@@ -1,60 +1,10 @@
-// ─────────────────────────────────────────────
-// ATENA – UI ALUMNO: BUSCAR INSTITUCIONES (OWNER-ONLY)
-// Archivo: lib/screens/alumnos/alumno_buscar_instituciones_page.dart
-// ─────────────────────────────────────────────
-//
-// Notas canónicas (enero 2026):
-// - Filtro extracurricular usa BloqueExtracurricular como fuente de verdad.
-// - “Otros” incluido.
-// - Guía/leyenda NO se hardcodea: BloqueExtracurricular.descripcionCorta/ejemplos.
-//
-// OPTIMIZACIÓN – BÚSQUEDA/PAGINACIÓN (backend-ready):
-// - buscarInstitucionesPaginado(query, offset, limit) → índice liviano.
-// - Hidrata institución completa solo al entrar (en pantalla siguiente).
-//
-// ✅ CIERRE FASE 2:
-// - ✅ i18n REAL: AppLocalizations.of(context).<key> (sin fallbacks)
-// - ✅ Theme/ColorScheme real (sin Colors.* fijo)
-// - ✅ Hardening: refresh disabled mientras carga
-// - ✅ Simplificación: menos helpers, mismo comportamiento
-//
-// ✅ E2E (feb 2026):
-// - Botón "Extracurricular" navega a selección de grupo extracurricular por institución.
-//
-// ✅ EXTENSIÓN (feb 2026):
-// - Previsualización del “perfil público” (cómo lo ve el alumno) on-demand,
-//   sin romper paginación: hidrata institución solo para preview.
-//
-// ✅ HARDENING (feb 2026) – ESTE ARCHIVO:
-// - Bootstrapping post-frame (evita depender de l10n en initState).
-// - Timeouts cortos en IO (helpers/prefs) para evitar awaits colgados.
-// - Public preview: manejo de snap.hasError (no queda “silencioso”).
-// - Prefs keys: institucionId normalizado para key (trim + remove whitespace interno).
-// - No cambia IDs de DATA (para navegación), solo normaliza para keys de prefs.
-//
-// ✅ HARDENING (feb 2026 · diagnóstico):
-// - Logs [ATENA][ALUMNO][BUSCAR_INST] para rastrear institucionId y navegación.
-// ─────────────────────────────────────────────
-
-import 'dart:async';
-import 'dart:convert';
-import 'dart:developer' as dev;
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 
-// ✅ ATENA usa l10n generado en /lib/l10n/gen (no flutter_gen)
 import '../../l10n/gen/app_localizations.dart';
-
-// Modelos (solo lo necesario para el filtro)
 import '../../models/extracurriculares/bloque_extracurricular.dart';
 import '../../models/instituciones/instituciones_integrado.dart';
-
-// Servicios
-import '../../services/instituciones_helpers.dart' as ih;
-
-// Pantallas siguientes del flujo
+import '../../services/alumno_instituciones_search_service.dart';
 import 'alumno_seleccion_grupo_extracurricular_page.dart';
 import 'alumno_seleccion_grupo_page.dart';
 
@@ -77,244 +27,776 @@ class AlumnoBuscarInstitucionesPage extends StatefulWidget {
 
 class _AlumnoBuscarInstitucionesPageState
     extends State<AlumnoBuscarInstitucionesPage> {
-  // Estado UI
-  bool _cargando = true;
-  bool _cargandoMas = false;
-  String? _errorCarga;
+  final _nombreCtrl = TextEditingController();
+  final _ciudadCtrl = TextEditingController();
+  final _edadCtrl = TextEditingController();
 
-  // Búsqueda (con debounce)
-  final _busquedaCtrl = TextEditingController();
-  Timer? _debounce;
-  String _filtroNombre = '';
+  AlumnoBusquedaScope? _scope;
+  String? _provincia;
+  NivelCurricular? _nivel;
+  TipoInstitucion? _tipoInstitucion;
+  ModalidadCursado? _modalidad;
+  final Set<BloqueExtracurricular> _bloques = {};
+  bool _soloVacantes = false;
+  AlumnoPrecioFiltro _precio = AlumnoPrecioFiltro.todos;
 
-  // Data source (local hoy, backend mañana)
-  int _offset = 0;
-  static const int _pageSize = 20;
-  bool _hasMore = true;
+  bool _usarUbicacion = false;
+  bool _cargandoUbicacion = false;
+  double? _userLat;
+  double? _userLng;
+  double? _distanciaMaxima;
+  bool _ordenarPorDistancia = false;
 
-  // IO hardening
-  static const Duration _ioTimeout = Duration(seconds: 6);
+  bool _cargando = false;
+  String? _error;
+  List<AlumnoInstitucionSearchResult> _resultados = const [];
 
-  // Cache liviana (fuente de UI)
-  final List<ih.InstitucionSearchItem> _todas = [];
-  List<ih.InstitucionSearchItem> _filtradas = [];
-
-  final Set<BloqueExtracurricular> _bloquesSeleccionados = {};
-
-  final ScrollController _scrollCtrl = ScrollController();
-
-  // ─────────────────────────────────────────────
-  // Normalizador para keys/prefs (NO para DATA IDs)
-  static String _kid(String v) => v.trim().replaceAll(RegExp(r'\s+'), '');
+  static const List<String> _provincias = [
+    'Buenos Aires',
+    'Catamarca',
+    'Chaco',
+    'Chubut',
+    'Córdoba',
+    'Corrientes',
+    'Entre Ríos',
+    'Formosa',
+    'Jujuy',
+    'La Pampa',
+    'La Rioja',
+    'Mendoza',
+    'Misiones',
+    'Neuquén',
+    'Río Negro',
+    'Salta',
+    'San Juan',
+    'San Luis',
+    'Santa Cruz',
+    'Santa Fe',
+    'Santiago del Estero',
+    'Tierra del Fuego, Antártida e Islas del Atlántico Sur',
+    'Tucumán',
+    'Ciudad Autónoma de Buenos Aires',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _busquedaCtrl.addListener(_onBusquedaChanged);
-    _scrollCtrl.addListener(_onScroll);
-
-    // ✅ Bootstrapping post-frame: evita depender de InheritedWidgets (l10n/theme)
-    // durante initState y elimina edge-cases tipo “cargando infinito”.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // ignore: discarded_futures
-      _recargarDesdeCero(cargando: true);
-    });
+    _nombreCtrl.addListener(_onFieldChanged);
+    _ciudadCtrl.addListener(_onFieldChanged);
+    _edadCtrl.addListener(_onFieldChanged);
   }
 
   @override
   void dispose() {
-    _debounce?.cancel();
-    _busquedaCtrl.removeListener(_onBusquedaChanged);
-    _busquedaCtrl.dispose();
-    _scrollCtrl.removeListener(_onScroll);
-    _scrollCtrl.dispose();
+    _nombreCtrl.dispose();
+    _ciudadCtrl.dispose();
+    _edadCtrl.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
-    if (!_hasMore) return;
-    if (_cargandoMas || _cargando) return;
-    if (!_scrollCtrl.hasClients) return;
-
-    final pos = _scrollCtrl.position;
-    if (pos.pixels >= (pos.maxScrollExtent - 240)) {
-      // ignore: discarded_futures
-      _cargarMas();
-    }
+  void _onFieldChanged() {
+    if (_scope == null || _cargando) return;
+    setState(() {});
   }
 
-  void _onBusquedaChanged() {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 220), () {
-      if (!mounted) return;
-
-      final nuevo = _busquedaCtrl.text.trim().toLowerCase();
-      if (nuevo == _filtroNombre) return;
-
-      setState(() {
-        _filtroNombre = nuevo;
-      });
-
-      // ignore: discarded_futures
-      _recargarDesdeCero(cargando: true);
+  void _seleccionarScope(AlumnoBusquedaScope scope) {
+    setState(() {
+      _scope = scope;
+      _nivel = null;
+      _tipoInstitucion = null;
+      _modalidad = null;
+      _bloques.clear();
+      _soloVacantes = false;
+      _precio = AlumnoPrecioFiltro.todos;
+      _error = null;
+      _resultados = const [];
     });
   }
 
-  void _resetPaginacion({required bool cargando}) {
-    _offset = 0;
-    _hasMore = true;
-    _todas.clear();
-    _filtradas = [];
-    _errorCarga = null;
-    _cargando = cargando;
-    _cargandoMas = false;
-  }
-
-  ih.InstitucionSearchQuery _buildQuery() {
-    return ih.InstitucionSearchQuery(
-      texto: _filtroNombre,
-      bloquesExtra: Set<BloqueExtracurricular>.from(_bloquesSeleccionados),
-    );
-  }
-
-  Future<void> _recargarDesdeCero({required bool cargando}) async {
-    if (!mounted) return;
-
-    // Capturamos l10n antes de awaits para evitar lint.
-    final l10n = AppLocalizations.of(context);
-
-    setState(() => _resetPaginacion(cargando: cargando));
-
-    dev.log(
-      '[ATENA][ALUMNO][BUSCAR_INST] recargarDesdeCero: owner="${widget.ownerAccountId}" perfil="${widget.perfilId}" filtro="$_filtroNombre" bloques=${_bloquesSeleccionados.length}',
-    );
+  Future<void> _usarMiUbicacion() async {
+    setState(() {
+      _cargandoUbicacion = true;
+      _error = null;
+    });
 
     try {
-      await _cargarPagina().timeout(_ioTimeout);
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) {
+        throw StateError('La ubicación del dispositivo está desactivada.');
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw StateError('No se concedió permiso para acceder a la ubicación.');
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
       if (!mounted) return;
       setState(() {
-        _cargando = false;
-        _aplicarOrdenLocal();
+        _usarUbicacion = true;
+        _userLat = position.latitude;
+        _userLng = position.longitude;
+        _cargandoUbicacion = false;
       });
-
-      dev.log(
-        '[ATENA][ALUMNO][BUSCAR_INST] OK: items=${_todas.length} hasMore=$_hasMore nextOffset=$_offset',
-      );
     } catch (e) {
       if (!mounted) return;
-      dev.log(
-        '[ATENA][ALUMNO][BUSCAR_INST] ERROR recargarDesdeCero: $e',
-        error: e,
-      );
       setState(() {
-        _cargando = false;
-        _errorCarga = l10n.alumnoBuscarInstitucionesErrorCargar(e.toString());
+        _cargandoUbicacion = false;
+        _usarUbicacion = false;
+        _userLat = null;
+        _userLng = null;
+        _error = e.toString().replaceFirst('Bad state: ', '');
       });
     }
   }
 
-  Future<void> _cargarMas() async {
-    if (!_hasMore || _cargandoMas || _cargando) return;
-    if (!mounted) return;
+  void _quitarUbicacion() {
+    setState(() {
+      _usarUbicacion = false;
+      _userLat = null;
+      _userLng = null;
+      _distanciaMaxima = null;
+      _ordenarPorDistancia = false;
+    });
+  }
 
-    // Capturamos l10n antes de awaits para evitar lint.
-    final l10n = AppLocalizations.of(context);
+  Future<void> _abrirFiltroBloques() async {
+    final tmp = Set<BloqueExtracurricular>.from(_bloques);
+    final result = await showModalBottomSheet<Set<BloqueExtracurricular>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: StatefulBuilder(
+          builder: (ctx, setSheetState) => Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Módulo extracurricular',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => setSheetState(tmp.clear),
+                      child: const Text('Limpiar'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                for (final bloque in BloqueExtracurricularX.ordered())
+                  CheckboxListTile(
+                    value: tmp.contains(bloque),
+                    title: Text(bloque.label),
+                    subtitle: Text(bloque.descripcionCorta),
+                    onChanged: (value) {
+                      setSheetState(() {
+                        if (value == true) {
+                          tmp.add(bloque);
+                        } else {
+                          tmp.remove(bloque);
+                        }
+                      });
+                    },
+                  ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, tmp),
+                    child: const Text('Aplicar módulos'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (!mounted || result == null) return;
+    setState(() {
+      _bloques
+        ..clear()
+        ..addAll(result);
+    });
+  }
+
+  Future<void> _buscar() async {
+    final scope = _scope;
+    if (scope == null) return;
 
     setState(() {
-      _cargandoMas = true;
-      _errorCarga = null;
+      _cargando = true;
+      _error = null;
     });
 
-    dev.log(
-      '[ATENA][ALUMNO][BUSCAR_INST] cargarMas: offset=$_offset pageSize=$_pageSize',
-    );
-
     try {
-      await _cargarPagina().timeout(_ioTimeout);
+      final edad = int.tryParse(_edadCtrl.text.trim());
+      final results = await AlumnoInstitucionesSearchService.search(
+        AlumnoInstitucionSearchFilters(
+          scope: scope,
+          texto: _nombreCtrl.text.trim(),
+          provincia: _provincia,
+          ciudad: _ciudadCtrl.text.trim().isEmpty
+              ? null
+              : _ciudadCtrl.text.trim(),
+          nivel: _nivel,
+          tipoInstitucion: _tipoInstitucion,
+          modalidadCursado: _modalidad,
+          bloques: Set<BloqueExtracurricular>.from(_bloques),
+          edad: edad,
+          soloConVacantes: _soloVacantes,
+          precio: _precio,
+          userLat: _usarUbicacion ? _userLat : null,
+          userLng: _usarUbicacion ? _userLng : null,
+          maxDistanceKm: _usarUbicacion ? _distanciaMaxima : null,
+          ordenarPorDistancia: _usarUbicacion && _ordenarPorDistancia,
+        ),
+      );
+
       if (!mounted) return;
       setState(() {
-        _cargandoMas = false;
-        _aplicarOrdenLocal();
+        _resultados = results;
+        _cargando = false;
       });
-
-      dev.log(
-        '[ATENA][ALUMNO][BUSCAR_INST] OK cargarMas: items=${_todas.length} hasMore=$_hasMore nextOffset=$_offset',
-      );
     } catch (e) {
       if (!mounted) return;
-      dev.log('[ATENA][ALUMNO][BUSCAR_INST] ERROR cargarMas: $e', error: e);
       setState(() {
-        _cargandoMas = false;
-        _errorCarga = l10n.alumnoBuscarInstitucionesErrorCargarMas(
-          e.toString(),
-        );
+        _cargando = false;
+        _error = e.toString().replaceFirst('Exception: ', '');
+        _resultados = const [];
       });
     }
   }
 
-  Future<void> _cargarPagina() async {
-    if (!_hasMore) return;
-
-    final page = await ih
-        .buscarInstitucionesPaginado(
-          query: _buildQuery(),
-          offset: _offset,
-          limit: _pageSize,
-        )
-        .timeout(_ioTimeout);
-
-    if (page.items.isEmpty) {
-      _hasMore = false;
-      return;
+  String _scopeDescription(AlumnoBusquedaScope scope) {
+    if (scope == AlumnoBusquedaScope.curricular) {
+      return 'Propuestas educativas que forman parte de la trayectoria escolar y curricular, organizadas según nivel y ciclo educativo.';
     }
-
-    // Hardening: filtra IDs vacíos y evita duplicados por institucionId.
-    final existingIds = _todas.map((e) => e.institucionId.trim()).toSet();
-    final toAdd = <ih.InstitucionSearchItem>[];
-    for (final it in page.items) {
-      final id = it.institucionId.trim();
-      if (id.isEmpty) continue;
-      if (existingIds.contains(id)) continue;
-      existingIds.add(id);
-      toAdd.add(it);
-    }
-
-    _todas.addAll(toAdd);
-    _offset = page.nextOffset;
-    _hasMore = page.hasMore;
+    return 'Actividades, propuestas y espacios de formación que no forman parte de la trayectoria curricular escolar, como deportes y entrenamiento, talleres, idiomas, arte, música, cursos independientes y otras propuestas formativas. Atena también contempla propuestas que puedan surgir en nuevas áreas o modalidades.';
   }
 
-  void _aplicarOrdenLocal() {
-    if (_todas.isEmpty) {
-      _filtradas = [];
-      return;
+  String _levelLabel(NivelCurricular value) {
+    switch (value) {
+      case NivelCurricular.jardin:
+        return 'Jardín';
+      case NivelCurricular.primaria:
+        return 'Primaria';
+      case NivelCurricular.secundaria:
+        return 'Secundaria';
+      case NivelCurricular.tecnica:
+        return 'Técnica';
+      case NivelCurricular.terciario:
+        return 'Terciario';
     }
-
-    final next = List<ih.InstitucionSearchItem>.from(
-      _todas,
-    )..sort((a, b) => a.nombre.toLowerCase().compareTo(b.nombre.toLowerCase()));
-
-    _filtradas = next;
   }
 
-  Future<void> _abrirInstitucionCurricular(
-    ih.InstitucionSearchItem item,
-  ) async {
-    final id = item.institucionId.trim(); // DATA ID (solo trim)
-    if (id.isEmpty) return;
+  String _tipoLabel(TipoInstitucion value) {
+    switch (value) {
+      case TipoInstitucion.jardin:
+        return 'Jardín';
+      case TipoInstitucion.primaria:
+        return 'Primaria';
+      case TipoInstitucion.secundaria:
+        return 'Secundaria';
+      case TipoInstitucion.tecnica:
+        return 'Técnica';
+      case TipoInstitucion.terciario:
+        return 'Terciario';
+      case TipoInstitucion.taller:
+        return 'Taller';
+      case TipoInstitucion.club:
+        return 'Club';
+      case TipoInstitucion.otra:
+        return 'Otra';
+    }
+  }
+
+  String _modalidadLabel(ModalidadCursado value) {
+    switch (value) {
+      case ModalidadCursado.presencial:
+        return 'Presencial';
+      case ModalidadCursado.remoto:
+        return 'Remoto';
+      case ModalidadCursado.hibrido:
+        return 'Híbrido';
+    }
+  }
+
+  String _precioLabel() {
+    switch (_precio) {
+      case AlumnoPrecioFiltro.todos:
+        return 'Todos los valores';
+      case AlumnoPrecioFiltro.gratuitos:
+        return 'Gratuitos';
+      case AlumnoPrecioFiltro.conCosto:
+        return 'Con costo';
+    }
+  }
+
+  String _distanciaLabel() {
+    if (_distanciaMaxima == null) return 'Sin límite de distancia';
+    return 'Hasta ${_distanciaMaxima!.toStringAsFixed(0)} km';
+  }
+
+  Future<void> _mostrarFiltrosUbicacion() async {
+    final selected = await showModalBottomSheet<double?>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ListTile(
+              title: Text('Distancia máxima'),
+              subtitle: Text('Solo funciona cuando las instituciones tienen coordenadas geográficas registradas.'),
+            ),
+            for (final km in <double>[1, 3, 5, 10, 20, 50])
+              RadioListTile<double>(
+                value: km,
+                groupValue: _distanciaMaxima,
+                title: Text('Hasta ${km.toStringAsFixed(0)} km'),
+                onChanged: (value) => Navigator.pop(ctx, value),
+              ),
+            RadioListTile<double?>(
+              value: null,
+              groupValue: _distanciaMaxima,
+              title: const Text('Sin límite'),
+              onChanged: (_) => Navigator.pop(ctx, null),
+            ),
+          ],
+        ),
+      ),
+    );
     if (!mounted) return;
+    setState(() => _distanciaMaxima = selected);
+  }
 
-    dev.log(
-      '[ATENA][ALUMNO][BUSCAR_INST] abrirCurricular: institucionId="$id" nombre="${item.nombre}"',
+  Widget _scopeCard({
+    required AlumnoBusquedaScope scope,
+    required IconData icon,
+  }) {
+    final selected = _scope == scope;
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      elevation: 0,
+      color: selected ? cs.primaryContainer : cs.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: selected ? cs.primary : cs.outlineVariant,
+          width: selected ? 1.5 : 1,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _seleccionarScope(scope),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 30),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      scope == AlumnoBusquedaScope.curricular
+                          ? 'Curricular'
+                          : 'Extracurricular',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(_scopeDescription(scope)),
+                  ],
+                ),
+              ),
+              Radio<AlumnoBusquedaScope>(
+                value: scope,
+                groupValue: _scope,
+                onChanged: (_) => _seleccionarScope(scope),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String title, {String? subtitle}) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 3),
+              Text(subtitle),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilters() {
+    final scope = _scope;
+    if (scope == null) return const SizedBox.shrink();
+
+    final cs = Theme.of(context).colorScheme;
+    final inputDecoration = (String label, IconData icon) => InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     );
 
+    return Column(
+      children: [
+        _sectionTitle('Datos de la institución'),
+        TextField(
+          controller: _nombreCtrl,
+          decoration: inputDecoration('Nombre de la institución', Icons.search),
+        ),
+        const SizedBox(height: 10),
+        _sectionTitle(
+          'Ubicación',
+          subtitle: 'Podés buscar cerca de vos o elegir una provincia y localidad diferente.',
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: _cargandoUbicacion ? null : _usarMiUbicacion,
+              icon: _cargandoUbicacion
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.my_location),
+              label: Text(
+                _usarUbicacion ? 'Ubicación actual activada' : 'Usar mi ubicación',
+              ),
+            ),
+            if (_usarUbicacion)
+              OutlinedButton.icon(
+                onPressed: _quitarUbicacion,
+                icon: const Icon(Icons.close),
+                label: const Text('Quitar ubicación'),
+              ),
+          ],
+        ),
+        if (_usarUbicacion) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _mostrarFiltrosUbicacion,
+                  icon: const Icon(Icons.social_distance),
+                  label: Text(_distanciaLabel()),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  value: _ordenarPorDistancia,
+                  title: const Text('Más cercanas primero'),
+                  onChanged: (value) =>
+                      setState(() => _ordenarPorDistancia = value),
+                ),
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 10),
+        DropdownButtonFormField<String>(
+          value: _provincia,
+          isExpanded: true,
+          decoration: inputDecoration('Provincia', Icons.map_outlined),
+          items: [
+            const DropdownMenuItem<String>(value: null, child: Text('Todas las provincias')),
+            ..._provincias.map(
+              (p) => DropdownMenuItem<String>(value: p, child: Text(p)),
+            ),
+          ],
+          onChanged: (value) => setState(() => _provincia = value),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _ciudadCtrl,
+          decoration: inputDecoration('Localidad o ciudad', Icons.location_city),
+        ),
+        _sectionTitle('Filtros específicos'),
+        if (scope == AlumnoBusquedaScope.curricular) ...[
+          DropdownButtonFormField<NivelCurricular>(
+            value: _nivel,
+            isExpanded: true,
+            decoration: inputDecoration('Nivel curricular', Icons.school_outlined),
+            items: [
+              const DropdownMenuItem<NivelCurricular>(
+                value: null,
+                child: Text('Todos los niveles'),
+              ),
+              ...NivelCurricular.values.map(
+                (e) => DropdownMenuItem(value: e, child: Text(_levelLabel(e))),
+              ),
+            ],
+            onChanged: (value) => setState(() => _nivel = value),
+          ),
+          const SizedBox(height: 10),
+          const InputDecorator(
+            decoration: InputDecoration(
+              labelText: 'Ciclo curricular',
+              border: OutlineInputBorder(),
+            ),
+            child: Text(
+              'El ciclo curricular todavía no está almacenado como dato canónico independiente en el perfil institucional.',
+            ),
+          ),
+        ] else ...[
+          InkWell(
+            onTap: _abrirFiltroBloques,
+            borderRadius: BorderRadius.circular(12),
+            child: InputDecorator(
+              decoration: inputDecoration('Módulo extracurricular', Icons.category_outlined),
+              child: Text(
+                _bloques.isEmpty
+                    ? 'Todos los módulos'
+                    : _bloques.map((e) => e.label).join(' • '),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _edadCtrl,
+            keyboardType: TextInputType.number,
+            decoration: inputDecoration('Edad', Icons.cake_outlined).copyWith(
+              hintText: 'Ejemplo: 12',
+            ),
+          ),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<AlumnoPrecioFiltro>(
+            value: _precio,
+            decoration: inputDecoration('Valor', Icons.payments_outlined),
+            items: AlumnoPrecioFiltro.values
+                .map(
+                  (e) => DropdownMenuItem(
+                    value: e,
+                    child: Text(
+                      e == AlumnoPrecioFiltro.todos
+                          ? 'Todos los valores'
+                          : e == AlumnoPrecioFiltro.gratuitos
+                          ? 'Gratuitos'
+                          : 'Con costo',
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) =>
+                setState(() => _precio = value ?? AlumnoPrecioFiltro.todos),
+          ),
+        ],
+        const SizedBox(height: 10),
+        DropdownButtonFormField<TipoInstitucion>(
+          value: _tipoInstitucion,
+          isExpanded: true,
+          decoration: inputDecoration('Tipo de institución', Icons.account_balance_outlined),
+          items: [
+            const DropdownMenuItem<TipoInstitucion>(
+              value: null,
+              child: Text('Todos los tipos'),
+            ),
+            ...TipoInstitucion.values.map(
+              (e) => DropdownMenuItem(value: e, child: Text(_tipoLabel(e))),
+            ),
+          ],
+          onChanged: (value) => setState(() => _tipoInstitucion = value),
+        ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<ModalidadCursado>(
+          value: _modalidad,
+          decoration: inputDecoration('Modalidad de cursado', Icons.devices_outlined),
+          items: [
+            const DropdownMenuItem<ModalidadCursado>(
+              value: null,
+              child: Text('Todas las modalidades'),
+            ),
+            ...ModalidadCursado.values.map(
+              (e) => DropdownMenuItem(value: e, child: Text(_modalidadLabel(e))),
+            ),
+          ],
+          onChanged: (value) => setState(() => _modalidad = value),
+        ),
+        const SizedBox(height: 6),
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _soloVacantes,
+          title: const Text('Mostrar solamente propuestas con vacantes disponibles'),
+          onChanged: (value) => setState(() => _soloVacantes = value ?? false),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _cargando ? null : _buscar,
+            icon: const Icon(Icons.search),
+            label: Text(
+              _cargando ? 'Buscando...' : 'Buscar instituciones',
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Los filtros se aplican sobre los datos actualmente registrados en los perfiles de Atena.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResultCard(AlumnoInstitucionSearchResult result) {
+    final inst = result.institucion;
+    final cs = Theme.of(context).colorScheme;
+    final extra = inst.actividadesExtracurriculares.where((a) => a.activa).toList();
+    final bloques = extra.map((a) => a.bloque).toSet().toList();
+    final niveles = inst.planConfig?.niveles
+            .where((e) => e.habilitado)
+            .map(_levelLabel)
+            .toList() ??
+        const <String>[];
+
+    final location = [
+      if (inst.ciudad.trim().isNotEmpty) inst.ciudad.trim(),
+      if (inst.provincia.trim().isNotEmpty) inst.provincia.trim(),
+    ].join(', ');
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: cs.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    inst.nombre,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Ver información',
+                  onPressed: () => _mostrarInstitucion(inst),
+                  icon: const Icon(Icons.visibility_outlined),
+                ),
+              ],
+            ),
+            if (location.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text(location),
+              ),
+            if (result.distanciaKm != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Text('${result.distanciaKm!.toStringAsFixed(1)} km de distancia'),
+              ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                if (inst.curricular)
+                  const Chip(label: Text('Curricular')),
+                if (inst.extracurricular)
+                  const Chip(label: Text('Extracurricular')),
+                Chip(label: Text(_tipoLabel(inst.tipoInstitucion))),
+                Chip(label: Text(_modalidadLabel(inst.modalidad))),
+              ],
+            ),
+            if (niveles.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text('Niveles: ${niveles.join(' • ')}'),
+            ],
+            if (bloques.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text('Módulos: ${bloques.map((e) => e.label).join(' • ')}'),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                if (inst.curricular)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _abrirCurricular(inst),
+                      icon: const Icon(Icons.school_outlined),
+                      label: const Text('Ver curricular'),
+                    ),
+                  ),
+                if (inst.curricular && inst.extracurricular)
+                  const SizedBox(width: 8),
+                if (inst.extracurricular)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _abrirExtracurricular(inst),
+                      icon: const Icon(Icons.category_outlined),
+                      label: const Text('Ver extracurricular'),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _abrirCurricular(Institucion inst) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => AlumnoSeleccionGrupoPage(
-          institucionId: id,
-          institucionNombre: item.nombre,
+          institucionId: inst.id,
+          institucionNombre: inst.nombre,
           alumnoDocumento: widget.alumnoDni,
           ownerAccountId: widget.ownerAccountId,
           perfilId: widget.perfilId,
@@ -323,811 +805,151 @@ class _AlumnoBuscarInstitucionesPageState
     );
   }
 
-  Future<void> _abrirInstitucionExtracurricular(
-    ih.InstitucionSearchItem item,
-  ) async {
-    final id = item.institucionId.trim(); // DATA ID (solo trim)
-    if (id.isEmpty) return;
-    if (!mounted) return;
-
-    // Si el alumno filtró por 1 bloque, lo pasamos como inicial.
-    BloqueExtracurricular? bloqueInicial;
-    if (_bloquesSeleccionados.length == 1) {
-      bloqueInicial = _bloquesSeleccionados.first;
-    }
-
-    dev.log(
-      '[ATENA][ALUMNO][BUSCAR_INST] abrirExtracurricular: institucionId="$id" nombre="${item.nombre}" bloqueInicial=${bloqueInicial?.label ?? "-"}',
-    );
-
+  Future<void> _abrirExtracurricular(Institucion inst) async {
+    final bloqueInicial = _bloques.length == 1 ? _bloques.first : null;
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (ctx) => AlumnoSeleccionGrupoExtracurricularPage(
-          institucionId: id,
-          institucionNombre: item.nombre,
-          alumnoDocumento: widget.alumnoDni, // compat visual
+        builder: (_) => AlumnoSeleccionGrupoExtracurricularPage(
+          institucionId: inst.id,
+          institucionNombre: inst.nombre,
+          alumnoDocumento: widget.alumnoDni,
           ownerAccountId: widget.ownerAccountId,
           perfilId: widget.perfilId,
           bloqueInicial: bloqueInicial,
-          filtroInicial: _filtroNombre,
+          filtroInicial: _nombreCtrl.text.trim(),
         ),
       ),
     );
   }
 
-  List<String> _previewBloques(
-    Set<BloqueExtracurricular> bloques, {
-    int max = 3,
-  }) {
-    if (bloques.isEmpty) return const [];
-    final list = bloques.map((b) => b.label).toList()
-      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    return list.length <= max ? list : list.take(max).toList();
-  }
-
-  String _labelBloquesSeleccionados(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (_bloquesSeleccionados.isEmpty) {
-      return l10n.alumnoBuscarInstitucionesExtraAll;
-    }
-    final labels = _bloquesSeleccionados.map((b) => b.label).toList()
-      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    return l10n.alumnoBuscarInstitucionesExtraSelected(labels.join(' • '));
-  }
-
-  String _subtitleBloque(BloqueExtracurricular b) {
-    final desc = b.descripcionCorta.trim();
-    final ej = b.ejemplos;
-    final ejTxt = ej.isEmpty ? '' : ' • ${ej.first}';
-    return desc.isEmpty ? ejTxt.trim() : '$desc$ejTxt';
-  }
-
-  Future<void> _abrirFiltroBloques() async {
-    if (!mounted) return;
-    if (_cargando || _cargandoMas) return;
-
-    final l10n = AppLocalizations.of(context);
-
-    final res = await showModalBottomSheet<Set<BloqueExtracurricular>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) {
-        final tmp = Set<BloqueExtracurricular>.from(_bloquesSeleccionados);
-
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
-            child: StatefulBuilder(
-              builder: (ctx, setSheetState) {
-                Widget tile(BloqueExtracurricular b) {
-                  final sel = tmp.contains(b);
-                  return CheckboxListTile(
-                    value: sel,
-                    title: Text(b.label),
-                    subtitle: Text(_subtitleBloque(b)),
-                    onChanged: (v) {
-                      setSheetState(() {
-                        if (v == true) {
-                          tmp.add(b);
-                        } else {
-                          tmp.remove(b);
-                        }
-                      });
-                    },
-                  );
-                }
-
-                final ordered = BloqueExtracurricularX.ordered();
-
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            l10n.alumnoBuscarInstitucionesFiltroExtraTitle,
-                            style: Theme.of(ctx).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => setSheetState(() => tmp.clear()),
-                          child: Text(l10n.commonClear),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    for (final b in ordered) tile(b),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(ctx, tmp),
-                        child: Text(l10n.commonApply),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-
-    if (!mounted || res == null) return;
-
-    setState(() {
-      _bloquesSeleccionados
-        ..clear()
-        ..addAll(res);
-    });
-
-    await _recargarDesdeCero(cargando: true);
-  }
-
-  Widget _buildFooter(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    if (_cargandoMas) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 14),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (_hasMore) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Center(
-          child: OutlinedButton.icon(
-            onPressed: () {
-              // ignore: discarded_futures
-              _cargarMas();
-            },
-            icon: const Icon(Icons.expand_more),
-            label: Text(l10n.commonLoadMore),
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Center(
-        child: Text(l10n.commonEndOfResults, textAlign: TextAlign.center),
-      ),
-    );
-  }
-
-  // ─────────────────────────────────────────────
-  // Preview del perfil público (cómo lo ve el alumno) – on demand
-  static const int _maxPublicPhotos = 5;
-
-  String _kPublicProfile(String institucionId) =>
-      'inst_public_profile_v1_${_kid(institucionId)}';
-
-  Future<_InstPublicExtra> _loadPublicExtra(String institucionId) async {
-    final prefs = await SharedPreferences.getInstance().timeout(_ioTimeout);
-    final key = _kPublicProfile(institucionId);
-    final raw = (prefs.getString(key) ?? '').trim();
-    return _InstPublicExtra.fromJson(raw);
-  }
-
-  Uint8List? _b64ToBytesSafe(String b64) {
-    final t = b64.trim();
-    if (t.isEmpty) return null;
-    try {
-      return base64Decode(t);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  void _openPhotoViewer(Uint8List bytes) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        final cs = Theme.of(ctx).colorScheme;
-        return Dialog(
-          insetPadding: const EdgeInsets.all(16),
-          backgroundColor: cs.surface,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Stack(
-              children: [
-                InteractiveViewer(
-                  minScale: 0.8,
-                  maxScale: 4,
-                  child: Image.memory(bytes, fit: BoxFit.contain),
-                ),
-                Positioned(
-                  right: 10,
-                  top: 10,
-                  child: IconButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    icon: const Icon(Icons.close),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _abrirPreviewPerfilPublico(ih.InstitucionSearchItem item) async {
-    final id = item.institucionId.trim(); // DATA ID (solo trim)
-    if (id.isEmpty) return;
-    if (!mounted) return;
-
-    dev.log(
-      '[ATENA][ALUMNO][BUSCAR_INST] previewPublico: institucionId="$id" nombre="${item.nombre}"',
-    );
-
-    await showModalBottomSheet<void>(
+  void _mostrarInstitucion(Institucion inst) {
+    final extra = inst.actividadesExtracurriculares.where((a) => a.activa).toList();
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        final cs = theme.colorScheme;
-
-        Future<_InstPreviewData> load() async {
-          // Hidrata institución solo para preview (on-demand).
-          final inst = await ih.cargarInstitucionPorId(id).timeout(_ioTimeout);
-          final extra = await _loadPublicExtra(id);
-          return _InstPreviewData(inst: inst, extra: extra);
-        }
-
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
-            child: FutureBuilder<_InstPreviewData>(
-              future: load(),
-              builder: (ctx2, snap) {
-                if (snap.connectionState != ConnectionState.done) {
-                  return const SizedBox(
-                    height: 260,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-
-                // ✅ HARDENING: error explícito (sin quedar “vacío”)
-                if (snap.hasError) {
-                  return SizedBox(
-                    height: 260,
-                    child: Center(
-                      child: Icon(
-                        Icons.error_outline,
-                        color: cs.onSurfaceVariant,
-                      ),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                inst.nombre,
+                style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              if (inst.direccion.trim().isNotEmpty)
+                Text('Dirección: ${inst.direccion.trim()}'),
+              if (inst.ciudad.trim().isNotEmpty)
+                Text('Localidad: ${inst.ciudad.trim()}'),
+              if (inst.provincia.trim().isNotEmpty)
+                Text('Provincia: ${inst.provincia.trim()}'),
+              Text('Modalidad: ${_modalidadLabel(inst.modalidad)}'),
+              const SizedBox(height: 14),
+              if (extra.isNotEmpty) ...[
+                const Text(
+                  'Propuestas extracurriculares',
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 6),
+                for (final a in extra)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(a.nombre),
+                    subtitle: Text(
+                      [
+                        a.bloque.label,
+                        if ((a.edades ?? '').trim().isNotEmpty) 'Edades: ${a.edades}',
+                        if ((a.precio ?? '').trim().isNotEmpty) 'Valor: ${a.precio}',
+                      ].join(' • '),
                     ),
-                  );
-                }
-
-                if (!snap.hasData || snap.data == null) {
-                  return SizedBox(
-                    height: 260,
-                    child: Center(
-                      child: Icon(Icons.error_outline, color: cs.onSurface),
-                    ),
-                  );
-                }
-
-                final data = snap.data!;
-                final inst = data.inst;
-                final extra = data.extra;
-
-                final nombre = (inst?.nombre ?? item.nombre).trim();
-                final ciudad = (inst?.ciudad ?? '').trim();
-                final provincia = (inst?.provincia ?? '').trim();
-                final direccion = (inst?.direccion ?? '').trim();
-
-                final ubicacion = [
-                  if (ciudad.isNotEmpty) ciudad,
-                  if (provincia.isNotEmpty) provincia,
-                ].join(', ');
-
-                final fotosBytes = extra.fotos
-                    .take(_maxPublicPhotos)
-                    .map(_b64ToBytesSafe)
-                    .whereType<Uint8List>()
-                    .toList(growable: false);
-
-                final desc = extra.descripcion.trim();
-                final hAdmin = extra.horariosAtencion.trim();
-                final hAulas = extra.horariosAulas.trim();
-                final tel = extra.telefonoPublico.trim();
-                final web = extra.website.trim();
-
-                final servicios = extra.servicios
-                    .map((e) => e.trim())
-                    .where((e) => e.isNotEmpty)
-                    .toList(growable: false);
-
-                return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nombre,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (ubicacion.isNotEmpty)
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 18,
-                              color: cs.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(child: Text(ubicacion)),
-                          ],
-                        ),
-                      if (direccion.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.place,
-                              size: 18,
-                              color: cs.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(child: Text(direccion)),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      if (fotosBytes.isNotEmpty) ...[
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            for (final b in fotosBytes)
-                              InkWell(
-                                onTap: () => _openPhotoViewer(b),
-                                borderRadius: BorderRadius.circular(14),
-                                child: Container(
-                                  width: 98,
-                                  height: 98,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: cs.outlineVariant.withValues(
-                                        alpha:
-                                            theme.brightness == Brightness.dark
-                                            ? 0.55
-                                            : 0.35,
-                                      ),
-                                    ),
-                                  ),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: Image.memory(b, fit: BoxFit.cover),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      if (desc.isNotEmpty) ...[
-                        Text(desc),
-                        const SizedBox(height: 12),
-                      ],
-                      if (hAdmin.isNotEmpty || hAulas.isNotEmpty) ...[
-                        if (hAdmin.isNotEmpty)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.access_time,
-                                size: 18,
-                                color: cs.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(child: Text(hAdmin)),
-                            ],
-                          ),
-                        if (hAulas.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.schedule,
-                                size: 18,
-                                color: cs.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(child: Text(hAulas)),
-                            ],
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                      ],
-                      if (tel.isNotEmpty || web.isNotEmpty) ...[
-                        if (tel.isNotEmpty)
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.phone_in_talk,
-                                size: 18,
-                                color: cs.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(child: Text(tel)),
-                            ],
-                          ),
-                        if (web.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.language,
-                                size: 18,
-                                color: cs.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(child: Text(web)),
-                            ],
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                      ],
-                      if (servicios.isNotEmpty)
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final s in servicios)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceContainerHighest.withValues(
-                                    alpha: theme.brightness == Brightness.dark
-                                        ? 0.55
-                                        : 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    color: cs.outlineVariant.withValues(
-                                      alpha: theme.brightness == Brightness.dark
-                                          ? 0.55
-                                          : 0.35,
-                                    ),
-                                  ),
-                                ),
-                                child: Text(s),
-                              ),
-                          ],
-                        ),
-                    ],
                   ),
-                );
-              },
-            ),
+              ],
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
-  // ─────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    final inputFill = cs.surfaceContainerHighest.withValues(
-      alpha: isDark ? 0.55 : 1.0,
-    );
-    final outline = cs.outlineVariant.withValues(alpha: isDark ? 0.55 : 0.35);
-
-    if (_cargando) {
-      return Scaffold(
-        appBar: AppBar(title: Text(l10n.alumnoBuscarInstitucionesTitle)),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.alumnoBuscarInstitucionesTitle),
-        actions: [
-          IconButton(
-            onPressed: (_cargando || _cargandoMas)
-                ? null
-                : () {
-                    // ignore: discarded_futures
-                    _recargarDesdeCero(cargando: true);
-                  },
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.commonRefresh,
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        child: Column(
+      appBar: AppBar(title: Text(l10n.alumnoBuscarInstitucionesTitle)),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
           children: [
-            if (_errorCarga != null) ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: cs.surfaceContainerHighest.withValues(
-                    alpha: isDark ? 0.55 : 1.0,
-                  ),
-                  border: Border.all(color: outline),
-                ),
-                child: Text(
-                  _errorCarga!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+            Text(
+              '¿Qué estás buscando?',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Elegí primero el tipo de propuesta. Después podrás aplicar los filtros específicos correspondientes.',
+            ),
+            const SizedBox(height: 14),
+            _scopeCard(
+              scope: AlumnoBusquedaScope.curricular,
+              icon: Icons.school_outlined,
+            ),
+            _scopeCard(
+              scope: AlumnoBusquedaScope.extracurricular,
+              icon: Icons.category_outlined,
+            ),
+            if (_scope != null) ...[
+              const Divider(height: 28),
+              _buildFilters(),
+              if (_error != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _error!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-            ],
-            TextField(
-              controller: _busquedaCtrl,
-              decoration: InputDecoration(
-                hintText: l10n.alumnoBuscarInstitucionesHint,
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: inputFill,
-                suffixIcon: _filtroNombre.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => _busquedaCtrl.clear(),
-                        tooltip: l10n.commonClear,
-                      ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            InkWell(
-              onTap: (_cargando || _cargandoMas)
-                  ? null
-                  : () {
-                      // ignore: discarded_futures
-                      _abrirFiltroBloques();
-                    },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: cs.surfaceContainerHighest.withValues(
-                    alpha: isDark ? 0.35 : 1.0,
+              ],
+              const SizedBox(height: 20),
+              if (_cargando)
+                const Center(child: CircularProgressIndicator())
+              else if (_resultados.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Text(
+                      _scope == null
+                          ? 'Seleccioná una modalidad para comenzar.'
+                          : 'No se encontraron instituciones con los criterios seleccionados.',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  border: Border.all(color: outline),
+                )
+              else ...[
+                Text(
+                  'Instituciones encontradas: ${_resultados.length}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.tune),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _labelBloquesSeleccionados(context),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const Icon(Icons.expand_more),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: _filtradas.isEmpty
-                  ? Center(
-                      child: Text(
-                        _todas.isEmpty
-                            ? l10n.alumnoBuscarInstitucionesNoHayInstituciones
-                            : l10n.alumnoBuscarInstitucionesNoResultadosConFiltro,
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  : ListView.separated(
-                      controller: _scrollCtrl,
-                      itemCount: _filtradas.length + 1,
-                      separatorBuilder: (ctx, index) =>
-                          const SizedBox(height: 8),
-                      itemBuilder: (context, i) {
-                        if (i == _filtradas.length) {
-                          return _buildFooter(context);
-                        }
-
-                        final item = _filtradas[i];
-                        final previewBloques = _previewBloques(
-                          item.bloquesExtra,
-                        );
-
-                        final curricularTxt = item.curricular == true
-                            ? l10n.alumnoBuscarInstitucionesCurricularDisponible
-                            : l10n.alumnoBuscarInstitucionesCurricularNoDisponible;
-
-                        // Esta key acepta 1 argumento. Unificamos el contenido en 1 string.
-                        final extraTxt = item.extracurricular == true
-                            ? (item.bloquesExtra.isEmpty
-                                  ? l10n.alumnoBuscarInstitucionesExtraSinModulos
-                                  : l10n.alumnoBuscarInstitucionesExtraConModulos(
-                                      '${item.bloquesExtra.length} • ${previewBloques.isEmpty ? '-' : previewBloques.join(' • ')}',
-                                    ))
-                            : l10n.alumnoBuscarInstitucionesExtraNoDisponible;
-
-                        return Card(
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(color: outline),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Text(item.nombre),
-                                  subtitle: Text('$curricularTxt\n\n$extraTxt'),
-                                  trailing: IconButton(
-                                    onPressed: () {
-                                      // ignore: discarded_futures
-                                      _abrirPreviewPerfilPublico(item);
-                                    },
-                                    icon: const Icon(Icons.visibility_outlined),
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    12,
-                                    0,
-                                    12,
-                                    10,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: OutlinedButton.icon(
-                                          onPressed: item.curricular == true
-                                              ? () {
-                                                  // ignore: discarded_futures
-                                                  _abrirInstitucionCurricular(
-                                                    item,
-                                                  );
-                                                }
-                                              : null,
-                                          icon: const Icon(
-                                            Icons.school_outlined,
-                                          ),
-                                          label: Text(
-                                            l10n.alumnoBuscarInstitucionesBtnCurricular,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: OutlinedButton.icon(
-                                          onPressed:
-                                              item.extracurricular == true
-                                              ? () {
-                                                  // ignore: discarded_futures
-                                                  _abrirInstitucionExtracurricular(
-                                                    item,
-                                                  );
-                                                }
-                                              : null,
-                                          icon: const Icon(Icons.sports_soccer),
-                                          label: Text(
-                                            l10n.alumnoBuscarInstitucionesBtnExtracurricular,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
+                const SizedBox(height: 10),
+                for (final result in _resultados) ...[
+                  _buildResultCard(result),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            ],
           ],
         ),
       ),
     );
   }
-}
-
-// ─────────────────────────────────────────────
-// Public extra (lectura) – mismo formato que Institución edita en su perfil.
-// i18n: no agregamos labels acá; solo datos.
-// ─────────────────────────────────────────────
-
-class _InstPublicExtra {
-  final String descripcion;
-  final String horariosAtencion;
-  final String horariosAulas;
-  final String telefonoPublico;
-  final String website;
-  final List<String> servicios;
-  final List<String> fotos;
-
-  const _InstPublicExtra({
-    this.descripcion = '',
-    this.horariosAtencion = '',
-    this.horariosAulas = '',
-    this.telefonoPublico = '',
-    this.website = '',
-    this.servicios = const [],
-    this.fotos = const [],
-  });
-
-  static _InstPublicExtra fromJson(String raw) {
-    final t = raw.trim();
-    if (t.isEmpty) return const _InstPublicExtra();
-    try {
-      final decoded = jsonDecode(t);
-      if (decoded is! Map) return const _InstPublicExtra();
-      final m = decoded.cast<String, dynamic>();
-
-      final serviciosRaw = (m['servicios'] is List)
-          ? (m['servicios'] as List)
-          : const [];
-      final servicios = serviciosRaw
-          .map((e) => (e ?? '').toString().trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-
-      final fotosRaw = (m['fotos'] is List) ? (m['fotos'] as List) : const [];
-      final fotos = fotosRaw
-          .map((e) => (e ?? '').toString().trim())
-          .where((e) => e.isNotEmpty)
-          .take(5)
-          .toList();
-
-      return _InstPublicExtra(
-        descripcion: (m['descripcion'] ?? '').toString(),
-        horariosAtencion: (m['horariosAtencion'] ?? '').toString(),
-        horariosAulas: (m['horariosAulas'] ?? '').toString(),
-        telefonoPublico: (m['telefonoPublico'] ?? '').toString(),
-        website: (m['website'] ?? '').toString(),
-        servicios: servicios,
-        fotos: fotos,
-      );
-    } catch (_) {
-      return const _InstPublicExtra();
-    }
-  }
-}
-
-class _InstPreviewData {
-  final Institucion? inst;
-  final _InstPublicExtra extra;
-
-  const _InstPreviewData({required this.inst, required this.extra});
 }
