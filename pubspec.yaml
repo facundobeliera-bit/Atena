@@ -1,0 +1,52 @@
+name: atena_app
+description: "A new Flutter project."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.10.1 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.3.0
+  pdf: ^3.11.0
+  printing: ^5.12.0
+  image_picker: ^1.0.7
+  flutter_image_compress: ^2.1.0
+  path_provider: ^2.1.0
+  share_plus: ^7.0.0
+  geolocator: ^13.0.1
+  file_picker: ^8.1.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    # ─────────────────────────────────────────────
+    # ATENA – VISUAL ROOT (carpetas)
+    # Incluye todas las subcarpetas de assets/visual/
+    # ─────────────────────────────────────────────
+    - assets/visual/backgrounds/
+    - assets/visual/icons/
+    - assets/visual/icons/app/
+    - assets/visual/illustrations/
+    - assets/visual/logos/
+    - assets/visual/overlays/
+    - assets/visual/panels/
+    - assets/visual/referencias/
+    - assets/visual/splash/
+    - assets/visual/states/
+    - assets/visual/ui/
