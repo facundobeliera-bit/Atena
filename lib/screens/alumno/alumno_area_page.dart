@@ -1,19 +1,7 @@
 // lib/screens/alumnos/alumno_area_page.dart
 //
-// ✅ HARDENING + CANÓNICO (enero 2026 / fase 2):
-// - Imports limpios.
-// - ✅ Navegación segura: evita push con context si no mounted.
-// - ✅ Badge: evita setState redundante, filtra por perfilId de forma segura.
-// - ✅ Foto: UI bloquea borrar cuando no hay foto.
-// - ✅ UX: Cards con transparencia adaptada a dark mode (como CuentaHome).
-// - ✅ Accesibilidad: tooltips y textos con overflow.
-// - ✅ Evita “double tap”/doble navegación (guardia _navegando).
-// - ✅ Deja placeholders compilables intactos.
-// - ✅ i18n REAL: textos via AppLocalizations (sin fallbacks).
-// - ✅ Theme-driven: evita hardcode de colores.
-//
-// FIX (feb 2026):
-// - ✅ elimina unnecessary_underscores (errorBuilder con parámetros nombrados)
+// FIX: Buscar Instituciones ahora abre la pantalla real de búsqueda.
+// La pantalla placeholder queda eliminada de este archivo.
 
 import 'dart:convert';
 import 'dart:typed_data';
@@ -26,6 +14,7 @@ import '../../services/alumno_service.dart';
 import '../../services/cuenta_service.dart';
 import '../../services/notificaciones_service.dart';
 
+import '../alumnos/alumno_buscar_instituciones_page.dart';
 import '../alumnos/alumno_calendario_page.dart';
 import '../alumnos/alumno_notificaciones_page.dart';
 import '../alumnos/alumno_pdfs_page.dart';
@@ -33,19 +22,12 @@ import '../alumnos/alumno_pdfs_page.dart';
 import '../auth/alumno_login_page.dart';
 import '../cuentas/cuenta_home_page.dart';
 
-// ✅ Assets centralizados
 import '../../ui/atena_assets.dart';
-
-// ✅ i18n (según tu l10n.yaml: synthetic-package: false)
 import 'package:atena_app/l10n/gen/app_localizations.dart';
 
 class AlumnoAreaPage extends StatefulWidget {
-  /// ⚠️ Legacy neutralizado
-  /// Se conserva solo para compatibilidad de rutas.
   final String documentoAlumno;
-
-  /// Canónico
-  final String cuentaId; // ownerAccountId
+  final String cuentaId;
   final String perfilId;
 
   const AlumnoAreaPage({
@@ -63,12 +45,9 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
     with WidgetsBindingObserver {
   bool _cargando = true;
   bool _perfilInvalido = false;
-
-  /// ✅ Guardia anti-doble navegación
   bool _navegando = false;
 
   Alumno? _perfil;
-
   final ImagePicker _picker = ImagePicker();
   Uint8List? _fotoBytesCache;
 
@@ -81,9 +60,7 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
   static String _normId(String s) => s.trim().replaceAll(RegExp(r'\s+'), '');
 
   Future<void> _runNavigation(Future<void> Function() fn) async {
-    if (!mounted) return;
-    if (_navegando) return;
-
+    if (!mounted || _navegando) return;
     setState(() => _navegando = true);
     try {
       await fn();
@@ -95,20 +72,15 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
   @override
   void initState() {
     super.initState();
-
-    // ✅ refrescar badge al volver a foreground
     WidgetsBinding.instance.addObserver(this);
 
-    // Precache best-effort del fondo (no bloqueante)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       try {
-        // ignore: discarded_futures
         precacheImage(
           AssetImage(AtenaAssets.ensureCanonical(AtenaAssets.bgAlumnoHome)),
           context,
         );
-        // ignore: discarded_futures
         precacheImage(
           AssetImage(AtenaAssets.ensureCanonical(AtenaAssets.highlightGlow)),
           context,
@@ -116,7 +88,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
       } catch (_) {}
     });
 
-    // ignore: discarded_futures
     _cargar();
   }
 
@@ -129,15 +100,10 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // ignore: discarded_futures
       _refrescarBadge();
     }
     super.didChangeAppLifecycleState(state);
   }
-
-  // =====================================================
-  // CARGA PERFIL
-  // =====================================================
 
   Future<void> _cargar() async {
     if (!mounted) return;
@@ -152,7 +118,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
     try {
       final owner = _ownerAccountId;
       final perfilId = _perfilId;
-
       if (owner.isEmpty || perfilId.isEmpty) {
         throw StateError('Sesión inválida (owner/perfil vacío).');
       }
@@ -163,7 +128,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
       );
 
       if (!mounted) return;
-
       if (p == null) {
         setState(() {
           _cargando = false;
@@ -193,19 +157,13 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
     }
   }
 
-  // =====================================================
-  // NOTIFICACIONES – BADGE
-  // =====================================================
-
   Future<void> _refrescarBadge() async {
     if (_cargandoBadge || !mounted) return;
-
     setState(() => _cargandoBadge = true);
 
     try {
       final owner = _ownerAccountId;
       final perfilId = _perfilId;
-
       if (owner.isEmpty || perfilId.isEmpty) {
         if (!mounted) return;
         setState(() {
@@ -215,23 +173,16 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
         return;
       }
 
-      // Fuente: INBOX owner-scope. Para badge: filtramos por perfilId (UX).
       final list = await NotificacionesService.listarOwner(owner);
-
       final count = list
           .where((n) => !n.leida && _normId(n.perfilId ?? '') == perfilId)
           .length;
 
       if (!mounted) return;
-
-      if (_notiNoLeidas != count) {
-        setState(() {
-          _notiNoLeidas = count;
-          _cargandoBadge = false;
-        });
-      } else {
-        setState(() => _cargandoBadge = false);
-      }
+      setState(() {
+        _notiNoLeidas = count;
+        _cargandoBadge = false;
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -243,34 +194,24 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
 
   Future<void> _abrirNotificaciones() async {
     if (_navegando) return;
-
     await _runNavigation(() async {
       await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => AlumnoNotificacionesPage(
-            // ⚠️ Compat: el tablero real opera por owner/perfil.
             alumnoDocumento: widget.documentoAlumno,
             perfilIdFiltro: _perfilId,
           ),
         ),
       );
     });
-
-    if (!mounted) return;
-    await _refrescarBadge();
+    if (mounted) await _refrescarBadge();
   }
-
-  // =====================================================
-  // PDFs – DOCUMENTOS
-  // =====================================================
 
   void _abrirPdfs() {
     final perfil = _perfil;
-    if (perfil == null) return;
-    if (_navegando) return;
+    if (perfil == null || _navegando) return;
 
-    // ignore: discarded_futures
     _runNavigation(() async {
       await Navigator.push(
         context,
@@ -285,19 +226,19 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
     });
   }
 
-  // =====================================================
-  // BUSCAR INSTITUCIONES (placeholder compilable)
-  // =====================================================
-
+  /// Abre la pantalla REAL de búsqueda de instituciones.
+  ///
+  /// Antes este botón abría _AlumnoBuscarInstitucionesPlaceholderPage,
+  /// por lo que el alumno nunca llegaba a la búsqueda/paginación real.
   void _abrirBuscarInstituciones() {
     if (_navegando) return;
 
-    // ignore: discarded_futures
     _runNavigation(() async {
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => _AlumnoBuscarInstitucionesPlaceholderPage(
+          builder: (_) => AlumnoBuscarInstitucionesPage(
+            alumnoDni: widget.documentoAlumno,
             ownerAccountId: _ownerAccountId,
             perfilId: _perfilId,
           ),
@@ -305,10 +246,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
       );
     });
   }
-
-  // =====================================================
-  // FOTO PERFIL
-  // =====================================================
 
   Uint8List? _decodeB64(String? s) {
     final t = (s ?? '').trim();
@@ -330,8 +267,7 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
 
   Future<void> _cambiarFoto() async {
     final perfil = _perfil;
-    if (perfil == null) return;
-    if (_navegando) return;
+    if (perfil == null || _navegando) return;
 
     try {
       final x = await _picker.pickImage(
@@ -363,12 +299,9 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
 
   Future<void> _borrarFoto() async {
     final perfil = _perfil;
-    if (perfil == null) return;
-    if (_navegando) return;
-    if (!_tieneFoto(perfil)) return;
+    if (perfil == null || _navegando || !_tieneFoto(perfil)) return;
 
     final l10n = AppLocalizations.of(context);
-
     final ok = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -390,7 +323,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
     if (ok != true) return;
 
     final actualizado = perfil.copyWith(clearFotoPerfilLocalPath: true);
-
     await AlumnoService.instance.upsertPerfilAlumnoByPerfilId(
       ownerAccountId: _ownerAccountId,
       perfilId: _perfilId,
@@ -404,14 +336,8 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
     });
   }
 
-  // =====================================================
-  // NAVEGACIÓN
-  // =====================================================
-
   void _irASelectorPerfiles() {
     if (_navegando) return;
-
-    // ignore: discarded_futures
     _runNavigation(() async {
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
@@ -425,21 +351,15 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
 
   Future<void> _logout() async {
     if (_navegando) return;
-
     await _runNavigation(() async {
       await CuentaService.logoutCuenta();
       if (!mounted) return;
-
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const AlumnoLoginPage()),
         (_) => false,
       );
     });
   }
-
-  // =====================================================
-  // UI – Background wrapper (alineado a Login/CuentaHome)
-  // =====================================================
 
   Widget _buildBackground(BuildContext context, Widget child) {
     final theme = Theme.of(context);
@@ -457,10 +377,7 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
           filterQuality: FilterQuality.medium,
           errorBuilder: (context, error, stackTrace) => bgFallback(),
         ),
-
-        // Overlay: theme-driven (solo alpha)
         Container(color: cs.scrim.withValues(alpha: isDark ? 0.25 : 0.06)),
-
         Align(
           alignment: Alignment.topCenter,
           child: IgnorePointer(
@@ -481,15 +398,10 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
     );
   }
 
-  // =====================================================
-  // UI
-  // =====================================================
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final perfil = _perfil;
-
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
@@ -500,7 +412,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
       return _fotoProviderSync(perfil);
     }();
 
-    // Card: surface con alpha, estética “panel” sobre fondo.
     final cardColor = cs.surface.withValues(alpha: isDark ? 0.25 : 0.92);
 
     return Scaffold(
@@ -597,7 +508,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
     final titleStyle = theme.textTheme.titleMedium?.copyWith(
       fontWeight: FontWeight.w800,
     );
-
     final tieneFoto = _tieneFoto(perfil);
 
     return ListView(
@@ -693,7 +603,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
                 onTap: (_cargando || _navegando)
                     ? null
                     : () {
-                        // ignore: discarded_futures
                         _runNavigation(() async {
                           await Navigator.push(
                             context,
@@ -728,110 +637,6 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
   }
 }
 
-/// =====================================================
-/// PLACEHOLDER – Buscar Instituciones (Alumno)
-/// =====================================================
-
-class _AlumnoBuscarInstitucionesPlaceholderPage extends StatefulWidget {
-  final String ownerAccountId;
-  final String perfilId;
-
-  const _AlumnoBuscarInstitucionesPlaceholderPage({
-    required this.ownerAccountId,
-    required this.perfilId,
-  });
-
-  @override
-  State<_AlumnoBuscarInstitucionesPlaceholderPage> createState() =>
-      _AlumnoBuscarInstitucionesPlaceholderPageState();
-}
-
-class _AlumnoBuscarInstitucionesPlaceholderPageState
-    extends State<_AlumnoBuscarInstitucionesPlaceholderPage> {
-  final TextEditingController _q = TextEditingController();
-
-  @override
-  void dispose() {
-    _q.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final query = _q.text.trim();
-
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.alumnoBuscarInstituciones)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.alumnoBuscarInstitucionesPlaceholderTitle,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text('ownerAccountId: ${widget.ownerAccountId}'),
-                    Text('perfilId: ${widget.perfilId}'),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _q,
-                      decoration: InputDecoration(
-                        labelText: l10n.commonSearch,
-                        hintText: l10n.commonSearchHint,
-                        prefixIcon: const Icon(Icons.search),
-                        border: const OutlineInputBorder(),
-                      ),
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      query.isEmpty
-                          ? l10n.alumnoBuscarPlaceholderEmpty
-                          : l10n.alumnoBuscarPlaceholderQuery(query),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// =====================================================
-// WIDGET – CAMPANA
-// =====================================================
-
 class _Bell extends StatelessWidget {
   final String tooltip;
   final int count;
@@ -852,8 +657,6 @@ class _Bell extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-
-    // Badge: theme-driven (alto contraste via errorContainer).
     final badgeBg = cs.errorContainer;
     final badgeFg = cs.onErrorContainer;
     final badgeBorder = cs.outlineVariant.withValues(
