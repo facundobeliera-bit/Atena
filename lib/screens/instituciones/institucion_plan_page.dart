@@ -282,7 +282,7 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
   }
 
   // =============================================================================
-  // ✅ FIX COMPILACIÓN: cargar institución por ID (best-effort, sin acoplar API)
+  // FIX COMPILACIÓN: cargar institución por ID (best-effort, sin acoplar API)
   // =============================================================================
 
   Future<Institucion?> _cargarInstitucionPorIdBestEffort(
@@ -295,37 +295,27 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     try {
       final dyn = InstitucionService as dynamic;
 
-      // 1) cargarInstitucionPorId(id)
       try {
-        // ignore: avoid_dynamic_calls
         final r = await dyn.cargarInstitucionPorId(id);
         if (r is Institucion?) return r;
       } catch (_) {}
 
-      // 2) getInstitucionPorId(id)
       try {
-        // ignore: avoid_dynamic_calls
         final r = await dyn.getInstitucionPorId(id);
         if (r is Institucion?) return r;
       } catch (_) {}
 
-      // 3) getById(id)
       try {
-        // ignore: avoid_dynamic_calls
         final r = await dyn.getById(id);
         if (r is Institucion?) return r;
       } catch (_) {}
 
-      // 4) read(id)
       try {
-        // ignore: avoid_dynamic_calls
         final r = await dyn.read(id);
         if (r is Institucion?) return r;
       } catch (_) {}
 
-      // 5) cargarInstitucion(id)
       try {
-        // ignore: avoid_dynamic_calls
         final r = await dyn.cargarInstitucion(id);
         if (r is Institucion?) return r;
       } catch (_) {}
@@ -338,14 +328,19 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
   // L10N SAFE (best-effort, sin inventar keys)
   // =============================================================================
 
-  String _l10nTxt(AppLocalizations l10n, List<Object?> cands, String fallback) {
+  // IMPORTANTE: usar un tipo de función explícito evita que el compilador web
+  // tenga que emitir una invocación de dart:core Function() dinámica. El código
+  // anterior usaba `m is Function` + `m()`, que podía generar InvalidType(<invalid>)
+  // durante la compilación DDC. No cambia la lógica de selección de traducciones.
+  String _l10nTxt(
+    AppLocalizations l10n,
+    List<String Function()> cands,
+    String fallback,
+  ) {
     try {
-      for (final m in cands) {
-        if (m is String && m.trim().isNotEmpty) return m.trim();
-        if (m is Function) {
-          final out = m();
-          if (out is String && out.trim().isNotEmpty) return out.trim();
-        }
+      for (final candidate in cands) {
+        final out = candidate();
+        if (out.trim().isNotEmpty) return out.trim();
       }
     } catch (_) {}
     return fallback;
@@ -433,7 +428,7 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     () => (l10n as dynamic).atLeastOneActivityRequired,
   ], 'Seleccioná al menos 1 actividad.');
 
-  // ✅ Etiqueta “Código promo” sin inventar keys (best-effort)
+  // Etiqueta “Código promo” sin inventar keys (best-effort)
   String _tPromoCodeLabel(AppLocalizations l10n) => _l10nTxt(l10n, [
     () => (l10n as dynamic).promoCodeLabel,
     () => (l10n as dynamic).couponCodeLabel,
@@ -516,7 +511,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     final args = settings?.arguments;
 
     if (args is Map) {
-      // ✅ Evita cast que puede romper si hay keys/values no tipables
       final map = Map<dynamic, dynamic>.from(args);
 
       final owner = _pickArgString(map, const <String>[
@@ -545,7 +539,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         'planKey',
       ]);
 
-      // ✅ PlanStatus (puede venir tipado desde Guard)
       _routePlanStatus = _pickArgAny(map, const <String>[
         'planStatus',
         'status',
@@ -568,7 +561,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
 
   bool get _isManageEffective {
     if (widget.isManageMode) return true;
-    // ✅ CANÓNICO: para modo gestión, lo mínimo real es tener perfilId (owner opcional).
     return _routeInstPerfilId.isNotEmpty ||
         _n(widget.institucionPerfilId).isNotEmpty;
   }
@@ -639,7 +631,7 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
 
     try {
       final inst = await _cargarInstitucionPorIdBestEffort(
-        idPerfil, // ✅ CANÓNICO: Institucion.id == institucionPerfilId
+        idPerfil,
       ).timeout(const Duration(seconds: 8));
 
       if (!mounted) return;
@@ -702,7 +694,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     );
   }
 
-  // ✅ RECOMPUTE PURO: NO usa context / l10n / theme (evita crash initState).
   void _recompute() {
     if (_missingEntryData) {
       _calc = _PlanCalculo.zero();
@@ -776,7 +767,7 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       modalidad: inst?.modalidad ?? ModalidadCursado.presencial,
       email: inst?.email ?? '',
       telefono: inst?.telefono ?? '',
-      pass: '****', // gestión (no se usa)
+      pass: '****',
       tipo: inst?.tipoInstitucion ?? TipoInstitucion.otra,
       nivelesSeleccionados: niveles,
       bloquesSeleccionados: modulos,
@@ -891,14 +882,12 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     if (o.isEmpty) return;
 
     try {
-      // ignore: discarded_futures
       SessionService.setInstitucionOwnerAccountId(o);
       return;
     } catch (_) {}
 
     try {
       final dyn = SessionService as dynamic;
-      // ignore: avoid_dynamic_calls, discarded_futures
       dyn.setInstitucionOwnerAccountId(ownerAccountId: o);
     } catch (_) {}
   }
@@ -907,10 +896,8 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     final direct = _ownerIdManage.trim();
     if (direct.isNotEmpty) return direct;
 
-    // 1) SessionService (si existe getter)
     try {
       final dyn = SessionService as dynamic;
-      // ignore: avoid_dynamic_calls
       final v = dyn.getInstitucionOwnerAccountId?.call();
       if (v != null) {
         final s = v.toString().trim();
@@ -918,10 +905,8 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       }
     } catch (_) {}
 
-    // 2) CuentaService (si expone sesión actual)
     try {
       final dyn = CuentaService as dynamic;
-      // ignore: avoid_dynamic_calls
       final v = dyn.getSesionCuentaId?.call();
       if (v != null) {
         final s = v.toString().trim();
@@ -968,10 +953,8 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         nombre: d.nombre,
       ).timeout(const Duration(seconds: 10));
 
-      // ✅ ownerAccountId (sesión cuenta)
       final ownerId = auth.institucionId;
 
-      // ✅ PERFIL INSTITUCIÓN CANÓNICO PRIMERO -> define institucionId real (perfilId)
       final perfil = await CuentaService.crearPerfilInstitucion(
         cuentaId: ownerId,
         nombre: d.nombre,
@@ -979,7 +962,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         telefonoContacto: d.telefono,
       ).timeout(const Duration(seconds: 10));
 
-      // ✅ Institucion.id == perfil.id (CANÓNICO)
       final inicio = _planInicioNow();
       final fin = _planFinDefault(inicio);
 
@@ -1004,15 +986,11 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         planConfig: _buildPlanConfigFromSelections(),
       );
 
-      await InstitucionService.upsertInstitucion(
-        inst,
-      ).timeout(const Duration(seconds: 10));
+      await InstitucionService.upsertInstitucion(inst)
+          .timeout(const Duration(seconds: 10));
 
-      // ✅ Sesiones canónicas
-      await CuentaService.setSesionCuentaId(
-        ownerId,
-        recordarme: true,
-      ).timeout(const Duration(seconds: 4));
+      await CuentaService.setSesionCuentaId(ownerId, recordarme: true)
+          .timeout(const Duration(seconds: 4));
 
       await SessionService.setSession(
         userId: perfil.id,
@@ -1022,7 +1000,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
 
       await _trySetInstOwnerBestEffort(ownerId);
 
-      // Marcar cupo promo usado (best-effort) por OWNER (no por perfil)
       if ((_promo?.code ?? '').isNotEmpty) {
         try {
           final prefs = await SharedPreferences.getInstance().timeout(
@@ -1076,7 +1053,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       return;
     }
 
-    // ✅ Owner es recomendado: intentamos resolverlo best-effort
     final ownerId = await _resolveOwnerBestEffort();
     if (ownerId.isEmpty) {
       _snack(messenger, _tCommonError(l10n));
@@ -1086,7 +1062,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     setState(() => _cargando = true);
 
     try {
-      // 1) cargar inst (tolerante) por PERFIL (CANÓNICO)
       Institucion? inst = _instActual;
       inst ??= await _cargarInstitucionPorIdBestEffort(
         perfilId,
@@ -1097,7 +1072,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         return;
       }
 
-      // 2) actualizar tipoPlan/estadoPlan/planInicio/planFin + planConfig (manteniendo datos)
       final base = _draftFromInstitution(inst);
       final d = _effectiveDraftForCalc(baseDraft: base);
 
@@ -1105,7 +1079,7 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       final fin = _planFinDefault(inicio);
 
       final updated = Institucion(
-        id: inst.id, // ✅ perfilId
+        id: inst.id,
         nombre: inst.nombre,
         cuit: inst.cuit,
         direccion: inst.direccion,
@@ -1123,8 +1097,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         planInicio: inicio,
         planFin: fin,
         planConfig: _buildPlanConfigFromSelections(),
-
-        // Mantener campos canónicos existentes
         logoLocalPath: inst.logoLocalPath,
         croquisLocalPath: inst.croquisLocalPath,
         croquisAula: inst.croquisAula,
@@ -1132,14 +1104,12 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         actividadesExtracurriculares: inst.actividadesExtracurriculares,
       );
 
-      await InstitucionService.upsertInstitucion(
-        updated,
-      ).timeout(const Duration(seconds: 10));
+      await InstitucionService.upsertInstitucion(updated)
+          .timeout(const Duration(seconds: 10));
 
       _instActual = updated;
       _recompute();
 
-      // Best-effort: asegurar owner institucional para pantallas siguientes
       await _trySetInstOwnerBestEffort(ownerId);
 
       if (!mounted) return;
@@ -1174,7 +1144,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    // Más scrim en dark para legibilidad, light muy sutil.
     return _alpha(cs.scrim, isDark ? 0.60 : 0.14);
   }
 
@@ -1266,7 +1235,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
   }
 
   String _bloqueLabel(BloqueExtracurricular b) {
-    // Preferir label canónico del enum si existe (mejor UX que el toString())
     try {
       final lbl = b.label.trim();
       if (lbl.isNotEmpty) return lbl;
@@ -1393,7 +1361,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       return _missingDataView(context);
     }
 
-    // ✅ NO recompute acá. Totales se actualizan por eventos (chips/tier/promo/load/seed).
     final baseDraft = effectiveManage
         ? _draftFromInstitution(_instActual)
         : widget.draft!;
