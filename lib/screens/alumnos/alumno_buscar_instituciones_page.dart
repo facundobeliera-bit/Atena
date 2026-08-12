@@ -693,7 +693,7 @@ class _AlumnoBuscarInstitucionesPageState
     final bloques = extra.map((a) => a.bloque).toSet().toList();
     final niveles = inst.planConfig?.niveles
             .where((e) => e.habilitado)
-            .map(_levelLabel)
+            .map((e) => _levelLabel(e.nivel))
             .toList() ??
         const <String>[];
 
