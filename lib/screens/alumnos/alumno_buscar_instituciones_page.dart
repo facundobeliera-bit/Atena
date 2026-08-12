@@ -29,9 +29,11 @@ class _AlumnoBuscarInstitucionesPageState
     extends State<AlumnoBuscarInstitucionesPage> {
   final _nombreCtrl = TextEditingController();
   final _ciudadCtrl = TextEditingController();
+  final _regionCtrl = TextEditingController();
   final _edadCtrl = TextEditingController();
 
   AlumnoBusquedaScope? _scope;
+  String? _pais;
   String? _provincia;
   NivelCurricular? _nivel;
   TipoInstitucion? _tipoInstitucion;
@@ -51,7 +53,20 @@ class _AlumnoBuscarInstitucionesPageState
   String? _error;
   List<AlumnoInstitucionSearchResult> _resultados = const [];
 
-  static const List<String> _provincias = [
+  static const List<String> _paises = [
+    'Argentina',
+    'Bolivia',
+    'Brasil',
+    'Chile',
+    'Colombia',
+    'España',
+    'México',
+    'Paraguay',
+    'Perú',
+    'Uruguay',
+  ];
+
+  static const List<String> _provinciasArgentina = [
     'Buenos Aires',
     'Catamarca',
     'Chaco',
@@ -83,6 +98,7 @@ class _AlumnoBuscarInstitucionesPageState
     super.initState();
     _nombreCtrl.addListener(_onFieldChanged);
     _ciudadCtrl.addListener(_onFieldChanged);
+    _regionCtrl.addListener(_onFieldChanged);
     _edadCtrl.addListener(_onFieldChanged);
   }
 
@@ -90,6 +106,7 @@ class _AlumnoBuscarInstitucionesPageState
   void dispose() {
     _nombreCtrl.dispose();
     _ciudadCtrl.dispose();
+    _regionCtrl.dispose();
     _edadCtrl.dispose();
     super.dispose();
   }
@@ -245,11 +262,13 @@ class _AlumnoBuscarInstitucionesPageState
 
     try {
       final edad = int.tryParse(_edadCtrl.text.trim());
+      final region = _regionCtrl.text.trim();
       final results = await AlumnoInstitucionesSearchService.search(
         AlumnoInstitucionSearchFilters(
           scope: scope,
           texto: _nombreCtrl.text.trim(),
-          provincia: _provincia,
+          pais: _pais,
+          provincia: _provincia ?? (region.isEmpty ? null : region),
           ciudad: _ciudadCtrl.text.trim().isEmpty
               ? null
               : _ciudadCtrl.text.trim(),
@@ -485,8 +504,28 @@ class _AlumnoBuscarInstitucionesPageState
         const SizedBox(height: 10),
         _sectionTitle(
           'Ubicación',
-          subtitle: 'Podés buscar cerca de vos o elegir una provincia y localidad diferente.',
+          subtitle: 'Podés buscar cerca de vos o elegir un país, provincia y localidad diferentes.',
         ),
+        DropdownButtonFormField<String>(
+          value: _pais,
+          isExpanded: true,
+          decoration: inputDecoration('País', Icons.public),
+          items: [
+            const DropdownMenuItem<String>(
+              value: null,
+              child: Text('Todos los países'),
+            ),
+            ..._paises.map(
+              (pais) => DropdownMenuItem<String>(value: pais, child: Text(pais)),
+            ),
+          ],
+          onChanged: (value) => setState(() {
+            _pais = value;
+            _provincia = null;
+            _regionCtrl.clear();
+          }),
+        ),
+        const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -537,18 +576,30 @@ class _AlumnoBuscarInstitucionesPageState
           ),
         ],
         const SizedBox(height: 10),
-        DropdownButtonFormField<String>(
-          value: _provincia,
-          isExpanded: true,
-          decoration: inputDecoration('Provincia', Icons.map_outlined),
-          items: [
-            const DropdownMenuItem<String>(value: null, child: Text('Todas las provincias')),
-            ..._provincias.map(
-              (p) => DropdownMenuItem<String>(value: p, child: Text(p)),
+        if (_pais == null || _pais == 'Argentina')
+          DropdownButtonFormField<String>(
+            value: _provincia,
+            isExpanded: true,
+            decoration: inputDecoration('Provincia', Icons.map_outlined),
+            items: [
+              const DropdownMenuItem<String>(
+                value: null,
+                child: Text('Todas las provincias'),
+              ),
+              ..._provinciasArgentina.map(
+                (p) => DropdownMenuItem<String>(value: p, child: Text(p)),
+              ),
+            ],
+            onChanged: (value) => setState(() => _provincia = value),
+          )
+        else
+          TextField(
+            controller: _regionCtrl,
+            decoration: inputDecoration(
+              'Provincia, estado o región',
+              Icons.map_outlined,
             ),
-          ],
-          onChanged: (value) => setState(() => _provincia = value),
-        ),
+          ),
         const SizedBox(height: 10),
         TextField(
           controller: _ciudadCtrl,
@@ -844,6 +895,8 @@ class _AlumnoBuscarInstitucionesPageState
               const SizedBox(height: 10),
               if (inst.direccion.trim().isNotEmpty)
                 Text('Dirección: ${inst.direccion.trim()}'),
+              if (inst.pais.trim().isNotEmpty)
+                Text('País: ${inst.pais.trim()}'),
               if (inst.ciudad.trim().isNotEmpty)
                 Text('Localidad: ${inst.ciudad.trim()}'),
               if (inst.provincia.trim().isNotEmpty)
