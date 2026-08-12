@@ -775,9 +775,9 @@ class _AlumnoBuscarInstitucionesPageState
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Ver información',
+                  tooltip: 'Ver perfil',
                   onPressed: () => _mostrarInstitucion(inst),
-                  icon: const Icon(Icons.visibility_outlined),
+                  icon: const Icon(Icons.account_balance_outlined),
                 ),
               ],
             ),
@@ -813,6 +813,15 @@ class _AlumnoBuscarInstitucionesPageState
               Text('Módulos: ${bloques.map((e) => e.label).join(' • ')}'),
             ],
             const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => _mostrarInstitucion(inst),
+                icon: const Icon(Icons.account_balance_outlined),
+                label: const Text('Ver perfil de la institución'),
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 if (inst.curricular)
@@ -886,11 +895,18 @@ class _AlumnoBuscarInstitucionesPageState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                inst.nombre,
-                style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      inst.nombre,
+                      style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  const Chip(label: Text('Perfil institucional')),
+                ],
               ),
               const SizedBox(height: 10),
               if (inst.direccion.trim().isNotEmpty)
@@ -903,7 +919,24 @@ class _AlumnoBuscarInstitucionesPageState
                 Text('Provincia: ${inst.provincia.trim()}'),
               Text('Modalidad: ${_modalidadLabel(inst.modalidad)}'),
               const SizedBox(height: 14),
+              if (inst.curricular || inst.extracurricular) ...[
+                const Text(
+                  'Propuestas disponibles',
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    if (inst.curricular) const Chip(label: Text('Curricular')),
+                    if (inst.extracurricular)
+                      const Chip(label: Text('Extracurricular')),
+                  ],
+                ),
+              ],
               if (extra.isNotEmpty) ...[
+                const SizedBox(height: 14),
                 const Text(
                   'Propuestas extracurriculares',
                   style: TextStyle(fontWeight: FontWeight.w900),
@@ -922,6 +955,36 @@ class _AlumnoBuscarInstitucionesPageState
                     ),
                   ),
               ],
+              const SizedBox(height: 14),
+              if (inst.curricular || inst.extracurricular)
+                Row(
+                  children: [
+                    if (inst.curricular)
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _abrirCurricular(inst);
+                          },
+                          icon: const Icon(Icons.school_outlined),
+                          label: const Text('Explorar curricular'),
+                        ),
+                      ),
+                    if (inst.curricular && inst.extracurricular)
+                      const SizedBox(width: 8),
+                    if (inst.extracurricular)
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _abrirExtracurricular(inst);
+                          },
+                          icon: const Icon(Icons.category_outlined),
+                          label: const Text('Explorar extracurricular'),
+                        ),
+                      ),
+                  ],
+                ),
             ],
           ),
         ),
