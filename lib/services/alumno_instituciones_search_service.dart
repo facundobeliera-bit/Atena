@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/extracurriculares/bloque_extracurricular.dart';
 import '../models/extracurriculares/actividad_extracurricular.dart';
 import '../models/instituciones/instituciones_integrado.dart';
@@ -13,6 +15,7 @@ enum AlumnoPrecioFiltro { todos, gratuitos, conCosto }
 class AlumnoInstitucionSearchFilters {
   final AlumnoBusquedaScope scope;
   final String texto;
+  final String? pais;
   final String? provincia;
   final String? ciudad;
   final NivelCurricular? nivel;
@@ -30,6 +33,7 @@ class AlumnoInstitucionSearchFilters {
   const AlumnoInstitucionSearchFilters({
     required this.scope,
     this.texto = '',
+    this.pais,
     this.provincia,
     this.ciudad,
     this.nivel,
@@ -157,10 +161,58 @@ class AlumnoInstitucionesSearchService {
     return _actividadesActivas(inst).any((a) => a.tieneCuposDisponibles);
   }
 
+  /// Devuelve el catálogo de instituciones combinando el índice de compatibilidad
+  /// con el almacenamiento canónico del dominio Institucion.
+  ///
+  /// Algunas instituciones válidas pueden existir en `atena_institucion_by_id_*`
+  /// sin haber sido incorporadas todavía a `instituciones_registradas`. El buscador
+  /// no debe perderlas por depender exclusivamente de ese índice auxiliar.
+  static Future<List<Institucion>> _cargarCatalogoInstituciones() async {
+    final result = <Institucion>[];
+    final seen = <String>{};
+
+    void add(Institucion inst) {
+      final id = inst.id.trim();
+      if (id.isEmpty) return;
+      final key = _norm(id);
+      if (seen.add(key)) result.add(inst);
+    }
+
+    try {
+      final indexed = await ih.cargarInstitucionesRegistradas();
+      for (final inst in indexed) {
+        add(inst);
+      }
+    } catch (_) {
+      // El almacenamiento canónico se intenta igualmente a continuación.
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      const prefix = 'atena_institucion_by_id_';
+
+      for (final key in prefs.getKeys()) {
+        if (!key.startsWith(prefix)) continue;
+        final raw = prefs.getString(key);
+        if (raw == null || raw.trim().isEmpty) continue;
+
+        try {
+          add(Institucion.fromJson(raw));
+        } catch (_) {
+          // Una entrada corrupta/legacy no debe impedir las demás búsquedas.
+        }
+      }
+    } catch (_) {
+      // Si no se puede leer SharedPreferences, se conserva el índice disponible.
+    }
+
+    return result;
+  }
+
   static Future<List<AlumnoInstitucionSearchResult>> search(
     AlumnoInstitucionSearchFilters filters,
   ) async {
-    final raw = await ih.cargarInstitucionesRegistradas();
+    final raw = await _cargarCatalogoInstituciones();
     final results = <AlumnoInstitucionSearchResult>[];
 
     for (final original in raw) {
@@ -186,6 +238,12 @@ class AlumnoInstitucionesSearchService {
 
       final texto = _norm(filters.texto);
       if (texto.isNotEmpty && !_norm(inst.nombre).contains(texto)) continue;
+
+      if (filters.pais != null &&
+          filters.pais!.trim().isNotEmpty &&
+          _norm(inst.pais) != _norm(filters.pais!)) {
+        continue;
+      }
 
       if (filters.provincia != null &&
           filters.provincia!.trim().isNotEmpty &&
