@@ -2,14 +2,17 @@
 //
 // ATENA – APP ROOT (CANÓNICO)
 //
-// ✅ FIX (FASE 2 · AHORA):
-// - Evita que instituciones “caigan” en CuentaHomePage (pantalla Perfiles).
-// - Boot canónico por rol:
-//    * role=institucion -> InstitucionMenuPage (directo)
-//    * role=cuenta      -> CuentaHomePage (hub de perfiles)
-//    * sin sesión       -> LandingPage
+// FIX PERSISTENCIA (agosto 2026):
+// - Inicializa el bootstrap de persistencia local antes del routing.
+// - No cambia el contrato de sesión ni el routing por rol.
+// - La rehidratación es best-effort y no bloquea el arranque si Storage falla.
 //
-// Nota: los deeplinks (/calendario, /documentos) siguen entrando por Router.
+// Boot canónico por rol:
+//   * role=institucion -> InstitucionMenuPage (directo)
+//   * role=cuenta      -> CuentaHomePage (hub de perfiles)
+//   * sin sesión       -> LandingPage
+//
+// Los deeplinks (/calendario, /documentos) siguen entrando por Router.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,6 +20,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/gen/app_localizations.dart';
 
 import 'services/app_settings_service.dart';
+import 'services/atena_data_bootstrap_service.dart';
 import 'services/cuenta_service.dart';
 import 'services/session_service.dart';
 
@@ -29,6 +33,12 @@ import 'routes/atena_deeplink.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Persistencia local: preparar/reconstruir índices antes del primer consumo
+  // de datos de la UI. Es best-effort y no impide iniciar Atena ante un fallo.
+  try {
+    await AtenaDataBootstrapService.instance.initialize();
+  } catch (_) {}
 
   Locale? initialLocale;
   ThemeMode initialThemeMode = ThemeMode.system;
@@ -183,8 +193,8 @@ class _AtenaAppState extends State<AtenaApp> {
         GlobalWidgetsLocalizations.delegate,
       ],
 
-      // ✅ Deeplink “duro” (web): si la URL es /calendario o /documentos, respetamos Router.
-      // Si no hay deeplink, arrancamos en BootGate (que rutea por rol).
+      // Deeplink “duro” (web): si la URL es /calendario o /documentos,
+      // respetamos Router. Si no hay deeplink, arrancamos en BootGate.
       onGenerateInitialRoutes: (initialRoute) {
         final dl = (_initialDeeplink ?? '').trim();
         if (dl.isNotEmpty && dl != '/') {
@@ -242,7 +252,7 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
     final nav = Navigator.of(context);
 
     try {
-      // 0) Session v2 (userId + role) – fuente real para perfil en modo institución.
+      // Session v2 (userId + role) – fuente real para perfil en modo institución.
       SessionData? session;
       try {
         session = await SessionService.getSession();
@@ -269,8 +279,7 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
       final role = session.role;
       final userId = _s(session.userId);
 
-      // 1) Sesión canónica de cuenta (CuentaService: sesion_cuenta)
-      //    (en institución, esta debería estar seteada; si no, usamos instOwner best-effort).
+      // Sesión canónica de cuenta (CuentaService: sesion_cuenta).
       String? cuentaId;
       try {
         cuentaId = await CuentaService.getSesionCuentaId();
@@ -280,8 +289,8 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
       var ownerAccountId = _s(cuentaId);
 
       if (role == SessionRole.institucion) {
-        // ✅ INSTITUCIÓN:
-        // - institucionPerfilId = SessionService.userId (NO asumir == owner)
+        // Institución:
+        // - institucionPerfilId = SessionService.userId
         // - ownerAccountId = sesion_cuenta (si falta, instOwner best-effort)
         if (ownerAccountId.isEmpty) {
           try {
@@ -322,8 +331,7 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
         return;
       }
 
-      // ✅ CUENTA:
-      // Si no hay ownerAccountId, no podemos operar como cuenta -> Landing.
+      // Cuenta: si no hay ownerAccountId, no podemos operar como cuenta.
       if (ownerAccountId.isEmpty) {
         if (!mounted) return;
         nav.pushReplacement(
@@ -365,7 +373,6 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
 
   @override
   Widget build(BuildContext context) {
-    // Splash simple / loader
     return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
