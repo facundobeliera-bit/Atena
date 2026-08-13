@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/extracurriculares/bloque_extracurricular.dart';
 import '../models/extracurriculares/actividad_extracurricular.dart';
+import '../models/instituciones/grupo_curricular.dart';
 import '../models/instituciones/instituciones_integrado.dart';
 import 'instituciones_helpers.dart' as ih;
 
@@ -19,6 +20,7 @@ class AlumnoInstitucionSearchFilters {
   final String? provincia;
   final String? ciudad;
   final NivelCurricular? nivel;
+  final TurnoCurricular? turno;
   final TipoInstitucion? tipoInstitucion;
   final ModalidadCursado? modalidadCursado;
   final Set<BloqueExtracurricular> bloques;
@@ -37,6 +39,7 @@ class AlumnoInstitucionSearchFilters {
     this.provincia,
     this.ciudad,
     this.nivel,
+    this.turno,
     this.tipoInstitucion,
     this.modalidadCursado,
     this.bloques = const <BloqueExtracurricular>{},
@@ -157,6 +160,22 @@ class AlumnoInstitucionesSearchService {
     return inst.gruposCurriculares.any((g) => g.tieneCuposDisponibles);
   }
 
+  static bool _tieneVacantesCurricularesConFiltro(
+    Institucion inst,
+    AlumnoInstitucionSearchFilters filters,
+  ) {
+    return inst.gruposCurriculares.any((g) {
+      if (!g.tieneCuposDisponibles) return false;
+      if (filters.nivel != null) {
+        final nombre = _norm(g.nombreCurso);
+        final nivel = _norm(filters.nivel!.name);
+        if (!nombre.contains(nivel)) return false;
+      }
+      if (filters.turno != null && g.turno != filters.turno) return false;
+      return true;
+    });
+  }
+
   static List<ActividadExtracurricular> _actividadesActivas(Institucion inst) {
     return inst.actividadesExtracurriculares.where((a) => a.activa).toList();
   }
@@ -262,7 +281,10 @@ class AlumnoInstitucionesSearchService {
       if (filters.scope == AlumnoBusquedaScope.curricular) {
         final niveles = _nivelesHabilitados(inst);
         if (filters.nivel != null && !niveles.contains(filters.nivel)) continue;
-        if (filters.soloConVacantes && !_tieneVacantesCurriculares(inst)) continue;
+        if (filters.soloConVacantes &&
+            !_tieneVacantesCurricularesConFiltro(inst, filters)) {
+          continue;
+        }
       } else {
         var actividades = _actividadesActivas(inst);
 
