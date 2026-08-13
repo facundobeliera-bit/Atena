@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/instituciones/grupo_curricular.dart';
+import '../../services/alumno_instituciones_search_service.dart';
 import '../../services/instituciones_helpers.dart' as ih;
 import 'alumno_solicitar_vacante_page.dart';
 
@@ -26,7 +27,7 @@ class AlumnoVacantesCurricularesPage extends StatefulWidget {
 }
 
 enum _Disponibilidad { todas, disponibles, completas }
-enum _Orden { gradoTurnoVacantes, vacantesPrimero, horario }
+enum _Orden { recomendadas, gradoTurno, vacantesPrimero, horario }
 
 class _AlumnoVacantesCurricularesPageState
     extends State<AlumnoVacantesCurricularesPage> {
@@ -38,9 +39,14 @@ class _AlumnoVacantesCurricularesPageState
   final _horarioCtrl = TextEditingController();
 
   TurnoCurricular? _turno;
-  _Disponibilidad _disponibilidad = _Disponibilidad.todas;
-  _Orden _orden = _Orden.gradoTurnoVacantes;
-  bool _soloVacantes = false;
+  _Disponibilidad _disponibilidad = _Disponibilidad.disponibles;
+  _Orden _orden = _Orden.recomendadas;
+  bool _soloVacantes = true;
+
+  AlumnoInstitucionSearchFilters? get _contextoBusqueda =>
+      AlumnoInstitucionesSearchService.ultimaBusqueda;
+
+  NivelCurricular? get _nivelPrioritario => _contextoBusqueda?.nivel;
 
   @override
   void initState() {
@@ -108,14 +114,12 @@ class _AlumnoVacantesCurricularesPageState
     }
   }
 
-  List<String> _partes(String raw) {
-    return raw
-        .trim()
-        .split('•')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-  }
+  List<String> _partes(String raw) => raw
+      .trim()
+      .split('•')
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList();
 
   String _grado(GrupoCurricular grupo) {
     final partes = _partes(grupo.nombreCurso);
@@ -130,9 +134,17 @@ class _AlumnoVacantesCurricularesPageState
   String _horario(GrupoCurricular grupo) {
     final inicio = (grupo.horaInicio ?? '').trim();
     final fin = (grupo.horaFin ?? '').trim();
-
     if (inicio.isEmpty && fin.isEmpty) return 'Horario no informado';
     return '${inicio.isEmpty ? '--:--' : inicio} - ${fin.isEmpty ? '--:--' : fin}';
+  }
+
+  bool _esNivelPrioritario(GrupoCurricular grupo) {
+    final nivel = _nivelPrioritario;
+    if (nivel == null) return false;
+
+    final buscado = nivel.name.toLowerCase();
+    final actual = _nivel(grupo).toLowerCase();
+    return actual.contains(buscado) || buscado.contains(actual);
   }
 
   bool _coincide(GrupoCurricular grupo) {
@@ -187,6 +199,16 @@ class _AlumnoVacantesCurricularesPageState
     final lista = _grupos.where(_coincide).toList();
 
     lista.sort((a, b) {
+      if (_orden == _Orden.recomendadas) {
+        final prioridadA = _esNivelPrioritario(a) ? 0 : 1;
+        final prioridadB = _esNivelPrioritario(b) ? 0 : 1;
+        if (prioridadA != prioridadB) return prioridadA.compareTo(prioridadB);
+
+        final vacanteA = a.tieneCuposDisponibles ? 0 : 1;
+        final vacanteB = b.tieneCuposDisponibles ? 0 : 1;
+        if (vacanteA != vacanteB) return vacanteA.compareTo(vacanteB);
+      }
+
       if (_orden == _Orden.vacantesPrimero) {
         final comparacion =
             b.cuposDisponibles.compareTo(a.cuposDisponibles);
@@ -214,15 +236,214 @@ class _AlumnoVacantesCurricularesPageState
     return lista;
   }
 
-  void _limpiar() {
+  List<GrupoCurricular> get _recomendadas =>
+      _filtrados.where(_esNivelPrioritario).toList();
+
+  List<GrupoCurricular> get _otras =>
+      _filtrados.where((grupo) => !_esNivelPrioritario(grupo)).toList();
+
+  void _limpiarFiltros() {
     setState(() {
       _gradoCtrl.clear();
       _horarioCtrl.clear();
       _turno = null;
-      _disponibilidad = _Disponibilidad.todas;
-      _orden = _Orden.gradoTurnoVacantes;
-      _soloVacantes = false;
+      _disponibilidad = _Disponibilidad.disponibles;
+      _orden = _Orden.recomendadas;
+      _soloVacantes = true;
     });
+  }
+
+  Future<void> _abrirFiltros() async {
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                8,
+                20,
+                MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ajustar búsqueda',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text('Podés afinar las vacantes sin perder las recomendaciones iniciales.'),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _gradoCtrl,
+                      onChanged: (_) => setSheetState(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'Grado, sala o año',
+                        prefixIcon: const Icon(Icons.school_outlined),
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<TurnoCurricular?>(
+                      value: _turno,
+                      decoration: InputDecoration(
+                        labelText: 'Turno',
+                        prefixIcon: const Icon(Icons.wb_sunny_outlined),
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      items: [
+                        const DropdownMenuItem<TurnoCurricular?>(
+                          value: null,
+                          child: Text('Todos los turnos'),
+                        ),
+                        ...TurnoCurricular.values.map(
+                          (turno) => DropdownMenuItem<TurnoCurricular?>(
+                            value: turno,
+                            child: Text(_turnoLabel(turno)),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setSheetState(() => _turno = value);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _horarioCtrl,
+                      onChanged: (_) => setSheetState(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'Horario',
+                        hintText: 'Ej.: 08:00 o 13:30',
+                        prefixIcon: const Icon(Icons.schedule_outlined),
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<_Disponibilidad>(
+                      value: _disponibilidad,
+                      decoration: InputDecoration(
+                        labelText: 'Disponibilidad',
+                        prefixIcon: const Icon(Icons.event_seat_outlined),
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: _Disponibilidad.todas,
+                          child: Text('Todas'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Disponibilidad.disponibles,
+                          child: Text('Con vacantes'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Disponibilidad.completas,
+                          child: Text('Sin vacantes'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setSheetState(
+                          () => _disponibilidad =
+                              value ?? _Disponibilidad.disponibles,
+                        );
+                      },
+                    ),
+                    SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      value: _soloVacantes,
+                      title: const Text('Mostrar solo vacantes disponibles'),
+                      onChanged: (value) {
+                        setSheetState(() => _soloVacantes = value);
+                      },
+                    ),
+                    DropdownButtonFormField<_Orden>(
+                      value: _orden,
+                      decoration: InputDecoration(
+                        labelText: 'Ordenar',
+                        prefixIcon: const Icon(Icons.sort),
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: _Orden.recomendadas,
+                          child: Text('Primero las recomendadas'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Orden.gradoTurno,
+                          child: Text('Grado → turno → vacantes'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Orden.vacantesPrimero,
+                          child: Text('Más vacantes primero'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Orden.horario,
+                          child: Text('Por horario'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setSheetState(
+                          () => _orden = value ?? _Orden.recomendadas,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              _limpiarFiltros();
+                              setSheetState(() {});
+                            },
+                            child: const Text('Restablecer'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => Navigator.pop(sheetContext, true),
+                            child: const Text('Aplicar filtros'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    if (result == true && mounted) setState(() {});
   }
 
   Future<void> _solicitar(GrupoCurricular grupo) async {
@@ -250,9 +471,7 @@ class _AlumnoVacantesCurricularesPageState
       ),
     );
 
-    if (mounted && resultado == true) {
-      await _cargar();
-    }
+    if (mounted && resultado == true) await _cargar();
   }
 
   void _mensaje(String texto) {
@@ -262,149 +481,100 @@ class _AlumnoVacantesCurricularesPageState
       ..showSnackBar(SnackBar(content: Text(texto)));
   }
 
-  Widget _filtros() {
-    return Card(
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.tune),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Filtrar vacantes',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w900),
-                  ),
-                ),
-                TextButton(
-                  onPressed: _limpiar,
-                  child: const Text('Limpiar'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _gradoCtrl,
-              onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                labelText: 'Grado / sala / año',
-                hintText: 'Ej.: 1°, 2°, sala de 5, 4° año',
-                prefixIcon: Icon(Icons.school_outlined),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            DropdownButtonFormField<TurnoCurricular?>(
-              value: _turno,
-              decoration: const InputDecoration(
-                labelText: 'Turno',
-                prefixIcon: Icon(Icons.wb_sunny_outlined),
-                border: OutlineInputBorder(),
-              ),
-              items: [
-                const DropdownMenuItem<TurnoCurricular?>(
-                  value: null,
-                  child: Text('Todos los turnos'),
-                ),
-                ...TurnoCurricular.values.map(
-                  (turno) => DropdownMenuItem<TurnoCurricular?>(
-                    value: turno,
-                    child: Text(_turnoLabel(turno)),
-                  ),
-                ),
-              ],
-              onChanged: (valor) => setState(() => _turno = valor),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _horarioCtrl,
-              onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                labelText: 'Horario',
-                hintText: 'Ej.: 08:00, 13:30 o 17:00',
-                prefixIcon: Icon(Icons.schedule_outlined),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            DropdownButtonFormField<_Disponibilidad>(
-              value: _disponibilidad,
-              decoration: const InputDecoration(
-                labelText: 'Vacantes',
-                prefixIcon: Icon(Icons.event_seat_outlined),
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: _Disponibilidad.todas,
-                  child: Text('Todas'),
-                ),
-                DropdownMenuItem(
-                  value: _Disponibilidad.disponibles,
-                  child: Text('Solo con vacantes'),
-                ),
-                DropdownMenuItem(
-                  value: _Disponibilidad.completas,
-                  child: Text('Sin vacantes'),
-                ),
-              ],
-              onChanged: (valor) => setState(
-                () => _disponibilidad = valor ?? _Disponibilidad.todas,
-              ),
-            ),
-            CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _soloVacantes,
-              title: const Text('Mostrar solamente vacantes disponibles'),
-              onChanged: (valor) => setState(
-                () => _soloVacantes = valor ?? false,
-              ),
-            ),
-            DropdownButtonFormField<_Orden>(
-              value: _orden,
-              decoration: const InputDecoration(
-                labelText: 'Ordenar resultados',
-                prefixIcon: Icon(Icons.sort),
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: _Orden.gradoTurnoVacantes,
-                  child: Text('Grado → turno → vacantes'),
-                ),
-                DropdownMenuItem(
-                  value: _Orden.vacantesPrimero,
-                  child: Text('Más vacantes primero'),
-                ),
-                DropdownMenuItem(
-                  value: _Orden.horario,
-                  child: Text('Por horario'),
-                ),
-              ],
-              onChanged: (valor) => setState(
-                () => _orden = valor ?? _Orden.gradoTurnoVacantes,
-              ),
-            ),
-          ],
+  Widget _chip(String label, {bool emphasized = false}) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      decoration: BoxDecoration(
+        color: emphasized ? cs.primaryContainer : cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontWeight: emphasized ? FontWeight.w800 : FontWeight.w600,
+          color: emphasized ? cs.onPrimaryContainer : null,
         ),
       ),
     );
   }
 
-  Widget _card(GrupoCurricular grupo) {
+  Widget _contextoCard() {
+    final contexto = _contextoBusqueda;
+    if (contexto == null) return const SizedBox.shrink();
+
+    final chips = <Widget>[];
+    if (contexto.nivel != null) {
+      chips.add(_chip('Nivel: ${_nivelLabel(contexto.nivel!)}', emphasized: true));
+    }
+    if (contexto.soloConVacantes) {
+      chips.add(_chip('Con vacantes', emphasized: true));
+    }
+    if (contexto.ciudad != null && contexto.ciudad!.trim().isNotEmpty) {
+      chips.add(_chip(contexto.ciudad!));
+    }
+
+    if (chips.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(.42),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tu búsqueda',
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 9),
+          Wrap(spacing: 7, runSpacing: 7, children: chips),
+          const SizedBox(height: 9),
+          const Text(
+            'Estas condiciones se usan para priorizar las vacantes que más se parecen a lo que buscabas.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _nivelLabel(NivelCurricular nivel) {
+    switch (nivel) {
+      case NivelCurricular.jardin:
+        return 'Jardín';
+      case NivelCurricular.primaria:
+        return 'Primaria';
+      case NivelCurricular.secundaria:
+        return 'Secundaria';
+      case NivelCurricular.tecnica:
+        return 'Técnica';
+      case NivelCurricular.terciario:
+        return 'Terciario';
+    }
+  }
+
+  Widget _card(GrupoCurricular grupo, {bool recomendada = false}) {
     final disponible = grupo.tieneCuposDisponibles;
+    final cs = Theme.of(context).colorScheme;
 
     return Card(
       elevation: 0,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: recomendada ? cs.primary.withOpacity(.28) : cs.outlineVariant,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -415,6 +585,19 @@ class _AlumnoVacantesCurricularesPageState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (recomendada)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            'RECOMENDADA PARA VOS',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: .7,
+                              color: cs.primary,
+                            ),
+                          ),
+                        ),
                       if (_nivel(grupo).isNotEmpty)
                         Text(
                           _nivel(grupo),
@@ -427,45 +610,38 @@ class _AlumnoVacantesCurricularesPageState
                         _grado(grupo),
                         style: Theme.of(context)
                             .textTheme
-                            .titleLarge
+                            .headlineSmall
                             ?.copyWith(fontWeight: FontWeight.w900),
                       ),
                     ],
                   ),
                 ),
-                Chip(
-                  label: Text(
-                    disponible
-                        ? '${grupo.cuposDisponibles} vacantes'
-                        : 'Sin vacantes',
-                  ),
+                _chip(
+                  disponible
+                      ? '${grupo.cuposDisponibles} vacantes'
+                      : 'Sin vacantes',
+                  emphasized: disponible,
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 14),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                Chip(label: Text(_turnoLabel(grupo.turno))),
-                Chip(label: Text(_horario(grupo))),
-                Chip(
-                  label: Text(
-                    '${grupo.cuposOcupados}/${grupo.cuposTotales} ocupados',
-                  ),
-                ),
+                _chip(_turnoLabel(grupo.turno)),
+                _chip(_horario(grupo)),
+                _chip('${grupo.cuposOcupados}/${grupo.cuposTotales} ocupados'),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 15),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: disponible ? () => _solicitar(grupo) : null,
-                icon: const Icon(Icons.how_to_reg_outlined),
+                icon: const Icon(Icons.arrow_forward_rounded),
                 label: Text(
-                  disponible
-                      ? 'Solicitar esta vacante'
-                      : 'Vacante completa',
+                  disponible ? 'Solicitar esta vacante' : 'Curso completo',
                 ),
               ),
             ),
@@ -475,15 +651,56 @@ class _AlumnoVacantesCurricularesPageState
     );
   }
 
+  Widget _emptyState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(26),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.search_off_rounded, size: 42),
+          const SizedBox(height: 12),
+          Text(
+            'No encontramos vacantes con estos filtros',
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Probá ampliar la búsqueda para ver otras opciones dentro de la institución.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 14),
+          OutlinedButton.icon(
+            onPressed: _limpiarFiltros,
+            icon: const Icon(Icons.restart_alt),
+            label: const Text('Restablecer filtros'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filtrados = _filtrados;
+    final recomendadas = _recomendadas;
+    final otras = _otras;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vacantes curriculares'),
+        title: const Text('Vacantes disponibles'),
         actions: [
           IconButton(
+            tooltip: 'Actualizar',
             onPressed: _cargando ? null : _cargar,
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
           ),
         ],
       ),
@@ -496,11 +713,13 @@ class _AlumnoVacantesCurricularesPageState
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(_error!, textAlign: TextAlign.center),
+                        const Icon(Icons.error_outline_rounded, size: 48),
                         const SizedBox(height: 12),
+                        Text(_error!, textAlign: TextAlign.center),
+                        const SizedBox(height: 14),
                         FilledButton.icon(
                           onPressed: _cargar,
-                          icon: const Icon(Icons.refresh),
+                          icon: const Icon(Icons.refresh_rounded),
                           label: const Text('Reintentar'),
                         ),
                       ],
@@ -510,43 +729,84 @@ class _AlumnoVacantesCurricularesPageState
               : RefreshIndicator(
                   onRefresh: _cargar,
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
                     children: [
                       Text(
                         widget.institucionNombre,
                         style: Theme.of(context)
                             .textTheme
-                            .headlineSmall
+                            .headlineMedium
                             ?.copyWith(fontWeight: FontWeight.w900),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
                       const Text(
-                        'Elegí la vacante según grado, turno, horario y disponibilidad.',
+                        'Explorá las opciones disponibles y elegí el curso que mejor se adapte a tu búsqueda.',
                       ),
                       const SizedBox(height: 16),
-                      _filtros(),
-                      const SizedBox(height: 16),
-                      Text(
-                        '${_filtrados.length} vacantes encontradas',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w900),
-                      ),
-                      const SizedBox(height: 10),
-                      if (_filtrados.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.all(24),
-                          child: Text(
-                            'No hay vacantes que coincidan con los filtros.',
-                            textAlign: TextAlign.center,
+                      _contextoCard(),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${filtrados.length} opciones',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w900),
+                            ),
                           ),
-                        )
-                      else
-                        for (final grupo in _filtrados) ...[
-                          _card(grupo),
-                          const SizedBox(height: 10),
+                          OutlinedButton.icon(
+                            onPressed: _abrirFiltros,
+                            icon: const Icon(Icons.tune_rounded),
+                            label: const Text('Filtrar'),
+                          ),
                         ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (filtrados.isEmpty)
+                        _emptyState()
+                      else if (_orden == _Orden.recomendadas &&
+                          recomendadas.isNotEmpty) ...[
+                        Text(
+                          'Recomendadas para tu búsqueda',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w900),
+                        ),
+                        const SizedBox(height: 10),
+                        ...recomendadas.map(
+                          (grupo) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: _card(grupo, recomendada: true),
+                          ),
+                        ),
+                        if (otras.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'Otras opciones disponibles',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w900),
+                          ),
+                          const SizedBox(height: 10),
+                          ...otras.map(
+                            (grupo) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _card(grupo),
+                            ),
+                          ),
+                        ],
+                      ] else ...[
+                        ...filtrados.map(
+                          (grupo) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: _card(grupo),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
