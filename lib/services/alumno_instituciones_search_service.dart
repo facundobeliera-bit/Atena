@@ -61,6 +61,10 @@ class AlumnoInstitucionSearchResult {
 }
 
 class AlumnoInstitucionesSearchService {
+  /// Última intención de búsqueda confirmada por el alumno.
+  /// Se utiliza para conservar el contexto al pasar de instituciones a vacantes.
+  static AlumnoInstitucionSearchFilters? ultimaBusqueda;
+
   static String _norm(String value) => value.trim().toLowerCase();
 
   static double? _toDouble(dynamic value) {
@@ -161,12 +165,6 @@ class AlumnoInstitucionesSearchService {
     return _actividadesActivas(inst).any((a) => a.tieneCuposDisponibles);
   }
 
-  /// Devuelve el catálogo de instituciones combinando el índice de compatibilidad
-  /// con el almacenamiento canónico del dominio Institucion.
-  ///
-  /// Algunas instituciones válidas pueden existir en `atena_institucion_by_id_*`
-  /// sin haber sido incorporadas todavía a `instituciones_registradas`. El buscador
-  /// no debe perderlas por depender exclusivamente de ese índice auxiliar.
   static Future<List<Institucion>> _cargarCatalogoInstituciones() async {
     final result = <Institucion>[];
     final seen = <String>{};
@@ -183,9 +181,7 @@ class AlumnoInstitucionesSearchService {
       for (final inst in indexed) {
         add(inst);
       }
-    } catch (_) {
-      // El almacenamiento canónico se intenta igualmente a continuación.
-    }
+    } catch (_) {}
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -198,13 +194,9 @@ class AlumnoInstitucionesSearchService {
 
         try {
           add(Institucion.fromJson(raw));
-        } catch (_) {
-          // Una entrada corrupta/legacy no debe impedir las demás búsquedas.
-        }
+        } catch (_) {}
       }
-    } catch (_) {
-      // Si no se puede leer SharedPreferences, se conserva el índice disponible.
-    }
+    } catch (_) {}
 
     return result;
   }
@@ -212,6 +204,8 @@ class AlumnoInstitucionesSearchService {
   static Future<List<AlumnoInstitucionSearchResult>> search(
     AlumnoInstitucionSearchFilters filters,
   ) async {
+    ultimaBusqueda = filters;
+
     final raw = await _cargarCatalogoInstituciones();
     final results = <AlumnoInstitucionSearchResult>[];
 
@@ -225,9 +219,7 @@ class AlumnoInstitucionesSearchService {
           conGrupos,
           migrateIfLegacy: false,
         );
-      } catch (_) {
-        // Si la hidratación falla, se conserva la institución base.
-      }
+      } catch (_) {}
 
       if (filters.scope == AlumnoBusquedaScope.curricular && !inst.curricular) {
         continue;
@@ -323,7 +315,6 @@ class AlumnoInstitucionesSearchService {
       } else if (filters.maxDistanceKm != null &&
           filters.userLat != null &&
           filters.userLng != null) {
-        // Se pidió radio, pero esta institución todavía no tiene coordenadas.
         continue;
       }
 
