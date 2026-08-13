@@ -47,10 +47,13 @@ class _AlumnoVacantesCurricularesPageState
       AlumnoInstitucionesSearchService.ultimaBusqueda;
 
   NivelCurricular? get _nivelPrioritario => _contextoBusqueda?.nivel;
+  TurnoCurricular? get _turnoPrioritario => _contextoBusqueda?.turno;
 
   @override
   void initState() {
     super.initState();
+    _turno = _turnoPrioritario;
+    _soloVacantes = _contextoBusqueda?.soloConVacantes ?? true;
     _cargar();
   }
 
@@ -147,6 +150,18 @@ class _AlumnoVacantesCurricularesPageState
     return actual.contains(buscado) || buscado.contains(actual);
   }
 
+  bool _esTurnoPrioritario(GrupoCurricular grupo) =>
+      _turnoPrioritario != null && grupo.turno == _turnoPrioritario;
+
+  int _prioridadRecomendacion(GrupoCurricular grupo) {
+    final turno = _esTurnoPrioritario(grupo);
+    final nivel = _esNivelPrioritario(grupo);
+    if (turno && nivel) return 0;
+    if (turno) return 1;
+    if (nivel) return 2;
+    return 3;
+  }
+
   bool _coincide(GrupoCurricular grupo) {
     final grado = _grado(grupo).toLowerCase();
     final nombre = grupo.nombreCurso.toLowerCase();
@@ -200,8 +215,8 @@ class _AlumnoVacantesCurricularesPageState
 
     lista.sort((a, b) {
       if (_orden == _Orden.recomendadas) {
-        final prioridadA = _esNivelPrioritario(a) ? 0 : 1;
-        final prioridadB = _esNivelPrioritario(b) ? 0 : 1;
+        final prioridadA = _prioridadRecomendacion(a);
+        final prioridadB = _prioridadRecomendacion(b);
         if (prioridadA != prioridadB) return prioridadA.compareTo(prioridadB);
 
         final vacanteA = a.tieneCuposDisponibles ? 0 : 1;
@@ -210,14 +225,12 @@ class _AlumnoVacantesCurricularesPageState
       }
 
       if (_orden == _Orden.vacantesPrimero) {
-        final comparacion =
-            b.cuposDisponibles.compareTo(a.cuposDisponibles);
+        final comparacion = b.cuposDisponibles.compareTo(a.cuposDisponibles);
         if (comparacion != 0) return comparacion;
       }
 
       if (_orden == _Orden.horario) {
-        final comparacion =
-            (a.horaInicio ?? '').compareTo(b.horaInicio ?? '');
+        final comparacion = (a.horaInicio ?? '').compareTo(b.horaInicio ?? '');
         if (comparacion != 0) return comparacion;
       }
 
@@ -236,20 +249,22 @@ class _AlumnoVacantesCurricularesPageState
     return lista;
   }
 
-  List<GrupoCurricular> get _recomendadas =>
-      _filtrados.where(_esNivelPrioritario).toList();
+  List<GrupoCurricular> get _recomendadas => _filtrados
+      .where((grupo) => _prioridadRecomendacion(grupo) < 3)
+      .toList();
 
-  List<GrupoCurricular> get _otras =>
-      _filtrados.where((grupo) => !_esNivelPrioritario(grupo)).toList();
+  List<GrupoCurricular> get _otras => _filtrados
+      .where((grupo) => _prioridadRecomendacion(grupo) == 3)
+      .toList();
 
   void _limpiarFiltros() {
     setState(() {
       _gradoCtrl.clear();
       _horarioCtrl.clear();
-      _turno = null;
+      _turno = _turnoPrioritario;
       _disponibilidad = _Disponibilidad.disponibles;
       _orden = _Orden.recomendadas;
-      _soloVacantes = true;
+      _soloVacantes = _contextoBusqueda?.soloConVacantes ?? true;
     });
   }
 
@@ -318,9 +333,7 @@ class _AlumnoVacantesCurricularesPageState
                           ),
                         ),
                       ],
-                      onChanged: (value) {
-                        setSheetState(() => _turno = value);
-                      },
+                      onChanged: (value) => setSheetState(() => _turno = value),
                     ),
                     const SizedBox(height: 12),
                     TextField(
@@ -350,33 +363,19 @@ class _AlumnoVacantesCurricularesPageState
                         ),
                       ),
                       items: const [
-                        DropdownMenuItem(
-                          value: _Disponibilidad.todas,
-                          child: Text('Todas'),
-                        ),
-                        DropdownMenuItem(
-                          value: _Disponibilidad.disponibles,
-                          child: Text('Con vacantes'),
-                        ),
-                        DropdownMenuItem(
-                          value: _Disponibilidad.completas,
-                          child: Text('Sin vacantes'),
-                        ),
+                        DropdownMenuItem(value: _Disponibilidad.todas, child: Text('Todas')),
+                        DropdownMenuItem(value: _Disponibilidad.disponibles, child: Text('Con vacantes')),
+                        DropdownMenuItem(value: _Disponibilidad.completas, child: Text('Sin vacantes')),
                       ],
-                      onChanged: (value) {
-                        setSheetState(
-                          () => _disponibilidad =
-                              value ?? _Disponibilidad.disponibles,
-                        );
-                      },
+                      onChanged: (value) => setSheetState(
+                        () => _disponibilidad = value ?? _Disponibilidad.disponibles,
+                      ),
                     ),
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       value: _soloVacantes,
                       title: const Text('Mostrar solo vacantes disponibles'),
-                      onChanged: (value) {
-                        setSheetState(() => _soloVacantes = value);
-                      },
+                      onChanged: (value) => setSheetState(() => _soloVacantes = value),
                     ),
                     DropdownButtonFormField<_Orden>(
                       value: _orden,
@@ -390,28 +389,14 @@ class _AlumnoVacantesCurricularesPageState
                         ),
                       ),
                       items: const [
-                        DropdownMenuItem(
-                          value: _Orden.recomendadas,
-                          child: Text('Primero las recomendadas'),
-                        ),
-                        DropdownMenuItem(
-                          value: _Orden.gradoTurno,
-                          child: Text('Grado → turno → vacantes'),
-                        ),
-                        DropdownMenuItem(
-                          value: _Orden.vacantesPrimero,
-                          child: Text('Más vacantes primero'),
-                        ),
-                        DropdownMenuItem(
-                          value: _Orden.horario,
-                          child: Text('Por horario'),
-                        ),
+                        DropdownMenuItem(value: _Orden.recomendadas, child: Text('Primero las recomendadas')),
+                        DropdownMenuItem(value: _Orden.gradoTurno, child: Text('Grado → turno → vacantes')),
+                        DropdownMenuItem(value: _Orden.vacantesPrimero, child: Text('Más vacantes primero')),
+                        DropdownMenuItem(value: _Orden.horario, child: Text('Por horario')),
                       ],
-                      onChanged: (value) {
-                        setSheetState(
-                          () => _orden = value ?? _Orden.recomendadas,
-                        );
-                      },
+                      onChanged: (value) => setSheetState(
+                        () => _orden = value ?? _Orden.recomendadas,
+                      ),
                     ),
                     const SizedBox(height: 18),
                     Row(
@@ -507,6 +492,9 @@ class _AlumnoVacantesCurricularesPageState
     if (contexto.nivel != null) {
       chips.add(_chip('Nivel: ${_nivelLabel(contexto.nivel!)}', emphasized: true));
     }
+    if (contexto.turno != null) {
+      chips.add(_chip('Turno: ${_turnoLabel(contexto.turno!)}', emphasized: true));
+    }
     if (contexto.soloConVacantes) {
       chips.add(_chip('Con vacantes', emphasized: true));
     }
@@ -528,17 +516,12 @@ class _AlumnoVacantesCurricularesPageState
         children: [
           Text(
             'Tu búsqueda',
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 9),
           Wrap(spacing: 7, runSpacing: 7, children: chips),
           const SizedBox(height: 9),
-          const Text(
-            'Estas condiciones se usan para priorizar las vacantes que más se parecen a lo que buscabas.',
-          ),
+          const Text('Estas condiciones se usan para priorizar las vacantes que más se parecen a lo que buscabas.'),
         ],
       ),
     );
@@ -601,27 +584,16 @@ class _AlumnoVacantesCurricularesPageState
                       if (_nivel(grupo).isNotEmpty)
                         Text(
                           _nivel(grupo),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       Text(
                         _grado(grupo),
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w900),
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
                       ),
                     ],
                   ),
                 ),
-                _chip(
-                  disponible
-                      ? '${grupo.cuposDisponibles} vacantes'
-                      : 'Sin vacantes',
-                  emphasized: disponible,
-                ),
+                _chip(disponible ? '${grupo.cuposDisponibles} vacantes' : 'Sin vacantes', emphasized: disponible),
               ],
             ),
             const SizedBox(height: 14),
@@ -640,9 +612,7 @@ class _AlumnoVacantesCurricularesPageState
               child: FilledButton.icon(
                 onPressed: disponible ? () => _solicitar(grupo) : null,
                 icon: const Icon(Icons.arrow_forward_rounded),
-                label: Text(
-                  disponible ? 'Solicitar esta vacante' : 'Curso completo',
-                ),
+                label: Text(disponible ? 'Solicitar esta vacante' : 'Curso completo'),
               ),
             ),
           ],
@@ -666,10 +636,7 @@ class _AlumnoVacantesCurricularesPageState
           Text(
             'No encontramos vacantes con estos filtros',
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 6),
           const Text(
@@ -733,15 +700,10 @@ class _AlumnoVacantesCurricularesPageState
                     children: [
                       Text(
                         widget.institucionNombre,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.w900),
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
                       ),
                       const SizedBox(height: 5),
-                      const Text(
-                        'Explorá las opciones disponibles y elegí el curso que mejor se adapte a tu búsqueda.',
-                      ),
+                      const Text('Explorá las opciones disponibles y elegí el curso que mejor se adapte a tu búsqueda.'),
                       const SizedBox(height: 16),
                       _contextoCard(),
                       const SizedBox(height: 14),
@@ -750,10 +712,7 @@ class _AlumnoVacantesCurricularesPageState
                           Expanded(
                             child: Text(
                               '${filtrados.length} opciones',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.w900),
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
                             ),
                           ),
                           OutlinedButton.icon(
@@ -766,14 +725,10 @@ class _AlumnoVacantesCurricularesPageState
                       const SizedBox(height: 12),
                       if (filtrados.isEmpty)
                         _emptyState()
-                      else if (_orden == _Orden.recomendadas &&
-                          recomendadas.isNotEmpty) ...[
+                      else if (_orden == _Orden.recomendadas && recomendadas.isNotEmpty) ...[
                         Text(
                           'Recomendadas para tu búsqueda',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w900),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                         ),
                         const SizedBox(height: 10),
                         ...recomendadas.map(
@@ -786,10 +741,7 @@ class _AlumnoVacantesCurricularesPageState
                           const SizedBox(height: 8),
                           Text(
                             'Otras opciones disponibles',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w900),
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                           ),
                           const SizedBox(height: 10),
                           ...otras.map(
