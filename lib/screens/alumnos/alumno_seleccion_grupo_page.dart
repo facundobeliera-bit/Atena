@@ -5,16 +5,15 @@ import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 
 import '../../l10n/gen/app_localizations.dart';
-import '../../services/alumno_service.dart';
-import '../../services/instituciones_helpers.dart' as ih;
-import '../../models/instituciones/instituciones_integrado.dart';
-import '../../models/instituciones/grupo_curricular.dart';
-import '../../models/alumnos/alumnos_integrados.dart';
-import '../../models/extracurriculares/bloque_extracurricular.dart';
 import '../../models/extracurriculares/actividad_extracurricular.dart';
+import '../../models/extracurriculares/bloque_extracurricular.dart';
+import '../../models/instituciones/grupo_curricular.dart';
+import '../../services/instituciones_helpers.dart' as ih;
 import 'alumno_solicitar_vacante_page.dart';
 
 enum ModoSolicitudUI { curricular, extracurricular }
+
+enum _OrdenVacantes { curso, vacantes, horario }
 
 class AlumnoSeleccionGrupoPage extends StatefulWidget {
   final String institucionId;
@@ -38,25 +37,21 @@ class AlumnoSeleccionGrupoPage extends StatefulWidget {
 }
 
 class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
+  static const Duration _loadTimeout = Duration(seconds: 15);
+
   bool _cargando = true;
-  Institucion? _perfilInst;
-  Alumno? _alumno;
+  String? _errorCarga;
 
   ModoSolicitudUI _modo = ModoSolicitudUI.curricular;
 
-  final Map<TurnoCurricular, List<GrupoCurricular>> _gruposPorTurno = {
-    TurnoCurricular.manana: <GrupoCurricular>[],
-    TurnoCurricular.tarde: <GrupoCurricular>[],
-    TurnoCurricular.noche: <GrupoCurricular>[],
-  };
-
+  List<GrupoCurricular> _grupos = <GrupoCurricular>[];
   GrupoCurricular? _grupoSeleccionado;
   String? _curricularRadioValue;
 
-  // Filtros de vacante: TODOS son opcionales.
   TurnoCurricular? _filtroTurno;
-  String _filtroCurso = '';
   final TextEditingController _cursoController = TextEditingController();
+  bool _soloConVacantes = true;
+  _OrdenVacantes _orden = _OrdenVacantes.curso;
 
   bool _cargandoExtra = false;
   bool _extraCargadoUnaVez = false;
@@ -67,18 +62,21 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
   ActividadExtracurricular? _actividadSeleccionada;
   String? _extraRadioValue;
 
+  String get _instId => widget.institucionId.trim();
   String get _owner => widget.ownerAccountId.trim();
   String get _perfilId => widget.perfilId.trim();
-  String get _instId => widget.institucionId.trim();
+
+  String get _nombreInstitucion {
+    final n = (widget.institucionNombre ?? '').trim();
+    return n.isEmpty ? 'Institución' : n;
+  }
 
   @override
   void initState() {
     super.initState();
     _cursoController.addListener(() {
-      final value = _cursoController.text.trim();
-      if (value == _filtroCurso) return;
       if (!mounted) return;
-      setState(() => _filtroCurso = value);
+      setState(() {});
     });
     _cargarDatos();
   }
@@ -89,14 +87,14 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
     super.dispose();
   }
 
-  String _nombreGrupo(GrupoCurricular g) {
-    final n = g.nombreCurso.trim();
-    return n.isEmpty ? g.toString() : n;
-  }
-
   bool _tieneCupo(GrupoCurricular g) => g.tieneCuposDisponibles;
 
-  String _labelTurnoCurricular(AppLocalizations l, TurnoCurricular t) {
+  String _nombreGrupo(GrupoCurricular g) {
+    final n = g.nombreCurso.trim();
+    return n.isEmpty ? 'Curso' : n;
+  }
+
+  String _labelTurno(AppLocalizations l, TurnoCurricular t) {
     switch (t) {
       case TurnoCurricular.manana:
         return l.commonShiftMorning;
@@ -107,178 +105,121 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
     }
   }
 
-  String _turnoUiForGrupo(AppLocalizations l, GrupoCurricular g) {
-    final base = _labelTurnoCurricular(l, g.turno).trim();
+  String _horario(GrupoCurricular g) {
     final hi = (g.horaInicio ?? '').trim();
     final hf = (g.horaFin ?? '').trim();
-    if (hi.isEmpty && hf.isEmpty) return base;
-    return '$base • ${hi.isNotEmpty ? hi : '--:--'}-${hf.isNotEmpty ? hf : '--:--'}';
+    if (hi.isEmpty && hf.isEmpty) return '';
+    return '${hi.isEmpty ? '--:--' : hi} - ${hf.isEmpty ? '--:--' : hf}';
   }
 
-  String _subtitleCurricular(AppLocalizations l, GrupoCurricular g) {
-    final turnoTxt = _turnoUiForGrupo(l, g);
-    final slotsTxt = l.alumnoSeleccionGrupoSlotsAvailable(g.cuposDisponibles);
-    if (_tieneCupo(g)) return '$turnoTxt\n$slotsTxt';
-    return '$turnoTxt\n$slotsTxt\n${l.alumnoSeleccionGrupoNoSlotsShort}';
-  }
-
-  void _snack(String msg) {
-    if (!mounted) return;
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return;
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  List<BloqueExtracurricular> _orderedBloques() =>
-      BloqueExtracurricularX.ordered();
-
-  ActividadExtracurricular? _findActividadById(String id) {
-    final x = id.trim();
-    if (x.isEmpty) return null;
-    for (final a in _actividadesExtra) {
-      if (a.id == x) return a;
-    }
-    return null;
-  }
-
-  GrupoCurricular? _findGrupoById(String id) {
-    for (final entry in _gruposPorTurno.entries) {
-      for (final g in entry.value) {
-        if (g.id == id) return g;
-      }
-    }
-    return null;
+  String _turnoHorario(AppLocalizations l, GrupoCurricular g) {
+    final turno = _labelTurno(l, g.turno);
+    final horario = _horario(g);
+    return horario.isEmpty ? turno : '$turno • $horario';
   }
 
   List<GrupoCurricular> get _gruposFiltrados {
-    final texto = _filtroCurso.toLowerCase();
-    final todos = <GrupoCurricular>[];
-    for (final lista in _gruposPorTurno.values) {
-      todos.addAll(lista);
-    }
-
-    final filtrados = todos.where((g) {
+    final query = _cursoController.text.trim().toLowerCase();
+    final filtered = _grupos.where((g) {
       if (_filtroTurno != null && g.turno != _filtroTurno) return false;
-      if (texto.isNotEmpty &&
-          !_nombreGrupo(g).toLowerCase().contains(texto)) {
+      if (_soloConVacantes && !_tieneCupo(g)) return false;
+      if (query.isNotEmpty &&
+          !_nombreGrupo(g).toLowerCase().contains(query)) {
         return false;
       }
       return true;
     }).toList();
 
-    filtrados.sort((a, b) {
-      final c = _nombreGrupo(a).toLowerCase().compareTo(
+    filtered.sort((a, b) {
+      if (_orden == _OrdenVacantes.vacantes) {
+        final c = b.cuposDisponibles.compareTo(a.cuposDisponibles);
+        if (c != 0) return c;
+      }
+
+      if (_orden == _OrdenVacantes.horario) {
+        final c = (a.horaInicio ?? '').compareTo(b.horaInicio ?? '');
+        if (c != 0) return c;
+      }
+
+      final curso = _nombreGrupo(a).toLowerCase().compareTo(
             _nombreGrupo(b).toLowerCase(),
           );
-      if (c != 0) return c;
-      final t = a.turno.index.compareTo(b.turno.index);
-      if (t != 0) return t;
+      if (curso != 0) return curso;
+
+      final turno = a.turno.index.compareTo(b.turno.index);
+      if (turno != 0) return turno;
+
+      if (_orden != _OrdenVacantes.horario) {
+        final hora = (a.horaInicio ?? '').compareTo(b.horaInicio ?? '');
+        if (hora != 0) return hora;
+      }
       return a.id.compareTo(b.id);
     });
-    return filtrados;
+
+    return filtered;
   }
 
-  void _limpiarFiltrosVacante() {
-    if (!mounted) return;
+  void _limpiarFiltros() {
     setState(() {
       _filtroTurno = null;
-      _filtroCurso = '';
       _cursoController.clear();
-      _curricularRadioValue = null;
+      _soloConVacantes = true;
+      _orden = _OrdenVacantes.curso;
       _grupoSeleccionado = null;
-    });
-  }
-
-  void _seleccionarCurricularRadio(String grupoId) {
-    final l = AppLocalizations.of(context);
-    final g = _findGrupoById(grupoId);
-    if (g == null) return;
-    if (!_tieneCupo(g)) {
-      _snack(l.alumnoSeleccionGrupoNoSlotsShort);
-      return;
-    }
-    setState(() {
-      _grupoSeleccionado = g;
-      _curricularRadioValue = grupoId;
+      _curricularRadioValue = null;
     });
   }
 
   Future<void> _cargarDatos() async {
     if (!mounted) return;
-    setState(() => _cargando = true);
-    final l = AppLocalizations.of(context);
+
+    setState(() {
+      _cargando = true;
+      _errorCarga = null;
+    });
+
+    if (_instId.isEmpty) {
+      setState(() {
+        _cargando = false;
+        _errorCarga = 'No se recibió una institución válida.';
+      });
+      return;
+    }
 
     try {
-      if (_owner.isEmpty || _perfilId.isEmpty) {
-        setState(() => _cargando = false);
-        _snack(l.commonInvalidSession);
-        return;
-      }
-      if (_instId.isEmpty) {
-        setState(() => _cargando = false);
-        _snack(l.alumnoSeleccionGrupoInstitutionLoadFailed);
-        return;
-      }
+      // Esta pantalla no necesita cargar el perfil del alumno ni volver a
+      // cargar la institución completa para mostrar las vacantes. La fuente
+      // canónica de cursos/aulas es cargarGruposCurricularesInstitucion.
+      final grupos = await ih
+          .cargarGruposCurricularesInstitucion(_instId)
+          .timeout(_loadTimeout);
 
-      dev.log('[ATENA][ALUMNO][SEL_GRUPO] cargarDatos instId=$_instId');
-      final institucion = await ih.cargarInstitucionPorId(_instId);
-      final alumno = await AlumnoService.instance.getPerfilAlumnoByPerfilId(
-        ownerAccountId: _owner,
-        perfilId: _perfilId,
+      if (!mounted) return;
+      setState(() {
+        _grupos = List<GrupoCurricular>.from(grupos);
+        _grupoSeleccionado = null;
+        _curricularRadioValue = null;
+        _cargando = false;
+      });
+
+      dev.log(
+        '[ATENA][ALUMNO][VACANTES] institución=$_instId grupos=${_grupos.length}',
       );
-      final gruposAll = await ih.cargarGruposCurricularesInstitucion(_instId);
-
-      final grupos = List<GrupoCurricular>.from(gruposAll)
-        ..sort((a, b) {
-          final c = _nombreGrupo(a).toLowerCase().compareTo(
-                _nombreGrupo(b).toLowerCase(),
-              );
-          if (c != 0) return c;
-          final h = (a.horaInicio ?? '').compareTo(b.horaInicio ?? '');
-          if (h != 0) return h;
-          return a.id.compareTo(b.id);
-        });
-
-      final porTurno = <TurnoCurricular, List<GrupoCurricular>>{
-        TurnoCurricular.manana: <GrupoCurricular>[],
-        TurnoCurricular.tarde: <GrupoCurricular>[],
-        TurnoCurricular.noche: <GrupoCurricular>[],
-      };
-      for (final g in grupos) {
-        porTurno[g.turno]!.add(g);
-      }
-
+    } catch (e, st) {
+      dev.log(
+        '[ATENA][ALUMNO][VACANTES] error cargando institución=$_instId',
+        error: e,
+        stackTrace: st,
+      );
       if (!mounted) return;
       setState(() {
-        _perfilInst = institucion;
-        _alumno = alumno;
-        _gruposPorTurno[TurnoCurricular.manana] = porTurno[TurnoCurricular.manana]!;
-        _gruposPorTurno[TurnoCurricular.tarde] = porTurno[TurnoCurricular.tarde]!;
-        _gruposPorTurno[TurnoCurricular.noche] = porTurno[TurnoCurricular.noche]!;
-        _filtroTurno = null;
-        _filtroCurso = '';
-        _cursoController.clear();
-        _curricularRadioValue = null;
+        _grupos = <GrupoCurricular>[];
         _grupoSeleccionado = null;
-        _cargando = false;
-      });
-
-      if (grupos.isEmpty) {
-        dev.log('[ATENA][ALUMNO][SEL_GRUPO] WARNING: institución sin grupos: $_instId');
-      }
-    } catch (e) {
-      dev.log('[ATENA][ALUMNO][SEL_GRUPO] ERROR cargarDatos: $e', error: e);
-      if (!mounted) return;
-      setState(() {
-        _perfilInst = null;
-        _alumno = null;
-        _gruposPorTurno.updateAll((_, __) => <GrupoCurricular>[]);
         _curricularRadioValue = null;
-        _grupoSeleccionado = null;
         _cargando = false;
+        _errorCarga =
+            'No pudimos cargar las vacantes de esta institución. Podés reintentar.';
       });
-      _snack(l.alumnoSeleccionGrupoLoadError('$e'));
     }
   }
 
@@ -296,23 +237,30 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
       _extraRadioValue = null;
       _actividadesExtra = <ActividadExtracurricular>[];
     });
-    final l = AppLocalizations.of(context);
+
     try {
-      final acts = await ih.cargarActividadesExtracurricularesPorInstitucion(_instId);
+      final acts = await ih
+          .cargarActividadesExtracurricularesPorInstitucion(_instId)
+          .timeout(_loadTimeout);
       if (!mounted) return;
       setState(() {
         _actividadesExtra = acts;
         _extraCargadoUnaVez = true;
         _cargandoExtra = false;
       });
-    } catch (e) {
+    } catch (e, st) {
+      dev.log(
+        '[ATENA][ALUMNO][VACANTES] error extracurricular',
+        error: e,
+        stackTrace: st,
+      );
       if (!mounted) return;
       setState(() {
         _extraCargadoUnaVez = true;
         _cargandoExtra = false;
         _actividadesExtra = <ActividadExtracurricular>[];
       });
-      _snack(l.alumnoSeleccionGrupoExtraLoadError('$e'));
+      _mostrarMensaje('No pudimos cargar las propuestas extracurriculares.');
     } finally {
       _extraCargandoAhora = false;
     }
@@ -327,89 +275,92 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
         .toList();
   }
 
-  Future<void> _irASolicitarVacanteCurricular() async {
-    final l = AppLocalizations.of(context);
-    final inst = _perfilInst;
-    final g = _grupoSeleccionado;
-    if (inst == null) {
-      _snack(l.commonInstitutionUnavailable);
+  void _mostrarMensaje(String message) {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    messenger?.hideCurrentSnackBar();
+    messenger?.showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _seleccionarGrupo(GrupoCurricular g) {
+    if (!_tieneCupo(g)) {
+      _mostrarMensaje('Esta opción no tiene vacantes disponibles.');
       return;
     }
+    setState(() {
+      _grupoSeleccionado = g;
+      _curricularRadioValue = g.id;
+    });
+  }
+
+  Future<void> _solicitarCurricular() async {
+    final g = _grupoSeleccionado;
     if (g == null) {
-      _snack(l.alumnoSeleccionGrupoPickCourseAndShift);
+      _mostrarMensaje('Seleccioná una vacante disponible para continuar.');
       return;
     }
     if (!_tieneCupo(g)) {
-      _snack(l.alumnoSeleccionGrupoNoSlotsShort);
+      _mostrarMensaje('La vacante seleccionada ya no está disponible.');
+      return;
+    }
+    if (_owner.isEmpty || _perfilId.isEmpty) {
+      _mostrarMensaje('La sesión del alumno no es válida.');
       return;
     }
 
-    final nombre = (widget.institucionNombre ?? '').trim().isNotEmpty
-        ? widget.institucionNombre!.trim()
-        : inst.nombre;
-    final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.maybeOf(context);
     try {
-      final ok = await navigator.push<bool>(
+      final ok = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (_) => AlumnoSolicitarVacantePage(
             alumnoDocumento: widget.alumnoDocumento,
             institucionId: _instId,
-            institucionNombre: nombre,
+            institucionNombre: _nombreInstitucion,
             actividadNombre: _nombreGrupo(g),
             esCurricular: true,
             aula: _nombreGrupo(g),
-            turno: _turnoUiForGrupo(l, g),
+            turno: _turnoHorario(AppLocalizations.of(context), g),
             grupoCurricularId: g.id,
             ownerAccountId: _owner,
             perfilId: _perfilId,
           ),
         ),
       );
+
       if (!mounted) return;
       if (ok == true) {
-        _snack(l.commonRequestCreated);
-        navigator.pop();
+        _mostrarMensaje(AppLocalizations.of(context).commonRequestCreated);
+        Navigator.of(context).pop();
       }
-    } catch (e) {
-      if (messenger != null) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l.alumnoSeleccionGrupoOpenSolicitudError('$e'))),
-        );
-      }
+    } catch (e, st) {
+      dev.log('[ATENA][ALUMNO][VACANTES] error abriendo solicitud',
+          error: e, stackTrace: st);
+      _mostrarMensaje('No pudimos abrir la solicitud de vacante.');
     }
   }
 
-  Future<void> _irASolicitarVacanteExtracurricular() async {
-    final l = AppLocalizations.of(context);
-    final inst = _perfilInst;
+  Future<void> _solicitarExtracurricular() async {
     final act = _actividadSeleccionada;
-    if (inst == null) {
-      _snack(l.commonInstitutionUnavailable);
-      return;
-    }
     if (act == null) {
-      _snack(l.alumnoSeleccionGrupoPickExtraActivity);
+      _mostrarMensaje('Seleccioná una propuesta disponible para continuar.');
       return;
     }
     if (!act.tieneCuposDisponibles) {
-      _snack(l.alumnoSeleccionGrupoExtraNoSlots);
+      _mostrarMensaje('Esta propuesta no tiene vacantes disponibles.');
+      return;
+    }
+    if (_owner.isEmpty || _perfilId.isEmpty) {
+      _mostrarMensaje('La sesión del alumno no es válida.');
       return;
     }
 
-    final nombre = (widget.institucionNombre ?? '').trim().isNotEmpty
-        ? widget.institucionNombre!.trim()
-        : inst.nombre;
-    final horario = (act.horario ?? '').trim();
-    final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.maybeOf(context);
     try {
-      final ok = await navigator.push<bool>(
+      final horario = (act.horario ?? '').trim();
+      final ok = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (_) => AlumnoSolicitarVacantePage(
             alumnoDocumento: widget.alumnoDocumento,
             institucionId: _instId,
-            institucionNombre: nombre,
+            institucionNombre: _nombreInstitucion,
             actividadNombre: act.nombre,
             esCurricular: false,
             aula: null,
@@ -420,43 +371,23 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
           ),
         ),
       );
+
       if (!mounted) return;
       if (ok == true) {
-        _snack(l.commonRequestCreated);
-        navigator.pop();
+        _mostrarMensaje(AppLocalizations.of(context).commonRequestCreated);
+        Navigator.of(context).pop();
       }
-    } catch (e) {
-      if (messenger != null) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l.alumnoSeleccionGrupoOpenSolicitudError('$e'))),
-        );
-      }
+    } catch (e, st) {
+      dev.log('[ATENA][ALUMNO][VACANTES] error abriendo solicitud extra',
+          error: e, stackTrace: st);
+      _mostrarMensaje('No pudimos abrir la solicitud.');
     }
-  }
-
-  Future<void> _accionSolicitar() async {
-    if (_modo == ModoSolicitudUI.curricular) {
-      return _irASolicitarVacanteCurricular();
-    }
-    return _irASolicitarVacanteExtracurricular();
-  }
-
-  bool get _puedeSolicitar {
-    if (_modo == ModoSolicitudUI.curricular) {
-      final g = _grupoSeleccionado;
-      return g != null && _tieneCupo(g);
-    }
-    final a = _actividadSeleccionada;
-    return a != null && a.tieneCuposDisponibles;
   }
 
   Widget _filtrosCurriculares() {
     final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final turnos = <TurnoCurricular>[...
-      TurnoCurricular.values,
-    ];
 
     return Card(
       margin: const EdgeInsets.fromLTRB(12, 8, 12, 10),
@@ -466,13 +397,34 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Filtros de vacante (opcionales)',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              'Encontrá la vacante que buscás',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
-              'Podés dejar todo en Todos para explorar todas las opciones de la institución.',
-              style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+              'La institución ya fue seleccionada en la búsqueda anterior. Acá podés explorar todas sus opciones y afinar la búsqueda sin perder las demás vacantes.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _cursoController,
+              decoration: InputDecoration(
+                labelText: 'Curso / grado / sala',
+                hintText: 'Ej.: 1.º, 2.º, 4.º A, sala de 5',
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _cursoController.text.trim().isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Limpiar búsqueda',
+                        onPressed: () => _cursoController.clear(),
+                        icon: const Icon(Icons.clear),
+                      ),
+              ),
             ),
             const SizedBox(height: 10),
             DropdownButtonFormField<TurnoCurricular?>(
@@ -486,42 +438,69 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
                   value: null,
                   child: Text('Todos los turnos'),
                 ),
-                for (final t in turnos)
+                for (final t in TurnoCurricular.values)
                   DropdownMenuItem<TurnoCurricular?>(
                     value: t,
-                    child: Text(_labelTurnoCurricular(l, t)),
+                    child: Text(_labelTurno(l, t)),
                   ),
               ],
               onChanged: (value) {
                 setState(() {
                   _filtroTurno = value;
-                  _curricularRadioValue = null;
                   _grupoSeleccionado = null;
+                  _curricularRadioValue = null;
                 });
               },
             ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _cursoController,
-              decoration: InputDecoration(
-                labelText: 'Curso / grado (opcional)',
-                hintText: 'Ej.: 1.º, 2.º, 4.º A',
-                border: const OutlineInputBorder(),
-                suffixIcon: _filtroCurso.isEmpty
-                    ? null
-                    : IconButton(
-                        tooltip: 'Limpiar',
-                        onPressed: _limpiarFiltrosVacante,
-                        icon: const Icon(Icons.clear),
-                      ),
-              ),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Mostrar solo vacantes disponibles'),
+              subtitle: const Text('Podés desactivarlo para consultar también cursos completos.'),
+              value: _soloConVacantes,
+              onChanged: (value) {
+                setState(() {
+                  _soloConVacantes = value;
+                  if (!value && _grupoSeleccionado != null) {
+                    _curricularRadioValue = null;
+                    _grupoSeleccionado = null;
+                  }
+                });
+              },
             ),
-            if (_filtroTurno != null || _filtroCurso.isNotEmpty) ...[
-              const SizedBox(height: 8),
+            DropdownButtonFormField<_OrdenVacantes>(
+              value: _orden,
+              decoration: const InputDecoration(
+                labelText: 'Ordenar resultados',
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: _OrdenVacantes.curso,
+                  child: Text('Curso → turno → horario'),
+                ),
+                DropdownMenuItem(
+                  value: _OrdenVacantes.vacantes,
+                  child: Text('Más vacantes disponibles primero'),
+                ),
+                DropdownMenuItem(
+                  value: _OrdenVacantes.horario,
+                  child: Text('Por horario'),
+                ),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _orden = value);
+              },
+            ),
+            if (_filtroTurno != null ||
+                _cursoController.text.trim().isNotEmpty ||
+                !_soloConVacantes ||
+                _orden != _OrdenVacantes.curso) ...[
+              const SizedBox(height: 6),
               TextButton.icon(
-                onPressed: _limpiarFiltrosVacante,
+                onPressed: _limpiarFiltros,
                 icon: const Icon(Icons.filter_alt_off),
-                label: const Text('Mostrar todas las opciones'),
+                label: const Text('Restablecer filtros'),
               ),
             ],
           ],
@@ -536,42 +515,85 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
     final cs = theme.colorScheme;
     final grupos = _gruposFiltrados;
 
-    if (_gruposPorTurno.values.every((e) => e.isEmpty)) {
-      return Expanded(child: Center(child: Text(l.alumnoSeleccionGrupoNoSlots)));
+    if (_grupos.isEmpty) {
+      return Expanded(
+        child: Center(
+          child: Text(
+            'Esta institución no tiene vacantes curriculares cargadas.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
 
     return Expanded(
       child: Column(
         children: [
           _filtrosCurriculares(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '${grupos.length} opción${grupos.length == 1 ? '' : 'es'} encontrada${grupos.length == 1 ? '' : 's'}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
           Expanded(
             child: grupos.isEmpty
                 ? Center(
-                    child: Text(
-                      'No hay grupos que coincidan con los filtros seleccionados.',
-                      textAlign: TextAlign.center,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        'No hay vacantes que coincidan con estos filtros. Probá ampliar la búsqueda para ver las demás opciones de la institución.',
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   )
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                     itemCount: grupos.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, i) {
-                      final g = grupos[i];
-                      final enabled = _tieneCupo(g);
+                    itemBuilder: (context, index) {
+                      final g = grupos[index];
+                      final disponible = _tieneCupo(g);
+                      final selected = _curricularRadioValue == g.id;
+                      final horario = _horario(g);
+                      final cupos =
+                          '${g.cuposDisponibles} ${g.cuposDisponibles == 1 ? 'vacante disponible' : 'vacantes disponibles'}';
+
                       return Card(
+                        clipBehavior: Clip.antiAlias,
                         child: RadioListTile<String>(
                           value: g.id,
                           groupValue: _curricularRadioValue,
-                          onChanged: enabled
-                              ? (v) {
-                                  if (v != null) _seleccionarCurricularRadio(v);
-                                }
+                          onChanged: disponible
+                              ? (_) => _seleccionarGrupo(g)
                               : null,
-                          title: Text(_nombreGrupo(g)),
-                          subtitle: Text(_subtitleCurricular(l, g)),
-                          secondary: enabled
-                              ? const Icon(Icons.school_outlined)
+                          title: Text(
+                            _nombreGrupo(g),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              [
+                                _labelTurno(l, g.turno),
+                                if (horario.isNotEmpty) horario,
+                                cupos,
+                              ].join(' • '),
+                            ),
+                          ),
+                          secondary: disponible
+                              ? Icon(
+                                  selected
+                                      ? Icons.check_circle
+                                      : Icons.school_outlined,
+                                )
                               : Icon(Icons.block, color: cs.error),
                         ),
                       );
@@ -584,13 +606,13 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
   }
 
   Widget _chipBloque(BloqueExtracurricular b) {
-    final sel = _bloqueSeleccionado == b;
+    final selected = _bloqueSeleccionado == b;
     return ChoiceChip(
       label: Text(b.label),
-      selected: sel,
+      selected: selected,
       onSelected: (_) {
         setState(() {
-          _bloqueSeleccionado = sel ? null : b;
+          _bloqueSeleccionado = selected ? null : b;
           _actividadSeleccionada = null;
           _extraRadioValue = null;
         });
@@ -601,9 +623,11 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
   Widget _uiExtracurricular() {
     final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
+
     if (_cargandoExtra) {
       return const Expanded(child: Center(child: CircularProgressIndicator()));
     }
+
     final filtered = _extraFiltradas;
     return Expanded(
       child: Column(
@@ -614,7 +638,9 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
               alignment: Alignment.centerLeft,
               child: Text(
                 l.alumnoSeleccionGrupoExtraFilterByBlock,
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
@@ -623,7 +649,7 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                for (final b in _orderedBloques()) ...[
+                for (final b in BloqueExtracurricularX.ordered()) ...[
                   _chipBloque(b),
                   const SizedBox(width: 8),
                 ],
@@ -643,22 +669,28 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                     itemCount: filtered.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, i) {
-                      final a = filtered[i];
+                    itemBuilder: (context, index) {
+                      final a = filtered[index];
                       final selected = _extraRadioValue == a.id;
                       final parts = <String>[];
                       final desc = (a.descripcion ?? '').trim();
                       if (desc.isNotEmpty) parts.add(desc);
-                      final hor = (a.horario ?? '').trim();
-                      if (hor.isNotEmpty) parts.add(l.commonScheduleLabel(hor));
-                      final edad = (a.edades ?? '').trim();
-                      if (edad.isNotEmpty) parts.add(l.commonAgeLabel(edad));
+                      final horario = (a.horario ?? '').trim();
+                      if (horario.isNotEmpty) {
+                        parts.add(l.commonScheduleLabel(horario));
+                      }
+                      final edades = (a.edades ?? '').trim();
+                      if (edades.isNotEmpty) {
+                        parts.add(l.commonAgeLabel(edades));
+                      }
                       if (a.cupoMaximo > 0) {
-                        parts.add(l.commonSlotsLabel('${a.cuposDisponibles}/${a.cupoMaximo}'));
+                        parts.add(l.commonSlotsLabel(
+                            '${a.cuposDisponibles}/${a.cupoMaximo}'));
                       }
                       final subtitle = parts.isEmpty
                           ? a.bloque.label
                           : '${a.bloque.label}\n${parts.join('\n')}';
+
                       return Card(
                         child: RadioListTile<String>(
                           value: a.id,
@@ -666,11 +698,9 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
                           onChanged: a.tieneCuposDisponibles
                               ? (v) {
                                   if (v == null) return;
-                                  final act = _findActividadById(v);
-                                  if (act == null || !act.tieneCuposDisponibles) return;
                                   setState(() {
                                     _extraRadioValue = v;
-                                    _actividadSeleccionada = act;
+                                    _actividadSeleccionada = a;
                                   });
                                 }
                               : null,
@@ -692,7 +722,8 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
   Widget _selectorModo() {
     final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final isCurr = _modo == ModoSolicitudUI.curricular;
+    final curricular = _modo == ModoSolicitudUI.curricular;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
       child: Row(
@@ -703,8 +734,9 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
                   ? null
                   : () => setState(() => _modo = ModoSolicitudUI.curricular),
               style: FilledButton.styleFrom(
-                backgroundColor: isCurr ? null : cs.surfaceContainerHighest,
-                foregroundColor: isCurr ? null : cs.onSurface,
+                backgroundColor:
+                    curricular ? null : cs.surfaceContainerHighest,
+                foregroundColor: curricular ? null : cs.onSurface,
               ),
               child: Text(l.alumnoSeleccionGrupoModeCurricular),
             ),
@@ -719,8 +751,9 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
                       await _cargarExtracurricularesSiHaceFalta();
                     },
               style: FilledButton.styleFrom(
-                backgroundColor: !isCurr ? null : cs.surfaceContainerHighest,
-                foregroundColor: !isCurr ? null : cs.onSurface,
+                backgroundColor:
+                    !curricular ? null : cs.surfaceContainerHighest,
+                foregroundColor: !curricular ? null : cs.onSurface,
               ),
               child: Text(l.alumnoSeleccionGrupoModeExtracurricular),
             ),
@@ -738,31 +771,57 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
 
     if (_cargando) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.alumnoSeleccionGrupoTitle(l.commonInstitution))),
+        appBar: AppBar(
+          title: Text(l.alumnoSeleccionGrupoTitle(_nombreInstitucion)),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_perfilInst == null) {
+    if (_errorCarga != null) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.alumnoSeleccionGrupoTitle(l.commonInstitution))),
-        body: Center(child: Text(l.alumnoSeleccionGrupoInstitutionLoadFailed)),
+        appBar: AppBar(
+          title: Text(l.alumnoSeleccionGrupoTitle(_nombreInstitucion)),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, size: 48),
+                const SizedBox(height: 12),
+                Text(_errorCarga!, textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: _cargarDatos,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
-    final instNombre = _perfilInst!.nombre;
+    final puedeSolicitar = _modo == ModoSolicitudUI.curricular
+        ? _grupoSeleccionado != null && _tieneCupo(_grupoSeleccionado!)
+        : _actividadSeleccionada != null &&
+            _actividadSeleccionada!.tieneCuposDisponibles;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(l.alumnoSeleccionGrupoTitle(instNombre)),
+        title: Text(l.alumnoSeleccionGrupoTitle(_nombreInstitucion)),
         actions: [
           IconButton(
-            onPressed: (_cargando || _cargandoExtra) ? null : _cargarDatos,
+            onPressed: _cargando || _cargandoExtra ? null : _cargarDatos,
             icon: const Icon(Icons.refresh),
             tooltip: l.commonRefresh,
           ),
           if (_modo == ModoSolicitudUI.extracurricular)
             IconButton(
-              onPressed: (_cargando || _cargandoExtra) ? null : _refrescarExtracurriculares,
+              onPressed: _cargandoExtra ? null : _refrescarExtracurriculares,
               icon: const Icon(Icons.refresh),
               tooltip: l.alumnoSeleccionGrupoExtraRefresh,
             ),
@@ -771,55 +830,44 @@ class _AlumnoSeleccionGrupoPageState extends State<AlumnoSeleccionGrupoPage> {
       body: Column(
         children: [
           _selectorModo(),
-          if ((_alumno?.nombre ?? '').trim().isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l.commonProfileLabel((_alumno?.nombre ?? '').trim()),
-                  style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                ),
-              ),
-            ),
-          if (_modo == ModoSolicitudUI.curricular) _uiCurricular() else _uiExtracurricular(),
           Padding(
-            padding: const EdgeInsets.all(12),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: _puedeSolicitar ? _accionSolicitar : null,
-                icon: const Icon(Icons.send),
-                label: Text(
-                  _modo == ModoSolicitudUI.curricular
-                      ? l.alumnoSeleccionGrupoCtaCurricular
-                      : l.alumnoSeleccionGrupoCtaExtracurricular,
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Explorá las opciones disponibles dentro de esta institución.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ),
           ),
-          if (_modo == ModoSolicitudUI.curricular && _grupoSeleccionado == null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-              child: Text(
-                'Explorá libremente las opciones. Los filtros son opcionales; para solicitar una vacante elegí una alternativa disponible.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-              ),
-            ),
-          if (_modo == ModoSolicitudUI.extracurricular &&
-              _actividadSeleccionada != null &&
-              !_actividadSeleccionada!.tieneCuposDisponibles)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-              child: Text(
-                l.alumnoSeleccionGrupoExtraNoSlots,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: cs.error,
-                  fontWeight: FontWeight.w700,
+          if (_modo == ModoSolicitudUI.curricular)
+            _uiCurricular()
+          else
+            _uiExtracurricular(),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: puedeSolicitar
+                      ? (_modo == ModoSolicitudUI.curricular
+                          ? _solicitarCurricular
+                          : _solicitarExtracurricular)
+                      : null,
+                  icon: const Icon(Icons.send),
+                  label: Text(
+                    _modo == ModoSolicitudUI.curricular
+                        ? l.alumnoSeleccionGrupoCtaCurricular
+                        : l.alumnoSeleccionGrupoCtaExtracurricular,
+                  ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
