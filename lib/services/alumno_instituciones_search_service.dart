@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/extracurriculares/bloque_extracurricular.dart';
 import '../models/extracurriculares/actividad_extracurricular.dart';
+import '../models/instituciones/grupo_curricular.dart';
 import '../models/instituciones/instituciones_integrado.dart';
 import 'instituciones_helpers.dart' as ih;
 
@@ -19,6 +20,7 @@ class AlumnoInstitucionSearchFilters {
   final String? provincia;
   final String? ciudad;
   final NivelCurricular? nivel;
+  final TurnoCurricular? turno;
   final TipoInstitucion? tipoInstitucion;
   final ModalidadCursado? modalidadCursado;
   final Set<BloqueExtracurricular> bloques;
@@ -37,6 +39,7 @@ class AlumnoInstitucionSearchFilters {
     this.provincia,
     this.ciudad,
     this.nivel,
+    this.turno,
     this.tipoInstitucion,
     this.modalidadCursado,
     this.bloques = const <BloqueExtracurricular>{},
@@ -61,6 +64,10 @@ class AlumnoInstitucionSearchResult {
 }
 
 class AlumnoInstitucionesSearchService {
+  /// Última intención de búsqueda confirmada por el alumno.
+  /// Se utiliza para conservar el contexto al pasar de instituciones a vacantes.
+  static AlumnoInstitucionSearchFilters? ultimaBusqueda;
+
   static String _norm(String value) => value.trim().toLowerCase();
 
   static double? _toDouble(dynamic value) {
@@ -153,6 +160,22 @@ class AlumnoInstitucionesSearchService {
     return inst.gruposCurriculares.any((g) => g.tieneCuposDisponibles);
   }
 
+  static bool _tieneVacantesCurricularesConFiltro(
+    Institucion inst,
+    AlumnoInstitucionSearchFilters filters,
+  ) {
+    return inst.gruposCurriculares.any((g) {
+      if (!g.tieneCuposDisponibles) return false;
+      if (filters.nivel != null) {
+        final nombre = _norm(g.nombreCurso);
+        final nivel = _norm(filters.nivel!.name);
+        if (!nombre.contains(nivel)) return false;
+      }
+      if (filters.turno != null && g.turno != filters.turno) return false;
+      return true;
+    });
+  }
+
   static List<ActividadExtracurricular> _actividadesActivas(Institucion inst) {
     return inst.actividadesExtracurriculares.where((a) => a.activa).toList();
   }
@@ -161,12 +184,6 @@ class AlumnoInstitucionesSearchService {
     return _actividadesActivas(inst).any((a) => a.tieneCuposDisponibles);
   }
 
-  /// Devuelve el catálogo de instituciones combinando el índice de compatibilidad
-  /// con el almacenamiento canónico del dominio Institucion.
-  ///
-  /// Algunas instituciones válidas pueden existir en `atena_institucion_by_id_*`
-  /// sin haber sido incorporadas todavía a `instituciones_registradas`. El buscador
-  /// no debe perderlas por depender exclusivamente de ese índice auxiliar.
   static Future<List<Institucion>> _cargarCatalogoInstituciones() async {
     final result = <Institucion>[];
     final seen = <String>{};
@@ -183,9 +200,7 @@ class AlumnoInstitucionesSearchService {
       for (final inst in indexed) {
         add(inst);
       }
-    } catch (_) {
-      // El almacenamiento canónico se intenta igualmente a continuación.
-    }
+    } catch (_) {}
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -198,13 +213,9 @@ class AlumnoInstitucionesSearchService {
 
         try {
           add(Institucion.fromJson(raw));
-        } catch (_) {
-          // Una entrada corrupta/legacy no debe impedir las demás búsquedas.
-        }
+        } catch (_) {}
       }
-    } catch (_) {
-      // Si no se puede leer SharedPreferences, se conserva el índice disponible.
-    }
+    } catch (_) {}
 
     return result;
   }
@@ -212,6 +223,8 @@ class AlumnoInstitucionesSearchService {
   static Future<List<AlumnoInstitucionSearchResult>> search(
     AlumnoInstitucionSearchFilters filters,
   ) async {
+    ultimaBusqueda = filters;
+
     final raw = await _cargarCatalogoInstituciones();
     final results = <AlumnoInstitucionSearchResult>[];
 
@@ -225,9 +238,7 @@ class AlumnoInstitucionesSearchService {
           conGrupos,
           migrateIfLegacy: false,
         );
-      } catch (_) {
-        // Si la hidratación falla, se conserva la institución base.
-      }
+      } catch (_) {}
 
       if (filters.scope == AlumnoBusquedaScope.curricular && !inst.curricular) {
         continue;
@@ -270,7 +281,10 @@ class AlumnoInstitucionesSearchService {
       if (filters.scope == AlumnoBusquedaScope.curricular) {
         final niveles = _nivelesHabilitados(inst);
         if (filters.nivel != null && !niveles.contains(filters.nivel)) continue;
-        if (filters.soloConVacantes && !_tieneVacantesCurriculares(inst)) continue;
+        if (filters.soloConVacantes &&
+            !_tieneVacantesCurricularesConFiltro(inst, filters)) {
+          continue;
+        }
       } else {
         var actividades = _actividadesActivas(inst);
 
@@ -323,7 +337,6 @@ class AlumnoInstitucionesSearchService {
       } else if (filters.maxDistanceKm != null &&
           filters.userLat != null &&
           filters.userLng != null) {
-        // Se pidió radio, pero esta institución todavía no tiene coordenadas.
         continue;
       }
 
