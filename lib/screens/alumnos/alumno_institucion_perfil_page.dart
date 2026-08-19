@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/extracurriculares/bloque_extracurricular.dart';
 import '../../models/instituciones/instituciones_integrado.dart';
 
 /// Perfil institucional de consulta para alumnos/interesados.
