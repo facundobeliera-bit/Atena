@@ -26,6 +26,11 @@
 // - Dark mode: alpha/contraste ajustado SIN withOpacity deprecated (usa withValues).
 // - Stack expand + Positioned.fill para evitar fondos “cortados”.
 //
+// ARQUITECTURA CANÓNICA DE IDENTIDAD:
+//   * SessionService.role == institucion
+//   * SessionService.userId == institucionPerfilId
+//   * SessionService.institucionOwnerAccountId == ownerAccountId
+//   * CuentaService NO decide ni adopta la identidad institucional.
 
 import 'dart:async';
 
@@ -39,10 +44,11 @@ import '../auth/institucion_login_page.dart';
 import '../../models/instituciones/instituciones_integrado.dart';
 import '../../services/instituciones_helpers.dart';
 
-// ✅ Sesión canónica (legacy/compat CUENTA)
+// ✅ CuentaService: operaciones heredadas de cuenta/perfil y logout.
+// NO se utiliza para resolver la identidad institucional.
 import '../../services/cuenta_service.dart';
 
-// ✅ FIX: sesión v2 (institución / cuenta)
+// ✅ Sesión canónica (institución / cuenta)
 import '../../services/session_service.dart';
 
 // ✅ Assets centralizados
@@ -111,23 +117,6 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
       v.trim().replaceAll(RegExp(r'\s+'), '');
 
   static String _safeStr(Object? v) => v == null ? '' : v.toString();
-
-  Future<bool> _tryApplyVoidOrFuture(
-    Function f, {
-    List<dynamic> positional = const [],
-    Map<Symbol, dynamic> named = const {},
-    Duration timeout = const Duration(seconds: 2),
-  }) async {
-    try {
-      final res = Function.apply(f, positional, named);
-      if (res is Future) {
-        await res.timeout(timeout);
-      }
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
 
   Future<T?> _tryApplyReturn<T>(
     Function f, {
@@ -326,54 +315,6 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
     return null;
   }
 
-  Future<void> _ensureCuentaSesionBestEffort(String ownerId) async {
-    final o = _normIdKeyLocal(ownerId);
-    if (o.isEmpty) return;
-
-    final fn = (CuentaService.setSesionCuentaId as Function);
-
-    final ok1 = await _tryApplyVoidOrFuture(
-      fn,
-      positional: [o],
-      named: const {#recordarme: true},
-      timeout: const Duration(seconds: 2),
-    );
-    if (ok1) return;
-
-    final ok2 = await _tryApplyVoidOrFuture(
-      fn,
-      named: {#cuentaId: o, #recordarme: true},
-      timeout: const Duration(seconds: 2),
-    );
-    if (ok2) return;
-
-    await _tryApplyVoidOrFuture(
-      fn,
-      named: {#ownerAccountId: o, #recordarme: true},
-      timeout: const Duration(seconds: 2),
-    );
-  }
-
-  Future<void> _ensureInstOwnerBestEffort(String ownerId) async {
-    final o = _normIdKeyLocal(ownerId);
-    if (o.isEmpty) return;
-
-    final fn = (SessionService.setInstitucionOwnerAccountId as Function);
-
-    final ok1 = await _tryApplyVoidOrFuture(
-      fn,
-      positional: [o],
-      timeout: const Duration(seconds: 2),
-    );
-    if (ok1) return;
-
-    await _tryApplyVoidOrFuture(
-      fn,
-      named: {#ownerAccountId: o},
-      timeout: const Duration(seconds: 2),
-    );
-  }
-
   Future<bool> _sessionMatchesInstitutionPerfilSafe() async {
     final expected = _normIdKeyLocal(_instPerfilId);
     if (expected.isEmpty) return false;
@@ -384,89 +325,39 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
       );
       if (s == null) return false;
       if (s.role != SessionRole.institucion) return false;
+
       final userId = _normIdKeyLocal(_safeStr(s.userId));
+
       return userId.isNotEmpty && userId == expected;
     } catch (_) {
       return false;
     }
   }
 
-  Future<String?> _resolveSesionOwnerIdSafe({
-    required String expectedInstPerfilId,
-    required String fallbackOwnerIdFromWidget,
-  }) async {
-    final expected = _normIdKeyLocal(expectedInstPerfilId);
-    final fallbackOwner = _normIdKeyLocal(fallbackOwnerIdFromWidget);
-
+  Future<String?> _resolveSesionOwnerIdSafe() async {
     try {
       final s = await SessionService.getSession().timeout(
         const Duration(seconds: 3),
       );
 
-      if (s != null && s.role == SessionRole.institucion) {
-        String? instOwner;
+      if (s == null) return null;
+      if (s.role != SessionRole.institucion) return null;
 
-        try {
-          final fn =
-              (SessionService.getInstitucionOwnerAccountIdLogueado as Function);
-          final v = await _tryApplyReturn<Object?>(
-            fn,
-            timeout: const Duration(seconds: 3),
-          );
-          instOwner = _safeStr(v);
-        } catch (_) {
-          instOwner = null;
-        }
+      final expectedPerfil = _normIdKeyLocal(_instPerfilId);
+      final userId = _normIdKeyLocal(_safeStr(s.userId));
 
-        final v = _normIdKeyLocal(_safeStr(instOwner));
-        final userId = _normIdKeyLocal(_safeStr(s.userId));
+      if (expectedPerfil.isEmpty || userId.isEmpty) return null;
+      if (userId != expectedPerfil) return null;
 
-        if (v.isNotEmpty && fallbackOwner.isNotEmpty && v == fallbackOwner) {
-          return v;
-        }
+      final owner = await SessionService.getInstitucionOwnerAccountIdLogueado()
+          .timeout(const Duration(seconds: 3));
 
-        final isSospechoso =
-            v.isNotEmpty &&
-            expected.isNotEmpty &&
-            v == expected &&
-            fallbackOwner.isNotEmpty &&
-            expected != fallbackOwner;
+      final ownerN = _normIdKeyLocal(_safeStr(owner));
 
-        if (v.isNotEmpty && !isSospechoso) {
-          return v;
-        }
-
-        if (fallbackOwner.isNotEmpty &&
-            userId.isNotEmpty &&
-            expected.isNotEmpty &&
-            userId == expected) {
-          return fallbackOwner;
-        }
-      }
-    } catch (_) {}
-
-    try {
-      final id = await CuentaService.getSesionCuentaId().timeout(
-        const Duration(seconds: 4),
-      );
-      final v = _normIdKeyLocal(_safeStr(id));
-      if (v.isNotEmpty) return v;
-    } catch (_) {}
-
-    if (fallbackOwner.isNotEmpty) {
-      await _ensureCuentaSesionBestEffort(fallbackOwner);
-      try {
-        final id = await CuentaService.getSesionCuentaId().timeout(
-          const Duration(seconds: 2),
-        );
-        final v = _normIdKeyLocal(_safeStr(id));
-        return v.isEmpty ? null : v;
-      } catch (_) {
-        return null;
-      }
+      return ownerN.isEmpty ? null : ownerN;
+    } catch (_) {
+      return null;
     }
-
-    return null;
   }
 
   Future<void> _irAHomeHardReset() async {
@@ -531,29 +422,6 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
     return false;
   }
 
-  Future<bool> _maybeAdoptSesionOwner({required String sesOwner}) async {
-    final s = _normIdKeyLocal(sesOwner);
-    if (s.isEmpty) return false;
-
-    if (s == _ownerId) return true;
-
-    final ok = await _ownerTienePerfilSafe(
-      ownerAccountId: s,
-      perfilId: _instPerfilId,
-    );
-    if (!ok) return false;
-
-    debugPrint(
-      '[ATENA][INST-MENU][BOOT] adopt sesOwner=$s (was owner=$_ownerId) for perfil=$_instPerfilId',
-    );
-    _ownerId = s;
-
-    await _ensureCuentaSesionBestEffort(_ownerId);
-    await _ensureInstOwnerBestEffort(_ownerId);
-
-    return true;
-  }
-
   Future<void> _bootstrap() async {
     final myToken = ++_bootToken;
 
@@ -583,43 +451,51 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
         return;
       }
 
-      final sesOwner = await _resolveSesionOwnerIdSafe(
-        expectedInstPerfilId: _instPerfilId,
-        fallbackOwnerIdFromWidget: _ownerId,
+      // La identidad institucional es estrictamente canónica:
+      //   SessionService.role == institucion
+      //   SessionService.userId == institucionPerfilId
+      //   SessionService.institucionOwnerAccountId == ownerAccountId
+      final session = await SessionService.getSession().timeout(
+        const Duration(seconds: 3),
       );
+      if (!stillValid()) return;
+
+      if (session == null) {
+        _setFatal(_FatalReason.noSession);
+        return;
+      }
+
+      if (session.role != SessionRole.institucion) {
+        _setFatal(_FatalReason.sessionMismatch);
+        return;
+      }
+
+      final sessionPerfilId = _normIdKeyLocal(_safeStr(session.userId));
+
+      if (sessionPerfilId.isEmpty || sessionPerfilId != _instPerfilId) {
+        _setFatal(_FatalReason.sessionMismatch);
+        return;
+      }
+
+      final sesOwner = await _resolveSesionOwnerIdSafe();
       if (!stillValid()) return;
 
       final sesOwnerN = _normIdKeyLocal(_safeStr(sesOwner));
 
       if (sesOwnerN.isEmpty) {
-        final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-        if (!stillValid()) return;
+        _setFatal(_FatalReason.sessionMismatch);
+        return;
+      }
 
-        if (!okBySession) {
-          if (stillValid()) _setFatal(_FatalReason.noSession);
-          return;
-        }
-        await _ensureInstOwnerBestEffort(_ownerId);
-      } else {
-        if (sesOwnerN != _ownerId) {
-          final adopted = await _maybeAdoptSesionOwner(sesOwner: sesOwnerN);
-          if (!stillValid()) return;
-
-          if (!adopted) {
-            final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-            if (!stillValid()) return;
-            if (!okBySession) {
-              if (stillValid()) _setFatal(_FatalReason.sessionMismatch);
-              return;
-            }
-
-            _ownerId = sesOwnerN;
-            await _ensureCuentaSesionBestEffort(_ownerId);
-            await _ensureInstOwnerBestEffort(_ownerId);
-          }
-        } else {
-          await _ensureInstOwnerBestEffort(_ownerId);
-        }
+      // El owner de la sesión NO se adopta ni se reemplaza.
+      // Debe coincidir exactamente con el owner recibido por navegación.
+      if (sesOwnerN != _ownerId) {
+        debugPrint(
+          '[ATENA][INST-MENU][BOOT] owner mismatch '
+          'session=$sesOwnerN widget=$_ownerId perfil=$_instPerfilId',
+        );
+        _setFatal(_FatalReason.sessionMismatch);
+        return;
       }
 
       bool pertenece = false;
@@ -633,6 +509,8 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
       }
       if (!stillValid()) return;
 
+      // La sesión institucional válida es suficiente aunque la relación
+      // owner -> perfil no pueda resolverse por una migración/persistencia.
       if (!pertenece) {
         final okBySession = await _sessionMatchesInstitutionPerfilSafe();
         if (!stillValid()) return;
@@ -808,42 +686,33 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
     if (!mounted) return false;
     final l10n = AppLocalizations.of(context);
 
-    final sesOwner = await _resolveSesionOwnerIdSafe(
-      expectedInstPerfilId: _instPerfilId,
-      fallbackOwnerIdFromWidget: _ownerId,
+    final session = await SessionService.getSession().timeout(
+      const Duration(seconds: 3),
     );
     if (!mounted) return false;
 
-    final sesOwnerN = _normIdKeyLocal(_safeStr(sesOwner));
+    if (session == null || session.role != SessionRole.institucion) {
+      _toast(l10n.noActiveSessionGoBackToLogin);
+      return false;
+    }
 
-    if (sesOwnerN.isEmpty) {
-      final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-      if (!mounted) return false;
-      if (!okBySession) {
-        _toast(l10n.noActiveSessionGoBackToLogin);
-        return false;
-      }
-      await _ensureInstOwnerBestEffort(_ownerId);
-    } else {
-      if (sesOwnerN != _ownerId) {
-        final adopted = await _maybeAdoptSesionOwner(sesOwner: sesOwnerN);
-        if (!mounted) return false;
+    final sessionPerfilId = _normIdKeyLocal(_safeStr(session.userId));
+    if (sessionPerfilId.isEmpty || sessionPerfilId != _instPerfilId) {
+      _toast(l10n.invalidSessionForThisAccount);
+      return false;
+    }
 
-        if (!adopted) {
-          final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-          if (!mounted) return false;
-          if (!okBySession) {
-            _toast(l10n.invalidSessionForThisAccount);
-            return false;
-          }
+    final sessionOwner =
+        await SessionService.getInstitucionOwnerAccountIdLogueado().timeout(
+          const Duration(seconds: 3),
+        );
+    if (!mounted) return false;
 
-          _ownerId = sesOwnerN;
-          await _ensureCuentaSesionBestEffort(_ownerId);
-          await _ensureInstOwnerBestEffort(_ownerId);
-        }
-      } else {
-        await _ensureInstOwnerBestEffort(_ownerId);
-      }
+    final sessionOwnerN = _normIdKeyLocal(_safeStr(sessionOwner));
+
+    if (sessionOwnerN.isEmpty || sessionOwnerN != _ownerId) {
+      _toast(l10n.invalidSessionForThisAccount);
+      return false;
     }
 
     bool pertenece = false;
@@ -857,8 +726,7 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
     }
 
     if (!pertenece) {
-      final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-      if (!mounted) return false;
+      final okBySession = sessionPerfilId == _instPerfilId;
       if (okBySession) pertenece = true;
     }
 
@@ -951,7 +819,6 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
       institucionNombre: _nombreUI.trim().isEmpty ? inst.nombre : _nombreUI,
       institucion: inst,
     );
-    // ignore: dead_code
   }
 
   Future<void> _openAdmin() async {
