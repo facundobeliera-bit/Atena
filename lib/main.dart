@@ -34,8 +34,6 @@ import 'routes/atena_deeplink.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Persistencia local: preparar/reconstruir índices antes del primer consumo
-  // de datos de la UI. Es best-effort y no impide iniciar Atena ante un fallo.
   try {
     await AtenaDataBootstrapService.instance.initialize();
   } catch (_) {}
@@ -77,7 +75,6 @@ class AtenaApp extends StatefulWidget {
 class _AtenaAppState extends State<AtenaApp> {
   Locale? _locale;
   ThemeMode _themeMode = ThemeMode.system;
-
   String? _initialDeeplink;
 
   static const Color _seedLight = Color(0xFF3B82F6);
@@ -141,9 +138,7 @@ class _AtenaAppState extends State<AtenaApp> {
 
   Route<dynamic> _safeRouteForName(String name) {
     final n = name.trim();
-    if (n.isEmpty || n == '/') {
-      return _routeBootRoot();
-    }
+    if (n.isEmpty || n == '/') return _routeBootRoot();
     return AtenaRouter.onGenerateRoute(RouteSettings(name: n));
   }
 
@@ -179,11 +174,9 @@ class _AtenaAppState extends State<AtenaApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ATENA',
-
       themeMode: _themeMode,
       theme: _buildTheme(brightness: Brightness.light, seed: _seedLight),
       darkTheme: _buildTheme(brightness: Brightness.dark, seed: _seedDark),
-
       locale: _locale,
       supportedLocales: _supportedLocales,
       localizationsDelegates: const [
@@ -192,9 +185,6 @@ class _AtenaAppState extends State<AtenaApp> {
         GlobalCupertinoLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
-
-      // Deeplink “duro” (web): si la URL es /calendario o /documentos,
-      // respetamos Router. Si no hay deeplink, arrancamos en BootGate.
       onGenerateInitialRoutes: (initialRoute) {
         final dl = (_initialDeeplink ?? '').trim();
         if (dl.isNotEmpty && dl != '/') {
@@ -202,18 +192,12 @@ class _AtenaAppState extends State<AtenaApp> {
         }
         return <Route<dynamic>>[_routeBootRoot()];
       },
-
       onGenerateRoute: AtenaRouter.onGenerateRoute,
       onUnknownRoute: AtenaRouter.onUnknownRoute,
     );
   }
 }
 
-// =====================================================
-// BOOT GATE (CANÓNICO)
-// - Decide pantalla inicial según sesión + rol.
-// - Institución NUNCA entra a CuentaHomePage.
-// =====================================================
 class _AtenaBootGate extends StatefulWidget {
   final Locale? locale;
   final ThemeMode themeMode;
@@ -240,7 +224,6 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // ignore: discarded_futures
       _run();
     });
   }
@@ -252,7 +235,11 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
     final nav = Navigator.of(context);
 
     try {
-      // Session v2 (userId + role) – fuente real para perfil en modo institución.
+      // IMPORTANTE: una sesión marcada como temporal es válida durante la
+      // ejecución actual, pero NO debe sobrevivir al reinicio de la app.
+      // Se limpia antes de intentar rehidratar el routing.
+      await SessionService.clearTempIfNeeded();
+
       SessionData? session;
       try {
         session = await SessionService.getSession();
@@ -279,30 +266,28 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
       final role = session.role;
       final userId = _s(session.userId);
 
-      // Sesión canónica de cuenta (CuentaService: sesion_cuenta).
-      String? cuentaId;
-      try {
-        cuentaId = await CuentaService.getSesionCuentaId();
-      } catch (_) {
-        cuentaId = null;
-      }
-      var ownerAccountId = _s(cuentaId);
+      // La sesión v2 es la fuente de verdad para el routing.
+      // CuentaService queda como compatibilidad para resolver owner institucional.
+      var ownerAccountId = '';
 
       if (role == SessionRole.institucion) {
-        // Institución:
-        // - institucionPerfilId = SessionService.userId
-        // - ownerAccountId = sesion_cuenta (si falta, instOwner best-effort)
+        try {
+          ownerAccountId = _s(
+            await SessionService.getInstitucionOwnerAccountIdLogueado(),
+          );
+        } catch (_) {
+          ownerAccountId = '';
+        }
+
+        // Compatibilidad con sesiones institucionales históricas.
         if (ownerAccountId.isEmpty) {
           try {
-            ownerAccountId = _s(
-              await SessionService.getInstitucionOwnerAccountIdLogueado(),
-            );
+            ownerAccountId = _s(await CuentaService.getSesionCuentaId());
           } catch (_) {
             ownerAccountId = '';
           }
         }
 
-        // Sin datos mínimos, no inventamos: volvemos a Landing (login).
         if (!mounted) return;
         if (userId.isEmpty || ownerAccountId.isEmpty) {
           nav.pushReplacement(
@@ -331,8 +316,8 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
         return;
       }
 
-      // Cuenta: si no hay ownerAccountId, no podemos operar como cuenta.
-      if (ownerAccountId.isEmpty) {
+      // Cuenta: userId de SessionService es el ownerAccountId canónico.
+      if (userId.isEmpty) {
         if (!mounted) return;
         nav.pushReplacement(
           MaterialPageRoute(
@@ -351,8 +336,10 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
       if (!mounted) return;
       nav.pushReplacement(
         MaterialPageRoute(
-          builder: (_) =>
-              CuentaHomePage(cuentaId: ownerAccountId, initialDeeplink: null),
+          builder: (_) => CuentaHomePage(
+            cuentaId: userId,
+            initialDeeplink: null,
+          ),
         ),
       );
     } catch (_) {
