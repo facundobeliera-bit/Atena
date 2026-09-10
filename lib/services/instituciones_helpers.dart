@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────
 // HELPERS GLOBALES – INSTITUCIONES (ATENA)
-// Fuente de verdad: Institucion.gruposCurriculares (CANÓNICO)
+// Fuente operativa curricular: grupos_<id>; histórico solo cuando no existe.
 // Legacy: key dedicada de grupos curriculares se usa solo para migración.
 // Archivo: lib/services/instituciones_helpers.dart
 //
@@ -66,6 +66,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/foundation.dart' show debugPrint;
 
@@ -385,75 +387,6 @@ Future<void> borrarInstitucionRegistradaPorId(String institucionId) async {
 /// LEGACY: GRUPOS CURRICULARES EN KEY DEDICADA (solo migración)
 /// ===============================
 
-Future<List<GrupoCurricular>> _cargarGruposCurricularesLegacyKey(
-  String institucionId,
-) async {
-  final dataId = _normInstitucionId(institucionId);
-  if (dataId.isEmpty) return <GrupoCurricular>[];
-
-  // Probamos ambas keys (canónica/legacy) derivadas del RAW input
-  final kids = _keyVariantsFromRaw(institucionId);
-  for (final kid in kids) {
-    final raw = await _withTimeout<String?>(
-      StorageService.instance.getString(kGruposCurricularesInstitucion(kid)),
-      timeout: _kIOTimeoutHeavy,
-      fallback: null,
-      tag: 'getString grupos_curriculares_',
-    );
-
-    if (raw == null || raw.trim().isEmpty) {
-      final rawLegacy = await _withTimeout<String?>(
-        StorageService.instance.getString(
-          kGruposCurricularesInstitucionLegacy(kid),
-        ),
-        timeout: _kIOTimeoutHeavy,
-        fallback: null,
-        tag: 'getString grupos_curriculares_ legacy',
-      );
-      if (rawLegacy == null || rawLegacy.trim().isEmpty) continue;
-
-      try {
-        final decoded = jsonDecode(rawLegacy);
-        if (decoded is! List) continue;
-
-        final out = decoded
-            .whereType<Map>()
-            .map((e) => GrupoCurricular.fromMap(Map<String, dynamic>.from(e)))
-            .toList();
-
-        out.sort(
-          (a, b) => a.nombreCurso.toLowerCase().compareTo(
-            b.nombreCurso.toLowerCase(),
-          ),
-        );
-        return out;
-      } catch (_) {
-        continue;
-      }
-    }
-
-    try {
-      final decoded = jsonDecode(raw);
-      if (decoded is! List) continue;
-
-      final out = decoded
-          .whereType<Map>()
-          .map((e) => GrupoCurricular.fromMap(Map<String, dynamic>.from(e)))
-          .toList();
-
-      out.sort(
-        (a, b) =>
-            a.nombreCurso.toLowerCase().compareTo(b.nombreCurso.toLowerCase()),
-      );
-      return out;
-    } catch (_) {
-      continue;
-    }
-  }
-
-  return <GrupoCurricular>[];
-}
-
 Future<void> _vaciarLegacyKeyGruposCurriculares(String institucionId) async {
   final dataId = _normInstitucionId(institucionId);
   if (dataId.isEmpty) return;
@@ -478,112 +411,171 @@ Future<void> _vaciarLegacyKeyGruposCurriculares(String institucionId) async {
   }
 }
 
-/// ✅ Hidratación “read-only” por defecto.
+/// Representación persistida sin hidratar, migrar ni poblar cachés.
+/// Precedencia estable: caché por ID > dominio > catálogo registrado.
+Future<Institucion?> _cargarInstitucionHistorica(String id) async {
+  final prefs = await SharedPreferences.getInstance().timeout(_kIOTimeoutHeavy);
+  for (final key in {
+    kPerfilInstitucionPorId(id),
+    kPerfilInstitucionPorIdLegacy(id),
+  }) {
+    final raw = prefs.getString(key);
+    if (raw == null || raw.trim().isEmpty) continue;
+    final candidate = Institucion.fromJson(raw);
+    if (_normKey(candidate.id) == _normKey(id)) return candidate;
+  }
+  final domain = await InstitucionService.getInstitucionById(id);
+  if (domain != null && _normKey(domain.id) == _normKey(id)) return domain;
+  for (final candidate in await cargarInstitucionesRegistradas()) {
+    if (_normKey(candidate.id) == _normKey(id)) return candidate;
+  }
+  return null;
+}
+
+/// Resolución compartida, exclusivamente de lectura.
+/// Precedencia: Gestión (incluido []) > Institucion.gruposCurriculares
+/// > clave curricular histórica. Nunca combinar listas ni generar IDs.
+/// Conserva los objetos de Gestión para no perder estado/aula al editarlos.
+Future<({List<GrupoInstitucional> gestion, List<GrupoCurricular> curricular})>
+_resolverGruposCurriculares(String id, {Institucion? historica}) async {
+  if (_normInstitucionId(id).isEmpty) {
+    return (gestion: <GrupoInstitucional>[], curricular: <GrupoCurricular>[]);
+  }
+  // Lectura estricta: StorageService.getString puede convertir errores en null.
+  // Aquí un error de lectura/tipo debe propagarse, nunca habilitar fallback.
+  final prefs = await SharedPreferences.getInstance().timeout(_kIOTimeoutHeavy);
+  for (final key in {kGruposInstitucion(id), kGruposInstitucionLegacy(id)}) {
+    if (!prefs.containsKey(key)) continue;
+    final raw = prefs.get(key);
+    if (raw is! String) {
+      throw FormatException('Grupos vigentes inválidos: $key');
+    }
+    final decoded = jsonDecode(raw);
+    if (decoded is! List) throw FormatException('Se esperaba una lista: $key');
+    final gestion = <GrupoInstitucional>[];
+    final curricular = <GrupoCurricular>[];
+    final ids = <String>{};
+    for (final item in decoded) {
+      if (item is! Map) throw FormatException('Grupo inválido: $key');
+      final m = Map<String, dynamic>.from(item);
+      final gid = m['id'];
+      final nombre = m['nombreGrupo'];
+      final owner = m['institucionId'];
+      if (gid is! String ||
+          gid.trim().isEmpty ||
+          !ids.add(gid) ||
+          nombre is! String ||
+          nombre.trim().isEmpty ||
+          owner is! String ||
+          _normKey(owner) != _normKey(id) ||
+          m['cupoMaximo'] is! int ||
+          m['cupoOcupado'] is! int ||
+          (m['cupoMaximo'] as int) <= 0 ||
+          (m['cupoOcupado'] as int) < 0 ||
+          (m['cupoOcupado'] as int) > (m['cupoMaximo'] as int)) {
+        throw FormatException(
+          'Grupo vigente incompleto o contradictorio: $key',
+        );
+      }
+      final g = GrupoInstitucional.fromMap(m);
+      gestion.add(g);
+      final horario = RegExp(
+        r'(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})',
+      ).firstMatch(g.turno ?? '');
+      curricular.add(
+        GrupoCurricular(
+          id: gid,
+          nombreCurso: (g.aula ?? '').trim().isNotEmpty ? g.aula! : nombre,
+          turno: TurnoCurricularX.parse(g.turno),
+          horaInicio: horario?.group(1),
+          horaFin: horario?.group(2),
+          cuposTotales: g.cupoMaximo,
+          cuposOcupados: g.cupoOcupado,
+        ),
+      );
+    }
+    return (gestion: gestion, curricular: curricular);
+  }
+
+  // La persistencia siempre prevalece sobre el objeto recibido por el caller.
+  final inst = await _cargarInstitucionHistorica(id) ?? historica;
+  var grupos = List<GrupoCurricular>.from(inst?.gruposCurriculares ?? []);
+  if (grupos.isEmpty) {
+    for (final key in {
+      kGruposCurricularesInstitucion(id),
+      kGruposCurricularesInstitucionLegacy(id),
+    }) {
+      if (!prefs.containsKey(key)) continue;
+      final raw = prefs.getString(key);
+      // Compat: antiguas operaciones de limpieza guardaban cadena vacía.
+      if (raw == null || raw.trim().isEmpty) continue;
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) throw FormatException('Histórico inválido: $key');
+      grupos = decoded.map((item) {
+        if (item is! Map ||
+            item['id'] is! String ||
+            (item['id'] as String).trim().isEmpty) {
+          throw FormatException('Grupo histórico sin ID: $key');
+        }
+        return GrupoCurricular.fromMap(Map<String, dynamic>.from(item));
+      }).toList();
+      break;
+    }
+  }
+  final ids = <String>{};
+  for (final g in grupos) {
+    if (g.id.isEmpty || !ids.add(g.id)) {
+      throw const FormatException('IDs históricos vacíos o duplicados');
+    }
+  }
+  return (
+    curricular: grupos,
+    gestion: grupos
+        .map(
+          (g) => GrupoInstitucional(
+            id: g.id,
+            institucionId: id,
+            actividadNombre: 'Curricular',
+            nombreGrupo: g.nombreCurso,
+            aula: g.nombreCurso,
+            turno:
+                '${g.turno.name}${g.horaInicio != null && g.horaFin != null ? ' • ${g.horaInicio}-${g.horaFin}' : ''}',
+            cupoMaximo: g.cuposTotales,
+            cupoOcupado: g.cuposOcupados,
+            estado: g.tieneCuposDisponibles
+                ? EstadoCupo.disponible
+                : EstadoCupo.completo,
+          ),
+        )
+        .toList(),
+  );
+}
+
+/// Lectura sin mutar ni persistir la institución recibida. Los parámetros
+/// históricos conservan su firma, pero true se rechaza explícitamente.
+/// La escritura se solicita en migrarPersistirLegacyEnInstitucion.
 Future<Institucion> hidratarInstitucionConGruposCurriculares(
   Institucion institucion, {
   bool persist = false,
   bool clearLegacyKey = false,
 }) async {
-  final dataId = _normInstitucionId(institucion.id);
-  if (dataId.isEmpty) return institucion;
-
-  try {
-    if (institucion.gruposCurriculares.isNotEmpty) {
-      return institucion;
-    }
-  } catch (_) {}
-
-  // Importante: pasar RAW (institucion.id) para no perder legacy key.
-  final legacy = await _cargarGruposCurricularesLegacyKey(institucion.id);
-  if (legacy.isEmpty) return institucion;
-
-  try {
-    institucion.gruposCurriculares
-      ..clear()
-      ..addAll(legacy);
-  } catch (_) {
-    return institucion;
+  if (persist || clearLegacyKey) {
+    throw UnsupportedError(
+      'La hidratación es solo lectura; usar migrarPersistirLegacyEnInstitucion para migrar o limpiar.',
+    );
   }
-
-  if (persist) {
-    await upsertInstitucion(institucion);
-    if (clearLegacyKey) {
-      await _vaciarLegacyKeyGruposCurriculares(institucion.id);
-    }
-  }
-
-  return institucion;
+  final resolved = await _resolverGruposCurriculares(
+    institucion.id,
+    historica: institucion,
+  );
+  return institucion.copyWith(gruposCurriculares: resolved.curricular);
 }
 
-/// ===============================
-/// ✅ CANÓNICO: GRUPOS CURRICULARES
-/// ===============================
-/// Fuente de verdad: Institucion.gruposCurriculares.
-/// - Hidratación legacy controlada (si está vacío y existe grupos_curriculares_*).
-/// - Orden estable.
-/// - NO toca keys legacy salvo que se pida explícitamente por otros flujos.
-///
-/// 🔥 IMPORTANTE:
-/// - Esto es lo que deben usar pantallas de alumnos para ver “aulas/cursos”.
+/// Misma colección efectiva que Gestión y validación. Los errores se propagan.
 Future<List<GrupoCurricular>> cargarGruposCurricularesInstitucion(
   String institucionId,
 ) async {
-  final dataId = _normInstitucionId(institucionId);
-  if (dataId.isEmpty) return <GrupoCurricular>[];
-
-  debugPrint(
-    '[ATENA][IH] cargarGruposCurricularesInstitucion start id="$dataId"',
-  );
-
-  // Cargar institución canónica (ya viene con cache+domain+lista y timeouts).
-  final inst = await _withTimeout<Institucion?>(
-    cargarInstitucionPorId(institucionId),
-    timeout: _kIOTimeoutHeavy,
-    fallback: null,
-    tag: 'cargarInstitucionPorId (grupos curriculares canonico)',
-  );
-
-  if (inst == null) {
-    debugPrint(
-      '[ATENA][IH] cargarGruposCurricularesInstitucion inst=null id="$dataId"',
-    );
-    return <GrupoCurricular>[];
-  }
-
-  // Hidratación read-only (no upsert por defecto)
-  final hydrated = await hidratarInstitucionConGruposCurriculares(
-    inst,
-    persist: false,
-    clearLegacyKey: false,
-  );
-
-  List<GrupoCurricular> out;
-  try {
-    out = List<GrupoCurricular>.from(hydrated.gruposCurriculares);
-  } catch (_) {
-    out = <GrupoCurricular>[];
-  }
-
-  // Orden estable best-effort: nombreCurso, horaInicio, horaFin, id
-  out.sort((a, b) {
-    final an = a.nombreCurso.trim().toLowerCase();
-    final bn = b.nombreCurso.trim().toLowerCase();
-    final c = an.compareTo(bn);
-    if (c != 0) return c;
-
-    final ahi = (a.horaInicio ?? '').compareTo(b.horaInicio ?? '');
-    if (ahi != 0) return ahi;
-
-    final ahf = (a.horaFin ?? '').compareTo(b.horaFin ?? '');
-    if (ahf != 0) return ahf;
-
-    return a.id.compareTo(b.id);
-  });
-
-  debugPrint(
-    '[ATENA][IH] cargarGruposCurricularesInstitucion ok n=${out.length} id="$dataId"',
-  );
-  return out;
+  return (await _resolverGruposCurriculares(institucionId)).curricular;
 }
 
 /// Compat API: alias explícito para curriculares (por legibilidad en pantallas)
@@ -725,11 +717,16 @@ Future<Institucion> hidratarInstitucionConExtracurriculares(
 
   if (prefsList.isEmpty) {
     // C) Limpieza legacy automática (si el catálogo final queda vacío).
-    await _limpiarActividadesExtracurricularesPrefs(institucion.id);
+    if (migrateIfLegacy) {
+      await _limpiarActividadesExtracurricularesPrefs(institucion.id);
+    }
     return institucion;
   }
 
-  // D) Migración silenciosa controlada (one-shot).
+  if (!migrateIfLegacy) {
+    return institucion.copyWith(actividadesExtracurriculares: prefsList);
+  }
+  // D) Migración solicitada explícitamente.
   try {
     institucion.actividadesExtracurriculares
       ..clear()
@@ -909,26 +906,23 @@ Future<Institucion?> migrarPersistirLegacyEnInstitucion(
   final dataId = _normInstitucionId(institucionId);
   if (dataId.isEmpty) return null;
 
-  final inst = await _withTimeout<Institucion?>(
-    cargarInstitucionPorId(institucionId),
-    timeout: _kIOTimeoutHeavy,
-    fallback: null,
-    tag: 'cargarInstitucionPorId (migrar)',
-  );
+  final inst = await _cargarInstitucionHistorica(institucionId);
   if (inst == null) return null;
-
-  final a = await hidratarInstitucionConGruposCurriculares(
-    inst,
-    persist: true,
-    clearLegacyKey: clearLegacyKeyCurricular,
-  );
-
-  // Extracurriculares: migración controlada (si está vacío y hay legacy).
-  final b = await hidratarInstitucionConExtracurriculares(
-    a,
-    migrateIfLegacy: true,
-  );
-  return b;
+  final resolved = await _resolverGruposCurriculares(institucionId);
+  final migrated = inst.copyWith(gruposCurriculares: resolved.curricular);
+  // Solo representaciones de institución; no migrar/limpiar extracurriculares.
+  final registered = await cargarInstitucionesRegistradas();
+  final next =
+      registered.where((i) => _normKey(i.id) != _normKey(inst.id)).toList()
+        ..add(migrated);
+  await guardarInstitucionesRegistradas(next);
+  await guardarInstitucionCachePorId(institucionId, migrated);
+  await InstitucionService.upsertInstitucion(migrated);
+  await invalidarInstitucionesSearchIndex();
+  if (clearLegacyKeyCurricular) {
+    await _vaciarLegacyKeyGruposCurriculares(institucionId);
+  }
+  return migrated;
 }
 
 /// ===============================
@@ -943,7 +937,7 @@ Future<Institucion?> cargarInstitucionPorNombre(String nombre) async {
   for (final inst in instituciones) {
     if (_norm(inst.nombre) == n) {
       final a = await hidratarInstitucionConGruposCurriculares(inst);
-      return hidratarInstitucionConExtracurriculares(a, migrateIfLegacy: true);
+      return hidratarInstitucionConExtracurriculares(a, migrateIfLegacy: false);
     }
   }
   return null;
@@ -957,7 +951,7 @@ Future<Institucion?> cargarInstitucionPorNombreFlexible(String nombre) async {
   for (final inst in instituciones) {
     if (_normLower(inst.nombre) == n) {
       final a = await hidratarInstitucionConGruposCurriculares(inst);
-      return hidratarInstitucionConExtracurriculares(a, migrateIfLegacy: true);
+      return hidratarInstitucionConExtracurriculares(a, migrateIfLegacy: false);
     }
   }
   return null;
@@ -995,17 +989,13 @@ Future<Institucion?> cargarInstitucionCachePorId(String institucionId) async {
 
   if (raw == null || raw.trim().isEmpty) return null;
 
-  try {
-    final decoded = jsonDecode(raw);
-    if (decoded is Map) {
-      final inst = Institucion.fromMap(Map<String, dynamic>.from(decoded));
-      final a = await hidratarInstitucionConGruposCurriculares(inst);
-      return hidratarInstitucionConExtracurriculares(a, migrateIfLegacy: true);
-    }
-    return null;
-  } catch (_) {
-    return null;
+  final decoded = jsonDecode(raw);
+  if (decoded is! Map) {
+    throw const FormatException('Caché institucional inválida');
   }
+  final inst = Institucion.fromMap(Map<String, dynamic>.from(decoded));
+  final a = await hidratarInstitucionConGruposCurriculares(inst);
+  return hidratarInstitucionConExtracurriculares(a, migrateIfLegacy: false);
 }
 
 Future<void> guardarInstitucionCachePorId(
@@ -1043,12 +1033,9 @@ Future<Institucion?> cargarInstitucionPorId(String institucionId) async {
   debugPrint('[ATENA][IH] cargarInstitucionPorId start id="$dataId"');
 
   // ✅ Cache primero
-  final cached = await _withTimeout<Institucion?>(
-    cargarInstitucionCachePorId(institucionId),
-    timeout: _kIOTimeoutHeavy,
-    fallback: null,
-    tag: 'cargarInstitucionCachePorId',
-  );
+  final cached = await cargarInstitucionCachePorId(
+    institucionId,
+  ).timeout(_kIOTimeoutHeavy);
   if (cached != null) {
     debugPrint('[ATENA][IH] cargarInstitucionPorId hit-cache id="$dataId"');
     return cached;
@@ -1065,9 +1052,9 @@ Future<Institucion?> cargarInstitucionPorId(String institucionId) async {
     final a = await hidratarInstitucionConGruposCurriculares(byDomain);
     final b = await hidratarInstitucionConExtracurriculares(
       a,
-      migrateIfLegacy: true,
+      migrateIfLegacy: false,
     );
-    await guardarInstitucionCachePorId(institucionId, b);
+    await guardarInstitucionCachePorId(institucionId, byDomain);
     debugPrint('[ATENA][IH] cargarInstitucionPorId ok(domain) id="$dataId"');
     return b;
   }
@@ -1081,9 +1068,9 @@ Future<Institucion?> cargarInstitucionPorId(String institucionId) async {
       final a = await hidratarInstitucionConGruposCurriculares(inst);
       final b = await hidratarInstitucionConExtracurriculares(
         a,
-        migrateIfLegacy: true,
+        migrateIfLegacy: false,
       );
-      await guardarInstitucionCachePorId(institucionId, b);
+      await guardarInstitucionCachePorId(institucionId, inst);
       debugPrint('[ATENA][IH] cargarInstitucionPorId ok(list) id="$dataId"');
       return b;
     }
@@ -1187,59 +1174,7 @@ Future<void> upsertInstitucionPorNombre(Institucion institucion) async {
 Future<List<GrupoInstitucional>> cargarGruposInstitucion(
   String institucionId,
 ) async {
-  final dataId = _normInstitucionId(institucionId);
-  if (dataId.isEmpty) return <GrupoInstitucional>[];
-
-  debugPrint('[ATENA][IH] cargarGruposInstitucion start id="$dataId"');
-
-  String? raw;
-
-  final kids = _keyVariantsFromRaw(institucionId);
-  for (final kid in kids) {
-    raw = await _withTimeout<String?>(
-      StorageService.instance.getString(kGruposInstitucion(kid)),
-      timeout: _kIOTimeoutHeavy,
-      fallback: null,
-      tag: 'getString grupos_',
-    );
-    if (raw != null && raw.trim().isNotEmpty) break;
-
-    raw = await _withTimeout<String?>(
-      StorageService.instance.getString(kGruposInstitucionLegacy(kid)),
-      timeout: _kIOTimeoutHeavy,
-      fallback: null,
-      tag: 'getString grupos_ legacy',
-    );
-    if (raw != null && raw.trim().isNotEmpty) break;
-  }
-
-  if (raw == null || raw.trim().isEmpty) {
-    debugPrint('[ATENA][IH] cargarGruposInstitucion empty id="$dataId"');
-    return <GrupoInstitucional>[];
-  }
-
-  try {
-    final decoded = jsonDecode(raw);
-    if (decoded is! List) return <GrupoInstitucional>[];
-
-    final out = decoded
-        .whereType<Map>()
-        .map((e) => GrupoInstitucional.fromMap(Map<String, dynamic>.from(e)))
-        .toList();
-
-    out.sort(
-      (a, b) =>
-          a.nombreGrupo.toLowerCase().compareTo(b.nombreGrupo.toLowerCase()),
-    );
-
-    debugPrint(
-      '[ATENA][IH] cargarGruposInstitucion ok n=${out.length} id="$dataId"',
-    );
-    return out;
-  } catch (_) {
-    debugPrint('[ATENA][IH] cargarGruposInstitucion decode-error id="$dataId"');
-    return <GrupoInstitucional>[];
-  }
+  return (await _resolverGruposCurriculares(institucionId)).gestion;
 }
 
 Future<void> guardarGruposInstitucion(
@@ -2259,10 +2194,12 @@ Future<List<Institucion>> cargarInstitucionesRegistradasPageHidratada({
       final a = await hidratarInstitucionConGruposCurriculares(inst);
       final b = await hidratarInstitucionConExtracurriculares(
         a,
-        migrateIfLegacy: true,
+        migrateIfLegacy: false,
       );
 
       out.add(b);
+    } on FormatException {
+      rethrow;
     } catch (_) {}
   }
 

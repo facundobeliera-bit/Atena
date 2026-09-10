@@ -137,50 +137,6 @@ class SolicitudesService {
   // ✅ COERCIÓN CANÓNICA – GRUPOS CURRICULARES (E2E)
   // =====================================================
 
-  static GrupoCurricular? _coerceGrupoCurricular(Object? g) {
-    if (g == null) return null;
-    if (g is GrupoCurricular) return g;
-
-    if (g is Map) {
-      try {
-        return GrupoCurricular.fromMap(Map<String, dynamic>.from(g));
-      } catch (_) {
-        return null;
-      }
-    }
-
-    try {
-      // ignore: avoid_dynamic_calls
-      final dyn = g as dynamic;
-      // ignore: avoid_dynamic_calls
-      final m = dyn.toMap();
-      if (m is Map) {
-        return GrupoCurricular.fromMap(Map<String, dynamic>.from(m));
-      }
-    } catch (_) {}
-
-    return null;
-  }
-
-  static List<GrupoCurricular> _coerceListaGruposCurriculares(Object? raw) {
-    if (raw == null) return <GrupoCurricular>[];
-
-    if (raw is List<GrupoCurricular>) {
-      return List<GrupoCurricular>.from(raw);
-    }
-
-    if (raw is List) {
-      final out = <GrupoCurricular>[];
-      for (final item in raw) {
-        final g = _coerceGrupoCurricular(item);
-        if (g != null) out.add(g);
-      }
-      return out;
-    }
-
-    return <GrupoCurricular>[];
-  }
-
   // =====================================================
   // ✅ CURRICULAR – RESOLUCIÓN/VALIDACIÓN DE grupoCurricularId (E2E)
   // =====================================================
@@ -411,7 +367,10 @@ class SolicitudesService {
     try {
       final inst = await ih.cargarInstitucionPorId(id);
       if (inst != null) {
-        final hydrated = await ih.hidratarInstitucionConExtracurriculares(inst);
+        final hydrated = await ih.hidratarInstitucionConExtracurriculares(
+          inst,
+          migrateIfLegacy: false,
+        );
         final list = List<ActividadExtracurricular>.from(
           hydrated.actividadesExtracurriculares,
         );
@@ -1533,12 +1492,9 @@ class SolicitudesService {
     final id = _kid(institucionId);
     if (id.isEmpty) return <GrupoCurricular>[];
 
-    try {
-      final raw = await ih.cargarGruposInstitucion(id);
-      return _coerceListaGruposCurriculares(raw);
-    } catch (_) {
-      return <GrupoCurricular>[];
-    }
+    // La misma resolución que usa el alumno y Gestión, incluido vacío explícito.
+    // No ocultar corrupción como ausencia de grupos.
+    return ih.cargarGruposCurricularesInstitucion(id);
   }
 
   static Future<List<GrupoCurricular>>

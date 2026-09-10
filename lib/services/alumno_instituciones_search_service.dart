@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show debugPrint;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -87,7 +88,11 @@ class AlumnoInstitucionesSearchService {
   static double? _lng(Institucion inst) {
     final map = inst.toMap();
     return _toDouble(
-      map['lng'] ?? map['lon'] ?? map['longitude'] ?? map['ubicacionLng'] ?? map['geoLng'],
+      map['lng'] ??
+          map['lon'] ??
+          map['longitude'] ??
+          map['ubicacionLng'] ??
+          map['geoLng'],
     );
   }
 
@@ -114,7 +119,8 @@ class AlumnoInstitucionesSearchService {
     if (raw.isEmpty) return true;
 
     final normalized = raw.replaceAll('años', '').replaceAll('año', '');
-    final numbers = RegExp(r'\d+').allMatches(normalized)
+    final numbers = RegExp(r'\d+')
+        .allMatches(normalized)
         .map((m) => int.tryParse(m.group(0)!))
         .whereType<int>()
         .toList();
@@ -130,13 +136,19 @@ class AlumnoInstitucionesSearchService {
   static bool _esGratuito(String? precio) {
     final p = (precio ?? '').trim().toLowerCase();
     if (p.isEmpty) return true;
-    if (p == '0' || p == r'$0' || p.contains('gratis') || p.contains('gratuito')) {
+    if (p == '0' ||
+        p == r'$0' ||
+        p.contains('gratis') ||
+        p.contains('gratuito')) {
       return true;
     }
     return false;
   }
 
-  static bool _cumplePrecio(ActividadExtracurricular a, AlumnoPrecioFiltro filtro) {
+  static bool _cumplePrecio(
+    ActividadExtracurricular a,
+    AlumnoPrecioFiltro filtro,
+  ) {
     switch (filtro) {
       case AlumnoPrecioFiltro.todos:
         return true;
@@ -233,17 +245,27 @@ class AlumnoInstitucionesSearchService {
 
       var inst = original;
       try {
-        final conGrupos = await ih.hidratarInstitucionConGruposCurriculares(inst);
+        inst = await ih.hidratarInstitucionConGruposCurriculares(original);
+      } catch (e) {
+        // Estado curricular desconocido: no atribuir disponibilidad histórica.
+        // Conservar la institución para filtros generales y extracurriculares.
+        debugPrint('[ATENA][SEARCH][CURRICULAR_ERROR] ${original.id}: $e');
+        inst = original.copyWith(gruposCurriculares: <GrupoCurricular>[]);
+      }
+      try {
         inst = await ih.hidratarInstitucionConExtracurriculares(
-          conGrupos,
+          inst,
           migrateIfLegacy: false,
         );
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('[ATENA][SEARCH][EXTRA_ERROR] ${original.id}: $e');
+      }
 
       if (filters.scope == AlumnoBusquedaScope.curricular && !inst.curricular) {
         continue;
       }
-      if (filters.scope == AlumnoBusquedaScope.extracurricular && !inst.extracurricular) {
+      if (filters.scope == AlumnoBusquedaScope.extracurricular &&
+          !inst.extracurricular) {
         continue;
       }
 
@@ -307,7 +329,9 @@ class AlumnoInstitucionesSearchService {
         }
 
         if (filters.soloConVacantes) {
-          actividades = actividades.where((a) => a.tieneCuposDisponibles).toList();
+          actividades = actividades
+              .where((a) => a.tieneCuposDisponibles)
+              .toList();
         }
 
         if (filters.bloques.isNotEmpty ||
@@ -331,7 +355,8 @@ class AlumnoInstitucionesSearchService {
           lat2: lat,
           lng2: lng,
         );
-        if (filters.maxDistanceKm != null && distancia > filters.maxDistanceKm!) {
+        if (filters.maxDistanceKm != null &&
+            distancia > filters.maxDistanceKm!) {
           continue;
         }
       } else if (filters.maxDistanceKm != null &&
@@ -355,17 +380,22 @@ class AlumnoInstitucionesSearchService {
         final da = a.distanciaKm;
         final db = b.distanciaKm;
         if (da == null && db == null) {
-          return _norm(a.institucion.nombre).compareTo(_norm(b.institucion.nombre));
+          return _norm(
+            a.institucion.nombre,
+          ).compareTo(_norm(b.institucion.nombre));
         }
         if (da == null) return 1;
         if (db == null) return -1;
         final c = da.compareTo(db);
         if (c != 0) return c;
-        return _norm(a.institucion.nombre).compareTo(_norm(b.institucion.nombre));
+        return _norm(
+          a.institucion.nombre,
+        ).compareTo(_norm(b.institucion.nombre));
       });
     } else {
       results.sort(
-        (a, b) => _norm(a.institucion.nombre).compareTo(_norm(b.institucion.nombre)),
+        (a, b) =>
+            _norm(a.institucion.nombre).compareTo(_norm(b.institucion.nombre)),
       );
     }
 
