@@ -92,12 +92,6 @@ String _norm(String v) => v.trim().toLowerCase();
 /// Normalización alineada con services para storage keys (sin whitespace interno).
 String _normIdKey(String v) => v.trim().replaceAll(RegExp(r'\s+'), '');
 
-int _clampInt(int v, {required int min, required int max}) {
-  if (v < min) return min;
-  if (v > max) return max;
-  return v;
-}
-
 /// Parser canónico (sin heurísticas):
 /// acepta key/name/label exactos (case-insensitive). Si no => otros.
 BloqueExtracurricular _parseBloqueCanonico(dynamic raw) {
@@ -280,13 +274,7 @@ class GrupoExtracurricular {
     if (max < 0) max = 0;
     if (ocupado < 0) ocupado = 0;
 
-    // Hard clamp: si está gestionado, cupoOcupado no puede superar cupoMaximo.
-    if (max > 0) {
-      ocupado = _clampInt(ocupado, min: 0, max: max);
-    } else {
-      // Si no se gestiona cupo, mantenemos consistencia MVP: ocupado=0
-      ocupado = 0;
-    }
+    // Preserve historical occupation above capacity; admission validates it.
 
     return GrupoExtracurricular(
       id: parsedId.isEmpty ? GrupoExtracurricular.newGrupoId() : parsedId,
@@ -342,11 +330,7 @@ class GrupoExtracurricular {
     if (max < 0) max = 0;
     if (ocupado < 0) ocupado = 0;
 
-    if (max > 0) {
-      ocupado = _clampInt(ocupado, min: 0, max: max);
-    } else {
-      ocupado = 0;
-    }
+    // Occupation is total, including historical excess.
 
     final nextCreated = createdAt ?? this.createdAt;
     var nextUpdated = updatedAt ?? now;

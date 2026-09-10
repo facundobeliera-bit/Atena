@@ -1033,12 +1033,6 @@ class _InstitucionGestionVacantesPageState
 
   static String _keyGid(String gid) => 'gid|${_normKey(gid)}';
 
-  int _clamp(int v, int min, int max) {
-    if (v < min) return min;
-    if (v > max) return max;
-    return v;
-  }
-
   String _solicitudGrupoCurricularIdBestEffort(SolicitudAlumno s) {
     try {
       // ignore: avoid_dynamic_calls
@@ -1128,7 +1122,12 @@ class _InstitucionGestionVacantesPageState
           raw = contadorLegacy[k] ?? 0;
         }
 
-        final occ = g.cupoMaximo <= 0 ? 0 : _clamp(raw, 0, g.cupoMaximo);
+        if (raw > g.cupoMaximo || g.cupoOcupado > g.cupoMaximo) {
+          throw StateError(
+            'Ocupación histórica superior al cupo en ${g.id}. No se modificaron los datos.',
+          );
+        }
+        final occ = math.max(g.cupoOcupado, raw);
 
         final disponible = (g.cupoMaximo - occ) > 0;
 
@@ -1521,7 +1520,13 @@ class _InstitucionGestionVacantesPageState
                       }
 
                       final prevOcc = existente?.cupoOcupado ?? 0;
-                      final occ = math.min(math.max(prevOcc, 0), cupo);
+                      if (cupo < prevOcc) {
+                        localSnack(
+                          'El cupo no puede ser menor que la ocupación actual.',
+                        );
+                        return;
+                      }
+                      final occ = math.max(prevOcc, 0);
 
                       final instId = _instIdData;
                       if (instId.isEmpty) {

@@ -21,8 +21,8 @@
 // - La dedupKey pública contempla moduleKey para extracurriculares.
 //
 // ✅ CANÓNICO (enero 2026) – Cupos extracurriculares:
-// - Fuente de verdad de "ocupados": solicitudes confirmadas.
-// - Grupos/actividades almacenan cupoOcupado como CACHE derivado (best-effort).
+// - Ocupación persistida: total; confirmadas: control de consistencia.
+// - Confirmación y cancelación actualizan el total sin sumar dos veces confirmadas.
 // - Evitamos incrementos manuales (+1) al confirmar para prevenir doble conteo.
 //
 // Ajuste (enero 2026):
@@ -65,7 +65,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/extracurriculares/actividad_extracurricular.dart';
 import '../models/extracurriculares/bloque_extracurricular.dart';
-import '../models/extracurriculares/grupo_extracurricular.dart';
 import '../models/instituciones/grupo_curricular.dart';
 import '../models/notificaciones/notificacion_atena.dart';
 import '../models/solicitudes/solicitud_alumno.dart';
@@ -74,6 +73,7 @@ import '../repositories/solicitudes_repository_prefs.dart';
 import '../services/notificaciones_service.dart' as noti;
 
 import 'extracurriculares_service.dart';
+import 'storage_service.dart';
 import 'instituciones_helpers.dart' as ih;
 
 class SolicitudesException implements Exception {
@@ -406,29 +406,6 @@ class SolicitudesService {
     return const <ActividadExtracurricular>[];
   }
 
-  static Future<void> _guardarCatalogoExtraCompleto(
-    String institucionId,
-    List<ActividadExtracurricular> actividades,
-  ) async {
-    final id = _kid(institucionId);
-    if (id.isEmpty) return;
-
-    // Preferimos helper canónico (sincroniza donde corresponda)
-    try {
-      await ih.guardarActividadesExtracurricularesEnInstitucion(
-        institucionId: id,
-        actividades: actividades,
-      );
-      return;
-    } catch (_) {
-      // fallback: prefs directo
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    final list = actividades.map((a) => a.toMap()).toList();
-    await prefs.setString(_kActsByInst(institucionId), jsonEncode(list));
-  }
-
   // =====================================================
   // ✅ EXTRACURRICULARES – RESOLUCIÓN DE moduleKey (BEST-EFFORT)
   // =====================================================
@@ -585,142 +562,6 @@ class SolicitudesService {
       _l(turno),
       _normalizeModuleKeyCanonical(moduleKey),
     ].join('|');
-  }
-
-  static String _kMatchActividad({
-    required String actividadNombre,
-    required String moduleKey,
-  }) {
-    return [
-      _l(actividadNombre),
-      _normalizeModuleKeyCanonical(moduleKey),
-    ].join('|');
-  }
-
-  static ActividadExtracurricular _rebuildActividadFromMap(
-    ActividadExtracurricular base,
-    Map<String, dynamic> m,
-  ) {
-    try {
-      return ActividadExtracurricular.fromMap(m);
-    } catch (_) {
-      return base;
-    }
-  }
-
-  static GrupoExtracurricular _rebuildGrupoFromMap(
-    GrupoExtracurricular base,
-    Map<String, dynamic> m,
-  ) {
-    try {
-      return GrupoExtracurricular.fromMap(m);
-    } catch (_) {
-      return base;
-    }
-  }
-
-  static Future<void> _syncCuposExtracurricularesDesdeSolicitudes(
-    String institucionId,
-  ) async {
-    final instId = _kid(institucionId);
-    if (instId.isEmpty) return;
-
-    final all = await obtenerSolicitudesParaInstitucion(institucionId: instId);
-    final actividadToMk = await _buildActividadToModuleKeyMap(instId);
-
-    final contadorGrupos = <String, int>{};
-    final contadorActs = <String, int>{};
-
-    for (final s in all) {
-      if (s.esCurricular) continue;
-      if (s.estado != EstadoSolicitud.confirmada) continue;
-
-      final mk = _resolveModuleKeyFromMap(
-        s: s,
-        actividadToModuleKey: actividadToMk,
-      );
-      final mkSafe = _isValidModuleKey(mk)
-          ? mk
-          : BloqueExtracurricular.otros.key;
-
-      final actName = _n(s.actividadNombre);
-      if (actName.isEmpty) continue;
-
-      final grupo = _n(s.aula);
-      final turno = _n(s.turno);
-
-      final kAct = _kMatchActividad(
-        actividadNombre: actName,
-        moduleKey: mkSafe,
-      );
-      contadorActs[kAct] = (contadorActs[kAct] ?? 0) + 1;
-
-      if (grupo.isNotEmpty) {
-        final kG = _kMatchGrupo(
-          actividadNombre: actName,
-          nombreGrupo: grupo,
-          turno: turno,
-          moduleKey: mkSafe,
-        );
-        contadorGrupos[kG] = (contadorGrupos[kG] ?? 0) + 1;
-      }
-    }
-
-    final nowIso = DateTime.now().toIso8601String();
-
-    // Grupos (best-effort; NO requerimos copyWith)
-    try {
-      final grupos = await ExtracurricularesService.instance.cargarGrupos(
-        instId,
-      );
-      if (grupos.isNotEmpty) {
-        final nuevos = grupos
-            .map((g) {
-              final kG = _kMatchGrupo(
-                actividadNombre: g.actividadNombre,
-                nombreGrupo: g.nombreGrupo,
-                turno: _n(g.turno),
-                moduleKey: g.bloque.key,
-              );
-
-              final ocup = contadorGrupos[kG] ?? 0;
-
-              final m = Map<String, dynamic>.from(g.toMap());
-              m['cupoOcupado'] = ocup;
-              m['updatedAt'] = nowIso;
-
-              return _rebuildGrupoFromMap(g, m);
-            })
-            .toList(growable: false);
-
-        await ExtracurricularesService.instance.guardarGrupos(instId, nuevos);
-      }
-    } catch (_) {}
-
-    // Catálogo (best-effort; NO requerimos copyWith)
-    try {
-      final catalogo = await _cargarCatalogoExtraCompleto(instId);
-      if (catalogo.isNotEmpty) {
-        final nuevos = catalogo
-            .map((a) {
-              final kAct = _kMatchActividad(
-                actividadNombre: a.nombre,
-                moduleKey: a.bloque.key,
-              );
-
-              final ocup = contadorActs[kAct] ?? 0;
-
-              final m = Map<String, dynamic>.from(a.toMap());
-              m['cupoOcupado'] = ocup;
-              m['updatedAt'] = nowIso;
-
-              return _rebuildActividadFromMap(a, m);
-            })
-            .toList(growable: false);
-
-        await _guardarCatalogoExtraCompleto(instId, nuevos);
-      }
-    } catch (_) {}
   }
 
   // =====================================================
@@ -1154,8 +995,11 @@ class SolicitudesService {
       fechaUltimoCambio: DateTime.now(),
     );
 
-    await _repo.saveSolicitudAlumno(cancelada);
-    await _rebuildIfPossible();
+    if (s.estado == EstadoSolicitud.canceladaPorAlumno) return;
+    final writes = s.estado == EstadoSolicitud.confirmada
+        ? await _prepararCupos(s, -1)
+        : <String, String>{};
+    await _guardarCambioConCupos(s, cancelada, writes);
 
     String? moduleKey;
     if (!cancelada.esCurricular) {
@@ -1195,14 +1039,6 @@ class SolicitudesService {
       notificacion: n,
       duplicarEnPerfil: duplicarNotiEnPerfil,
     );
-
-    if (!cancelada.esCurricular) {
-      try {
-        await _syncCuposExtracurricularesDesdeSolicitudes(
-          cancelada.institucionId,
-        );
-      } catch (_) {}
-    }
   }
 
   static Future<void> borrarSolicitudPorId({
@@ -1297,6 +1133,263 @@ class SolicitudesService {
   // + Cupos extracurriculares derivados desde solicitudes (best-effort)
   // =====================================================
 
+  // Persisted occupation is total occupation, not an additive request counter.
+  static int _ocupacionTrasCambio(
+    int occupied,
+    int confirmed,
+    int capacity,
+    int delta, {
+    bool unlimited = false,
+  }) {
+    if (occupied < 0 || capacity < 0) {
+      throw SolicitudesException(
+        'invalid_capacity',
+        'Capacidad inconsistente.',
+      );
+    }
+    final current = occupied > confirmed ? occupied : confirmed;
+    if (delta > 0 && !unlimited && current >= capacity) {
+      throw SolicitudesException('no_capacity', 'El grupo ya no tiene cupo.');
+    }
+    final next = current + delta;
+    return next < 0 ? 0 : next;
+  }
+
+  static Future<Map<String, String>> _prepararCupos(
+    SolicitudAlumno s,
+    int delta,
+  ) async {
+    final inst = _kid(s.institucionId);
+    final confirmed = (await obtenerSolicitudesParaInstitucion(
+      institucionId: inst,
+    )).where((x) => x.estado == EstadoSolicitud.confirmada).toList();
+    if (s.esCurricular) {
+      // Same P0 #1 resolver as Management; retain its full representation.
+      final groups = await ih.cargarGruposInstitucion(inst);
+      final matches = groups
+          .where((g) => g.id == s.grupoCurricularIdCanonico)
+          .toList();
+      if (matches.length != 1 || _kid(matches.single.institucionId) != inst) {
+        throw SolicitudesException(
+          'invalid_group',
+          'Grupo curricular inexistente o ajeno.',
+        );
+      }
+      final g = matches.single;
+      if (delta > 0 &&
+          (g.estado.name != 'disponible' ||
+              (_n(s.aula).isNotEmpty &&
+                  _n(s.aula) !=
+                      (_n(g.aula).isEmpty ? _n(g.nombreGrupo) : _n(g.aula))) ||
+              (_n(s.turno).isNotEmpty && _n(s.turno) != _n(g.turno)))) {
+        throw SolicitudesException(
+          'incompatible_group',
+          'La configuración del grupo cambió.',
+        );
+      }
+
+      final count = confirmed
+          .where((x) => x.esCurricular && x.grupoCurricularIdCanonico == g.id)
+          .length;
+      final next = _ocupacionTrasCambio(
+        g.cupoOcupado,
+        count,
+        g.cupoMaximo,
+        delta,
+      );
+      final data = groups.map((x) {
+        final m = x.toMap();
+        if (x.id == g.id) {
+          m['cupoOcupado'] = next;
+          if (x.estado.name != 'suspendido') {
+            m['estado'] = next >= x.cupoMaximo ? 'completo' : 'disponible';
+          }
+        }
+        return m;
+      }).toList();
+      return {ih.kGruposInstitucion(inst): jsonEncode(data)};
+    }
+    final mk = _normalizeModuleKeyCanonical(s.moduleKey);
+    if (!_isValidModuleKey(mk) ||
+        _n(s.aula).isEmpty ||
+        _n(s.actividadNombre).isEmpty) {
+      throw SolicitudesException(
+        'ambiguous_group',
+        'Falta identificación extracurricular inequívoca.',
+      );
+    }
+    final key = _kMatchGrupo(
+      actividadNombre: s.actividadNombre,
+      nombreGrupo: s.aula,
+      turno: s.turno,
+      moduleKey: mk,
+    );
+    final groups = await ExtracurricularesService.instance.cargarGrupos(inst);
+    final matches = groups
+        .where(
+          (g) =>
+              _kMatchGrupo(
+                actividadNombre: g.actividadNombre,
+                nombreGrupo: g.nombreGrupo,
+                turno: g.turno,
+                moduleKey: g.bloque.key,
+              ) ==
+              key,
+        )
+        .toList();
+    if (matches.length != 1 ||
+        _kid(matches.single.institucionId) != inst ||
+        (delta > 0 && !matches.single.activo)) {
+      throw SolicitudesException(
+        'invalid_group',
+        'Grupo extracurricular inexistente, ambiguo o inactivo.',
+      );
+    }
+    final g = matches.single;
+    final count = confirmed
+        .where(
+          (x) =>
+              !x.esCurricular &&
+              _kMatchGrupo(
+                    actividadNombre: x.actividadNombre,
+                    nombreGrupo: x.aula,
+                    turno: x.turno,
+                    moduleKey: x.moduleKey,
+                  ) ==
+                  key,
+        )
+        .length;
+    final next = _ocupacionTrasCambio(
+      g.cupoOcupado,
+      count,
+      g.cupoMaximo,
+      delta,
+      unlimited: g.cupoMaximo == 0,
+    );
+    final data = groups.map((x) {
+      final m = x.toMap();
+      if (x.id == g.id) m['cupoOcupado'] = next;
+      return m;
+    }).toList();
+    final writes = {
+      ExtracurricularesService.kGruposExtracurriculares(inst): jsonEncode(data),
+    };
+    // Respect activity-wide capacity as well, if a catalog entry exists.
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_kActsByInst(inst));
+    final catalog = raw == null
+        ? await _cargarCatalogoExtraCompleto(inst)
+        : (jsonDecode(raw) as List)
+              .map(
+                (m) => ActividadExtracurricular.fromMap(
+                  Map<String, dynamic>.from(m as Map),
+                ),
+              )
+              .toList();
+    final acts = catalog
+        .where(
+          (a) => _l(a.nombre) == _l(s.actividadNombre) && a.bloque.key == mk,
+        )
+        .toList();
+    if (acts.length > 1 ||
+        (acts.isNotEmpty && delta > 0 && !acts.single.activa)) {
+      throw SolicitudesException(
+        'invalid_activity',
+        'Actividad ambigua o inactiva.',
+      );
+    }
+    if (acts.isNotEmpty) {
+      final a = acts.single;
+      if (_kid(a.institucionId) != inst) {
+        throw SolicitudesException(
+          'invalid_activity',
+          'Actividad ajena a la institución.',
+        );
+      }
+      final actCount = confirmed
+          .where(
+            (x) =>
+                !x.esCurricular &&
+                _l(x.actividadNombre) == _l(a.nombre) &&
+                x.moduleKey == mk,
+          )
+          .length;
+      final actNext = _ocupacionTrasCambio(
+        a.cupoOcupado,
+        actCount,
+        a.cupoMaximo,
+        delta,
+        unlimited: a.cupoMaximo == 0,
+      );
+      writes[_kActsByInst(inst)] = jsonEncode(
+        catalog.map((x) {
+          final m = x.toMap();
+          if (identical(x, a)) m['cupoOcupado'] = actNext;
+          return m;
+        }).toList(),
+      );
+    }
+    return writes;
+  }
+
+  // Compensate failed writes before notifying. SharedPreferences has no transaction.
+  static Future<void> _guardarCambioConCupos(
+    SolicitudAlumno before,
+    SolicitudAlumno after,
+    Map<String, String> writes,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final requestKey = 'sol_alumno_${_kid(before.id)}';
+    final pendingKey = 'sol_idx_inst_${_kid(before.institucionId)}_pend';
+    final keys = {...writes.keys, requestKey, pendingKey};
+    final snapshots = {for (final key in keys) key: prefs.get(key)};
+    try {
+      // Persist capacity first so a failed capacity write never confirms a request.
+      for (final entry in writes.entries) {
+        if (!await prefs.setString(entry.key, entry.value)) {
+          throw StateError('No se pudo guardar la ocupación.');
+        }
+      }
+      await _repo.saveSolicitudAlumno(after);
+      await prefs.reload();
+      if ((await _repo.getSolicitudAlumnoById(after.id))?.estado !=
+              after.estado ||
+          writes.entries.any((e) => prefs.getString(e.key) != e.value)) {
+        throw StateError('No se pudo verificar el cambio de solicitud y cupo.');
+      }
+      await _repo.rebuildIndexes();
+      final pending = prefs.getStringList(pendingKey) ?? <String>[];
+      pending.remove(_kid(after.id));
+      if (after.estado == EstadoSolicitud.pendiente) {
+        pending.add(_kid(after.id));
+      }
+      if (!await prefs.setStringList(pendingKey, pending)) {
+        throw StateError('No se pudo guardar el índice de pendientes.');
+      }
+    } catch (error) {
+      for (final entry in snapshots.entries) {
+        final value = entry.value;
+        final bool restored;
+        if (value == null) {
+          restored = await prefs.remove(entry.key);
+        } else if (value is String) {
+          restored = await prefs.setString(entry.key, value);
+        } else {
+          restored = await prefs.setStringList(
+            entry.key,
+            List<String>.from(value as List),
+          );
+        }
+        if (!restored) {
+          throw StateError('Falló la escritura y su recuperación: $error');
+        }
+      }
+      rethrow;
+    } finally {
+      StorageService.instance.resetCache();
+    }
+  }
+
   static Future<void> responderSolicitud({
     required String solicitudId,
     required EstadoSolicitud nuevoEstado,
@@ -1306,6 +1399,24 @@ class SolicitudesService {
   }) async {
     final s = await _repo.getSolicitudAlumnoById(solicitudId);
     if (s == null) return;
+
+    if (nuevoEstado != EstadoSolicitud.confirmada &&
+        nuevoEstado != EstadoSolicitud.rechazada) {
+      throw SolicitudesException(
+        'invalid_transition',
+        'Respuesta no permitida.',
+      );
+    }
+    if (s.estado == nuevoEstado) return;
+    if (s.estado != EstadoSolicitud.pendiente) {
+      throw SolicitudesException(
+        'invalid_transition',
+        'La solicitud ya no está pendiente.',
+      );
+    }
+    final writes = nuevoEstado == EstadoSolicitud.confirmada
+        ? await _prepararCupos(s, 1)
+        : <String, String>{};
 
     final nota = (notaInstitucion ?? '').trim();
     final mr = (motivoRechazo ?? '').trim();
@@ -1320,16 +1431,7 @@ class SolicitudesService {
       editada = editada.copyWith(motivoRechazo: mr.isEmpty ? null : mr);
     }
 
-    await _repo.saveSolicitudAlumno(editada);
-    await _rebuildIfPossible();
-
-    if (!editada.esCurricular) {
-      try {
-        await _syncCuposExtracurricularesDesdeSolicitudes(
-          editada.institucionId,
-        );
-      } catch (_) {}
-    }
+    await _guardarCambioConCupos(s, editada, writes);
 
     final owner = _kid(editada.ownerAccountId);
     final perfil = _kid(editada.perfilId);

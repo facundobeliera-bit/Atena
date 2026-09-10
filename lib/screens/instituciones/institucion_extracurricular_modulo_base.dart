@@ -299,12 +299,6 @@ class _InstitucionExtracurricularModuloBaseState
     if (res == true) _reloadFuture(k: _k);
   }
 
-  int _clamp(int v, int min, int max) {
-    if (v < min) return min;
-    if (v > max) return max;
-    return v;
-  }
-
   GrupoExtracurricular _rebuildFromMap(GrupoExtracurricular base, Map m) {
     try {
       return GrupoExtracurricular.fromMap(Map<String, dynamic>.from(m));
@@ -336,7 +330,7 @@ class _InstitucionExtracurricularModuloBaseState
       return;
     }
 
-    int ocupado = _clamp(g.cupoOcupado, 0, cupoMax);
+    int ocupado = g.cupoOcupado;
 
     final ok = await showDialog<bool>(
       context: context,
@@ -368,9 +362,11 @@ class _InstitucionExtracurricularModuloBaseState
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () => setLocal(() {
-                        ocupado = _clamp(ocupado - 1, 0, cupoMax);
-                      }),
+                      onPressed: ocupado <= 0
+                          ? null
+                          : () => setLocal(() {
+                              ocupado -= 1;
+                            }),
                       icon: const Icon(Icons.remove_circle_outline),
                       tooltip: l10n.actionDecrease,
                     ),
@@ -383,9 +379,11 @@ class _InstitucionExtracurricularModuloBaseState
                       ),
                     ),
                     IconButton(
-                      onPressed: () => setLocal(() {
-                        ocupado = _clamp(ocupado + 1, 0, cupoMax);
-                      }),
+                      onPressed: ocupado >= cupoMax
+                          ? null
+                          : () => setLocal(() {
+                              ocupado += 1;
+                            }),
                       icon: const Icon(Icons.add_circle_outline),
                       tooltip: l10n.actionIncrease,
                     ),
@@ -405,7 +403,17 @@ class _InstitucionExtracurricularModuloBaseState
                 child: Text(l10n.actionCancel),
               ),
               ElevatedButton(
-                onPressed: () => Navigator.of(dialogCtx).pop(true),
+                onPressed: () {
+                  if (ocupado < 0 ||
+                      (ocupado > cupoMax && ocupado != g.cupoOcupado)) {
+                    _toast(
+                      messenger,
+                      l10n.institucionExtracGrupoValOccExceedsMax,
+                    );
+                    return;
+                  }
+                  Navigator.of(dialogCtx).pop(true);
+                },
                 child: Text(l10n.actionSave),
               ),
             ],
@@ -416,6 +424,7 @@ class _InstitucionExtracurricularModuloBaseState
 
     if (!mounted) return;
     if (ok != true) return;
+    if (ocupado == g.cupoOcupado) return;
 
     try {
       // ✅ Compat fuerte: NO copyWith. Actualiza por toMap/fromMap.

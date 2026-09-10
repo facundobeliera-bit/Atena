@@ -97,21 +97,6 @@ class _InstitucionExtracurricularGrupoFormPageState
 
   String _normalizeModuleKey(String k) => _norm(k);
 
-  int _parseIntSafe(String s, {int fallback = 0}) {
-    final t = s.trim();
-    if (t.isEmpty) return fallback;
-
-    final onlyDigits = t.replaceAll(RegExp(r'[^0-9\-]'), '');
-    final parsed = int.tryParse(onlyDigits);
-    return parsed ?? fallback;
-  }
-
-  int _clamp(int v, int min, int max) {
-    if (v < min) return min;
-    if (v > max) return max;
-    return v;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -283,17 +268,9 @@ class _InstitucionExtracurricularGrupoFormPageState
     final turno = _n(_turnoCtrl.text);
     final aula = _n(_aulaCtrl.text);
 
-    int cupoMax = _parseIntSafe(_cupoMaxCtrl.text, fallback: 0);
-    int cupoOcupado = _parseIntSafe(_cupoOcupadoCtrl.text, fallback: 0);
-
-    if (cupoMax < 0) cupoMax = 0;
-    if (cupoOcupado < 0) cupoOcupado = 0;
-
-    if (cupoMax > 0) {
-      cupoOcupado = _clamp(cupoOcupado, 0, cupoMax);
-    } else {
-      cupoOcupado = 0; // consistencia MVP
-    }
+    // The form validators reject invalid edits; never repair persisted totals.
+    final cupoMax = int.parse(_cupoMaxCtrl.text.trim());
+    final cupoOcupado = int.parse(_cupoOcupadoCtrl.text.trim());
 
     final now = DateTime.now();
     final bool isEdit = widget.initial != null;
@@ -542,7 +519,8 @@ class _InstitucionExtracurricularGrupoFormPageState
                               border: const OutlineInputBorder(),
                             ),
                             validator: (v) {
-                              final n = _parseIntSafe(v ?? '', fallback: 0);
+                              final n = int.tryParse((v ?? '').trim());
+                              if (n == null) return l10n.commonError;
                               if (n < 0) return l10n.validationCannotBeNegative;
                               return null;
                             },
@@ -559,16 +537,21 @@ class _InstitucionExtracurricularGrupoFormPageState
                               border: const OutlineInputBorder(),
                             ),
                             validator: (v) {
-                              final occ = _parseIntSafe(v ?? '', fallback: 0);
+                              final occ = int.tryParse((v ?? '').trim());
+                              if (occ == null) return l10n.commonError;
                               if (occ < 0) {
                                 return l10n.validationCannotBeNegative;
                               }
-
-                              final max = _parseIntSafe(
-                                _cupoMaxCtrl.text,
-                                fallback: 0,
+                              final max = int.tryParse(
+                                _cupoMaxCtrl.text.trim(),
                               );
-                              if (max > 0 && occ > max) {
+                              if (max == null) return l10n.commonError;
+                              final original = widget.initial;
+                              final unchanged =
+                                  original != null &&
+                                  original.cupoMaximo == max &&
+                                  original.cupoOcupado == occ;
+                              if (occ > max && !unchanged) {
                                 return l10n
                                     .institucionExtracGrupoValOccExceedsMax;
                               }

@@ -74,12 +74,6 @@ Map<String, dynamic> _asMap(dynamic v) {
   return <String, dynamic>{};
 }
 
-int _clampInt(int v, {required int min, required int max}) {
-  if (v < min) return min;
-  if (v > max) return max;
-  return v;
-}
-
 /// Parser estricto de BloqueExtracurricular (sin legacy).
 /// Acepta SOLO: key exacta OR name exacta OR label exacta (case-insensitive).
 /// Si inválido => otros (sin romper).
@@ -232,10 +226,7 @@ class ActividadExtracurricular {
     if (max < 0) max = 0;
     if (ocupado < 0) ocupado = 0;
 
-    // Hard clamp: si está gestionado, cupoOcupado no puede superar cupoMaximo.
-    if (max > 0) {
-      ocupado = _clampInt(ocupado, min: 0, max: max);
-    }
+    // Preserve historical occupation above capacity; admission validates it.
 
     return ActividadExtracurricular(
       id: parsedId.isEmpty
@@ -294,9 +285,7 @@ class ActividadExtracurricular {
     int ocupado = cupoOcupado ?? this.cupoOcupado;
     if (max < 0) max = 0;
     if (ocupado < 0) ocupado = 0;
-    if (max > 0) {
-      ocupado = _clampInt(ocupado, min: 0, max: max);
-    }
+    // Preserve occupation even when capacity was reduced.
 
     final nextCreatedAt = createdAt ?? this.createdAt;
 
