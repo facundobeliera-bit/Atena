@@ -50,7 +50,6 @@ import '../../services/cuenta_service.dart';
 import '../../services/documentos_temporales_service.dart';
 import '../../services/institucion_service.dart';
 import '../../services/instituciones_helpers.dart' as ih;
-import '../../services/session_service.dart';
 import '../../ui/atena_assets.dart';
 
 import '../instituciones/institucion_menu_page.dart';
@@ -168,7 +167,6 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
     return s;
   }
 
-  bool _isTaggedInstitucion(String v) => _n(v).startsWith('I|');
   bool _isTaggedAlumno(String v) => _n(v).startsWith('A|');
 
   Future<void> _registrarOwnerInstBestEffort({
@@ -191,168 +189,22 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
     }
   }
 
-  Future<void> _setSesionCuenta(String cuentaId) async {
-    final id = cuentaId.trim();
-    if (id.isEmpty) {
-      return;
-    }
-    try {
-      await CuentaService.setSesionCuentaId(id, recordarme: _rememberMe);
-    } catch (_) {
-      // NO-OP
-    }
-  }
-
-  Future<void> _setSessionInstitucionV2({
-    required String institucionPerfilId,
-  }) async {
-    final id = _n(institucionPerfilId);
-    if (id.isEmpty) {
-      return;
-    }
-    try {
-      await SessionService.setSession(
-        userId: id,
-        role: SessionRole.institucion,
-        rememberMe: _rememberMe,
-      );
-    } catch (_) {
-      // NO-OP
-    }
-  }
-
-  // ✅ Best-effort: persistir instOwner en SessionService sin asumir firma.
-  // ⚠️ FIX: NO usar SessionService.instance (no existe).
-  Future<void> _ensureInstOwnerBestEffort(String ownerId) async {
-    final o = _n(ownerId);
-    if (o.isEmpty) {
-      return;
-    }
-
-    Future<bool> tryCall(Future<dynamic> Function() fn) async {
-      try {
-        await fn();
-        return true;
-      } catch (_) {
-        return false;
-      }
-    }
-
-    // 1) static: setInstitucionOwnerAccountId(String)
-    try {
-      final dyn = SessionService as dynamic;
-      final ok = await tryCall(
-        () => dyn.setInstitucionOwnerAccountId(o) as Future,
-      );
-      if (ok) {
-        return;
-      }
-    } catch (_) {}
-
-    // 2) static named (ownerAccountId:)
-    try {
-      final dyn = SessionService as dynamic;
-      final ok = await tryCall(
-        () => dyn.setInstitucionOwnerAccountId(ownerAccountId: o) as Future,
-      );
-      if (ok) {
-        return;
-      }
-    } catch (_) {}
-
-    // 3) (no-op)
-  }
-
-  // ✅ Best-effort: intentar resolver el perfil institucional a usar para el menú.
-  // - Preferimos “último perfil institución” si existe (porque puede NO ser == owner).
-  // - IMPORTANTE: si viene tagueado, lo strippeamos.
-  // - Si el último perfil viene como A|..., lo ignoramos (cruce legacy) y hacemos fallback.
   Future<String> _resolveInstitucionPerfilIdBestEffort(String ownerId) async {
     final owner = _n(ownerId);
-    if (owner.isEmpty) {
-      return '';
-    }
-
-    Future<String?> tryGet(Future<dynamic> Function() fn) async {
-      try {
-        final r = await fn();
-        if (r == null) {
-          return null;
-        }
-        if (r is String) {
-          final v = _n(r);
-          return v.isEmpty ? null : v;
-        }
-        return null;
-      } catch (_) {
-        return null;
+    final last = await CuentaService.getUltimoPerfil(owner);
+    if (last != null && !_isTaggedAlumno(last)) {
+      final candidate = _stripUltimoPerfilTagIfAny(last);
+      if (await CuentaService.perfilInstitucionalPertenece(owner, candidate)) {
+        return candidate;
       }
     }
-
-    String? rawLast;
-
-    // 1) instance variants
-    try {
-      final dyn = CuentaService.instance as dynamic;
-
-      final r1 = await tryGet(
-        () => dyn.getUltimoPerfil(cuentaId: owner) as Future,
-      );
-      rawLast = r1 ?? rawLast;
-
-      final r2 = await tryGet(
-        () => dyn.getUltimoPerfil(ownerAccountId: owner) as Future,
-      );
-      rawLast = r2 ?? rawLast;
-
-      final r3 = await tryGet(() => dyn.getUltimoPerfil(owner) as Future);
-      rawLast = r3 ?? rawLast;
-    } catch (_) {
-      // NO-OP
-    }
-
-    // 2) static variants
-    if (rawLast == null) {
-      try {
-        final dyn = CuentaService as dynamic;
-
-        final r1 = await tryGet(
-          () => dyn.getUltimoPerfil(cuentaId: owner) as Future,
-        );
-        rawLast = r1 ?? rawLast;
-
-        final r2 = await tryGet(
-          () => dyn.getUltimoPerfil(ownerAccountId: owner) as Future,
-        );
-        rawLast = r2 ?? rawLast;
-
-        final r3 = await tryGet(() => dyn.getUltimoPerfil(owner) as Future);
-        rawLast = r3 ?? rawLast;
-      } catch (_) {
-        // NO-OP
+    final perfiles = await CuentaService.listarPerfilesInstitucion(owner);
+    for (final perfil in perfiles) {
+      if (await CuentaService.perfilInstitucionalPertenece(owner, perfil.id)) {
+        return perfil.id;
       }
     }
-
-    final last = _n(rawLast);
-
-    // Si viene A|..., NO sirve para institución.
-    if (last.isNotEmpty && _isTaggedAlumno(last)) {
-      return owner; // prototipo / fallback seguro
-    }
-
-    // Si viene I|..., usar STRIP.
-    if (last.isNotEmpty && _isTaggedInstitucion(last)) {
-      final stripped = _stripUltimoPerfilTagIfAny(last);
-      return stripped.isNotEmpty ? stripped : owner;
-    }
-
-    // Si viene "pelado", podría ser un perfil institución o legacy: lo aceptamos,
-    // pero nunca devolver vacío.
-    if (last.isNotEmpty) {
-      return last;
-    }
-
-    return owner; // prototipo
+    throw StateError('La cuenta no tiene un perfil institucional válido.');
   }
 
   // =====================================================
@@ -447,19 +299,18 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
       }
 
       // ✅ Sesión v2 completa (userId = PERFIL REAL, no tagueado)
-      await _setSessionInstitucionV2(institucionPerfilId: instPerfilIdClean);
-
-      // ✅ Persistir instOwner best-effort para estabilizar InstitucionMenuPage
-      await _ensureInstOwnerBestEffort(ownerId);
-
-      // Best-effort: mapping owner↔institución para documentos temporales
+      await CuentaService.iniciarSesionAutenticada(
+        ownerId,
+        recordarme: _rememberMe,
+      );
+      await CuentaService.activarContextoInstitucion(
+        ownerId,
+        instPerfilIdClean,
+      );
       await _registrarOwnerInstBestEffort(
         institucionPerfilId: instPerfilIdClean,
         ownerAccountId: ownerId,
       );
-
-      // Sesión canónica (sesion_cuenta) = ownerAccountId
-      await _setSesionCuenta(ownerId);
 
       // Best-effort: resolver nombre para UI
       String? nombreUI;

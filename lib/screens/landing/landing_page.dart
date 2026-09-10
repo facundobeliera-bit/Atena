@@ -188,18 +188,24 @@ class _LandingPageState extends State<LandingPage> {
     }
   }
 
-  Future<bool> _isInstitucionRoleHint() async {
-    try {
-      return await SessionService.isRole(SessionRole.institucion);
-    } catch (_) {
-      return false;
-    }
-  }
-
   Future<void> _boot() async {
     try {
-      final cuentaId = await CuentaService.getSesionCuentaId();
-      final sid = (cuentaId ?? '').trim();
+      final session = await SessionService.getSession();
+      final institutional = session?.role == SessionRole.institucion;
+      final instOwner = institutional
+          ? await SessionService.getInstitucionOwnerAccountIdLogueado()
+          : null;
+      final validInstitution =
+          institutional &&
+          instOwner != null &&
+          await CuentaService.perfilInstitucionalPertenece(
+            instOwner,
+            session!.userId,
+          );
+      final cuentaId = session?.role == SessionRole.cuenta
+          ? session!.userId
+          : await CuentaService.getSesionCuentaId();
+      final sid = (validInstitution ? instOwner : cuentaId)?.trim() ?? '';
 
       if (!mounted) return;
 
@@ -207,7 +213,7 @@ class _LandingPageState extends State<LandingPage> {
         final dl = _normalizeAllowedDeeplink(widget.deeplink);
 
         // ✅ HINT: si el role compat indica “institución”, vamos al HOME institucional
-        final isInstRole = await _isInstitucionRoleHint();
+        final isInstRole = validInstitution;
 
         // ✅ Navegación segura post-frame (evita race en initState/build)
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -223,8 +229,8 @@ class _LandingPageState extends State<LandingPage> {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (_) => InstitucionMenuPage(
-                  ownerAccountId: sid,
-                  institucionPerfilId: sid,
+                  ownerAccountId: instOwner,
+                  institucionPerfilId: session.userId,
                   institucionNombre: _txtInstitucionFallback(t),
                 ),
               ),

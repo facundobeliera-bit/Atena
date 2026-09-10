@@ -35,8 +35,8 @@
 //   actividadKey/actividadKeyScope/actividadKeyResolved, actividadLabel/activityLabel).
 //
 // ✅ FIX (feb 2026 · bug silencioso owner institucional):
-// - Si viene ownerAccountId desde el selector, lo setea en SessionService como
-//   owner institucional BEST-EFFORT (sin inferir). Además soporta ownerAccountId en route args.
+// - El propietario proviene de la sesión institucional validada.
+//   Los argumentos contradictorios se rechazan sin escribir la sesión.
 //
 // ✅ UX CLAVE (feb 2026 · claridad):
 // - AppBar muestra explícito: “<Actividad> — Administración”
@@ -770,26 +770,6 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     _routeArgsResolved = true;
   }
 
-  Future<void> _setInstOwnerBestEffort(String ownerAccountId) async {
-    final o = ownerAccountId.trim();
-    if (o.isEmpty) return;
-
-    try {
-      await SessionService.setInstitucionOwnerAccountId(
-        o,
-      ).timeout(const Duration(seconds: 3));
-      return;
-    } catch (_) {}
-
-    try {
-      // ignore: avoid_dynamic_calls
-      final dyn = SessionService as dynamic;
-      await (dyn.setInstitucionOwnerAccountId(ownerAccountId: o) as Future)
-          .timeout(const Duration(seconds: 3));
-      return;
-    } catch (_) {}
-  }
-
   dynamic _planRawForGuard(Institucion inst) {
     try {
       return inst.estadoPlan;
@@ -850,13 +830,6 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     } catch (_) {}
 
     try {
-      final owner = _ownerAccountIdResolved.trim();
-      if (owner.isNotEmpty) {
-        await _setInstOwnerBestEffort(owner);
-      }
-    } catch (_) {}
-
-    try {
       await _bootstrap().timeout(_kBootstrapTimeout);
     } on TimeoutException catch (e, st) {
       debugPrint('[ATENA][AREA][BOOT][TIMEOUT] $e\n$st');
@@ -902,6 +875,27 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     );
 
     final l10n = AppLocalizations.of(context);
+    final session = await SessionService.getSession();
+    final owner = await SessionService.getInstitucionOwnerAccountIdLogueado();
+    final requestedOwner = _ownerAccountIdResolved.trim();
+    final validContext =
+        session?.role == SessionRole.institucion &&
+        session!.userId == _instIdData &&
+        owner != null &&
+        (requestedOwner.isEmpty || requestedOwner == owner) &&
+        (widget.institucion == null ||
+            widget.institucion!.id == session.userId) &&
+        await CuentaService.perfilInstitucionalPertenece(owner, session.userId);
+    if (!mounted) return;
+    if (!validContext) {
+      setState(() {
+        _fatalError = l10n.sessionInvalidPleaseLogin;
+        _loading = false;
+      });
+      return;
+    }
+    // Navigation can confirm the owner, never redefine the active session.
+    _ownerAccountIdResolved = owner;
 
     if (_instIdData.isEmpty) {
       if (!mounted) return;

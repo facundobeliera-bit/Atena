@@ -149,8 +149,9 @@ class SessionService {
       await p.setBool(_kTemp, !rememberMe);
 
       if (role == SessionRole.cuenta) {
-        // Cuenta: nunca arrastrar owner institucional
+        // Cuenta: nunca arrastrar owner institucional ni DNI de otra cuenta.
         await p.remove(_kInstitucionOwnerAccountId);
+        if (userChanged || roleChanged) await p.remove(_kPerfilSeleccionadoDni);
       } else {
         // Institución: limpiar perfil seleccionado de cuenta SIEMPRE
         await p.remove(_kPerfilSeleccionadoDni);

@@ -877,21 +877,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
   DateTime _planFinDefault(DateTime inicio) =>
       inicio.add(const Duration(days: 30));
 
-  Future<void> _trySetInstOwnerBestEffort(String ownerAccountId) async {
-    final o = ownerAccountId.trim();
-    if (o.isEmpty) return;
-
-    try {
-      SessionService.setInstitucionOwnerAccountId(o);
-      return;
-    } catch (_) {}
-
-    try {
-      final dyn = SessionService as dynamic;
-      dyn.setInstitucionOwnerAccountId(ownerAccountId: o);
-    } catch (_) {}
-  }
-
   Future<String> _resolveOwnerBestEffort() async {
     final direct = _ownerIdManage.trim();
     if (direct.isNotEmpty) return direct;
@@ -945,6 +930,11 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     setState(() => _cargando = true);
 
     try {
+      final previousOwner = await CuentaService.getSesionCuentaId();
+      final previousAccount = previousOwner == null
+          ? null
+          : await CuentaService.getCuentaById(previousOwner);
+      final remember = previousAccount?.recordarme ?? false;
       await CuentaService.logoutCuenta().timeout(const Duration(seconds: 3));
 
       final auth = await InstitucionService.registrarInstitucion(
@@ -986,19 +976,15 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         planConfig: _buildPlanConfigFromSelections(),
       );
 
-      await InstitucionService.upsertInstitucion(inst)
-          .timeout(const Duration(seconds: 10));
+      await InstitucionService.upsertInstitucion(
+        inst,
+      ).timeout(const Duration(seconds: 10));
 
-      await CuentaService.setSesionCuentaId(ownerId, recordarme: true)
-          .timeout(const Duration(seconds: 4));
-
-      await SessionService.setSession(
-        userId: perfil.id,
-        role: SessionRole.institucion,
-        rememberMe: true,
-      ).timeout(const Duration(seconds: 4));
-
-      await _trySetInstOwnerBestEffort(ownerId);
+      await CuentaService.iniciarSesionAutenticada(
+        ownerId,
+        recordarme: remember,
+      );
+      await CuentaService.activarContextoInstitucion(ownerId, perfil.id);
 
       if ((_promo?.code ?? '').isNotEmpty) {
         try {
@@ -1104,13 +1090,14 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         actividadesExtracurriculares: inst.actividadesExtracurriculares,
       );
 
-      await InstitucionService.upsertInstitucion(updated)
-          .timeout(const Duration(seconds: 10));
+      await InstitucionService.upsertInstitucion(
+        updated,
+      ).timeout(const Duration(seconds: 10));
 
       _instActual = updated;
       _recompute();
 
-      await _trySetInstOwnerBestEffort(ownerId);
+      await CuentaService.activarContextoInstitucion(ownerId, perfilId);
 
       if (!mounted) return;
       setState(() {});

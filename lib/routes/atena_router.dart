@@ -567,15 +567,19 @@ class AtenaRouter {
     if (session != null && session.role == SessionRole.institucion) {
       final instPerfilId = _s(session.userId);
 
-      // Si owner falta en institución, usamos instOwner best-effort
-      if (ownerAccountId.isEmpty) {
-        try {
-          ownerAccountId = _s(
-            await SessionService.getInstitucionOwnerAccountIdLogueado(),
-          );
-        } catch (_) {
-          ownerAccountId = '';
-        }
+      ownerAccountId = _s(
+        await SessionService.getInstitucionOwnerAccountIdLogueado(),
+      );
+      if (ownerAccountId.isEmpty ||
+          !await CuentaService.perfilInstitucionalPertenece(
+            ownerAccountId,
+            instPerfilId,
+          )) {
+        return const _FallbackDecision(
+          role: null,
+          ownerAccountId: '',
+          institucionPerfilId: '',
+        );
       }
 
       return _FallbackDecision(
@@ -588,7 +592,9 @@ class AtenaRouter {
     // CUENTA (o sin rol)
     return _FallbackDecision(
       role: session?.role,
-      ownerAccountId: _normIdKey(ownerAccountId),
+      ownerAccountId: _normIdKey(
+        session?.role == SessionRole.cuenta ? session!.userId : ownerAccountId,
+      ),
       institucionPerfilId: '',
     );
   }

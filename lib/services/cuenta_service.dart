@@ -59,6 +59,7 @@
 // - Fuente única de verdad: ../models/cuentas/cuenta.dart
 
 import 'dart:convert';
+import 'session_service.dart';
 import 'dart:math';
 
 import '../models/cuentas/cuenta.dart';
@@ -293,6 +294,123 @@ class CuentaService {
     final storage = StorageService.instance;
     await storage.remove(_kSesionCuenta);
     await storage.remove(_kSesionCuentaTemp);
+    await SessionService.logout();
+  }
+
+  /// Llamar únicamente después de validar credenciales o registrar la cuenta.
+  static Future<void> iniciarSesionAutenticada(
+    String cuentaId, {
+    required bool recordarme,
+  }) async {
+    final cuenta = await getCuentaById(cuentaId);
+    if (cuenta == null) throw StateError('Cuenta autenticada inexistente.');
+    cuenta.recordarme = recordarme;
+    await _saveCuenta(cuenta);
+    await SessionService.logout();
+    await setSesionCuentaId(cuenta.id, recordarme: recordarme);
+    await activarContextoCuenta(cuenta.id);
+  }
+
+  /// Solo se activa contexto sobre una cuenta autenticada, no un ID de ruta.
+  static Future<Cuenta> _cuentaActiva(String cuentaId) async {
+    final id = _normIdKey(cuentaId);
+    final cuenta = await getCuentaById(id);
+    final legacy = await getSesionCuentaId();
+    final session = await SessionService.getSession();
+    final v2Owner = session?.role == SessionRole.institucion
+        ? await SessionService.getInstitucionOwnerAccountIdLogueado()
+        : session?.userId;
+    if (cuenta == null ||
+        id.isEmpty ||
+        (legacy != null && legacy != id) ||
+        (v2Owner != null && v2Owner != id) ||
+        (legacy != id && v2Owner != id)) {
+      throw StateError('La cuenta no coincide con la sesión autenticada.');
+    }
+    return cuenta;
+  }
+
+  /// Selector (sin perfil) o alumno; nunca conserva contexto institucional.
+  static Future<void> activarContextoCuenta(
+    String cuentaId, {
+    String? perfilAlumnoId,
+  }) async {
+    final cuenta = await _cuentaActiva(cuentaId);
+    PerfilAlumno? perfil;
+    if (perfilAlumnoId != null) {
+      perfil = await getPerfilAlumnoById(perfilAlumnoId);
+      final owner = await getOwnerAccountIdForPerfilAlumno(perfilAlumnoId);
+      if (perfil == null ||
+          owner != cuenta.id ||
+          _normIdKey(perfil.cuentaId) != cuenta.id ||
+          !cuenta.perfilesAlumnoIds.contains(perfil.id)) {
+        throw StateError('El alumno no pertenece a la cuenta autenticada.');
+      }
+    }
+    await setSesionCuentaId(cuenta.id, recordarme: cuenta.recordarme);
+    await SessionService.setSession(
+      userId: cuenta.id,
+      role: SessionRole.cuenta,
+      rememberMe: cuenta.recordarme,
+    );
+    await SessionService.setPerfilSeleccionado(perfil?.documento);
+    if (perfil != null) {
+      await setUltimoPerfil(cuenta.id, _encodeUltimoAlumno(perfil.id));
+    }
+    await _verificarContexto(cuenta.id, SessionRole.cuenta, cuenta.recordarme);
+  }
+
+  static Future<bool> perfilInstitucionalPertenece(
+    String owner,
+    String perfilId,
+  ) async {
+    final cuenta = await getCuentaById(owner);
+    final perfil = await getPerfilInstitucionById(perfilId);
+    return cuenta != null &&
+        perfil != null &&
+        await getOwnerAccountIdForPerfilInstitucion(perfilId) ==
+            _normIdKey(owner) &&
+        _normIdKey(perfil.cuentaId) == _normIdKey(owner) &&
+        cuenta.perfilesInstitucionIds
+            .map(_normIdKey)
+            .contains(_normIdKey(perfilId));
+  }
+
+  static Future<void> activarContextoInstitucion(
+    String cuentaId,
+    String perfilId,
+  ) async {
+    final cuenta = await _cuentaActiva(cuentaId);
+    final pid = _normIdKey(perfilId);
+    if (!await perfilInstitucionalPertenece(cuenta.id, pid)) {
+      throw StateError('La institución no pertenece a la cuenta autenticada.');
+    }
+    await setSesionCuentaId(cuenta.id, recordarme: cuenta.recordarme);
+    await SessionService.setSession(
+      userId: pid,
+      role: SessionRole.institucion,
+      rememberMe: cuenta.recordarme,
+    );
+    await SessionService.setInstitucionOwnerAccountId(cuenta.id);
+    await _verificarContexto(pid, SessionRole.institucion, cuenta.recordarme);
+    if (await SessionService.getInstitucionOwnerAccountIdLogueado() !=
+        cuenta.id) {
+      await logoutCuenta();
+      throw StateError('No se pudo establecer el propietario institucional.');
+    }
+    await setUltimoPerfil(cuenta.id, _encodeUltimoInstitucion(pid));
+  }
+
+  static Future<void> _verificarContexto(
+    String id,
+    SessionRole role,
+    bool remember,
+  ) async {
+    final s = await SessionService.getSession();
+    if (s?.userId != id || s?.role != role || s?.rememberMe != remember) {
+      await logoutCuenta();
+      throw StateError('No se pudo establecer la sesión.');
+    }
   }
 
   static Future<String?> getSesionCuentaId() async {
@@ -550,7 +668,9 @@ class CuentaService {
     );
 
     await _saveCuenta(cuenta);
+    await SessionService.logout();
     await setSesionCuentaId(cuenta.id, recordarme: recordarme);
+    await activarContextoCuenta(cuenta.id);
 
     return cuenta;
   }
@@ -575,7 +695,9 @@ class CuentaService {
     cuenta.recordarme = recordarme;
     await _saveCuenta(cuenta);
 
+    await SessionService.logout();
     await setSesionCuentaId(cuenta.id, recordarme: recordarme);
+    await activarContextoCuenta(cuenta.id);
 
     return cuenta;
   }

@@ -14,35 +14,9 @@
 // - /documentos?perfilId=...(&documentoId=...)
 // - ✅ /documentos?perfilId=...(&solicitudId=...)
 //
-// ✅ FIX BLOQUEANTE (FASE 2 · AHORA · INSTITUCIONES):
-// - Si la cuenta tiene SOLO perfiles de institución (y cero alumnos), esta pantalla NO debe mostrarse.
-// - Auto-redirige a InstitucionMenuPage (prioriza último perfil institución; si no, primero).
-//
-// ✅ FIX (feb 2026 · E2E):
-// - Sesión institucional usa userId = institucionPerfilId (para compat con guards que comparan institucionId logueada).
-// - OwnerAccountId operativo institucional se guarda en v2_session_instOwnerAccountId (SessionService.setInstitucionOwnerAccountId).
-//
-// ✅ FIX (feb 2026 · session persist):
-// - Para evitar “pantalla cargando” en InstitucionMenuPage cuando rememberMe=false,
-//   SIEMPRE persistimos SessionService.setSession(... rememberMe: true) para el runtime actual.
-//   El “Recordarme OFF” se controla con CuentaService (sesión temporal) y se limpia en boot/logout.
-//
-// ✅ FIX ANTI-BUG SILENCIOSO (feb 2026 · AHORA):
-// - Nunca “return” silencioso al abrir perfil institución.
-// - Si no se puede resolver instPerfilId: banner + snack + logs.
-// - En ONLY-INSTITUCIONES: si falla el auto-redirect, se desactiva modo redirect y se muestra UI normal.
-//
-// ✅ FIX CRÍTICO (feb 2026 · mismatch “sesión inválida” / cuenta cruzada):
-// - NO sobreescribir ownerId desde CuentaService.getSesionCuentaId() (puede venir stale de otra cuenta).
-//   En CuentaHome, el owner canónico SIEMPRE es widget.cuentaId.
-//
-// ✅ FIX CRÍTICO (feb 2026 · compat API real):
-// - Se elimina wrapper best-effort de setSesionCuentaId: ahora llamamos DIRECTO a CuentaService.setSesionCuentaId()
-//
-// ✅ FIX CRÍTICO (feb 2026 · BUG REAL “ownerTienePerfil=false” en InstitucionMenuPage):
-// - Antes de navegar a InstitucionMenuPage, hacemos “self-heal” canónico:
-//   si por cualquier razón el perfil institución NO está persistido en la lista del owner,
-//   lo insertamos en Cuenta.perfilesInstitucionIds y guardamos Cuenta (sin inventar perfiles).
+// El selector neutraliza el contexto institucional y requiere selección explícita.
+// CuentaService coordina identidad, propietario validado y Recordarme heredado.
+// Los perfiles ajenos o inconsistentes se rechazan, sin adoptar propietarios.
 //
 // ✅ FIX (feb 2026 · CONSISTENCIA CON CuentaService):
 // - Normalización local para comparar/guardar ids (trim + elimina whitespace interno) igual que CuentaService._normIdKey.
@@ -64,7 +38,6 @@ import '../../models/cuentas/cuenta.dart';
 import '../../routes/atena_deeplink.dart';
 import '../../services/alumno_service.dart';
 import '../../services/cuenta_service.dart';
-import '../../services/session_service.dart';
 import '../../ui/atena_assets.dart';
 
 import '../alumno/alumno_area_page.dart';
@@ -96,13 +69,6 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
 
   /// ✅ Guardia anti-doble navegación.
   bool _navegando = false;
-
-  /// ✅ Guardia anti-loop: auto-redirect institucional (solo instituciones)
-  bool _autoRedirectInstitucionHecho = false;
-
-  /// ✅ Si el auto-redirect falla, deshabilitamos el modo “only instituciones redirecting”
-  /// para que NO quede una UI “preparando” indefinida.
-  bool _autoRedirectInstitucionFallido = false;
 
   Cuenta? _cuenta;
 
@@ -139,12 +105,6 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
   // =====================================================
   static const String _lpAlumno = 'A|';
   static const String _lpInstitucion = 'I|';
-
-  String _encodeUltimoAlumno(String perfilId) =>
-      '$_lpAlumno${_normIdKey(perfilId)}';
-
-  String _encodeUltimoInstitucion(String perfilId) =>
-      '$_lpInstitucion${_normIdKey(perfilId)}';
 
   ({String tipo, String id}) _decodeUltimoPerfil(String raw) {
     final s = raw.trim();
@@ -253,9 +213,7 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
   }
 
   bool get _onlyInstitucionesUI =>
-      _perfilesAlumno.isEmpty &&
-      _perfilesInstitucion.isNotEmpty &&
-      !_autoRedirectInstitucionFallido;
+      _perfilesAlumno.isEmpty && _perfilesInstitucion.isNotEmpty;
 
   void _snack(String msg) {
     final m = msg.trim();
@@ -273,44 +231,6 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
   // ✅ SELF-HEAL CANÓNICO: asegurar que el owner “tenga” el perfil institución
   // (para que InstitucionMenuPage no marque ownerTienePerfil=false)
   // =====================================================
-  Future<void> _ensureOwnerHasInstitucionPerfil({
-    required String ownerAccountId,
-    required String institucionPerfilId,
-  }) async {
-    final owner = _normIdKey(ownerAccountId);
-    final pid = _normIdKey(institucionPerfilId);
-    if (owner.isEmpty || pid.isEmpty) return;
-
-    bool has = false;
-    try {
-      has = await CuentaService.ownerTienePerfil(
-        ownerAccountId: owner,
-        perfilId: pid,
-      );
-    } catch (_) {
-      has = false;
-    }
-    if (has) return;
-
-    debugPrint(
-      '[ATENA][CUENTA-HOME][SELF-HEAL] ownerTienePerfil=false -> insertando perfil institución en Cuenta (owner=$owner pid=$pid)',
-    );
-
-    final c = await CuentaService.getCuentaById(owner);
-    if (c == null) return;
-
-    final ids = c.perfilesInstitucionIds.map(_normIdKey).toList();
-    if (!ids.contains(pid)) {
-      c.perfilesInstitucionIds = List<String>.from(ids)..add(pid);
-      try {
-        await CuentaService.actualizarCuenta(c);
-      } catch (e) {
-        debugPrint(
-          '[ATENA][CUENTA-HOME][SELF-HEAL] actualizarCuenta failed: $e',
-        );
-      }
-    }
-  }
 
   @override
   void initState() {
@@ -446,8 +366,6 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
       _mostrarSugerenciaUltimoPerfil = false;
 
       // reset del hardening
-      _autoRedirectInstitucionHecho = false;
-      _autoRedirectInstitucionFallido = false;
 
       if (hasDeeplink) {
         _deeplinkProcesado = false;
@@ -466,6 +384,7 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         throw Exception('Cuenta no encontrada.');
       }
 
+      await CuentaService.activarContextoCuenta(cuentaId);
       final perfilesAlumno = await CuentaService.listarPerfilesAlumno(cuentaId);
       final perfilesInstitucion = await CuentaService.listarPerfilesInstitucion(
         cuentaId,
@@ -478,51 +397,6 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         _perfilesAlumno = perfilesAlumno;
         _perfilesInstitucion = perfilesInstitucion;
       });
-
-      // ✅ ONLY-INSTITUCIONES: auto-redirect (no mostrar HUB)
-      if (!_autoRedirectInstitucionHecho &&
-          perfilesAlumno.isEmpty &&
-          perfilesInstitucion.isNotEmpty) {
-        _autoRedirectInstitucionHecho = true;
-
-        PerfilInstitucion? target;
-
-        try {
-          final ultimoRaw = await CuentaService.getUltimoPerfil(
-            widget.cuentaId,
-          );
-          final up = (ultimoRaw ?? '').trim();
-          if (up.isNotEmpty) {
-            final decoded = _decodeUltimoPerfil(up);
-            if (decoded.tipo == 'institucion') {
-              final match = _buscarPerfilInstitucion(
-                perfilesInstitucion,
-                decoded.id,
-              );
-              if (match != null) target = match;
-            }
-          }
-        } catch (_) {}
-
-        target ??= perfilesInstitucion.first;
-
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          if (!mounted) return;
-          final ok = await _abrirPerfilInstitucion(target!);
-          if (!mounted) return;
-
-          // ✅ Si falló, salimos del “only instituciones redirecting”
-          if (!ok) {
-            final t = AppLocalizations.of(context);
-            setState(() {
-              _autoRedirectInstitucionFallido = true;
-              _error ??= t.commonError;
-            });
-          }
-        });
-
-        return;
-      }
 
       final handled = await _intentarResolverDeeplink(perfilesAlumno);
       if (handled) return;
@@ -724,8 +598,10 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         _deeplinkPendienteSinPerfil = null;
       }
 
-      // ignore: discarded_futures
-      CuentaService.setUltimoPerfil(widget.cuentaId, _encodeUltimoAlumno(p.id));
+      await CuentaService.activarContextoCuenta(
+        widget.cuentaId,
+        perfilAlumnoId: p.id,
+      );
       // ignore: discarded_futures
       _asegurarFichaAlumno(p);
 
@@ -773,8 +649,10 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         _deeplinkPendienteSinPerfil = null;
       }
 
-      // ignore: discarded_futures
-      CuentaService.setUltimoPerfil(widget.cuentaId, _encodeUltimoAlumno(p.id));
+      await CuentaService.activarContextoCuenta(
+        widget.cuentaId,
+        perfilAlumnoId: p.id,
+      );
       // ignore: discarded_futures
       _asegurarFichaAlumno(p);
 
@@ -944,8 +822,10 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
     if (_navegando) return;
 
     await _runNavigation(() async {
-      // ignore: discarded_futures
-      CuentaService.setUltimoPerfil(widget.cuentaId, _encodeUltimoAlumno(p.id));
+      await CuentaService.activarContextoCuenta(
+        widget.cuentaId,
+        perfilAlumnoId: p.id,
+      );
       // ignore: discarded_futures
       _asegurarFichaAlumno(p);
 
@@ -1049,80 +929,14 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         );
       }
 
-      // ignore: discarded_futures
-      CuentaService.setUltimoPerfil(
-        widget.cuentaId,
-        _encodeUltimoInstitucion(instId),
-      );
-
-      final c = _cuenta;
-      final recordar = (c?.recordarme == true);
-
       final nombre = _instNombre(p).trim();
-
-      debugPrint(
-        '[ATENA][CUENTA-HOME][OPEN-INST] ownerId=$ownerId instPerfilId=$instId recordar=$recordar',
-      );
-
-      // 1) Mantener sesión CUENTA (runtime siempre; persistencia según recordar)
-      // ✅ FIX CRÍTICO: NO envolver / no “best-effort”: API directa.
       try {
-        await CuentaService.setSesionCuentaId(
-          ownerId,
-          recordarme: recordar,
-        ).timeout(const Duration(seconds: 3));
+        await CuentaService.activarContextoInstitucion(ownerId, instId);
       } catch (e) {
-        debugPrint(
-          '[ATENA][CUENTA-HOME][OPEN-INST][ERR] setSesionCuentaId: $e',
-        );
         if (!mounted) return;
-        setState(() {
-          _error =
-              '${t.commonError}: ${e.toString().replaceFirst('Exception: ', '')}';
-        });
-        _snack(
-          '${t.commonError}: ${e.toString().replaceFirst('Exception: ', '')}',
-        );
-        navigated = false;
+        setState(() => _error = e.toString());
+        _snack(e.toString());
         return;
-      }
-
-      // 2) Sesión institucional v2
-      // ✅ FIX BLOQUEANTE: SIEMPRE persistimos SessionService para evitar guards “sin sesión”.
-      try {
-        await SessionService.setSession(
-          userId: instId, // 👈 institución: userId = institucionPerfilId
-          role: SessionRole.institucion,
-          rememberMe: true, // 🔒 runtime always (evita pantalla cargando)
-        ).timeout(const Duration(seconds: 4));
-
-        // ✅ CLAVE: ownerAccountId explícito (evita mismatch cuando userId != ownerId)
-        await SessionService.setInstitucionOwnerAccountId(
-          ownerId,
-        ).timeout(const Duration(seconds: 3));
-      } catch (e) {
-        debugPrint('[ATENA][CUENTA-HOME][OPEN-INST][ERR] SessionService: $e');
-        if (!mounted) return;
-        setState(() {
-          _error =
-              '${t.commonError}: ${e.toString().replaceFirst('Exception: ', '')}';
-        });
-        _snack(
-          '${t.commonError}: ${e.toString().replaceFirst('Exception: ', '')}',
-        );
-        navigated = false;
-        return;
-      }
-
-      // 3) ✅ SELF-HEAL: asegurar que el perfil institución esté persistido en CuentaService
-      // (evita "ownerTienePerfil=false" en InstitucionMenuPage)
-      try {
-        await _ensureOwnerHasInstitucionPerfil(
-          ownerAccountId: ownerId,
-          institucionPerfilId: instId,
-        );
-      } catch (_) {
-        // NO-OP
       }
 
       if (!mounted) return;
@@ -1319,40 +1133,6 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
     );
   }
 
-  Widget _buildOnlyInstitucionesRedirecting(BuildContext context) {
-    final t = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    final msg = (_autoRedirectInstitucionHecho && _navegando)
-        ? t.cuentaHomeRedirectingInstitution
-        : t.cuentaHomePreparingInstitution;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 14),
-            Text(
-              msg,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: (_cargando || _navegando) ? null : _cargar,
-              icon: const Icon(Icons.refresh),
-              label: Text(t.retry),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final cuenta = _cuenta;
@@ -1367,9 +1147,7 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
     final errorText = (_error ?? '').trim();
 
     final onlyInstituciones =
-        _perfilesAlumno.isEmpty &&
-        _perfilesInstitucion.isNotEmpty &&
-        !_autoRedirectInstitucionFallido;
+        _perfilesAlumno.isEmpty && _perfilesInstitucion.isNotEmpty;
 
     final shouldHideFab = onlyInstituciones;
 
@@ -1403,9 +1181,7 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         context,
         _cargando
             ? const Center(child: CircularProgressIndicator())
-            : (onlyInstituciones
-                  ? _buildOnlyInstitucionesRedirecting(context)
-                  : cuenta == null
+            : (cuenta == null
                   ? Center(
                       child: Text(
                         errorText.isEmpty ? t.commonError : errorText,
