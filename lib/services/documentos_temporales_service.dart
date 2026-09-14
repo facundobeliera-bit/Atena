@@ -13,10 +13,10 @@
 // - Deeplink: /documentos?ownerAccountId=...&perfilId=... (&documentoId=... / &solicitudId=... opcional)
 //
 // Nota:
-// - Storage en memoria (prototipo local). Luego se migra a SharedPrefs/Backend.
+// - Persistencia local durable mediante StorageService/SharedPreferences.
 //
 // ✅ HARDENING:
-// - Sin dependencia directa de CuentaService: registry en memoria institucionPerfilId -> ownerAccountId.
+// - Sin dependencia directa de CuentaService: registry persistente institucionPerfilId -> ownerAccountId.
 // - DEDUP notificaciones: idOverride opcional.
 // - Deeplink emitido incluye SIEMPRE ownerAccountId + perfilId.
 // - Payload normaliza claves: mantiene 'tipoDocumento' y agrega 'documentoTipo' (compat).
@@ -40,6 +40,7 @@
 
 import '../models/notificaciones/notificacion_atena.dart';
 import 'notificaciones_service.dart';
+import 'storage_service.dart';
 
 // =====================================================
 // TIPOS (CANÓNICOS)
@@ -198,14 +199,16 @@ typedef EstadoDocumentoTemporalAtena = EstadoDocumentoTemporal;
 
 class DocumentosTemporalesService {
   // =====================================================
-  // STORAGE (PROTOTIPO LOCAL - EN MEMORIA)
+  // STORAGE LOCAL DURABLE
   // =====================================================
 
-  static final Map<String, List<SolicitudDocumento>> _solicitudesPorPerfil =
-      <String, List<SolicitudDocumento>>{};
+  static final StorageService _storage = StorageService.instance;
 
-  static final Map<String, List<DocumentoTemporal>> _docsPorPerfil =
-      <String, List<DocumentoTemporal>>{};
+  static const String _kPerfiles = 'docs_temporales_v1_perfiles';
+  static const String _kSolicitudesPrefix = 'docs_temporales_v1_solicitudes_';
+  static const String _kDocumentosPrefix = 'docs_temporales_v1_documentos_';
+  static const String _kOwnerInstitucionPrefix =
+      'docs_temporales_v1_owner_institucion_';
 
   static const int _minTtlDays = 1;
   static const int _maxTtlDays = 30;
@@ -228,11 +231,6 @@ class DocumentosTemporalesService {
   // ✅ REGISTRO BEST-EFFORT (Institución perfil -> owner)
   // =====================================================
 
-  static final Map<String, String> _ownerPorPerfilInstitucion =
-      <String, String>{};
-
-  // 🔧 IMPORTANTE: esto es sync, pero lo dejamos Future para API estable.
-  // Con esto evitamos inconsistencias si luego migra a SharedPrefs/Backend.
   static Future<void> registrarOwnerDeInstitucion({
     required String institucionPerfilId,
     required String ownerAccountId,
@@ -240,15 +238,199 @@ class DocumentosTemporalesService {
     final pid = _normIdKey(institucionPerfilId);
     final oid = _normIdKey(ownerAccountId);
     if (pid.isEmpty || oid.isEmpty) return;
-    _ownerPorPerfilInstitucion[pid] = oid;
+    final ok = await _storage.setString('$_kOwnerInstitucionPrefix$pid', oid);
+    if (!ok) {
+      throw StateError('No se pudo persistir el propietario institucional.');
+    }
   }
 
-  static String? _resolveOwnerForInstitucionPerfil(String institucionPerfilId) {
+  static Future<String?> _resolveOwnerForInstitucionPerfil(
+    String institucionPerfilId,
+  ) async {
     final pid = _normIdKey(institucionPerfilId);
     if (pid.isEmpty) return null;
-    final v = _ownerPorPerfilInstitucion[pid];
+    final v = await _storage.getString('$_kOwnerInstitucionPrefix$pid');
     final vv = _normIdKey(v ?? '');
     return vv.isEmpty ? null : vv;
+  }
+
+  static String _kSolicitudes(String perfilId) =>
+      '$_kSolicitudesPrefix${_normIdKey(perfilId)}';
+
+  static String _kDocumentos(String perfilId) =>
+      '$_kDocumentosPrefix${_normIdKey(perfilId)}';
+
+  static Future<List<String>> _listarPerfilesRegistrados() async {
+    final raw = await _storage.getStringList(_kPerfiles);
+    final seen = <String>{};
+    return raw
+        .map(_normIdKey)
+        .where((id) => id.isNotEmpty && seen.add(id))
+        .toList(growable: false);
+  }
+
+  static Future<void> _registrarPerfil(String perfilId) async {
+    final perfil = _normIdKey(perfilId);
+    if (perfil.isEmpty) return;
+    final perfiles = await _listarPerfilesRegistrados();
+    if (perfiles.contains(perfil)) return;
+    final ok = await _storage.setStringList(_kPerfiles, [...perfiles, perfil]);
+    if (!ok) {
+      throw StateError('No se pudo persistir el índice documental.');
+    }
+  }
+
+  static Map<String, dynamic> _solicitudToMap(SolicitudDocumento s) =>
+      <String, dynamic>{
+        'id': s.id,
+        'institucionId': s.institucionId,
+        'ownerAccountId': s.ownerAccountId,
+        'perfilId': s.perfilId,
+        'tipo': s.tipo.name,
+        if ((s.mensaje ?? '').trim().isNotEmpty) 'mensaje': s.mensaje,
+        'createdAt': s.createdAt.toIso8601String(),
+        'estado': s.estado.name,
+      };
+
+  static SolicitudDocumento? _solicitudFromMap(Map<String, dynamic> map) {
+    final id = _normIdKey(map['id']?.toString() ?? '');
+    final institucionId = _normIdKey(map['institucionId']?.toString() ?? '');
+    final owner = _normIdKey(map['ownerAccountId']?.toString() ?? '');
+    final perfil = _normIdKey(map['perfilId']?.toString() ?? '');
+    final createdAt = DateTime.tryParse(map['createdAt']?.toString() ?? '');
+    final tipoName = map['tipo']?.toString() ?? '';
+    final estadoName = map['estado']?.toString() ?? '';
+    if (id.isEmpty ||
+        institucionId.isEmpty ||
+        owner.isEmpty ||
+        perfil.isEmpty ||
+        createdAt == null) {
+      return null;
+    }
+    TipoDocumento? tipo;
+    EstadoSolicitudDocumento? estado;
+    for (final value in TipoDocumento.values) {
+      if (value.name == tipoName) tipo = value;
+    }
+    for (final value in EstadoSolicitudDocumento.values) {
+      if (value.name == estadoName) estado = value;
+    }
+    if (tipo == null || estado == null) return null;
+    final mensaje = (map['mensaje']?.toString() ?? '').trim();
+    return SolicitudDocumento(
+      id: id,
+      institucionId: institucionId,
+      ownerAccountId: owner,
+      perfilId: perfil,
+      tipo: tipo,
+      mensaje: mensaje.isEmpty ? null : mensaje,
+      createdAt: createdAt,
+      estado: estado,
+    );
+  }
+
+  static Map<String, dynamic> _documentoToMap(
+    DocumentoTemporal d,
+  ) => <String, dynamic>{
+    'id': d.id,
+    'institucionSolicitanteId': d.institucionSolicitanteId,
+    'ownerAccountId': d.ownerAccountId,
+    'perfilId': d.perfilId,
+    'tipo': d.tipo.name,
+    'ref': d.ref,
+    if ((d.solicitudId ?? '').trim().isNotEmpty) 'solicitudId': d.solicitudId,
+    'uploadedAt': d.uploadedAt.toIso8601String(),
+    'expiresAt': d.expiresAt.toIso8601String(),
+    'estado': d.estado.name,
+  };
+
+  static DocumentoTemporal? _documentoFromMap(Map<String, dynamic> map) {
+    final id = _normIdKey(map['id']?.toString() ?? '');
+    final institucionId = _normIdKey(
+      map['institucionSolicitanteId']?.toString() ?? '',
+    );
+    final owner = _normIdKey(map['ownerAccountId']?.toString() ?? '');
+    final perfil = _normIdKey(map['perfilId']?.toString() ?? '');
+    final ref = _n(map['ref']?.toString() ?? '');
+    final uploadedAt = DateTime.tryParse(map['uploadedAt']?.toString() ?? '');
+    final expiresAt = DateTime.tryParse(map['expiresAt']?.toString() ?? '');
+    final tipoName = map['tipo']?.toString() ?? '';
+    final estadoName = map['estado']?.toString() ?? '';
+    if (id.isEmpty ||
+        institucionId.isEmpty ||
+        owner.isEmpty ||
+        perfil.isEmpty ||
+        ref.isEmpty ||
+        uploadedAt == null ||
+        expiresAt == null) {
+      return null;
+    }
+    TipoDocumento? tipo;
+    EstadoDocumentoTemporal? estado;
+    for (final value in TipoDocumento.values) {
+      if (value.name == tipoName) tipo = value;
+    }
+    for (final value in EstadoDocumentoTemporal.values) {
+      if (value.name == estadoName) estado = value;
+    }
+    if (tipo == null || estado == null) return null;
+    final solicitudId = _normIdKey(map['solicitudId']?.toString() ?? '');
+    return DocumentoTemporal(
+      id: id,
+      institucionSolicitanteId: institucionId,
+      ownerAccountId: owner,
+      perfilId: perfil,
+      tipo: tipo,
+      ref: ref,
+      solicitudId: solicitudId.isEmpty ? null : solicitudId,
+      uploadedAt: uploadedAt,
+      expiresAt: expiresAt,
+      estado: estado,
+    );
+  }
+
+  static Future<List<SolicitudDocumento>> _leerSolicitudes(
+    String perfilId,
+  ) async {
+    final raw = await _storage.getJsonList(_kSolicitudes(perfilId));
+    return raw
+        .map(_solicitudFromMap)
+        .whereType<SolicitudDocumento>()
+        .toList(growable: false);
+  }
+
+  static Future<void> _guardarSolicitudes(
+    String perfilId,
+    List<SolicitudDocumento> solicitudes,
+  ) async {
+    await _registrarPerfil(perfilId);
+    final ok = await _storage.setJsonList(
+      _kSolicitudes(perfilId),
+      solicitudes.map(_solicitudToMap).toList(growable: false),
+    );
+    if (!ok) throw StateError('No se pudieron persistir las solicitudes.');
+  }
+
+  static Future<List<DocumentoTemporal>> _leerDocumentos(
+    String perfilId,
+  ) async {
+    final raw = await _storage.getJsonList(_kDocumentos(perfilId));
+    return raw
+        .map(_documentoFromMap)
+        .whereType<DocumentoTemporal>()
+        .toList(growable: false);
+  }
+
+  static Future<void> _guardarDocumentos(
+    String perfilId,
+    List<DocumentoTemporal> documentos,
+  ) async {
+    await _registrarPerfil(perfilId);
+    final ok = await _storage.setJsonList(
+      _kDocumentos(perfilId),
+      documentos.map(_documentoToMap).toList(growable: false),
+    );
+    if (!ok) throw StateError('No se pudieron persistir los documentos.');
   }
 
   // =====================================================
@@ -399,7 +581,7 @@ class DocumentosTemporalesService {
     final instPid = _normIdKey(institucionPerfilId);
     if (instPid.isEmpty) return;
 
-    final owner = _resolveOwnerForInstitucionPerfil(instPid);
+    final owner = await _resolveOwnerForInstitucionPerfil(instPid);
     final o = _normIdKey(owner ?? '');
     if (o.isEmpty) return;
 
@@ -441,8 +623,8 @@ class DocumentosTemporalesService {
     if (perfil.isEmpty) throw Exception('perfilId vacío.');
     if (sid.isEmpty) throw Exception('solicitudId vacío.');
 
-    final list = _solicitudesPorPerfil[perfil];
-    if (list == null || list.isEmpty) return;
+    final list = await _leerSolicitudes(perfil);
+    if (list.isEmpty) return;
 
     final idx = list.indexWhere((e) => _normIdKey(e.id) == sid);
     if (idx < 0) return;
@@ -453,7 +635,7 @@ class DocumentosTemporalesService {
     final next = List<SolicitudDocumento>.from(list);
     final updated = cur.copyWith(estado: nuevoEstado);
     next[idx] = updated;
-    _solicitudesPorPerfil[perfil] = next;
+    await _guardarSolicitudes(perfil, next);
 
     if (!notificar) return;
 
@@ -533,8 +715,8 @@ class DocumentosTemporalesService {
       estado: EstadoSolicitudDocumento.pendiente,
     );
 
-    final list = _solicitudesPorPerfil[perfil] ?? <SolicitudDocumento>[];
-    _solicitudesPorPerfil[perfil] = [s, ...list];
+    final list = await _leerSolicitudes(perfil);
+    await _guardarSolicitudes(perfil, [s, ...list]);
 
     // IDs estables por evento (evita duplicados por reintentos)
     final notiIdAlumno = 'DOC_EVT_SOL_ALU_${s.id}';
@@ -625,11 +807,10 @@ class DocumentosTemporalesService {
     if (sid.isEmpty) throw Exception('solicitudId vacío.');
 
     String? foundPerfil;
-    for (final entry in _solicitudesPorPerfil.entries) {
-      for (final s in entry.value) {
+    for (final perfil in await _listarPerfilesRegistrados()) {
+      for (final s in await _leerSolicitudes(perfil)) {
         if (_normIdKey(s.id) == sid && _normIdKey(s.institucionId) == inst) {
-          // ✅ PERFIL ID del alumno (clave del map)
-          foundPerfil = entry.key;
+          foundPerfil = perfil;
           break;
         }
       }
@@ -657,11 +838,10 @@ class DocumentosTemporalesService {
     if (sid.isEmpty) throw Exception('solicitudId vacío.');
 
     String? foundPerfil;
-    for (final entry in _solicitudesPorPerfil.entries) {
-      for (final s in entry.value) {
+    for (final perfil in await _listarPerfilesRegistrados()) {
+      for (final s in await _leerSolicitudes(perfil)) {
         if (_normIdKey(s.id) == sid && _normIdKey(s.institucionId) == inst) {
-          // ✅ PERFIL ID del alumno (clave del map)
-          foundPerfil = entry.key;
+          foundPerfil = perfil;
           break;
         }
       }
@@ -682,7 +862,7 @@ class DocumentosTemporalesService {
   }) async {
     final perfil = _normIdKey(perfilId);
     if (perfil.isEmpty) return const <SolicitudDocumento>[];
-    final list = _solicitudesPorPerfil[perfil] ?? const <SolicitudDocumento>[];
+    final list = await _leerSolicitudes(perfil);
     final out = List<SolicitudDocumento>.from(list);
     out.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return out;
@@ -695,11 +875,11 @@ class DocumentosTemporalesService {
     if (inst.isEmpty) return const <SolicitudDocumento>[];
 
     final out = <SolicitudDocumento>[];
-    _solicitudesPorPerfil.forEach((_, list) {
-      for (final s in list) {
+    for (final perfil in await _listarPerfilesRegistrados()) {
+      for (final s in await _leerSolicitudes(perfil)) {
         if (_normIdKey(s.institucionId) == inst) out.add(s);
       }
-    });
+    }
 
     out.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return out;
@@ -757,8 +937,8 @@ class DocumentosTemporalesService {
       estado: EstadoDocumentoTemporal.activo,
     );
 
-    final list = _docsPorPerfil[perfil] ?? <DocumentoTemporal>[];
-    _docsPorPerfil[perfil] = [d, ...list];
+    final list = await _leerDocumentos(perfil);
+    await _guardarDocumentos(perfil, [d, ...list]);
 
     if (sid != null) {
       try {
@@ -848,7 +1028,7 @@ class DocumentosTemporalesService {
     final perfil = _normIdKey(perfilId);
     if (perfil.isEmpty) return const <DocumentoTemporal>[];
 
-    final list = _docsPorPerfil[perfil] ?? const <DocumentoTemporal>[];
+    final list = await _leerDocumentos(perfil);
 
     final now = DateTime.now();
     final out = <DocumentoTemporal>[];
@@ -880,7 +1060,7 @@ class DocumentosTemporalesService {
 
     if (changed) {
       // Persistir el estado expirado sin “resucitar” eliminados.
-      _docsPorPerfil[perfil] = List<DocumentoTemporal>.from(out);
+      await _guardarDocumentos(perfil, List<DocumentoTemporal>.from(out));
     }
 
     out.sort((a, b) => b.uploadedAt.compareTo(a.uploadedAt));
@@ -896,10 +1076,10 @@ class DocumentosTemporalesService {
     final now = DateTime.now();
     final out = <DocumentoTemporal>[];
 
-    final perfilKeys = _docsPorPerfil.keys.toList(growable: false);
+    final perfilKeys = await _listarPerfilesRegistrados();
 
     for (final perfilKey in perfilKeys) {
-      final list = _docsPorPerfil[perfilKey] ?? const <DocumentoTemporal>[];
+      final list = await _leerDocumentos(perfilKey);
       var changed = false;
       final nextPerfil = <DocumentoTemporal>[];
 
@@ -941,7 +1121,10 @@ class DocumentosTemporalesService {
       }
 
       if (changed) {
-        _docsPorPerfil[perfilKey] = List<DocumentoTemporal>.from(nextPerfil);
+        await _guardarDocumentos(
+          perfilKey,
+          List<DocumentoTemporal>.from(nextPerfil),
+        );
       }
     }
 
@@ -967,8 +1150,8 @@ class DocumentosTemporalesService {
     if (perfil.isEmpty) throw Exception('perfilId vacío.');
     if (docId.isEmpty) throw Exception('documentoId vacío.');
 
-    final list = _docsPorPerfil[perfil];
-    if (list == null || list.isEmpty) return;
+    final list = await _leerDocumentos(perfil);
+    if (list.isEmpty) return;
 
     final idx = list.indexWhere((d) => _normIdKey(d.id) == docId);
     if (idx < 0) return;
@@ -991,7 +1174,7 @@ class DocumentosTemporalesService {
       estado: EstadoDocumentoTemporal.eliminado,
       expiresAt: now,
     );
-    _docsPorPerfil[perfil] = next;
+    await _guardarDocumentos(perfil, next);
 
     final notiIdAlumno = 'DOC_EVT_DEL_ALU_${d.id}';
     final notiIdInst = 'DOC_EVT_DEL_INS_${d.id}';
@@ -1058,11 +1241,11 @@ class DocumentosTemporalesService {
     if (docId.isEmpty) throw Exception('documentoId vacío.');
 
     String? foundPerfil;
-    for (final entry in _docsPorPerfil.entries) {
-      for (final d in entry.value) {
+    for (final perfil in await _listarPerfilesRegistrados()) {
+      for (final d in await _leerDocumentos(perfil)) {
         if (_normIdKey(d.id) == docId &&
             _normIdKey(d.institucionSolicitanteId) == inst) {
-          foundPerfil = entry.key;
+          foundPerfil = perfil;
           break;
         }
       }
@@ -1094,8 +1277,8 @@ class DocumentosTemporalesService {
     final perfil = _normIdKey(perfilId);
     if (perfil.isEmpty) return 0;
 
-    final list = _docsPorPerfil[perfil];
-    if (list == null || list.isEmpty) return 0;
+    final list = await _leerDocumentos(perfil);
+    if (list.isEmpty) return 0;
 
     final now = DateTime.now();
     var removed = 0;
@@ -1118,7 +1301,7 @@ class DocumentosTemporalesService {
       next.add(d);
     }
 
-    _docsPorPerfil[perfil] = next;
+    await _guardarDocumentos(perfil, next);
 
     if (!notify || expirados.isEmpty) return removed;
 
@@ -1207,7 +1390,8 @@ class DocumentosTemporalesService {
 
     final toRemoveByPerfil = <String, List<DocumentoTemporal>>{};
 
-    _docsPorPerfil.forEach((perfilKey, list) {
+    for (final perfilKey in await _listarPerfilesRegistrados()) {
+      final list = await _leerDocumentos(perfilKey);
       final expirados = <DocumentoTemporal>[];
 
       for (final d in list) {
@@ -1224,7 +1408,7 @@ class DocumentosTemporalesService {
       if (expirados.isNotEmpty) {
         toRemoveByPerfil[perfilKey] = expirados;
       }
-    });
+    }
 
     if (toRemoveByPerfil.isEmpty) return 0;
 
@@ -1232,12 +1416,15 @@ class DocumentosTemporalesService {
       final perfilKey = entry.key;
       final expirados = entry.value;
 
-      final list = _docsPorPerfil[perfilKey] ?? <DocumentoTemporal>[];
+      final list = await _leerDocumentos(perfilKey);
       final ids = expirados.map((e) => _normIdKey(e.id)).toSet();
 
-      _docsPorPerfil[perfilKey] = list
-          .where((d) => !ids.contains(_normIdKey(d.id)))
-          .toList(growable: false);
+      await _guardarDocumentos(
+        perfilKey,
+        list
+            .where((d) => !ids.contains(_normIdKey(d.id)))
+            .toList(growable: false),
+      );
 
       removed += expirados.length;
 
