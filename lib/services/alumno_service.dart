@@ -447,24 +447,11 @@ class AlumnoService {
     }
   }
 
+  /// Legacy recovery is disabled: knowing an email does not verify identity.
   Future<String?> resetPasswordPorEmailPrototipo(String email) async {
-    final emailN = _normEmail(email);
-    final users = await _getUsuarios();
-
-    final idx = users.indexWhere((u) => _normEmail(u.email) == emailN);
-    if (idx == -1) return null;
-
-    final nueva = 'ATENA${Random().nextInt(900000) + 100000}';
-    final actual = users[idx];
-
-    users[idx] = AlumnoUsuario(
-      documento: actual.documento,
-      email: actual.email,
-      passwordHash: nueva,
+    throw UnsupportedError(
+      'La recuperación local no verificada está deshabilitada.',
     );
-
-    await _saveUsuarios(users);
-    return nueva;
   }
 
   // =====================================================
