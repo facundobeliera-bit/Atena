@@ -17,6 +17,7 @@ import '../../services/notificaciones_service.dart';
 import '../alumnos/alumno_buscar_instituciones_page.dart';
 import '../alumnos/alumno_calendario_page.dart';
 import '../alumnos/alumno_notificaciones_page.dart';
+import '../alumnos/alumno_mis_solicitudes_page.dart';
 import '../alumnos/alumno_pdfs_page.dart';
 
 import '../auth/alumno_login_page.dart';
@@ -220,6 +221,22 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
             ownerAccountId: _ownerAccountId,
             perfilId: _perfilId,
             alumno: perfil,
+          ),
+        ),
+      );
+    });
+  }
+
+  void _abrirMisSolicitudes() {
+    if (_navegando) return;
+    _runNavigation(() async {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AlumnoMisSolicitudesPage(
+            ownerAccountId: _ownerAccountId,
+            perfilId: _perfilId,
+            perfilNombre: _perfil?.nombreCompleto,
           ),
         ),
       );
@@ -588,6 +605,13 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
           ),
           child: Column(
             children: [
+              ListTile(
+                leading: const Icon(Icons.assignment),
+                title: Text(l10n.alumnoDashboardMisSolicitudes),
+                subtitle: Text(l10n.alumnoDashboardMisSolicitudesSub),
+                onTap: (_cargando || _navegando) ? null : _abrirMisSolicitudes,
+              ),
+              const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.search),
                 title: Text(l10n.alumnoBuscarInstituciones),

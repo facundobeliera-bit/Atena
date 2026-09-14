@@ -33,6 +33,7 @@ import '../../models/solicitudes/solicitud_alumno.dart';
 
 import '../../services/pdf/solicitud_pdf_service.dart';
 import '../../services/solicitudes_service.dart';
+import '../../services/cuenta_service.dart';
 
 class AlumnoMisSolicitudesPage extends StatefulWidget {
   /// Owner account (CANÓNICO)
@@ -46,11 +47,15 @@ class AlumnoMisSolicitudesPage extends StatefulWidget {
   /// Opcional: nombre del perfil (solo UI)
   final String? perfilNombre;
 
+  /// Solicitud que originó un acceso directo o una notificación.
+  final String? initialSolicitudId;
+
   const AlumnoMisSolicitudesPage({
     super.key,
     required this.ownerAccountId,
     this.perfilId,
     this.perfilNombre,
+    this.initialSolicitudId,
   });
 
   @override
@@ -140,6 +145,21 @@ class _AlumnoMisSolicitudesPageState extends State<AlumnoMisSolicitudesPage> {
         setState(() => _cargando = false);
         _snack(_l10n.alumnoMisSolicitudesInvalidOwner);
         return;
+      }
+
+      final activeOwner = (await CuentaService.getSesionCuentaId() ?? '')
+          .trim();
+      if (activeOwner != _owner) {
+        throw StateError('La sesión no corresponde a esta cuenta.');
+      }
+      if (!_modoOwner) {
+        final profileOwner =
+            (await CuentaService.getOwnerAccountIdForPerfilAlumno(_perfil) ??
+                    '')
+                .trim();
+        if (profileOwner != _owner) {
+          throw StateError('El perfil no pertenece a la cuenta activa.');
+        }
       }
 
       final List<SolicitudAlumno> list;
@@ -355,8 +375,21 @@ class _AlumnoMisSolicitudesPageState extends State<AlumnoMisSolicitudesPage> {
                 : _l10n.commonProfile,
           );
 
+    final initialId = (widget.initialSolicitudId ?? '').trim();
+    int initialTab = 0;
+    if (initialId.isNotEmpty) {
+      if (_confirmadas.any((s) => s.id.trim() == initialId)) {
+        initialTab = 1;
+      } else if (_rechazadas.any((s) => s.id.trim() == initialId)) {
+        initialTab = 2;
+      } else if (_canceladas.any((s) => s.id.trim() == initialId)) {
+        initialTab = 3;
+      }
+    }
+
     return DefaultTabController(
       length: 4,
+      initialIndex: initialTab,
       child: Scaffold(
         appBar: AppBar(
           title: Text(titulo),

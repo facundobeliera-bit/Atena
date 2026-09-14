@@ -55,6 +55,7 @@ import 'atena_deeplink.dart';
 // Pantallas
 import '../screens/alumnos/alumno_calendario_page.dart';
 import '../screens/alumnos/alumno_documentos_page.dart';
+import '../screens/alumnos/alumno_mis_solicitudes_page.dart';
 import '../screens/cuentas/cuenta_home_page.dart';
 
 // ✅ Institución: Plan (gestión)
@@ -271,7 +272,11 @@ class AtenaRouter {
     final path = _normalizeToPath(safeRaw);
 
     // Deeplinks canónicos que CuentaHome puede resolver.
-    if (path == '/calendario' || path == '/documentos') return true;
+    if (path == '/calendario' ||
+        path == '/documentos' ||
+        path == '/alumno/solicitudes') {
+      return true;
+    }
 
     // Rutas nombradas (auth / institucion/plan / institucion/perfil) NO deben reenviarse como deeplink.
     return false;
@@ -317,6 +322,13 @@ class AtenaRouter {
           return _fallbackGateway(settings, nameForParse);
         }
         return _buildDocumentosRoute(settings: settings, deeplink: dl);
+      }
+
+      if (dl.isSolicitudes) {
+        if (!_hasCanonOwnerPerfil(dl)) {
+          return _fallbackGateway(settings, nameForParse);
+        }
+        return _buildSolicitudesRoute(settings: settings, deeplink: dl);
       }
 
       return _fallbackGateway(settings, nameForParse);
@@ -698,6 +710,25 @@ class AtenaRouter {
         ownerAccountId: owner,
         perfilId: perfil,
         initialDocumentoId: deeplink.documentoId,
+        initialSolicitudId: deeplink.solicitudId,
+      ),
+    );
+  }
+
+  static Route<dynamic> _buildSolicitudesRoute({
+    required RouteSettings settings,
+    required AtenaDeeplink deeplink,
+  }) {
+    final owner = _normIdKey(_s(deeplink.ownerAccountId));
+    final perfil = _normIdKey(_s(deeplink.perfilId));
+    if (owner.isEmpty || perfil.isEmpty) {
+      return _fallbackGateway(settings, deeplink.toRouteString());
+    }
+    return MaterialPageRoute(
+      settings: settings,
+      builder: (_) => AlumnoMisSolicitudesPage(
+        ownerAccountId: owner,
+        perfilId: perfil,
         initialSolicitudId: deeplink.solicitudId,
       ),
     );

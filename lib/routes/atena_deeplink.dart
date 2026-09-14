@@ -73,6 +73,7 @@ class AtenaDeeplink {
 
   bool get isCalendario => _canonPath(path) == '/calendario';
   bool get isDocumentos => _canonPath(path) == '/documentos';
+  bool get isSolicitudes => _canonPath(path) == '/alumno/solicitudes';
 
   // =====================================================
   // Normalización básica
@@ -127,7 +128,7 @@ class AtenaDeeplink {
   // =====================================================
 
   AtenaDeeplink ensureCanonico({String? ownerAccountId, String? perfilId}) {
-    if (!isCalendario && !isDocumentos) return this;
+    if (!isCalendario && !isDocumentos && !isSolicitudes) return this;
 
     final oid = _normIdKey(_norm(ownerAccountId));
     final pid = _normIdKey(_norm(perfilId));
@@ -231,6 +232,11 @@ class AtenaDeeplink {
       } else if (did.isNotEmpty) {
         params['documentoId'] = did;
       }
+    }
+
+    if (pCanon == '/alumno/solicitudes') {
+      final sid = _normIdKey(_norm(solicitudId));
+      if (sid.isNotEmpty) params['solicitudId'] = sid;
     }
 
     if (params.isEmpty) return pCanon;
@@ -412,6 +418,8 @@ class AtenaDeeplink {
     } else if (pCanon == '/documentos') {
       solicitudIdFinal = solicitud.isEmpty ? null : solicitud;
       documentoIdFinal = docFinal;
+    } else if (pCanon == '/alumno/solicitudes') {
+      solicitudIdFinal = solicitud.isEmpty ? null : solicitud;
     }
 
     return AtenaDeeplink(

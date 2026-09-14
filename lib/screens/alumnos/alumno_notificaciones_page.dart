@@ -511,7 +511,11 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
       perfilId: pid,
     );
 
-    if (!ensured.isCalendario && !ensured.isDocumentos) return false;
+    if (!ensured.isCalendario &&
+        !ensured.isDocumentos &&
+        !ensured.isSolicitudes) {
+      return false;
+    }
 
     final route = ensured.toRouteString();
     if (!mounted) return true;
@@ -531,6 +535,15 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
     final l = AppLocalizations.of(context);
 
     switch (n.tipo) {
+      case TipoNotificacionAtena.confirmada:
+      case TipoNotificacionAtena.rechazada:
+      case TipoNotificacionAtena.solicitudCreada:
+      case TipoNotificacionAtena.solicitudCancelada:
+        return _NotiAction(
+          label: l.alumnoDashboardMisSolicitudes,
+          intent: _NotiIntent.detalle,
+        );
+
       case TipoNotificacionAtena.documentos:
       case TipoNotificacionAtena.documentacionActualizada:
       case TipoNotificacionAtena.documentoSolicitado:

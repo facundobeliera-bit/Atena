@@ -5,13 +5,14 @@
 // ✅ CIERRE FASE 2:
 // - “Buscar instituciones” habilitado (no puede quedar disabled).
 // - Navega a placeholder compilable para depurar flujo en Chrome.
-// - “Mis solicitudes” sigue placeholder hasta pegar screen real.
+// - “Mis solicitudes” abre la pantalla real del perfil activo.
 // - ✅ i18n REAL (sin fallbacks): AppLocalizations.of(context).<key>
 // - ✅ Theme/ColorScheme real (sin hardcode / sin withOpacity).
 // - ✅ Simplificación: helpers mínimos, menos ruido, misma funcionalidad.
 
 import 'package:flutter/material.dart';
 import 'package:atena_app/l10n/gen/app_localizations.dart';
+import '../alumnos/alumno_mis_solicitudes_page.dart';
 
 class AlumnoDashboardPage extends StatelessWidget {
   final String alumnoDocumento;
@@ -78,8 +79,7 @@ class AlumnoDashboardPage extends StatelessWidget {
               subtitle: Text(l10n.alumnoDashboardMisSolicitudesSub),
               onTap: () => _push(
                 context,
-                _AlumnoMisSolicitudesPlaceholderPage(
-                  alumnoDocumento: alumnoDocumento,
+                AlumnoMisSolicitudesPage(
                   ownerAccountId: ownerAccountId,
                   perfilId: perfilId,
                 ),
@@ -118,65 +118,6 @@ class AlumnoDashboardPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// =====================================================
-/// PLACEHOLDER – Mis Solicitudes
-/// =====================================================
-class _AlumnoMisSolicitudesPlaceholderPage extends StatelessWidget {
-  final String alumnoDocumento;
-  final String ownerAccountId;
-  final String perfilId;
-
-  const _AlumnoMisSolicitudesPlaceholderPage({
-    required this.alumnoDocumento,
-    required this.ownerAccountId,
-    required this.perfilId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    final cardColor = cs.surface.withValues(alpha: isDark ? 0.90 : 1.0);
-
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.alumnoMisSolicitudesTitle)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          elevation: 0,
-          color: cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.commonPendingConnect,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text('DNI: $alumnoDocumento'),
-                Text('ownerAccountId: $ownerAccountId'),
-                Text('perfilId: $perfilId'),
-                const SizedBox(height: 10),
-                Text(l10n.commonPasteRealScreenHint),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

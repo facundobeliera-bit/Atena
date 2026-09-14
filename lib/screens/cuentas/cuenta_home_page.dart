@@ -44,6 +44,7 @@ import '../alumno/alumno_area_page.dart';
 import '../alumno/alumno_perfil_registro_page.dart';
 import '../alumnos/alumno_calendario_page.dart';
 import '../alumnos/alumno_documentos_page.dart';
+import '../alumnos/alumno_mis_solicitudes_page.dart';
 
 // ✅ Institución: entrada FASE 2 (HOME institucional)
 import '../instituciones/institucion_menu_page.dart';
@@ -470,7 +471,7 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
   }
 
   bool _deeplinkSoportado(AtenaDeeplink dl) =>
-      dl.isCalendario || dl.isDocumentos;
+      dl.isCalendario || dl.isDocumentos || dl.isSolicitudes;
 
   Future<void> _runNavigation(Future<void> Function() fn) async {
     if (!mounted) return;
@@ -532,6 +533,24 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
             perfilId: perfilId.trim(),
             initialSolicitudId: sid.isEmpty ? null : sid,
             initialDocumentoId: (sid.isEmpty && did.isNotEmpty) ? did : null,
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> _navToSolicitudes({
+    required String perfilId,
+    String? solicitudId,
+  }) async {
+    await _runNavigation(() async {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => AlumnoMisSolicitudesPage(
+            ownerAccountId: widget.cuentaId,
+            perfilId: perfilId,
+            initialSolicitudId: solicitudId,
           ),
         ),
       );
@@ -630,6 +649,14 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         return true;
       }
 
+      if (ensured.isSolicitudes) {
+        await _navToSolicitudes(
+          perfilId: p.id,
+          solicitudId: ensured.solicitudId,
+        );
+        return true;
+      }
+
       return false;
     }
 
@@ -681,6 +708,14 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         return true;
       }
 
+      if (ensured.isSolicitudes) {
+        await _navToSolicitudes(
+          perfilId: p.id,
+          solicitudId: ensured.solicitudId,
+        );
+        return true;
+      }
+
       return false;
     }
 
@@ -690,7 +725,9 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         _deeplinkPendienteSinPerfil = dl;
         final destino = dl.isCalendario
             ? t.cuentaHomeDestinoCalendario
-            : t.cuentaHomeDestinoDocumentos;
+            : dl.isDocumentos
+            ? t.cuentaHomeDestinoDocumentos
+            : t.alumnoMisSolicitudesTitle;
         _error = t.cuentaHomeDeeplinkMissingPerfilId(destino);
       });
     } else {
@@ -865,6 +902,13 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
           await _navToDocumentos(
             perfilId: p.id,
             documentoId: ensured.documentoId,
+            solicitudId: ensured.solicitudId,
+          );
+          return;
+        }
+        if (ensured.isSolicitudes) {
+          await _navToSolicitudes(
+            perfilId: p.id,
             solicitudId: ensured.solicitudId,
           );
           return;
