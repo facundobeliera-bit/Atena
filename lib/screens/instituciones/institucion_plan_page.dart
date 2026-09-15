@@ -1436,7 +1436,7 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
                                         ? _tCurricularLabel(l10n)
                                         : (hasExt
                                               ? _tExtracurricularLabel(l10n)
-                                              : _tCommonError(l10n))),
+                                              : _tAtLeastOne(l10n))),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: cs.onSurfaceVariant,
                                 fontWeight: FontWeight.w700,

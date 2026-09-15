@@ -197,7 +197,18 @@ class _AlumnoRegistroPageState extends State<AlumnoRegistroPage> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Registro Alumno')),
+      appBar: AppBar(
+        title: const Text('Registro Alumno'),
+        leading: Navigator.of(context).canPop()
+            ? null
+            : IconButton(
+                tooltip: 'Volver al inicio',
+                onPressed: () => Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (_) => false),
+                icon: const Icon(Icons.home_outlined),
+              ),
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

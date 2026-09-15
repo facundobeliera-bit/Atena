@@ -7,10 +7,28 @@ class AlumnoForgotPasswordPage extends StatelessWidget {
 
   const AlumnoForgotPasswordPage({super.key, this.initialEmail});
 
+  void _volver(BuildContext context) {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop();
+      return;
+    }
+    navigator.pushNamedAndRemoveUntil('/', (_) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Recuperar contraseña')),
+      appBar: AppBar(
+        title: const Text('Recuperar contraseña'),
+        leading: Navigator.of(context).canPop()
+            ? null
+            : IconButton(
+                tooltip: 'Volver al inicio',
+                onPressed: () => _volver(context),
+                icon: const Icon(Icons.home_outlined),
+              ),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -32,7 +50,7 @@ class AlumnoForgotPasswordPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => _volver(context),
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('Volver al ingreso'),
                 ),
