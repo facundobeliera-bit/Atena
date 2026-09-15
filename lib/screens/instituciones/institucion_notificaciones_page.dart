@@ -32,10 +32,11 @@ import 'package:flutter/material.dart';
 import '../../l10n/gen/app_localizations.dart';
 
 // ✅ Sesión canónica
-import '../../services/cuenta_service.dart';
+import '../../services/session_service.dart';
 
 // ✅ Fuente de verdad de notificaciones
 import '../../services/notificaciones_service.dart';
+import '../../models/notificaciones/notificacion_atena.dart';
 
 // ✅ Navegación a solicitudes (tap inteligente)
 import 'institucion_mis_solicitudes_page.dart';
@@ -160,13 +161,21 @@ class _InstitucionNotificacionesPageState
       '[ATENA][NOTI] bootstrap start perfilId="$_perfilId" instNombre="${widget.institucionNombre.trim()}"',
     );
 
-    final owner = (await _getOwnerAccountIdSafe().timeout(
+    final session = await SessionService.getSession().timeout(
       const Duration(seconds: 3),
-    )).trim();
+    );
+    final sessionOwner =
+        await SessionService.getInstitucionOwnerAccountIdLogueado().timeout(
+          const Duration(seconds: 3),
+        );
+    final owner = (sessionOwner ?? '').trim();
 
     if (!mounted) return;
 
-    if (owner.isEmpty) {
+    if (session == null ||
+        session.role != SessionRole.institucion ||
+        session.userId.trim() != _perfilId ||
+        owner.isEmpty) {
       setState(() {
         _ownerAccountId = '';
         _items = const [];
@@ -238,15 +247,6 @@ class _InstitucionNotificacionesPageState
     }
 
     await _cargar();
-  }
-
-  Future<String> _getOwnerAccountIdSafe() async {
-    try {
-      final v = await CuentaService.getSesionCuentaId();
-      return (v ?? '').toString();
-    } catch (_) {
-      return '';
-    }
   }
 
   // ─────────────────────────────────────────────
@@ -467,6 +467,9 @@ class _InstitucionNotificacionesPageState
             institucionId: _perfilId,
             institucionNombre: instNombre,
             moduleKey: moduleKey.isEmpty ? null : moduleKey,
+            ownerAccountId: _ownerAccountId,
+            institucionPerfilId: _perfilId,
+            initialSolicitudId: _readString(noti, const ['solicitudId']),
           ),
         ),
       );
@@ -527,6 +530,35 @@ class _InstitucionNotificacionesPageState
 
   static String _readString(dynamic obj, List<String> keys) {
     try {
+      if (obj is NotificacionAtena) {
+        for (final key in keys) {
+          switch (key) {
+            case 'id':
+            case 'notificacionId':
+              return obj.id;
+            case 'titulo':
+            case 'title':
+              return obj.titulo;
+            case 'cuerpo':
+            case 'body':
+            case 'mensaje':
+            case 'message':
+              return obj.mensaje;
+            case 'tipo':
+            case 'type':
+            case 'evento':
+              return obj.tipo.name;
+            case 'deeplink':
+            case 'route':
+              final value = obj.deeplink?.trim() ?? '';
+              if (value.isNotEmpty) return value;
+          }
+          final value = obj.data?[key];
+          if (value is String) return value;
+          if (value != null) return value.toString();
+        }
+      }
+
       if (obj is Map) {
         for (final k in keys) {
           final v = obj[k];
@@ -558,6 +590,8 @@ class _InstitucionNotificacionesPageState
 
   static bool _readBool(dynamic obj, List<String> keys) {
     try {
+      if (obj is NotificacionAtena) return obj.leida;
+
       if (obj is Map) {
         for (final k in keys) {
           final v = obj[k];

@@ -66,6 +66,7 @@ import '../screens/instituciones/institucion_perfil_page.dart';
 
 // ✅ Institución: Menú (fallback rol institución)
 import '../screens/instituciones/institucion_menu_page.dart';
+import '../screens/instituciones/institucion_mis_solicitudes_page.dart';
 
 // Auth (forgot + registro)
 import '../screens/auth/alumno_forgot_password_page.dart';
@@ -436,6 +437,90 @@ class AtenaRouter {
     String routeName,
   ) {
     final n = _normalizeToPath(routeName);
+
+    if (n == '/institucion/solicitudes') {
+      final uri = Uri.tryParse(routeName);
+      final query = uri?.queryParameters ?? const <String, String>{};
+      final args = settings.arguments;
+      final argsMap = args is Map ? args.cast<dynamic, dynamic>() : null;
+
+      String fromQuery(String key) {
+        for (final entry in query.entries) {
+          if (_lowerEq(entry.key, key)) return _s(entry.value);
+        }
+        return '';
+      }
+
+      final requestedInstitution = _normIdKey(
+        fromQuery('institucionId').isNotEmpty
+            ? fromQuery('institucionId')
+            : (argsMap == null
+                  ? ''
+                  : _s(
+                      _pickArgString(argsMap, const <String>[
+                        'institucionPerfilId',
+                        'institucionId',
+                        'perfilId',
+                      ]),
+                    )),
+      );
+      final moduleKey = fromQuery('moduleKey').isNotEmpty
+          ? fromQuery('moduleKey')
+          : (argsMap == null
+                ? ''
+                : _s(_pickArgString(argsMap, const <String>['moduleKey'])));
+      final solicitudId = fromQuery('solicitudId').isNotEmpty
+          ? fromQuery('solicitudId')
+          : (argsMap == null
+                ? ''
+                : _s(_pickArgString(argsMap, const <String>['solicitudId'])));
+      final institutionName = argsMap == null
+          ? ''
+          : _s(
+              _pickArgString(argsMap, const <String>[
+                'institucionNombre',
+                'nombre',
+              ]),
+            );
+
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => FutureBuilder<_FallbackDecision>(
+          future: _resolveFallbackDecision(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final decision = snapshot.data;
+            final sessionInstitution = _normIdKey(
+              _s(decision?.institucionPerfilId),
+            );
+            final owner = _normIdKey(_s(decision?.ownerAccountId));
+            final matches =
+                decision?.role == SessionRole.institucion &&
+                sessionInstitution.isNotEmpty &&
+                owner.isNotEmpty &&
+                (requestedInstitution.isEmpty ||
+                    requestedInstitution == sessionInstitution);
+            if (!matches) {
+              return const Scaffold(
+                body: Center(child: Icon(Icons.lock_outline, size: 40)),
+              );
+            }
+            return InstitucionMisSolicitudesPage(
+              institucionId: sessionInstitution,
+              institucionNombre: institutionName,
+              moduleKey: moduleKey.isEmpty ? null : moduleKey,
+              ownerAccountId: owner,
+              institucionPerfilId: sessionInstitution,
+              initialSolicitudId: solicitudId.isEmpty ? null : solicitudId,
+            );
+          },
+        ),
+      );
+    }
 
     if (n == '/institucion/plan') {
       String? owner;

@@ -75,6 +75,7 @@ import '../services/notificaciones_service.dart' as noti;
 import 'extracurriculares_service.dart';
 import 'storage_service.dart';
 import 'instituciones_helpers.dart' as ih;
+import 'cuenta_service.dart';
 
 class SolicitudesException implements Exception {
   final String code;
@@ -605,6 +606,13 @@ class SolicitudesService {
       if (vv.isNotEmpty) return vv;
     } catch (_) {}
 
+    try {
+      final owner = _kid(
+        await CuentaService.getOwnerAccountIdForPerfilInstitucion(pid),
+      );
+      if (owner.isNotEmpty) return owner;
+    } catch (_) {}
+
     return null;
   }
 
@@ -682,6 +690,7 @@ class SolicitudesService {
       mensaje: parts.join('\n'),
       fecha: DateTime.now(),
       leida: false,
+      deeplink: deeplink,
       data: data,
     );
 
@@ -939,6 +948,7 @@ class SolicitudesService {
       mensaje: 'Solicitud enviada a ${base.institucionNombre}',
       fecha: DateTime.now(),
       leida: false,
+      deeplink: deeplinkAlumno,
       data: nAlumnoData,
     );
 
@@ -1520,6 +1530,7 @@ class SolicitudesService {
       mensaje: parts.join('\n'),
       fecha: DateTime.now(),
       leida: false,
+      deeplink: deeplinkAlumno,
       data: data,
     );
 

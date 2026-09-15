@@ -109,6 +109,9 @@ class InstitucionMisSolicitudesPage extends StatefulWidget {
   /// Si no viene, fallback = institucionId (canónico: institucionId = perfilId).
   final String? institucionPerfilId;
 
+  /// Solicitud que originó la navegación, para abrir su sección y priorizarla.
+  final String? initialSolicitudId;
+
   const InstitucionMisSolicitudesPage({
     super.key,
     required this.institucionId,
@@ -116,6 +119,7 @@ class InstitucionMisSolicitudesPage extends StatefulWidget {
     this.moduleKey,
     this.ownerAccountId,
     this.institucionPerfilId,
+    this.initialSolicitudId,
   });
 
   @override
@@ -134,6 +138,7 @@ class _InstitucionMisSolicitudesPageState
 
   /// ✅ Fuente de verdad UI: indica si se pidió filtro pero es inválido.
   bool _moduleKeyInvalida = false;
+  int _initialTabIndex = 0;
 
   // ✅ Anti-doble carga concurrente (prototipo local)
   bool _booting = false;
@@ -558,16 +563,37 @@ class _InstitucionMisSolicitudesPageState
       int byFechaDesc(SolicitudAlumno a, SolicitudAlumno b) =>
           b.fechaCreacion.compareTo(a.fechaCreacion);
 
-      pend.sort(byFechaDesc);
-      conf.sort(byFechaDesc);
-      rech.sort(byFechaDesc);
-      canc.sort(byFechaDesc);
+      final targetId = (widget.initialSolicitudId ?? '').trim();
+      int prioritizeTarget(SolicitudAlumno a, SolicitudAlumno b) {
+        if (targetId.isNotEmpty) {
+          if (a.id == targetId && b.id != targetId) return -1;
+          if (b.id == targetId && a.id != targetId) return 1;
+        }
+        return byFechaDesc(a, b);
+      }
+
+      pend.sort(prioritizeTarget);
+      conf.sort(prioritizeTarget);
+      rech.sort(prioritizeTarget);
+      canc.sort(prioritizeTarget);
+
+      var initialTab = 0;
+      if (targetId.isNotEmpty) {
+        if (conf.any((s) => s.id == targetId)) {
+          initialTab = 1;
+        } else if (rech.any((s) => s.id == targetId)) {
+          initialTab = 2;
+        } else if (canc.any((s) => s.id == targetId)) {
+          initialTab = 3;
+        }
+      }
 
       setState(() {
         _pendientes = pend;
         _confirmadas = conf;
         _rechazadas = rech;
         _canceladas = canc;
+        _initialTabIndex = initialTab;
         _cargando = false;
       });
 
@@ -823,7 +849,9 @@ class _InstitucionMisSolicitudesPageState
     final subtitle = _filtroAplicado ? _moduleLabel(_moduleKey, l10n) : '';
 
     return DefaultTabController(
+      key: ValueKey(_initialTabIndex),
       length: 4,
+      initialIndex: _initialTabIndex,
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.requestsTitleWithInstitution(nombre, subtitle)),
