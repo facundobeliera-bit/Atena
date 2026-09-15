@@ -59,6 +59,7 @@ import 'institucion_perfil_page.dart' as perfil_page;
 
 // ✅ SELECTOR (Actividad → Perfiles → Área) — alias para evitar colisión
 import 'institucion_perfiles_selector_page.dart' as selector_page;
+import 'institucion_respuestas_calendario_page.dart';
 
 // ✅ PLAN habilitación (canónico)
 import '../../guards/plan_habilitacion_guard.dart';
@@ -101,6 +102,7 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
   bool _navPlan = false;
   bool _navPerfil = false;
   bool _navAdmin = false;
+  bool _navCalendarResponses = false;
 
   bool _refreshing = false;
 
@@ -865,6 +867,32 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
     }
   }
 
+  Future<void> _openCalendarResponses() async {
+    if (_navCalendarResponses) return;
+    _navCalendarResponses = true;
+
+    try {
+      if (!mounted) return;
+      final ok = await _validateSessionOrFailSnack();
+      if (!ok || !mounted) return;
+
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => InstitucionRespuestasCalendarioPage(
+            ownerAccountId: _ownerId,
+            institucionId: _instPerfilId,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      _toast('${l10n.commonError}: $e');
+    } finally {
+      _navCalendarResponses = false;
+    }
+  }
+
   String _fatalMessage(BuildContext context, _FatalReason reason) {
     final l10n = AppLocalizations.of(context);
     switch (reason) {
@@ -1089,6 +1117,17 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
                     : () {
                         // ignore: discarded_futures
                         _openAdmin();
+                      },
+              ),
+              _bigActionCard(
+                icon: Icons.how_to_reg_outlined,
+                title: 'Respuestas de calendario',
+                subtitle: 'Consultá las respuestas de alumnos a tus eventos.',
+                onTap: _navCalendarResponses
+                    ? null
+                    : () {
+                        // ignore: discarded_futures
+                        _openCalendarResponses();
                       },
               ),
             ],

@@ -38,6 +38,30 @@ import '../models/notificaciones/notificacion_atena.dart';
 
 enum RsvpStatusAtena { pending, yes, no, maybe }
 
+class RespuestaCalendarioInstitucion {
+  final String id;
+  final String institucionId;
+  final String ownerAccountId;
+  final String perfilId;
+  final String eventId;
+  final String dateKey;
+  final RsvpStatusAtena status;
+  final DateTime respondedAt;
+  final String eventTitle;
+
+  const RespuestaCalendarioInstitucion({
+    required this.id,
+    required this.institucionId,
+    required this.ownerAccountId,
+    required this.perfilId,
+    required this.eventId,
+    required this.dateKey,
+    required this.status,
+    required this.respondedAt,
+    required this.eventTitle,
+  });
+}
+
 class AlumnoCalendarioInteraccionesService {
   AlumnoCalendarioInteraccionesService._();
   static final AlumnoCalendarioInteraccionesService instance =
@@ -1091,6 +1115,7 @@ class AlumnoCalendarioInteraccionesService {
         payload: {
           'rsvpStatus': next,
           'updatedAtIso': _str(e['rsvpUpdatedAtIso']),
+          'eventTitle': _str(e['title']),
         },
       );
     }
@@ -1114,6 +1139,87 @@ class AlumnoCalendarioInteraccionesService {
       if (m is Map) out.add(Map<String, dynamic>.from(m));
     }
     return out;
+  }
+
+  /// Devuelve la última respuesta vigente de cada alumno para cada evento.
+  /// Los demás mensajes técnicos del outbox no forman parte de este contrato.
+  Future<List<RespuestaCalendarioInstitucion>> listarRespuestasInstitucion(
+    String institucionId,
+  ) async {
+    final inst = _normIdKey(institucionId);
+    if (inst.isEmpty) return const <RespuestaCalendarioInstitucion>[];
+
+    final raw = await listarOutboxInstitucion(inst);
+    final latest = <String, RespuestaCalendarioInstitucion>{};
+
+    for (final entry in raw) {
+      if (_str(entry['kind']) != 'rsvp_changed') continue;
+      if (_normIdKey(_str(entry['institucionId'])) != inst) continue;
+
+      final owner = _normIdKey(_str(entry['ownerAccountId']));
+      final perfil = _normIdKey(_str(entry['perfilId']));
+      final eventId = _normIdKey(_str(entry['eventId']));
+      final dateKey = _str(entry['date']);
+      final payloadRaw = entry['payload'];
+      final payload = payloadRaw is Map
+          ? Map<String, dynamic>.from(payloadRaw)
+          : const <String, dynamic>{};
+      final statusRaw = _str(payload['rsvpStatus']).toLowerCase();
+      final status = _parseRsvp(statusRaw);
+      final respondedAt =
+          DateTime.tryParse(_str(payload['updatedAtIso'])) ??
+          DateTime.tryParse(_str(entry['createdAtIso']));
+
+      if (owner.isEmpty ||
+          perfil.isEmpty ||
+          eventId.isEmpty ||
+          dateKey.isEmpty ||
+          respondedAt == null ||
+          status == RsvpStatusAtena.pending) {
+        continue;
+      }
+
+      var eventTitle = _str(payload['eventTitle']);
+      if (eventTitle.isEmpty) {
+        try {
+          final events = await listarEventos(
+            ownerAccountId: owner,
+            perfilId: perfil,
+          );
+          for (final event in events) {
+            if (_normIdKey(_str(event['id'])) != eventId) continue;
+            if (_normIdKey(_str(event['institucionId'])) != inst) continue;
+            eventTitle = _str(event['title']);
+            break;
+          }
+        } catch (_) {
+          // La respuesta sigue siendo consumible aunque el evento o perfil
+          // histórico ya no pueda resolverse.
+        }
+      }
+
+      final response = RespuestaCalendarioInstitucion(
+        id: _normIdKey(_str(entry['id'])),
+        institucionId: inst,
+        ownerAccountId: owner,
+        perfilId: perfil,
+        eventId: eventId,
+        dateKey: dateKey,
+        status: status,
+        respondedAt: respondedAt,
+        eventTitle: eventTitle,
+      );
+      final key = '$owner::$perfil::$eventId';
+      final previous = latest[key];
+      if (previous == null ||
+          response.respondedAt.isAfter(previous.respondedAt)) {
+        latest[key] = response;
+      }
+    }
+
+    final responses = latest.values.toList(growable: false)
+      ..sort((a, b) => b.respondedAt.compareTo(a.respondedAt));
+    return responses;
   }
 
   Future<void> clearOutboxInstitucion(String institucionId) async {
