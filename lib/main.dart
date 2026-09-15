@@ -28,6 +28,7 @@ import 'services/session_service.dart';
 import 'services/cuenta_service.dart';
 
 import 'screens/landing/landing_page.dart';
+import 'screens/alumno/alumno_area_page.dart';
 import 'screens/cuentas/cuenta_home_page.dart';
 import 'screens/instituciones/institucion_menu_page.dart';
 
@@ -132,12 +133,13 @@ class _AtenaAppState extends State<AtenaApp> {
     }
   }
 
-  Route<dynamic> _routeBootRoot() {
+  Route<dynamic> _routeBootRoot({bool restoreActiveStudent = false}) {
     return MaterialPageRoute(
       settings: const RouteSettings(name: '/'),
       builder: (_) => _AtenaBootGate(
         locale: _locale,
         themeMode: _themeMode,
+        restoreActiveStudent: restoreActiveStudent,
         onLocaleChanged: _onLocaleChanged,
         onThemeModeChanged: _onThemeModeChanged,
       ),
@@ -196,9 +198,10 @@ class _AtenaAppState extends State<AtenaApp> {
       ],
       onGenerateInitialRoutes: (initialRoute) {
         final route = (_initialDeeplink ?? initialRoute).trim();
-        return <Route<dynamic>>[
-          _onGenerateRoute(RouteSettings(name: route.isEmpty ? '/' : route)),
-        ];
+        if (route.isEmpty || route == '/') {
+          return <Route<dynamic>>[_routeBootRoot(restoreActiveStudent: true)];
+        }
+        return <Route<dynamic>>[_onGenerateRoute(RouteSettings(name: route))];
       },
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: AtenaRouter.onUnknownRoute,
@@ -209,12 +212,14 @@ class _AtenaAppState extends State<AtenaApp> {
 class _AtenaBootGate extends StatefulWidget {
   final Locale? locale;
   final ThemeMode themeMode;
+  final bool restoreActiveStudent;
   final Future<void> Function(Locale?) onLocaleChanged;
   final Future<void> Function(ThemeMode) onThemeModeChanged;
 
   const _AtenaBootGate({
     required this.locale,
     required this.themeMode,
+    required this.restoreActiveStudent,
     required this.onLocaleChanged,
     required this.onThemeModeChanged,
   });
@@ -327,7 +332,26 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
         return;
       }
 
+      // Un reload conserva el alumno que estaba efectivamente activo sólo si
+      // el perfil, su owner y los dos marcadores persistidos siguen siendo
+      // coherentes con la cuenta autenticada.
+      final activeStudent = widget.restoreActiveStudent
+          ? await CuentaService.getPerfilAlumnoActivoValidado(userId)
+          : null;
       if (!mounted) return;
+      if (activeStudent != null) {
+        nav.pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => AlumnoAreaPage(
+              documentoAlumno: activeStudent.documento,
+              cuentaId: userId,
+              perfilId: activeStudent.id,
+            ),
+          ),
+        );
+        return;
+      }
+
       nav.pushReplacement(
         MaterialPageRoute(
           builder: (_) =>

@@ -232,6 +232,55 @@ class CuentaService {
     return null;
   }
 
+  /// Devuelve el alumno que estaba activamente seleccionado antes de un
+  /// reinicio, únicamente si todos los datos persistidos describen el mismo
+  /// contexto autenticado.
+  static Future<PerfilAlumno?> getPerfilAlumnoActivoValidado(
+    String cuentaId,
+  ) async {
+    final owner = _normIdKey(cuentaId);
+    if (owner.isEmpty) return null;
+
+    final session = await SessionService.getSession();
+    final legacyOwner = await getSesionCuentaId();
+    if (session == null ||
+        session.role != SessionRole.cuenta ||
+        _normIdKey(session.userId) != owner ||
+        _normIdKey(legacyOwner ?? '') != owner) {
+      return null;
+    }
+
+    final selectedDocument = _normIdKey(
+      await SessionService.getPerfilSeleccionado() ?? '',
+    );
+    final lastProfile = (await getUltimoPerfil(owner) ?? '').trim();
+    if (selectedDocument.isEmpty || !lastProfile.startsWith(_lpAlumno)) {
+      return null;
+    }
+
+    final profileId = _normIdKey(_stripUltimoPerfilTag(lastProfile));
+    if (profileId.isEmpty) return null;
+
+    final account = await getCuentaById(owner);
+    final profile = await getPerfilAlumnoById(profileId);
+    if (account == null || profile == null) return null;
+
+    final accountHasProfile = account.perfilesAlumnoIds
+        .map(_normIdKey)
+        .contains(profileId);
+    final profileOwner = _normIdKey(
+      (profile.ownerAccountId ?? profile.cuentaId).trim(),
+    );
+    if (!accountHasProfile ||
+        _normIdKey(profile.cuentaId) != owner ||
+        profileOwner != owner ||
+        _normIdKey(profile.documento) != selectedDocument) {
+      return null;
+    }
+
+    return profile;
+  }
+
   static Future<void> clearUltimoPerfil(String cuentaId) async {
     return instance.clearUltimoPerfilInst(cuentaId);
   }

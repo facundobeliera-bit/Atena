@@ -306,7 +306,7 @@ void main() {
         remember ? owner : isNull,
       );
       expect(
-        find.byType(CuentaHomePage),
+        find.byType(AlumnoAreaPage),
         remember ? findsOneWidget : findsNothing,
       );
       expect(find.byType(InstitucionMenuPage), findsNothing);
