@@ -24,7 +24,7 @@
 // - Emisión de “Fichas Extracurriculares” (institución → alumnos) BACKEND-READY:
 //   * Destinatarios confirmados por módulo (ownerAccountId + perfilId).
 //   * Emisión: Notificación CANÓNICA (owner inbox) usando NotificacionesService.
-//   * Calendario: pendiente de integración canónica hasta ver CalendarioService.
+//   * Calendario: usa AlumnoCalendarioInteraccionesService cuando la emisión lo solicita.
 //
 // Importante:
 // - Persistencia grupos: lista completa por institución.
@@ -37,6 +37,7 @@ import 'dart:convert';
 
 import 'storage_service.dart';
 import 'notificaciones_service.dart';
+import 'alumno_calendario_interacciones_service.dart';
 
 import '../models/extracurriculares/bloque_extracurricular.dart';
 import '../models/extracurriculares/grupo_extracurricular.dart';
@@ -468,6 +469,11 @@ class ExtracurricularesService {
     final bloqueLabel = _sTrim(payload['bloqueLabel']);
     final title = _sTrim(payload['title']);
     final content = _sTrim(payload['content']);
+    final addToCalendar = payload['addToCalendar'] == true;
+    final requiresRsvp = payload['requiresRsvp'] == true;
+    final rsvpPolicy = _sTrim(payload['rsvpPolicy']).isEmpty
+        ? 'optional'
+        : _sTrim(payload['rsvpPolicy']);
 
     final fichaBase = <String, dynamic>{
       'version': 1,
@@ -509,7 +515,7 @@ class ExtracurricularesService {
 
       // ✅ Deeplink canónico (se re-canoniza igual por NotificacionesService).
       final deeplinkRaw =
-          '/calendario?ownerAccountId=$owner&perfilId=$perfil&date=$date&time=$time&fichaId=$fichaId';
+          '/calendario?ownerAccountId=$owner&perfilId=$perfil&date=$date&time=$time&itemId=$fichaId&fichaId=$fichaId';
 
       final deeplink = AtenaDeeplink.ensureCanonicoString(
         deeplinkRaw,
@@ -551,10 +557,36 @@ class ExtracurricularesService {
         continue;
       }
 
-      // ⚠️ Calendario canónico: NO se escribe acá hasta ver CalendarioService real.
-      // En cuanto me pegues CalendarioService, lo integramos y queda E2E:
-      // - Upsert evento (owner calendar)
-      // - deeplink a detalle “Ficha Extracurricular”
+      if (addToCalendar) {
+        try {
+          await AlumnoCalendarioInteraccionesService.instance.upsertEvento(
+            ownerAccountId: owner,
+            perfilId: perfil,
+            notificarOwner: false,
+            evento: <String, dynamic>{
+              'id': fichaId,
+              'date': date,
+              'time': time,
+              'title': title.isEmpty ? 'Ficha extracurricular' : title,
+              'note': content,
+              'type': 'extracurricular',
+              'source': 'institucion',
+              'institucionId': institucionId,
+              'moduleKey': moduleKey,
+              'locked': true,
+              'allowStudentDelete': false,
+              'allowStudentEdit': false,
+              'requiresRsvp': requiresRsvp,
+              'rsvpPolicy': rsvpPolicy,
+              'rsvpStatus': 'pending',
+              'deeplink': deeplink,
+            },
+          );
+        } catch (_) {
+          // La notificación ya fue entregada; un fallo de calendario no debe
+          // impedir que el alumno reciba el comunicado.
+        }
+      }
     }
   }
 
