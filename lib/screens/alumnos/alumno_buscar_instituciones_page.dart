@@ -7,6 +7,7 @@ import '../../models/instituciones/grupo_curricular.dart';
 import '../../models/instituciones/instituciones_integrado.dart';
 import '../../services/alumno_instituciones_search_service.dart';
 import 'alumno_seleccion_grupo_extracurricular_page.dart';
+import 'alumno_institucion_perfil_page.dart';
 import 'alumno_vacantes_curriculares_page.dart';
 
 class AlumnoBuscarInstitucionesPage extends StatefulWidget {
@@ -596,52 +597,16 @@ class _AlumnoBuscarInstitucionesPageState
   }
 
   void _mostrarInstitucion(Institucion inst) {
-    final extra = inst.actividadesExtracurriculares.where((a) => a.activa).toList();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) => SafeArea(child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [Expanded(child: Text(inst.nombre, style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900))), const Chip(label: Text('Perfil institucional'))]),
-          const SizedBox(height: 10),
-          if (inst.direccion.trim().isNotEmpty) Text('Dirección: ${inst.direccion.trim()}'),
-          if (inst.pais.trim().isNotEmpty) Text('País: ${inst.pais.trim()}'),
-          if (inst.ciudad.trim().isNotEmpty) Text('Localidad: ${inst.ciudad.trim()}'),
-          if (inst.provincia.trim().isNotEmpty) Text('Provincia: ${inst.provincia.trim()}'),
-          Text('Modalidad: ${_modalidadLabel(inst.modalidad)}'),
-          const SizedBox(height: 14),
-          if (inst.curricular || inst.extracurricular) ...[
-            const Text('Propuestas disponibles', style: TextStyle(fontWeight: FontWeight.w900)),
-            const SizedBox(height: 6),
-            Wrap(spacing: 6, runSpacing: 6, children: [if (inst.curricular) const Chip(label: Text('Curricular')), if (inst.extracurricular) const Chip(label: Text('Extracurricular'))]),
-          ],
-          if (extra.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            const Text('Propuestas extracurriculares', style: TextStyle(fontWeight: FontWeight.w900)),
-            const SizedBox(height: 6),
-            for (final a in extra) ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(a.nombre),
-              subtitle: Text([
-                a.bloque.label,
-                if ((a.edades ?? '').trim().isNotEmpty) 'Edades: ${a.edades}',
-                if ((a.precio ?? '').trim().isNotEmpty) 'Valor: ${a.precio}',
-              ].join(' • ')),
-            ),
-          ],
-          const SizedBox(height: 14),
-          if (inst.curricular || inst.extracurricular) Row(children: [Expanded(child: FilledButton.icon(
-            onPressed: () { Navigator.pop(ctx); _solicitarVacante(inst); },
-            icon: const Icon(Icons.how_to_reg_outlined),
-            label: const Text('Solicitar vacante'),
-          ))]),
-        ]),
-      )),
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => AlumnoInstitucionPerfilPage(
+          institucion: inst,
+          onSolicitarVacante: () => _solicitarVacante(inst),
+        ),
+      ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
