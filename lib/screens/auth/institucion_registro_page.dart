@@ -315,6 +315,15 @@ class _InstitucionRegistroPageState extends State<InstitucionRegistroPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.institucionRegistroAppBar),
+        leading: Navigator.of(context).canPop()
+            ? null
+            : IconButton(
+                tooltip: 'Volver al inicio',
+                onPressed: () => Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (_) => false),
+                icon: const Icon(Icons.home_outlined),
+              ),
         backgroundColor: transparentSurface,
         surfaceTintColor: transparentSurface,
         elevation: 0,

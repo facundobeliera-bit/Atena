@@ -64,6 +64,10 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
 
   String? _error;
 
+  void _volverAlInicio() {
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -551,6 +555,13 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.alumnoLoginAppBar),
+        leading: Navigator.of(context).canPop()
+            ? null
+            : IconButton(
+                tooltip: 'Volver al inicio',
+                onPressed: _volverAlInicio,
+                icon: const Icon(Icons.home_outlined),
+              ),
         backgroundColor: cs.surface.withAlpha(0),
         surfaceTintColor: cs.surface.withAlpha(0),
         elevation: 0,

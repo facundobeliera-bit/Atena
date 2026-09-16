@@ -73,6 +73,11 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
 
   bool _cargando = false;
   bool _verPass = false;
+
+  void _volverAlInicio() {
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+  }
+
   bool _rememberMe = true;
 
   static const int _minPassLen = 4;
@@ -611,6 +616,13 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.institucionLoginAppBar),
+        leading: Navigator.of(context).canPop()
+            ? null
+            : IconButton(
+                tooltip: 'Volver al inicio',
+                onPressed: _volverAlInicio,
+                icon: const Icon(Icons.home_outlined),
+              ),
         backgroundColor: cs.surface.withAlpha(0),
         surfaceTintColor: cs.surface.withAlpha(0),
         elevation: 0,

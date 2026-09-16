@@ -2,8 +2,11 @@ import 'package:atena_app/l10n/gen/app_localizations.dart';
 import 'package:atena_app/models/extracurriculares/bloque_extracurricular.dart';
 import 'package:atena_app/models/instituciones/instituciones_integrado.dart';
 import 'package:atena_app/screens/auth/alumno_forgot_password_page.dart';
+import 'package:atena_app/screens/auth/alumno_login_page.dart';
 import 'package:atena_app/screens/auth/alumno_registro_page.dart';
 import 'package:atena_app/screens/auth/institucion_forgot_password_page.dart';
+import 'package:atena_app/screens/auth/institucion_login_page.dart';
+import 'package:atena_app/screens/auth/institucion_registro_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_plan_page.dart';
 import 'package:atena_app/screens/landing/landing_page.dart';
 import 'package:flutter/material.dart';
@@ -41,8 +44,11 @@ void main() {
 
   group('onboarding directo', () {
     for (final entry in <({String name, Widget page})>[
+      (name: 'acceso de alumno', page: const AlumnoLoginPage()),
       (name: 'registro de alumno', page: const AlumnoRegistroPage()),
       (name: 'recuperación de alumno', page: const AlumnoForgotPasswordPage()),
+      (name: 'acceso institucional', page: const InstitucionLoginPage()),
+      (name: 'registro institucional', page: const InstitucionRegistroPage()),
       (
         name: 'recuperación institucional',
         page: const InstitucionForgotPasswordPage(),

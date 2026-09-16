@@ -568,7 +568,11 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
     try {
       await SessionService.logout().timeout(const Duration(seconds: 2));
     } catch (_) {}
-    await _irAHomeHardReset();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const InstitucionLoginPage()),
+      (_) => false,
+    );
   }
 
   void _toast(String msg) {

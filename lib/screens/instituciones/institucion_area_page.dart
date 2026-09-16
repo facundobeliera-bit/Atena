@@ -98,6 +98,7 @@ import '../../guards/plan_habilitacion_guard.dart';
 
 // ✅ PLAN – Fuente de verdad (normalize + regla operativa)
 import '../../services/plan_habilitacion_service.dart';
+import '../auth/institucion_login_page.dart';
 
 Color _alpha(Color c, double opacity01) {
   final o = opacity01.clamp(0.0, 1.0);
@@ -993,7 +994,11 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     try {
       await CuentaService.logoutCuenta();
     } catch (_) {}
-    await _irAHomeHardReset();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const InstitucionLoginPage()),
+      (_) => false,
+    );
   }
 
   Future<void> _refrescar() async {
