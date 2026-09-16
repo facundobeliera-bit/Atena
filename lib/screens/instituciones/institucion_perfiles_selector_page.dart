@@ -38,7 +38,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atena_app/l10n/gen/app_localizations.dart';
 
 import '../../models/instituciones/instituciones_integrado.dart';
+import '../../models/instituciones/area_operativa.dart';
 import '../../services/institucion_area_locks.dart';
+import '../../services/institucion_areas_service.dart';
 import '../../services/institucion_service.dart';
 import '../../ui/atena_assets.dart';
 import 'institucion_area_page.dart';
@@ -2326,6 +2328,19 @@ class _InstitucionPerfilesSelectorPageState
     } catch (_) {}
 
     _actividades = out;
+    final institution = _instIdData.trim();
+    if (institution.isNotEmpty) {
+      for (final activity in out) {
+        await InstitucionAreasService.instance.resolverYGuardar(
+          institucionId: institution,
+          tipo: activity.kind == InstitucionActividadKind.curricular
+              ? TipoAreaOperativa.curricular
+              : TipoAreaOperativa.extracurricular,
+          claveOrigen: activity.keyScope,
+          nombre: activity.label,
+        );
+      }
+    }
   }
 }
 

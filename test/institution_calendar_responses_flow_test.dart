@@ -4,14 +4,17 @@ import 'package:atena_app/models/calendario/evento_calendario.dart';
 import 'package:atena_app/models/cuentas/cuenta.dart';
 import 'package:atena_app/models/instituciones/instituciones_integrado.dart'
     hide PerfilInstitucion;
+import 'package:atena_app/models/instituciones/area_operativa.dart';
 import 'package:atena_app/models/solicitudes/solicitud_alumno.dart';
 import 'package:atena_app/l10n/gen/app_localizations.dart';
 import 'package:atena_app/screens/instituciones/institucion_menu_page.dart';
+import 'package:atena_app/screens/instituciones/institucion_area_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_respuestas_calendario_page.dart';
 import 'package:atena_app/services/alumno_calendario_interacciones_service.dart';
 import 'package:atena_app/services/alumno_service.dart';
 import 'package:atena_app/services/cuenta_service.dart';
 import 'package:atena_app/services/institucion_emisiones_service.dart';
+import 'package:atena_app/services/institucion_areas_service.dart';
 import 'package:atena_app/services/instituciones_helpers.dart' as ih;
 import 'package:atena_app/services/session_service.dart';
 import 'package:atena_app/services/storage_service.dart';
@@ -150,6 +153,9 @@ Future<String> _emitAndRespond({
   required String profile,
   required String document,
   required RsvpStatusAtena response,
+  String actividadKey = 'primaria',
+  String? grupoId,
+  bool esCurricular = true,
 }) async {
   final emitted = await InstitucionEmisionesService.instance
       .emitirEventoEspecialAConfirmados(
@@ -164,7 +170,9 @@ Future<String> _emitAndRespond({
             institution: institution,
           ),
         ],
-        esCurricular: true,
+        esCurricular: esCurricular,
+        actividadKey: actividadKey,
+        grupoId: grupoId,
         inicio: DateTime(2026, 4, 15, 18),
         titulo: 'Reunión de familias',
         descripcion: 'Encuentro institucional',
@@ -373,7 +381,33 @@ void main() {
     );
   });
 
-  testWidgets('menú institucional abre el consumo de respuestas', (
+  testWidgets('acceso directo por área sin sesión es rechazado', (
+    tester,
+  ) async {
+    final area = await InstitucionAreasService.instance.resolverYGuardar(
+      institucionId: institutionA,
+      tipo: TipoAreaOperativa.curricular,
+      claveOrigen: 'primaria',
+      nombre: 'Primaria',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: InstitucionRespuestasCalendarioPage(
+          ownerAccountId: institutionOwnerA,
+          institucionId: institutionA,
+          areaId: area!.id,
+          areaNombre: area.nombre,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text('No se pudo validar la sesión para esta institución.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('menú institucional ya no ofrece respuestas globales', (
     tester,
   ) async {
     await _activateInstitutionA();
@@ -391,12 +425,127 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final action = find.text('Respuestas de calendario');
-    expect(action, findsOneWidget);
-    await tester.ensureVisible(action);
-    await tester.tap(action);
-    await tester.pumpAndSettle();
-    expect(find.byType(InstitucionRespuestasCalendarioPage), findsOneWidget);
+    expect(find.text('Respuestas de calendario'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'Administración de Primaria abre respuestas y Back conserva área',
+    (tester) async {
+      await _activateInstitutionA();
+      final institution = await ih.cargarInstitucionPorId(institutionA);
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('es'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: InstitucionAreaPage(
+            ownerAccountId: institutionOwnerA,
+            institucionId: institutionA,
+            institucionNombre: 'Institución A',
+            institucion: institution,
+            actividadKey: 'primaria',
+            actividadLabel: 'Primaria',
+            workProfileId: 'wp_primaria_1',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final action = find.text('Respuestas de calendario');
+      expect(action, findsOneWidget);
+      await tester.ensureVisible(action);
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+      expect(find.byType(InstitucionRespuestasCalendarioPage), findsOneWidget);
+      expect(find.text('Primaria — Respuestas de calendario'), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(InstitucionAreaPage), findsOneWidget);
+      expect(find.textContaining('Primaria'), findsWidgets);
+    },
+  );
+
+  test('respuestas quedan aisladas por área y conservan grupo', () async {
+    await _emitAndRespond(
+      institution: institutionA,
+      institutionName: 'Institución A',
+      owner: studentOwnerA,
+      profile: studentA,
+      document: '31000001',
+      response: RsvpStatusAtena.yes,
+      actividadKey: 'primaria',
+      grupoId: 'grupo-1A',
+    );
+    await _emitAndRespond(
+      institution: institutionA,
+      institutionName: 'Institución A',
+      owner: studentOwnerA,
+      profile: siblingA,
+      document: '31000002',
+      response: RsvpStatusAtena.no,
+      actividadKey: 'secundaria',
+      grupoId: 'grupo-2B',
+    );
+    await _emitAndRespond(
+      institution: institutionA,
+      institutionName: 'Institución A',
+      owner: studentOwnerB,
+      profile: studentB,
+      document: '32000001',
+      response: RsvpStatusAtena.maybe,
+      actividadKey: 'futbol',
+      grupoId: 'grupo-futbol-1',
+      esCurricular: false,
+    );
+    final primary = await InstitucionAreasService.instance.resolverYGuardar(
+      institucionId: institutionA,
+      tipo: TipoAreaOperativa.curricular,
+      claveOrigen: 'primaria',
+      nombre: 'Primaria',
+    );
+    final secondary = await InstitucionAreasService.instance.resolverYGuardar(
+      institucionId: institutionA,
+      tipo: TipoAreaOperativa.curricular,
+      claveOrigen: 'secundaria',
+      nombre: 'Secundaria',
+    );
+    final football = await InstitucionAreasService.instance.resolverYGuardar(
+      institucionId: institutionA,
+      tipo: TipoAreaOperativa.extracurricular,
+      claveOrigen: 'futbol',
+      nombre: 'Fútbol',
+    );
+    final primaryResponses = await AlumnoCalendarioInteraccionesService.instance
+        .listarRespuestasArea(institucionId: institutionA, areaId: primary!.id);
+    final secondaryResponses = await AlumnoCalendarioInteraccionesService
+        .instance
+        .listarRespuestasArea(
+          institucionId: institutionA,
+          areaId: secondary!.id,
+        );
+    final footballResponses = await AlumnoCalendarioInteraccionesService
+        .instance
+        .listarRespuestasArea(
+          institucionId: institutionA,
+          areaId: football!.id,
+        );
+    expect(primaryResponses.single.perfilId, studentA);
+    expect(primaryResponses.single.grupoId, 'grupo-1A');
+    expect(secondaryResponses.single.perfilId, siblingA);
+    expect(secondaryResponses.single.grupoId, 'grupo-2B');
+    expect(footballResponses.single.perfilId, studentB);
+    expect(footballResponses.single.grupoId, 'grupo-futbol-1');
+    expect(
+      await AlumnoCalendarioInteraccionesService.instance.listarRespuestasArea(
+        institucionId: institutionB,
+        areaId: primary.id,
+      ),
+      isEmpty,
+    );
+    expect(
+      await AlumnoCalendarioInteraccionesService.instance
+          .listarRespuestasInstitucion(institutionA),
+      hasLength(3),
+    );
   });
 }

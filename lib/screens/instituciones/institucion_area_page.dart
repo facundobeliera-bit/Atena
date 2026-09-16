@@ -66,6 +66,7 @@ import 'package:atena_app/l10n/gen/app_localizations.dart';
 
 // Modelos
 import '../../models/instituciones/instituciones_integrado.dart';
+import '../../models/instituciones/area_operativa.dart';
 import '../../models/extracurriculares/bloque_extracurricular.dart';
 
 // Helpers / compat (resolver institución)
@@ -92,6 +93,8 @@ import 'institucion_croquis_aula_page.dart' as croquis;
 
 // ✅ Locks canónicos por área
 import '../../services/institucion_area_locks.dart';
+import '../../services/institucion_areas_service.dart';
+import 'institucion_respuestas_calendario_page.dart';
 
 // ✅ PLAN – Guard canónico
 import '../../guards/plan_habilitacion_guard.dart';
@@ -1219,6 +1222,47 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     }
   }
 
+  Future<void> _openCalendarResponses() async {
+    final session = await SessionService.getSession();
+    final sessionOwner =
+        await SessionService.getInstitucionOwnerAccountIdLogueado();
+    final valid =
+        session?.role == SessionRole.institucion &&
+        session?.userId.trim() == _instIdData.trim() &&
+        (sessionOwner ?? '').trim() == _ownerAccountIdResolved.trim() &&
+        await CuentaService.perfilInstitucionalPertenece(
+          _ownerAccountIdResolved,
+          _instIdData,
+        );
+    if (!valid) {
+      if (mounted) _snack('No se pudo validar la sesión institucional.');
+      return;
+    }
+    final area = await InstitucionAreasService.instance.resolverYGuardar(
+      institucionId: _instIdData,
+      tipo: _isExtracurricularScope
+          ? TipoAreaOperativa.extracurricular
+          : TipoAreaOperativa.curricular,
+      claveOrigen: _actividadKeyResolved,
+      nombre: _actividadLabelResolved,
+    );
+    if (!mounted) return;
+    if (area == null) {
+      _snack('No se pudo determinar el área operativa.');
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => InstitucionRespuestasCalendarioPage(
+          ownerAccountId: _ownerAccountIdResolved,
+          institucionId: _instIdData,
+          areaId: area.id,
+          areaNombre: area.nombre,
+        ),
+      ),
+    );
+  }
+
   void _snack(String msg) {
     if (!mounted) return;
     final clean = msg.trim();
@@ -1442,6 +1486,14 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
                         area: InstitucionAreaKey.notificaciones,
                         builder: (_) => _buildNotificacionesPage(l10n: l10n),
                       ),
+              ),
+              _opCard(
+                icon: Icons.how_to_reg_outlined,
+                title: 'Respuestas de calendario',
+                subtitle: 'Consultá las respuestas de $actividadLabel.',
+                semanticsLabel:
+                    'Abrir respuestas de calendario de $actividadLabel',
+                onTap: !canOperate ? null : _openCalendarResponses,
               ),
               _opCard(
                 icon: Icons.inbox,

@@ -7,11 +7,15 @@ import '../../services/session_service.dart';
 class InstitucionRespuestasCalendarioPage extends StatefulWidget {
   final String ownerAccountId;
   final String institucionId;
+  final String? areaId;
+  final String? areaNombre;
 
   const InstitucionRespuestasCalendarioPage({
     super.key,
     required this.ownerAccountId,
     required this.institucionId,
+    this.areaId,
+    this.areaNombre,
   });
 
   @override
@@ -95,8 +99,15 @@ class _InstitucionRespuestasCalendarioPageState
         return;
       }
 
-      final responses = await AlumnoCalendarioInteraccionesService.instance
-          .listarRespuestasInstitucion(widget.institucionId);
+      final area = _id(widget.areaId ?? '');
+      final responses = area.isEmpty
+          ? await AlumnoCalendarioInteraccionesService.instance
+                .listarRespuestasInstitucion(widget.institucionId)
+          : await AlumnoCalendarioInteraccionesService.instance
+                .listarRespuestasArea(
+                  institucionId: widget.institucionId,
+                  areaId: area,
+                );
       final ui = <_RespuestaUi>[];
       for (final response in responses) {
         ui.add(
@@ -225,7 +236,13 @@ class _InstitucionRespuestasCalendarioPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Respuestas de calendario')),
+      appBar: AppBar(
+        title: Text(
+          (widget.areaNombre ?? '').trim().isEmpty
+              ? 'Respuestas de calendario'
+              : '${widget.areaNombre!.trim()} — Respuestas de calendario',
+        ),
+      ),
       body: SafeArea(child: _body()),
     );
   }

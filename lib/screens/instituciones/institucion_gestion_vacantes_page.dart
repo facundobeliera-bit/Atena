@@ -2474,6 +2474,8 @@ class _InstitucionGestionVacantesPageState
               institucionNombre: widget.institucionNombre.trim(),
               confirmados: confirmados,
               esCurricular: esCurricular,
+              actividadKey: _actividadKeyResolved,
+              grupoId: segmento?.grupoKey,
               actividadNombre: actividadScope.trim().isEmpty
                   ? null
                   : actividadScope.trim(),

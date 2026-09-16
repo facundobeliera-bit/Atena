@@ -10,8 +10,10 @@
 import 'dart:math';
 
 import '../models/calendario/evento_calendario.dart';
+import '../models/instituciones/area_operativa.dart';
 import '../models/solicitudes/solicitud_alumno.dart';
 import 'alumno_service.dart';
+import 'institucion_areas_service.dart';
 import 'solicitudes_service.dart';
 
 class InstitucionEmisionesService {
@@ -54,6 +56,8 @@ class InstitucionEmisionesService {
     required String institucionId,
     required String institucionNombre,
     required bool esCurricular,
+    String? areaId,
+    String? grupoId,
     required String? actividadNombre,
     required DateTime inicio,
     DateTime? fin,
@@ -97,6 +101,8 @@ class InstitucionEmisionesService {
       'institucionNombre': institucionNombre.trim(),
       'actividadNombre': _n(actividadNombre),
       'esCurricular': esCurricular,
+      if (_n(areaId).isNotEmpty) 'areaId': _n(areaId),
+      if (_n(grupoId).isNotEmpty) 'grupoId': _n(grupoId),
 
       // fin (si aplica)
       if (fin != null) 'endDate': _dateKey(fin),
@@ -189,6 +195,9 @@ class InstitucionEmisionesService {
     required String institucionNombre,
     required List<SolicitudAlumno> confirmados,
     required bool esCurricular,
+    String? areaId,
+    String? grupoId,
+    String? actividadKey,
     String? actividadNombre,
     required DateTime inicio,
     DateTime? fin,
@@ -208,6 +217,25 @@ class InstitucionEmisionesService {
 
     final out = <String, String>{};
 
+    var resolvedAreaId = _n(areaId);
+    if (resolvedAreaId.isNotEmpty) {
+      final registered = await InstitucionAreasService.instance.buscarPorId(
+        inst,
+        resolvedAreaId,
+      );
+      if (registered == null) resolvedAreaId = '';
+    } else if (_n(actividadKey).isNotEmpty) {
+      final area = await InstitucionAreasService.instance.resolverYGuardar(
+        institucionId: inst,
+        tipo: esCurricular
+            ? TipoAreaOperativa.curricular
+            : TipoAreaOperativa.extracurricular,
+        claveOrigen: actividadKey!,
+        nombre: _n(actividadNombre).isEmpty ? actividadKey : actividadNombre!,
+      );
+      resolvedAreaId = area?.id ?? '';
+    }
+
     for (final s in confirmados) {
       final owner = _n(s.ownerAccountId);
       final perfil = _n(s.perfilId);
@@ -221,6 +249,8 @@ class InstitucionEmisionesService {
         institucionId: inst,
         institucionNombre: institucionNombre,
         esCurricular: esCurricular,
+        areaId: resolvedAreaId,
+        grupoId: grupoId,
         actividadNombre: actividadNombre ?? s.actividadNombre,
         inicio: inicio,
         fin: fin,
@@ -262,6 +292,9 @@ class InstitucionEmisionesService {
     required String aula,
     String? turno,
     required bool esCurricular,
+    String? areaId,
+    String? grupoId,
+    String? actividadKey,
     String? actividadNombre,
     String? moduleKey,
     required DateTime inicio,
@@ -288,6 +321,9 @@ class InstitucionEmisionesService {
       institucionNombre: institucionNombre,
       confirmados: confirmados,
       esCurricular: esCurricular,
+      areaId: areaId,
+      grupoId: grupoId,
+      actividadKey: actividadKey,
       actividadNombre: actividadNombre,
       inicio: inicio,
       fin: fin,
@@ -306,6 +342,9 @@ class InstitucionEmisionesService {
     required String institucionId,
     required String institucionNombre,
     bool? esCurricular,
+    String? areaId,
+    String? grupoId,
+    String? actividadKey,
     String? actividadNombre,
     String? moduleKey,
     required DateTime inicio,
@@ -335,6 +374,9 @@ class InstitucionEmisionesService {
       institucionNombre: institucionNombre,
       confirmados: confirmados,
       esCurricular: ec,
+      areaId: areaId,
+      grupoId: grupoId,
+      actividadKey: actividadKey,
       actividadNombre: actividadNombre,
       inicio: inicio,
       fin: fin,

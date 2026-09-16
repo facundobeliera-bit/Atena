@@ -35,6 +35,7 @@ import 'cuenta_service.dart';
 import 'notificaciones_service.dart';
 
 import '../models/notificaciones/notificacion_atena.dart';
+import 'institucion_areas_service.dart';
 
 enum RsvpStatusAtena { pending, yes, no, maybe }
 
@@ -44,6 +45,8 @@ class RespuestaCalendarioInstitucion {
   final String ownerAccountId;
   final String perfilId;
   final String eventId;
+  final String? areaId;
+  final String? grupoId;
   final String dateKey;
   final RsvpStatusAtena status;
   final DateTime respondedAt;
@@ -55,6 +58,8 @@ class RespuestaCalendarioInstitucion {
     required this.ownerAccountId,
     required this.perfilId,
     required this.eventId,
+    required this.areaId,
+    required this.grupoId,
     required this.dateKey,
     required this.status,
     required this.respondedAt,
@@ -462,6 +467,8 @@ class AlumnoCalendarioInteraccionesService {
     );
 
     final instId = _str(src['institucionId'] ?? src['institutionId']);
+    final areaId = _str(src['areaId']);
+    final grupoId = _str(src['grupoId']);
 
     final lock = _boolFromAny(src['lock']) || _boolFromAny(src['locked']);
 
@@ -496,6 +503,8 @@ class AlumnoCalendarioInteraccionesService {
       'type': type.isEmpty ? 'curricular' : type,
       'source': sourceNorm,
       if (instId.isNotEmpty) 'institucionId': instId,
+      if (areaId.isNotEmpty) 'areaId': areaId,
+      if (grupoId.isNotEmpty) 'grupoId': grupoId,
       'lock': lock,
       'allowStudentDelete': allowStudentDelete,
       'allowStudentEdit': allowStudentEdit,
@@ -1116,6 +1125,8 @@ class AlumnoCalendarioInteraccionesService {
           'rsvpStatus': next,
           'updatedAtIso': _str(e['rsvpUpdatedAtIso']),
           'eventTitle': _str(e['title']),
+          if (_str(e['areaId']).isNotEmpty) 'areaId': _str(e['areaId']),
+          if (_str(e['grupoId']).isNotEmpty) 'grupoId': _str(e['grupoId']),
         },
       );
     }
@@ -1165,6 +1176,8 @@ class AlumnoCalendarioInteraccionesService {
           ? Map<String, dynamic>.from(payloadRaw)
           : const <String, dynamic>{};
       final statusRaw = _str(payload['rsvpStatus']).toLowerCase();
+      final areaId = _normIdKey(_str(payload['areaId']));
+      final grupoId = _normIdKey(_str(payload['grupoId']));
       final status = _parseRsvp(statusRaw);
       final respondedAt =
           DateTime.tryParse(_str(payload['updatedAtIso'])) ??
@@ -1204,6 +1217,8 @@ class AlumnoCalendarioInteraccionesService {
         ownerAccountId: owner,
         perfilId: perfil,
         eventId: eventId,
+        areaId: areaId.isEmpty ? null : areaId,
+        grupoId: grupoId.isEmpty ? null : grupoId,
         dateKey: dateKey,
         status: status,
         respondedAt: respondedAt,
@@ -1220,6 +1235,28 @@ class AlumnoCalendarioInteraccionesService {
     final responses = latest.values.toList(growable: false)
       ..sort((a, b) => b.respondedAt.compareTo(a.respondedAt));
     return responses;
+  }
+
+  Future<List<RespuestaCalendarioInstitucion>> listarRespuestasArea({
+    required String institucionId,
+    required String areaId,
+  }) async {
+    final inst = _normIdKey(institucionId);
+    final area = _normIdKey(areaId);
+    if (inst.isEmpty || area.isEmpty) return const [];
+    final registered = await InstitucionAreasService.instance.buscarPorId(
+      inst,
+      area,
+    );
+    if (registered == null ||
+        _normIdKey(registered.institucionId) != inst ||
+        _normIdKey(registered.id) != area) {
+      return const [];
+    }
+    final all = await listarRespuestasInstitucion(inst);
+    return all
+        .where((response) => _normIdKey(response.areaId ?? '') == area)
+        .toList(growable: false);
   }
 
   Future<void> clearOutboxInstitucion(String institucionId) async {

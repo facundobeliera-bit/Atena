@@ -220,6 +220,8 @@ class EventoCalendario {
 
   final String? actividadNombre;
   final bool esCurricular;
+  final String? areaId;
+  final String? grupoId;
 
   final TipoEventoCalendario tipo;
 
@@ -246,6 +248,8 @@ class EventoCalendario {
     required this.alumnoDni,
     required this.actividadNombre,
     required this.esCurricular,
+    this.areaId,
+    this.grupoId,
     required this.tipo,
     required this.tipoEspecial,
     required this.segmentoEspecial,
@@ -266,6 +270,8 @@ class EventoCalendario {
     String? alumnoDni,
     String? actividadNombre,
     bool? esCurricular,
+    String? areaId,
+    String? grupoId,
     TipoEventoCalendario? tipo,
     TipoEventoEspecial? tipoEspecial,
     SegmentoEventoEspecial? segmentoEspecial,
@@ -285,6 +291,8 @@ class EventoCalendario {
       alumnoDni: alumnoDni ?? this.alumnoDni,
       actividadNombre: actividadNombre ?? this.actividadNombre,
       esCurricular: esCurricular ?? this.esCurricular,
+      areaId: areaId ?? this.areaId,
+      grupoId: grupoId ?? this.grupoId,
       tipo: tipo ?? this.tipo,
       tipoEspecial: tipoEspecial ?? this.tipoEspecial,
       segmentoEspecial: segmentoEspecial ?? this.segmentoEspecial,
@@ -308,6 +316,8 @@ class EventoCalendario {
     'alumnoDni': alumnoDni,
     'actividadNombre': actividadNombre,
     'esCurricular': esCurricular,
+    if ((areaId ?? '').trim().isNotEmpty) 'areaId': areaId!.trim(),
+    if ((grupoId ?? '').trim().isNotEmpty) 'grupoId': grupoId!.trim(),
     'tipo': tipo.name,
     'tipoEspecial': tipoEspecial?.name,
     'segmentoEspecial': segmentoEspecial?.toMap(),
@@ -354,6 +364,12 @@ class EventoCalendario {
       alumnoDni: m['alumnoDni']?.toString(),
       actividadNombre: m['actividadNombre']?.toString(),
       esCurricular: _b(m['esCurricular'], fallback: false),
+      areaId: (m['areaId'] ?? '').toString().trim().isEmpty
+          ? null
+          : (m['areaId'] ?? '').toString().trim(),
+      grupoId: (m['grupoId'] ?? '').toString().trim().isEmpty
+          ? null
+          : (m['grupoId'] ?? '').toString().trim(),
       tipo: tipo,
       tipoEspecial: (tipoEspecialRaw == null)
           ? null
