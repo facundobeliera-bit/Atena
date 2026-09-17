@@ -1,5 +1,29 @@
 enum EstadoOperadorInstitucional { activo, suspendido, revocado }
 
+abstract final class CapacidadInstitucional {
+  static const areaManage = 'area.manage';
+  static const groupsRead = 'groups.read';
+  static const groupsWrite = 'groups.write';
+  static const requestsRead = 'requests.read';
+  static const requestsDecide = 'requests.decide';
+  static const calendarRead = 'calendar.read';
+  static const calendarWrite = 'calendar.write';
+  static const responsesRead = 'responses.read';
+  static const communicationsWrite = 'communications.write';
+
+  static const all = <String>{
+    areaManage,
+    groupsRead,
+    groupsWrite,
+    requestsRead,
+    requestsDecide,
+    calendarRead,
+    calendarWrite,
+    responsesRead,
+    communicationsWrite,
+  };
+}
+
 class OperadorInstitucional {
   static const int currentSchemaVersion = 1;
 
@@ -10,6 +34,7 @@ class OperadorInstitucional {
   final String nombreVisible;
   final bool esPropietario;
   final EstadoOperadorInstitucional estado;
+  final Set<String> capacidades;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int schemaVersion;
@@ -22,6 +47,7 @@ class OperadorInstitucional {
     required this.nombreVisible,
     required this.esPropietario,
     required this.estado,
+    this.capacidades = const {},
     required this.createdAt,
     required this.updatedAt,
     this.schemaVersion = currentSchemaVersion,
@@ -32,6 +58,7 @@ class OperadorInstitucional {
   OperadorInstitucional copyWith({
     String? nombreVisible,
     EstadoOperadorInstitucional? estado,
+    Set<String>? capacidades,
     DateTime? updatedAt,
   }) => OperadorInstitucional(
     id: id,
@@ -41,6 +68,7 @@ class OperadorInstitucional {
     nombreVisible: nombreVisible ?? this.nombreVisible,
     esPropietario: esPropietario,
     estado: estado ?? this.estado,
+    capacidades: capacidades ?? this.capacidades,
     createdAt: createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     schemaVersion: schemaVersion,
@@ -54,6 +82,7 @@ class OperadorInstitucional {
     'nombreVisible': nombreVisible,
     'esPropietario': esPropietario,
     'estado': estado.name,
+    'capacidades': capacidades.toList()..sort(),
     'createdAtIso': createdAt.toIso8601String(),
     'updatedAtIso': updatedAt.toIso8601String(),
     'schemaVersion': schemaVersion,
@@ -77,6 +106,12 @@ class OperadorInstitucional {
         (value) => value.name == state,
         orElse: () => EstadoOperadorInstitucional.revocado,
       ),
+      capacidades: map['capacidades'] is List
+          ? (map['capacidades'] as List)
+                .map((value) => value.toString().trim())
+                .where(CapacidadInstitucional.all.contains)
+                .toSet()
+          : const {},
       createdAt:
           DateTime.tryParse((map['createdAtIso'] ?? '').toString()) ??
           DateTime.fromMillisecondsSinceEpoch(0),

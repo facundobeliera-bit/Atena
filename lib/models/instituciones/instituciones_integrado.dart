@@ -1452,6 +1452,9 @@ class GrupoInstitucional {
   int cupoMaximo;
   int cupoOcupado;
   EstadoCupo estado;
+  String? areaId;
+  String? updatedByOperatorId;
+  DateTime? updatedAt;
 
   GrupoInstitucional({
     required this.id,
@@ -1463,6 +1466,9 @@ class GrupoInstitucional {
     required this.estado,
     this.aula,
     this.turno,
+    this.areaId,
+    this.updatedByOperatorId,
+    this.updatedAt,
   });
 
   int get cupoDisponible => (cupoMaximo - cupoOcupado).clamp(0, 9999);
@@ -1477,6 +1483,10 @@ class GrupoInstitucional {
     'cupoMaximo': cupoMaximo,
     'cupoOcupado': cupoOcupado,
     'estado': estado.name,
+    if ((areaId ?? '').trim().isNotEmpty) 'areaId': areaId,
+    if ((updatedByOperatorId ?? '').trim().isNotEmpty)
+      'updatedByOperatorId': updatedByOperatorId,
+    if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
   };
 
   factory GrupoInstitucional.fromMap(Map<String, dynamic> m) =>
@@ -1492,6 +1502,15 @@ class GrupoInstitucional {
         estado: EstadoCupoX.fromString(
           _asString(m['estado'], fallback: 'disponible'),
         ),
+        areaId: _asString(m['areaId']).trim().isEmpty
+            ? null
+            : _asString(m['areaId']).trim(),
+        updatedByOperatorId: _asString(m['updatedByOperatorId']).trim().isEmpty
+            ? null
+            : _asString(m['updatedByOperatorId']).trim(),
+        updatedAt: m['updatedAt'] == null
+            ? null
+            : _asDate(m['updatedAt']),
       );
 }
 

@@ -147,6 +147,7 @@ class InstitucionOperadoresService {
     required String operadorId,
     String? nombreVisible,
     EstadoOperadorInstitucional? estado,
+    Set<String>? capacidades,
   }) async {
     final operators = await listar(institucionId);
     final index = operators.indexWhere((value) => value.id == _id(operadorId));
@@ -162,6 +163,9 @@ class InstitucionOperadoresService {
           ? current.nombreVisible
           : nombreVisible!.trim(),
       estado: estado,
+      capacidades: capacidades
+          ?.where(CapacidadInstitucional.all.contains)
+          .toSet(),
       updatedAt: DateTime.now().toUtc(),
     );
     await _saveOperators(_id(institucionId), operators);
@@ -171,6 +175,57 @@ class InstitucionOperadoresService {
       await SessionService.clearInstitucionOperatorId();
     }
     return true;
+  }
+
+  Future<bool> setCapacidades({
+    required String institucionId,
+    required String operadorId,
+    required Set<String> capacidades,
+  }) => actualizar(
+    institucionId: institucionId,
+    operadorId: operadorId,
+    capacidades: capacidades,
+  );
+
+  Future<bool> puedeRealizar({
+    required String institucionId,
+    required String operadorId,
+    required String areaId,
+    required String capacidad,
+  }) async {
+    if (!CapacidadInstitucional.all.contains(capacidad)) return false;
+    final operator = await buscar(institucionId, operadorId);
+    if (operator == null || !operator.puedeActivarse) return false;
+    if (!await puedeAccederArea(
+      institucionId: institucionId,
+      operadorId: operadorId,
+      areaId: areaId,
+    )) {
+      return false;
+    }
+    return operator.esPropietario || operator.capacidades.contains(capacidad);
+  }
+
+  Future<OperadorInstitucional?> autorizarActivo({
+    required String institucionId,
+    required String areaId,
+    required String capacidad,
+  }) async {
+    final session = await SessionService.getSession();
+    if (session?.role != SessionRole.institucion ||
+        _id(session!.userId) != _id(institucionId)) {
+      return null;
+    }
+    final operator = await operadorActivo(institucionId);
+    if (operator == null) return null;
+    return await puedeRealizar(
+          institucionId: institucionId,
+          operadorId: operator.id,
+          areaId: areaId,
+          capacidad: capacidad,
+        )
+        ? operator
+        : null;
   }
 
   Future<List<AsignacionOperador>> _assignments(String institution) async {

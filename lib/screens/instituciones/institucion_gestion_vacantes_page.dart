@@ -94,12 +94,15 @@ import 'package:flutter/material.dart';
 import '../../l10n/gen/app_localizations.dart';
 
 import '../../models/instituciones/instituciones_integrado.dart';
+import '../../models/instituciones/area_operativa.dart';
 
 import '../../models/solicitudes/solicitud_alumno.dart'
     show SolicitudAlumno, EstadoSolicitud;
 
 import '../../services/solicitudes_service.dart';
 import '../../services/instituciones_helpers.dart' as ih;
+import '../../services/institucion_areas_service.dart';
+import '../../services/institucion_grupos_autorizacion_service.dart';
 
 import '../../guards/plan_habilitacion_guard.dart';
 
@@ -1002,9 +1005,16 @@ class _InstitucionGestionVacantesPageState
     final instId = _instIdData;
     if (instId.isEmpty) return;
 
-    await ih
-        .guardarGruposInstitucion(instId, grupos)
-        .timeout(const Duration(seconds: 4));
+    final areaId = InstitucionAreasService.stableId(
+      institucionId: instId,
+      tipo: TipoAreaOperativa.curricular,
+      claveOrigen: _actividadKeyResolved,
+    );
+    await InstitucionGruposAutorizacionService.guardarCurriculares(
+      institucionId: instId,
+      areaId: areaId,
+      grupos: grupos,
+    ).timeout(const Duration(seconds: 4));
   }
 
   Future<void> _guardar() async {
@@ -2467,13 +2477,29 @@ class _InstitucionGestionVacantesPageState
           if (v == false) hasExtra = true;
         }
         final esCurricular = hasCurr && !hasExtra;
+        if (hasCurr && hasExtra) {
+          _snack('No se pudo determinar un área única para la emisión.');
+          return;
+        }
+        final areaId = InstitucionAreasService.stableId(
+          institucionId: instId,
+          tipo: esCurricular
+              ? TipoAreaOperativa.curricular
+              : TipoAreaOperativa.extracurricular,
+          claveOrigen: _actividadKeyResolved,
+        );
+        if (areaId.isEmpty) {
+          _snack('No se pudo comprobar el área de esta emisión.');
+          return;
+        }
 
         final emitted = await InstitucionEmisionesService.instance
-            .emitirEventoEspecialAConfirmados(
+            .emitirEventoEspecialAutorizado(
               institucionId: instId,
               institucionNombre: widget.institucionNombre.trim(),
               confirmados: confirmados,
               esCurricular: esCurricular,
+              areaId: areaId,
               actividadKey: _actividadKeyResolved,
               grupoId: segmento?.grupoKey,
               actividadNombre: actividadScope.trim().isEmpty

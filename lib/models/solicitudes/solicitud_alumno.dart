@@ -252,6 +252,8 @@ class SolicitudAlumno {
   /// - Curricular: recomendado/idealmente requerido.
   /// - Extracurricular: ''.
   final String grupoCurricularId;
+  final String? areaId;
+  final String? updatedByOperatorId;
 
   // Opcionales (NO null) – snapshot/UI/compat
   final String aula;
@@ -292,6 +294,8 @@ class SolicitudAlumno {
     this.ownerAccountId,
     this.perfilId,
     this.grupoCurricularId = '',
+    this.areaId,
+    this.updatedByOperatorId,
     this.aula = '',
     this.turno = '',
     this.moduleKey = '',
@@ -331,6 +335,9 @@ class SolicitudAlumno {
 
     // ✅ Canon curricular
     'grupoCurricularId': grupoCurricularIdCanonico,
+    if ((areaId ?? '').trim().isNotEmpty) 'areaId': areaId!.trim(),
+    if ((updatedByOperatorId ?? '').trim().isNotEmpty)
+      'updatedByOperatorId': updatedByOperatorId!.trim(),
 
     // Snapshot/UI/compat
     'aula': aula,
@@ -525,6 +532,10 @@ class SolicitudAlumno {
       institucionNombre: instNombre,
       actividadNombre: actNombre,
       grupoCurricularId: grupoCurricularId,
+      areaId: _s(m['areaId']).isEmpty ? null : _s(m['areaId']),
+      updatedByOperatorId: _s(m['updatedByOperatorId']).isEmpty
+          ? null
+          : _s(m['updatedByOperatorId']),
       aula: aulaFinal,
       turno: turnoRaw,
       moduleKey: moduleKey,
@@ -557,6 +568,8 @@ class SolicitudAlumno {
     DateTime? fechaUltimoCambio,
     String? dedupKey,
     String? grupoCurricularId,
+    String? areaId,
+    String? updatedByOperatorId,
     String? aula,
     String? turno,
     String? moduleKey,
@@ -590,6 +603,8 @@ class SolicitudAlumno {
 
       actividadNombre: actividadNombre,
       grupoCurricularId: gid,
+      areaId: areaId ?? this.areaId,
+      updatedByOperatorId: updatedByOperatorId ?? this.updatedByOperatorId,
       aula: aula ?? this.aula,
       turno: turno ?? this.turno,
       moduleKey: mk,

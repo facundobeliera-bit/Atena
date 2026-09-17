@@ -45,6 +45,8 @@ import '../../l10n/gen/app_localizations.dart';
 import '../../models/extracurriculares/bloque_extracurricular.dart';
 import '../../models/extracurriculares/grupo_extracurricular.dart';
 import '../../services/extracurriculares_service.dart';
+import '../../models/instituciones/area_operativa.dart';
+import '../../services/institucion_areas_service.dart';
 import '../../ui/atena_assets.dart';
 
 import 'institucion_extracurricular_grupo_form_page.dart';
@@ -200,6 +202,11 @@ class _InstitucionExtracurricularModuloBaseState
           institucionId: k.instIdCanon,
           institucionNombre: widget.institucionNombre,
           moduleKey: k.normalizedKey,
+          areaId: InstitucionAreasService.stableId(
+            institucionId: k.instIdCanon,
+            tipo: TipoAreaOperativa.extracurricular,
+            claveOrigen: k.normalizedKey,
+          ),
         ),
       ),
     );

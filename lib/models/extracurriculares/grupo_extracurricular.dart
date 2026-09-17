@@ -136,6 +136,8 @@ class GrupoExtracurricular {
   /// Auditoría local
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? areaId;
+  final String? updatedByOperatorId;
 
   const GrupoExtracurricular({
     required this.id,
@@ -150,6 +152,8 @@ class GrupoExtracurricular {
     required this.updatedAt,
     this.turno = '',
     this.aula = '',
+    this.areaId,
+    this.updatedByOperatorId,
   });
 
   /// ✅ moduleKey canónica (snake_case estable) derivada del bloque.
@@ -208,6 +212,9 @@ class GrupoExtracurricular {
     'activo': activo,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
+    if ((areaId ?? '').trim().isNotEmpty) 'areaId': areaId,
+    if ((updatedByOperatorId ?? '').trim().isNotEmpty)
+      'updatedByOperatorId': updatedByOperatorId,
   };
 
   factory GrupoExtracurricular.fromMap(Map<String, dynamic> m) {
@@ -289,6 +296,12 @@ class GrupoExtracurricular {
       activo: _asBool(map['activo'], fallback: true),
       createdAt: created,
       updatedAt: updated,
+      areaId: _asString(map['areaId']).trim().isEmpty
+          ? null
+          : _asString(map['areaId']).trim(),
+      updatedByOperatorId: _asString(map['updatedByOperatorId']).trim().isEmpty
+          ? null
+          : _asString(map['updatedByOperatorId']).trim(),
     );
   }
 
@@ -315,6 +328,8 @@ class GrupoExtracurricular {
     bool? activo,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? areaId,
+    String? updatedByOperatorId,
   }) {
     final now = DateTime.now();
 
@@ -351,6 +366,8 @@ class GrupoExtracurricular {
       activo: activo ?? this.activo,
       createdAt: nextCreated,
       updatedAt: nextUpdated,
+      areaId: areaId ?? this.areaId,
+      updatedByOperatorId: updatedByOperatorId ?? this.updatedByOperatorId,
     );
   }
 }

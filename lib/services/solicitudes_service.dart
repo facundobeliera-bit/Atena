@@ -68,6 +68,8 @@ import '../models/extracurriculares/bloque_extracurricular.dart';
 import '../models/instituciones/grupo_curricular.dart';
 import '../models/notificaciones/notificacion_atena.dart';
 import '../models/solicitudes/solicitud_alumno.dart';
+import '../models/instituciones/operador_institucional.dart';
+import 'institucion_operadores_service.dart';
 import '../repositories/solicitudes_repository.dart';
 import '../repositories/solicitudes_repository_prefs.dart';
 import '../services/notificaciones_service.dart' as noti;
@@ -905,6 +907,7 @@ class SolicitudesService {
       institucionNombre: instNombre,
       actividadNombre: actNombre,
       grupoCurricularId: solicitudAlumno.esCurricular ? grupoCurricularId : '',
+      areaId: solicitudAlumno.areaId,
       aula: aulaSnapshot,
       turno: turnoSnapshot,
       moduleKey: moduleKey,
@@ -1406,6 +1409,8 @@ class SolicitudesService {
     String? notaInstitucion,
     String? motivoRechazo,
     bool duplicarNotiEnPerfil = true,
+    String? updatedByOperatorId,
+    String? resolvedAreaId,
   }) async {
     final s = await _repo.getSolicitudAlumnoById(solicitudId);
     if (s == null) return;
@@ -1435,6 +1440,8 @@ class SolicitudesService {
       estado: nuevoEstado,
       notaInstitucion: nota.isEmpty ? null : nota,
       fechaUltimoCambio: DateTime.now(),
+      updatedByOperatorId: updatedByOperatorId,
+      areaId: resolvedAreaId,
     );
 
     if (motivoRechazo != null) {
@@ -1538,6 +1545,52 @@ class SolicitudesService {
       ownerAccountId: owner,
       notificacion: n,
       duplicarEnPerfil: duplicarNotiEnPerfil,
+    );
+  }
+
+  static Future<void> responderSolicitudInstitucional({
+    required String solicitudId,
+    required String institucionId,
+    required String areaId,
+    required EstadoSolicitud nuevoEstado,
+    String? notaInstitucion,
+    String? motivoRechazo,
+    bool duplicarNotiEnPerfil = true,
+  }) async {
+    final request = await _repo.getSolicitudAlumnoById(solicitudId);
+    final institution = _kid(institucionId);
+    final area = _n(areaId);
+    if (request == null ||
+        institution.isEmpty ||
+        area.isEmpty ||
+        request.institucionIdCanonico != institution ||
+        ((request.areaId ?? '').trim().isNotEmpty &&
+            request.areaId!.trim() != area)) {
+      throw SolicitudesException(
+        'forbidden',
+        'No se pudo comprobar el ámbito de esta solicitud.',
+      );
+    }
+    final operator = await InstitucionOperadoresService.instance
+        .autorizarActivo(
+          institucionId: institution,
+          areaId: area,
+          capacidad: CapacidadInstitucional.requestsDecide,
+        );
+    if (operator == null) {
+      throw SolicitudesException(
+        'forbidden',
+        'El operador activo no puede decidir solicitudes en esta área.',
+      );
+    }
+    await responderSolicitud(
+      solicitudId: solicitudId,
+      nuevoEstado: nuevoEstado,
+      notaInstitucion: notaInstitucion,
+      motivoRechazo: motivoRechazo,
+      duplicarNotiEnPerfil: duplicarNotiEnPerfil,
+      updatedByOperatorId: operator.id,
+      resolvedAreaId: area,
     );
   }
 

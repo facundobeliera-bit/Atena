@@ -201,6 +201,76 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
     await _load();
   }
 
+  String _capabilityLabel(String capability) => switch (capability) {
+    CapacidadInstitucional.areaManage => 'Administrar áreas',
+    CapacidadInstitucional.groupsRead => 'Consultar grupos y cupos',
+    CapacidadInstitucional.groupsWrite => 'Modificar grupos y cupos',
+    CapacidadInstitucional.requestsRead => 'Consultar solicitudes',
+    CapacidadInstitucional.requestsDecide => 'Decidir solicitudes',
+    CapacidadInstitucional.calendarRead => 'Consultar calendario',
+    CapacidadInstitucional.calendarWrite => 'Modificar calendario',
+    CapacidadInstitucional.responsesRead => 'Consultar respuestas',
+    CapacidadInstitucional.communicationsWrite => 'Emitir comunicaciones',
+    _ => capability,
+  };
+
+  Future<void> _editCapabilities(OperadorInstitucional operator) async {
+    final selected = operator.capacidades.toSet();
+    final result = await showDialog<Set<String>>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setLocalState) => AlertDialog(
+          title: Text('Capacidades de ${operator.nombreVisible}'),
+          content: SizedBox(
+            width: 460,
+            child: ListView(
+              shrinkWrap: true,
+              children: CapacidadInstitucional.all
+                  .map(
+                    (capability) => CheckboxListTile(
+                      value:
+                          operator.esPropietario ||
+                          selected.contains(capability),
+                      onChanged: operator.esPropietario
+                          ? null
+                          : (enabled) => setLocalState(() {
+                              if (enabled == true) {
+                                selected.add(capability);
+                              } else {
+                                selected.remove(capability);
+                              }
+                            }),
+                      title: Text(_capabilityLabel(capability)),
+                      subtitle: Text(capability),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: operator.esPropietario
+                  ? null
+                  : () => Navigator.pop(context, selected),
+              child: const Text('Guardar'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result == null) return;
+    await InstitucionOperadoresService.instance.setCapacidades(
+      institucionId: widget.institucionId,
+      operadorId: operator.id,
+      capacidades: result,
+    );
+    await _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -235,8 +305,8 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
                       title: Text(operator.nombreVisible),
                       subtitle: Text(
                         operator.esPropietario
-                            ? 'Propietario · acceso a todas las áreas'
-                            : '${operator.estado.name} · identidad operativa local',
+                            ? 'Propietario · acceso administrativo completo'
+                            : '${operator.estado.name} · ${operator.capacidades.length} capacidades',
                       ),
                       trailing: Wrap(
                         children: [
@@ -260,6 +330,10 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
                           TextButton(
                             onPressed: () => _editAreas(operator),
                             child: const Text('Áreas'),
+                          ),
+                          TextButton(
+                            onPressed: () => _editCapabilities(operator),
+                            child: const Text('Capacidades'),
                           ),
                         ],
                       ),

@@ -111,6 +111,7 @@ class InstitucionMisSolicitudesPage extends StatefulWidget {
 
   /// Solicitud que originó la navegación, para abrir su sección y priorizarla.
   final String? initialSolicitudId;
+  final String? areaId;
 
   const InstitucionMisSolicitudesPage({
     super.key,
@@ -120,6 +121,7 @@ class InstitucionMisSolicitudesPage extends StatefulWidget {
     this.ownerAccountId,
     this.institucionPerfilId,
     this.initialSolicitudId,
+    this.areaId,
   });
 
   @override
@@ -750,8 +752,17 @@ class _InstitucionMisSolicitudesPageState
     final motivo = r.motivoRechazo.trim();
 
     try {
-      await SolicitudesService.responderSolicitud(
+      final area = (widget.areaId ?? '').trim();
+      if (area.isEmpty) {
+        throw SolicitudesException(
+          'forbidden',
+          'No se pudo comprobar el área de esta solicitud.',
+        );
+      }
+      await SolicitudesService.responderSolicitudInstitucional(
         solicitudId: s.id,
+        institucionId: _instIdFromWidget,
+        areaId: area,
         nuevoEstado: nuevoEstado,
         notaInstitucion: nota.isEmpty ? null : nota,
         motivoRechazo: (nuevoEstado == EstadoSolicitud.rechazada)

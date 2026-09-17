@@ -11,9 +11,11 @@ import 'dart:math';
 
 import '../models/calendario/evento_calendario.dart';
 import '../models/instituciones/area_operativa.dart';
+import '../models/instituciones/operador_institucional.dart';
 import '../models/solicitudes/solicitud_alumno.dart';
 import 'alumno_service.dart';
 import 'institucion_areas_service.dart';
+import 'institucion_operadores_service.dart';
 import 'solicitudes_service.dart';
 
 class InstitucionEmisionesService {
@@ -73,6 +75,7 @@ class InstitucionEmisionesService {
 
     // ✅ metadata UX (backend-ready): si el sistema quiere duplicar en perfil local
     bool duplicarNotiEnPerfil = true,
+    String? emittedByOperatorId,
   }) {
     final date = _dateKey(inicio);
     final time = _timeKey(inicio);
@@ -125,6 +128,8 @@ class InstitucionEmisionesService {
 
       // ✅ flag UX backend-ready (hoy puede ignorarse sin romper)
       'notiDuplicateInProfile': duplicarNotiEnPerfil,
+      if (_n(emittedByOperatorId).isNotEmpty)
+        'emittedByOperatorId': _n(emittedByOperatorId),
     };
   }
 
@@ -210,6 +215,7 @@ class InstitucionEmisionesService {
     List<int> preNotiMinutes = const <int>[1440, 120],
     bool duplicarNotiEnPerfil =
         true, // (compat) metadata: lo respeta NotificacionesService si se implementa
+    String? emittedByOperatorId,
   }) async {
     final inst = _n(institucionId);
     if (inst.isEmpty) return <String, String>{};
@@ -263,6 +269,7 @@ class InstitucionEmisionesService {
         rsvpStatus: 'pending',
         preNotiMinutes: preNotiMinutes,
         duplicarNotiEnPerfil: duplicarNotiEnPerfil,
+        emittedByOperatorId: emittedByOperatorId,
       );
 
       // ✅ Timeout por alumno: evita que 1 caso “cuelgue” toda la emisión.
@@ -283,6 +290,58 @@ class InstitucionEmisionesService {
     }
 
     return out;
+  }
+
+  Future<Map<String, String>> emitirEventoEspecialAutorizado({
+    required String institucionId,
+    required String institucionNombre,
+    required List<SolicitudAlumno> confirmados,
+    required bool esCurricular,
+    required String areaId,
+    String? grupoId,
+    String? actividadKey,
+    String? actividadNombre,
+    required DateTime inicio,
+    DateTime? fin,
+    required String titulo,
+    required String descripcion,
+    required TipoEventoEspecial tipoEspecial,
+    SegmentoEventoEspecial? segmento,
+    bool requiresRsvp = false,
+    String rsvpPolicy = 'optional',
+    List<int> preNotiMinutes = const <int>[1440, 120],
+  }) async {
+    final operator = await InstitucionOperadoresService.instance
+        .autorizarActivo(
+          institucionId: institucionId,
+          areaId: areaId,
+          capacidad: CapacidadInstitucional.communicationsWrite,
+        );
+    if (operator == null) {
+      throw StateError(
+        'El operador activo no puede emitir comunicaciones en esta área.',
+      );
+    }
+    return emitirEventoEspecialAConfirmados(
+      institucionId: institucionId,
+      institucionNombre: institucionNombre,
+      confirmados: confirmados,
+      esCurricular: esCurricular,
+      areaId: areaId,
+      grupoId: grupoId,
+      actividadKey: actividadKey,
+      actividadNombre: actividadNombre,
+      inicio: inicio,
+      fin: fin,
+      titulo: titulo,
+      descripcion: descripcion,
+      tipoEspecial: tipoEspecial,
+      segmento: segmento,
+      requiresRsvp: requiresRsvp,
+      rsvpPolicy: rsvpPolicy,
+      preNotiMinutes: preNotiMinutes,
+      emittedByOperatorId: operator.id,
+    );
   }
 
   /// Conveniencia: emite a “AULA completa” (confirmados curricular o extra).

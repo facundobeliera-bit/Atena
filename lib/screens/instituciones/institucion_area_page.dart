@@ -192,6 +192,7 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
   String _actividadLabelResolved = '';
   String _workProfileIdResolved = '';
   String _workProfileNameResolved = '';
+  String _areaIdResolved = '';
 
   // Owner institucional best-effort
   String _ownerAccountIdResolved = '';
@@ -351,6 +352,7 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
             #actividadLabel: _actividadLabelResolved.trim(),
             #workProfileId: _workProfileIdResolved.trim(),
             #workProfileName: _workProfileNameResolved.trim(),
+            #areaId: _areaIdResolved,
           })
           as Widget;
     } catch (_) {}
@@ -383,6 +385,7 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     return sol.InstitucionMisSolicitudesPage(
       institucionId: _instIdData,
       institucionNombre: instNombre,
+      areaId: _areaIdResolved,
     );
   }
 
@@ -929,6 +932,7 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
       claveOrigen: _actividadKeyResolved,
       nombre: _actividadLabelResolved,
     );
+    _areaIdResolved = scopedArea?.id ?? '';
     if (scopedArea != null) {
       final operatorService = InstitucionOperadoresService.instance;
       final ownerOperator = await operatorService.asegurarPropietario(

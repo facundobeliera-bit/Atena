@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/calendario/evento_calendario.dart';
+import '../models/instituciones/operador_institucional.dart';
+import 'institucion_operadores_service.dart';
 
 class CalendarioService {
   CalendarioService._();
@@ -59,6 +61,34 @@ class CalendarioService {
     }
 
     await _writeOwnerMaps(owner, list);
+  }
+
+  static Future<void> addEventoInstitucional(EventoCalendario event) async {
+    final institution = _norm(event.institucionId ?? '');
+    final area = _norm(event.areaId ?? '');
+    if (institution.isEmpty || area.isEmpty) {
+      throw StateError('El evento institucional no tiene un área inequívoca.');
+    }
+    final operator = await InstitucionOperadoresService.instance
+        .autorizarActivo(
+          institucionId: institution,
+          areaId: area,
+          capacidad: CapacidadInstitucional.calendarWrite,
+        );
+    if (operator == null) {
+      throw StateError(
+        'El operador activo no puede modificar el calendario de esta área.',
+      );
+    }
+    final existing = (await getEventos(
+      ownerAccountId: event.ownerAccountId,
+    )).where((value) => value.id == event.id).firstOrNull;
+    await addEvento(
+      event.copyWith(
+        createdByOperatorId: existing?.createdByOperatorId ?? operator.id,
+        updatedByOperatorId: operator.id,
+      ),
+    );
   }
 
   /// Upsert batch (reduce IO cuando se actualizan múltiples eventos).

@@ -505,6 +505,8 @@ class AlumnoCalendarioInteraccionesService {
       if (instId.isNotEmpty) 'institucionId': instId,
       if (areaId.isNotEmpty) 'areaId': areaId,
       if (grupoId.isNotEmpty) 'grupoId': grupoId,
+      if (_str(src['emittedByOperatorId']).isNotEmpty)
+        'emittedByOperatorId': _str(src['emittedByOperatorId']),
       'lock': lock,
       'allowStudentDelete': allowStudentDelete,
       'allowStudentEdit': allowStudentEdit,

@@ -222,6 +222,8 @@ class EventoCalendario {
   final bool esCurricular;
   final String? areaId;
   final String? grupoId;
+  final String? createdByOperatorId;
+  final String? updatedByOperatorId;
 
   final TipoEventoCalendario tipo;
 
@@ -250,6 +252,8 @@ class EventoCalendario {
     required this.esCurricular,
     this.areaId,
     this.grupoId,
+    this.createdByOperatorId,
+    this.updatedByOperatorId,
     required this.tipo,
     required this.tipoEspecial,
     required this.segmentoEspecial,
@@ -272,6 +276,8 @@ class EventoCalendario {
     bool? esCurricular,
     String? areaId,
     String? grupoId,
+    String? createdByOperatorId,
+    String? updatedByOperatorId,
     TipoEventoCalendario? tipo,
     TipoEventoEspecial? tipoEspecial,
     SegmentoEventoEspecial? segmentoEspecial,
@@ -293,6 +299,8 @@ class EventoCalendario {
       esCurricular: esCurricular ?? this.esCurricular,
       areaId: areaId ?? this.areaId,
       grupoId: grupoId ?? this.grupoId,
+      createdByOperatorId: createdByOperatorId ?? this.createdByOperatorId,
+      updatedByOperatorId: updatedByOperatorId ?? this.updatedByOperatorId,
       tipo: tipo ?? this.tipo,
       tipoEspecial: tipoEspecial ?? this.tipoEspecial,
       segmentoEspecial: segmentoEspecial ?? this.segmentoEspecial,
@@ -318,6 +326,10 @@ class EventoCalendario {
     'esCurricular': esCurricular,
     if ((areaId ?? '').trim().isNotEmpty) 'areaId': areaId!.trim(),
     if ((grupoId ?? '').trim().isNotEmpty) 'grupoId': grupoId!.trim(),
+    if ((createdByOperatorId ?? '').trim().isNotEmpty)
+      'createdByOperatorId': createdByOperatorId!.trim(),
+    if ((updatedByOperatorId ?? '').trim().isNotEmpty)
+      'updatedByOperatorId': updatedByOperatorId!.trim(),
     'tipo': tipo.name,
     'tipoEspecial': tipoEspecial?.name,
     'segmentoEspecial': segmentoEspecial?.toMap(),
@@ -370,6 +382,14 @@ class EventoCalendario {
       grupoId: (m['grupoId'] ?? '').toString().trim().isEmpty
           ? null
           : (m['grupoId'] ?? '').toString().trim(),
+      createdByOperatorId:
+          (m['createdByOperatorId'] ?? '').toString().trim().isEmpty
+          ? null
+          : (m['createdByOperatorId'] ?? '').toString().trim(),
+      updatedByOperatorId:
+          (m['updatedByOperatorId'] ?? '').toString().trim().isEmpty
+          ? null
+          : (m['updatedByOperatorId'] ?? '').toString().trim(),
       tipo: tipo,
       tipoEspecial: (tipoEspecialRaw == null)
           ? null
