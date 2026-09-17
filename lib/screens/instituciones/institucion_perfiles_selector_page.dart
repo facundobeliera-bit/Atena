@@ -44,6 +44,7 @@ import '../../services/institucion_areas_service.dart';
 import '../../services/institucion_service.dart';
 import '../../ui/atena_assets.dart';
 import 'institucion_area_page.dart';
+import 'institucion_operadores_page.dart';
 
 // =====================================================
 // PREFS SAFE GET (timeout) – evita await colgado
@@ -1644,6 +1645,21 @@ class _InstitucionPerfilesSelectorPageState
         backgroundColor: cs.surface.withValues(alpha: 0.88),
         surfaceTintColor: Colors.transparent,
         title: Text(_l10nSelectActivityTitle(l10n)),
+        actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => InstitucionOperadoresPage(
+                  ownerAccountId: widget.ownerAccountId ?? '',
+                  institucionId: _instIdData,
+                  institucionNombre: widget.institucionNombre,
+                ),
+              ),
+            ),
+            icon: const Icon(Icons.groups_outlined),
+            label: const Text('Operadores'),
+          ),
+        ],
       ),
       body: PopScope(
         canPop: true,

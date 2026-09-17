@@ -50,6 +50,7 @@ import '../../services/cuenta_service.dart';
 
 // ✅ Sesión canónica (institución / cuenta)
 import '../../services/session_service.dart';
+import '../../services/institucion_operadores_service.dart';
 
 // ✅ Assets centralizados
 import '../../ui/atena_assets.dart';
@@ -532,6 +533,24 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
       }
 
       final nombreReal = _n(inst.nombre);
+
+      final ownerOperator = await InstitucionOperadoresService.instance
+          .asegurarPropietario(
+            institucionId: _instPerfilId,
+            ownerAccountId: _ownerId,
+            perfilInstitucionId: _instPerfilId,
+            nombreVisible:
+                '${nombreReal.isEmpty ? 'Institución' : nombreReal} · Propietario',
+          );
+      if (await InstitucionOperadoresService.instance.operadorActivo(
+            _instPerfilId,
+          ) ==
+          null) {
+        await InstitucionOperadoresService.instance.activar(
+          institucionId: _instPerfilId,
+          operadorId: ownerOperator.id,
+        );
+      }
 
       _stopBootWatchdog();
 

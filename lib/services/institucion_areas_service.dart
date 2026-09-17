@@ -103,12 +103,8 @@ class InstitucionAreasService {
       final visibleName = nombre.trim().isEmpty
           ? current.nombre
           : nombre.trim();
-      if (visibleName != current.nombre || !current.activa) {
-        areas[index] = current.copyWith(
-          nombre: visibleName,
-          activa: true,
-          updatedAt: now,
-        );
+      if (visibleName != current.nombre) {
+        areas[index] = current.copyWith(nombre: visibleName, updatedAt: now);
         await StorageService.instance.setJsonList(
           _key(institution),
           areas.map((area) => area.toMap()).toList(),
@@ -132,5 +128,25 @@ class InstitucionAreasService {
       areas.map((value) => value.toMap()).toList(),
     );
     return area;
+  }
+
+  Future<bool> setActiva({
+    required String institucionId,
+    required String areaId,
+    required bool activa,
+  }) async {
+    final institution = institucionId.trim();
+    final areas = await listar(institution);
+    final index = areas.indexWhere((area) => area.id == areaId.trim());
+    if (index < 0) return false;
+    areas[index] = areas[index].copyWith(
+      activa: activa,
+      updatedAt: DateTime.now().toUtc(),
+    );
+    await StorageService.instance.setJsonList(
+      _key(institution),
+      areas.map((area) => area.toMap()).toList(),
+    );
+    return true;
   }
 }

@@ -77,6 +77,7 @@ class SessionService {
   /// ✅ Owner de institución (best-effort) para notificaciones / operaciones institucionales.
   static const String _kInstitucionOwnerAccountId =
       'v2_session_instOwnerAccountId';
+  static const String _kInstitucionOperatorId = 'v2_session_instOperatorId';
 
   static Future<SharedPreferences> _prefs() => SharedPreferences.getInstance();
 
@@ -151,6 +152,7 @@ class SessionService {
       if (role == SessionRole.cuenta) {
         // Cuenta: nunca arrastrar owner institucional ni DNI de otra cuenta.
         await p.remove(_kInstitucionOwnerAccountId);
+        await p.remove(_kInstitucionOperatorId);
         if (userChanged || roleChanged) await p.remove(_kPerfilSeleccionadoDni);
       } else {
         // Institución: limpiar perfil seleccionado de cuenta SIEMPRE
@@ -162,6 +164,7 @@ class SessionService {
             roleChanged || userChanged || prevRole != SessionRole.institucion;
         if (shouldClearInstOwner) {
           await p.remove(_kInstitucionOwnerAccountId);
+          await p.remove(_kInstitucionOperatorId);
         }
       }
     } catch (_) {
@@ -201,8 +204,10 @@ class SessionService {
         if (role == SessionRole.institucion) {
           await p.remove(_kPerfilSeleccionadoDni);
           await p.remove(_kInstitucionOwnerAccountId); // anti-stale al ENTRAR
+          await p.remove(_kInstitucionOperatorId);
         } else {
           await p.remove(_kInstitucionOwnerAccountId);
+          await p.remove(_kInstitucionOperatorId);
         }
       } else {
         // Si no cambió, solo asegurar coherencia mínima:
@@ -233,6 +238,7 @@ class SessionService {
           _normIdKey(
             p.getString(_kInstitucionOwnerAccountId) ?? '',
           ).isNotEmpty ||
+          _normIdKey(p.getString(_kInstitucionOperatorId) ?? '').isNotEmpty ||
           _normIdKey(p.getString(_kPerfilSeleccionadoDni) ?? '').isNotEmpty;
 
       if (hasResidue) {
@@ -289,10 +295,38 @@ class SessionService {
       await p.remove(_kTemp);
       await p.remove(_kPerfilSeleccionadoDni);
       await p.remove(_kInstitucionOwnerAccountId);
+      await p.remove(_kInstitucionOperatorId);
     } catch (_) {}
   }
 
   static Future<void> clearAllSessionOnly() => logout();
+
+  static Future<void> setInstitucionOperatorId(String operatorId) async {
+    final session = await getSession();
+    if (session?.role != SessionRole.institucion) return;
+    final value = _normIdKey(operatorId);
+    final p = await _prefs();
+    if (value.isEmpty) {
+      await p.remove(_kInstitucionOperatorId);
+    } else {
+      await p.setString(_kInstitucionOperatorId, value);
+    }
+  }
+
+  static Future<String?> getInstitucionOperatorIdLogueado() async {
+    final session = await getSession();
+    if (session?.role != SessionRole.institucion) return null;
+    final p = await _prefs();
+    final value = _normIdKey(p.getString(_kInstitucionOperatorId) ?? '');
+    return value.isEmpty ? null : value;
+  }
+
+  static Future<void> clearInstitucionOperatorId() async {
+    try {
+      final p = await _prefs();
+      await p.remove(_kInstitucionOperatorId);
+    } catch (_) {}
+  }
 
   // =====================================================
   // PERFIL SELECCIONADO (DNI) – SOLO CUENTA

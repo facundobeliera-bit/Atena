@@ -1,0 +1,134 @@
+enum EstadoOperadorInstitucional { activo, suspendido, revocado }
+
+class OperadorInstitucional {
+  static const int currentSchemaVersion = 1;
+
+  final String id;
+  final String institucionId;
+  final String? cuentaId;
+  final String? perfilInstitucionId;
+  final String nombreVisible;
+  final bool esPropietario;
+  final EstadoOperadorInstitucional estado;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int schemaVersion;
+
+  const OperadorInstitucional({
+    required this.id,
+    required this.institucionId,
+    required this.cuentaId,
+    required this.perfilInstitucionId,
+    required this.nombreVisible,
+    required this.esPropietario,
+    required this.estado,
+    required this.createdAt,
+    required this.updatedAt,
+    this.schemaVersion = currentSchemaVersion,
+  });
+
+  bool get puedeActivarse => estado == EstadoOperadorInstitucional.activo;
+
+  OperadorInstitucional copyWith({
+    String? nombreVisible,
+    EstadoOperadorInstitucional? estado,
+    DateTime? updatedAt,
+  }) => OperadorInstitucional(
+    id: id,
+    institucionId: institucionId,
+    cuentaId: cuentaId,
+    perfilInstitucionId: perfilInstitucionId,
+    nombreVisible: nombreVisible ?? this.nombreVisible,
+    esPropietario: esPropietario,
+    estado: estado ?? this.estado,
+    createdAt: createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    schemaVersion: schemaVersion,
+  );
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'institucionId': institucionId,
+    'cuentaId': cuentaId,
+    'perfilInstitucionId': perfilInstitucionId,
+    'nombreVisible': nombreVisible,
+    'esPropietario': esPropietario,
+    'estado': estado.name,
+    'createdAtIso': createdAt.toIso8601String(),
+    'updatedAtIso': updatedAt.toIso8601String(),
+    'schemaVersion': schemaVersion,
+  };
+
+  factory OperadorInstitucional.fromMap(Map<String, dynamic> map) {
+    final state = (map['estado'] ?? '').toString();
+    return OperadorInstitucional(
+      id: (map['id'] ?? '').toString().trim(),
+      institucionId: (map['institucionId'] ?? '').toString().trim(),
+      cuentaId: (map['cuentaId'] ?? '').toString().trim().isEmpty
+          ? null
+          : (map['cuentaId'] ?? '').toString().trim(),
+      perfilInstitucionId:
+          (map['perfilInstitucionId'] ?? '').toString().trim().isEmpty
+          ? null
+          : (map['perfilInstitucionId'] ?? '').toString().trim(),
+      nombreVisible: (map['nombreVisible'] ?? '').toString().trim(),
+      esPropietario: map['esPropietario'] == true,
+      estado: EstadoOperadorInstitucional.values.firstWhere(
+        (value) => value.name == state,
+        orElse: () => EstadoOperadorInstitucional.revocado,
+      ),
+      createdAt:
+          DateTime.tryParse((map['createdAtIso'] ?? '').toString()) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt:
+          DateTime.tryParse((map['updatedAtIso'] ?? '').toString()) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      schemaVersion: map['schemaVersion'] is num
+          ? (map['schemaVersion'] as num).toInt()
+          : currentSchemaVersion,
+    );
+  }
+}
+
+class AsignacionOperador {
+  final String institucionId;
+  final String operadorId;
+  final List<String> areaIds;
+  final DateTime updatedAt;
+  final int schemaVersion;
+
+  const AsignacionOperador({
+    required this.institucionId,
+    required this.operadorId,
+    required this.areaIds,
+    required this.updatedAt,
+    this.schemaVersion = 1,
+  });
+
+  Map<String, dynamic> toMap() => {
+    'institucionId': institucionId,
+    'operadorId': operadorId,
+    'areaIds': areaIds,
+    'updatedAtIso': updatedAt.toIso8601String(),
+    'schemaVersion': schemaVersion,
+  };
+
+  factory AsignacionOperador.fromMap(Map<String, dynamic> map) =>
+      AsignacionOperador(
+        institucionId: (map['institucionId'] ?? '').toString().trim(),
+        operadorId: (map['operadorId'] ?? '').toString().trim(),
+        areaIds: (map['areaIds'] is List)
+            ? (map['areaIds'] as List)
+                  .map((value) => value.toString().trim())
+                  .where((value) => value.isNotEmpty)
+                  .toSet()
+                  .toList()
+            : const [],
+        updatedAt:
+            DateTime.tryParse((map['updatedAtIso'] ?? '').toString()) ??
+            DateTime.fromMillisecondsSinceEpoch(0),
+        schemaVersion: map['schemaVersion'] is num
+            ? (map['schemaVersion'] as num).toInt()
+            : 1,
+      );
+}

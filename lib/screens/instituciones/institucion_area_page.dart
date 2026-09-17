@@ -67,6 +67,7 @@ import 'package:atena_app/l10n/gen/app_localizations.dart';
 // Modelos
 import '../../models/instituciones/instituciones_integrado.dart';
 import '../../models/instituciones/area_operativa.dart';
+import '../../models/instituciones/operador_institucional.dart';
 import '../../models/extracurriculares/bloque_extracurricular.dart';
 
 // Helpers / compat (resolver institución)
@@ -94,6 +95,7 @@ import 'institucion_croquis_aula_page.dart' as croquis;
 // ✅ Locks canónicos por área
 import '../../services/institucion_area_locks.dart';
 import '../../services/institucion_areas_service.dart';
+import '../../services/institucion_operadores_service.dart';
 import 'institucion_respuestas_calendario_page.dart';
 
 // ✅ PLAN – Guard canónico
@@ -919,6 +921,44 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
       return;
     }
 
+    final scopedArea = await InstitucionAreasService.instance.resolverYGuardar(
+      institucionId: _instIdData,
+      tipo: _isExtracurricularScope
+          ? TipoAreaOperativa.extracurricular
+          : TipoAreaOperativa.curricular,
+      claveOrigen: _actividadKeyResolved,
+      nombre: _actividadLabelResolved,
+    );
+    if (scopedArea != null) {
+      final operatorService = InstitucionOperadoresService.instance;
+      final ownerOperator = await operatorService.asegurarPropietario(
+        institucionId: _instIdData,
+        ownerAccountId: owner,
+        perfilInstitucionId: _instIdData,
+        nombreVisible: '${widget.institucionNombre} · Propietario',
+      );
+      var active = await operatorService.operadorActivo(_instIdData);
+      active ??= ownerOperator;
+      if (await operatorService.operadorActivo(_instIdData) == null) {
+        await operatorService.activar(
+          institucionId: _instIdData,
+          operadorId: active.id,
+        );
+      }
+      if (!await operatorService.puedeAccederArea(
+        institucionId: _instIdData,
+        operadorId: active.id,
+        areaId: scopedArea.id,
+      )) {
+        if (!mounted) return;
+        setState(() {
+          _fatalError = 'El operador activo no está asignado a esta área.';
+          _loading = false;
+        });
+        return;
+      }
+    }
+
     final instFromSelector = widget.institucion;
     if (instFromSelector != null) {
       _inst = instFromSelector;
@@ -1263,6 +1303,70 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     );
   }
 
+  Future<List<OperadorInstitucional>> _assignedOperators() async {
+    final area = await InstitucionAreasService.instance.resolverYGuardar(
+      institucionId: _instIdData,
+      tipo: _isExtracurricularScope
+          ? TipoAreaOperativa.extracurricular
+          : TipoAreaOperativa.curricular,
+      claveOrigen: _actividadKeyResolved,
+      nombre: _actividadLabelResolved,
+    );
+    if (area == null) return const [];
+    final owner = await InstitucionOperadoresService.instance
+        .asegurarPropietario(
+          institucionId: _instIdData,
+          ownerAccountId: _ownerAccountIdResolved,
+          perfilInstitucionId: _instIdData,
+          nombreVisible:
+              '${_nombreUI.isEmpty ? 'Institución' : _nombreUI} · Propietario',
+        );
+    if (await InstitucionOperadoresService.instance.operadorActivo(
+          _instIdData,
+        ) ==
+        null) {
+      await InstitucionOperadoresService.instance.activar(
+        institucionId: _instIdData,
+        operadorId: owner.id,
+      );
+    }
+    return InstitucionOperadoresService.instance.operadoresDelArea(
+      _instIdData,
+      area.id,
+    );
+  }
+
+  Widget _assignedOperatorsCard() => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: FutureBuilder<List<OperadorInstitucional>>(
+        future: _assignedOperators(),
+        builder: (context, snapshot) {
+          final operators = snapshot.data ?? const <OperadorInstitucional>[];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Asignados a esta área',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              if (snapshot.connectionState == ConnectionState.waiting)
+                const LinearProgressIndicator()
+              else if (operators.isEmpty)
+                const Text('No hay operadores asignados.')
+              else
+                for (final operator in operators)
+                  Text(
+                    '• ${operator.nombreVisible}${operator.esPropietario ? ' (propietario)' : ''}',
+                  ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
+
   void _snack(String msg) {
     if (!mounted) return;
     final clean = msg.trim();
@@ -1474,6 +1578,9 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
                 ),
               ),
               const SizedBox(height: 14),
+
+              _assignedOperatorsCard(),
+              const SizedBox(height: 10),
 
               _opCard(
                 icon: Icons.notifications,
