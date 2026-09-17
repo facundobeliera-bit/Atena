@@ -452,8 +452,12 @@ void main() {
       );
       await tester.pumpAndSettle();
       final action = find.text('Respuestas de calendario');
+      await tester.scrollUntilVisible(
+        action,
+        300,
+        scrollable: find.byType(Scrollable).last,
+      );
       expect(action, findsOneWidget);
-      await tester.ensureVisible(action);
       await tester.tap(action);
       await tester.pumpAndSettle();
       expect(find.byType(InstitucionRespuestasCalendarioPage), findsOneWidget);

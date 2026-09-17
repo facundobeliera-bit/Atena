@@ -44,8 +44,6 @@ import '../../services/institucion_areas_service.dart';
 import '../../services/institucion_service.dart';
 import '../../ui/atena_assets.dart';
 import 'institucion_area_page.dart';
-import 'institucion_operadores_page.dart';
-import 'institucion_historial_actividad_page.dart';
 
 // =====================================================
 // PREFS SAFE GET (timeout) – evita await colgado
@@ -60,6 +58,7 @@ Future<SharedPreferences> _prefsSafeGet() {
 // =====================================================
 
 String _enumName(Object e) {
+  if (e is Enum) return e.name;
   try {
     // ignore: avoid_dynamic_calls
     return (e as dynamic).name?.toString() ?? e.toString();
@@ -911,19 +910,7 @@ class _InstitucionPerfilesSelectorPageState
     return v.contains('premium') ? 10 : 3;
   }
 
-  dynamic _planOf(Institucion inst) {
-    try {
-      // ignore: avoid_dynamic_calls
-      final p = (inst as dynamic).planSafe;
-      if (p != null) return p;
-    } catch (_) {}
-    try {
-      // ignore: avoid_dynamic_calls
-      final p = (inst as dynamic).plan;
-      if (p != null) return p;
-    } catch (_) {}
-    return null;
-  }
+  PlanInstitucionConfig _planOf(Institucion inst) => inst.planSafe;
 
   // =====================================================
   // DEVICE ID (LOCAL, SIN DEPENDENCIAS EXTERNAS)
@@ -1646,32 +1633,6 @@ class _InstitucionPerfilesSelectorPageState
         backgroundColor: cs.surface.withValues(alpha: 0.88),
         surfaceTintColor: Colors.transparent,
         title: Text(_l10nSelectActivityTitle(l10n)),
-        actions: [
-          TextButton.icon(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => InstitucionHistorialActividadPage(
-                  institucionId: _instIdData,
-                ),
-              ),
-            ),
-            icon: const Icon(Icons.history),
-            label: const Text('Historial'),
-          ),
-          TextButton.icon(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => InstitucionOperadoresPage(
-                  ownerAccountId: widget.ownerAccountId ?? '',
-                  institucionId: _instIdData,
-                  institucionNombre: widget.institucionNombre,
-                ),
-              ),
-            ),
-            icon: const Icon(Icons.groups_outlined),
-            label: const Text('Operadores'),
-          ),
-        ],
       ),
       body: PopScope(
         canPop: true,
@@ -2313,7 +2274,7 @@ class _InstitucionPerfilesSelectorPageState
         final key = _nivelNameOf(n);
         if (key.trim().isEmpty) continue;
         final propio = _nombrePropioOf(n).trim();
-        final label = propio.isNotEmpty ? propio : key;
+        final label = propio.isNotEmpty ? propio : _capUi(key);
         out.add(
           InstitucionActividadRef(
             kind: InstitucionActividadKind.curricular,
@@ -2344,7 +2305,7 @@ class _InstitucionPerfilesSelectorPageState
         final key = _moduloNameOf(m);
         if (key.trim().isEmpty) continue;
         final propio = _nombrePropioOf(m).trim();
-        final label = propio.isNotEmpty ? propio : key;
+        final label = propio.isNotEmpty ? propio : _capUi(key);
         out.add(
           InstitucionActividadRef(
             kind: InstitucionActividadKind.extracurricular,

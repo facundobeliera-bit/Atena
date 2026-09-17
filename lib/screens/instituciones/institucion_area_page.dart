@@ -96,6 +96,8 @@ import 'institucion_croquis_aula_page.dart' as croquis;
 import '../../services/institucion_area_locks.dart';
 import '../../services/institucion_areas_service.dart';
 import '../../services/institucion_operadores_service.dart';
+import 'institucion_historial_actividad_page.dart';
+import 'institucion_operadores_page.dart';
 import 'institucion_respuestas_calendario_page.dart';
 
 // ✅ PLAN – Guard canónico
@@ -1307,6 +1309,28 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     );
   }
 
+  Future<void> _openOperators() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => InstitucionOperadoresPage(
+          ownerAccountId: _ownerAccountIdResolved,
+          institucionId: _instIdData,
+          institucionNombre: _nombreUI,
+        ),
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openActivityHistory() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            InstitucionHistorialActividadPage(institucionId: _instIdData),
+      ),
+    );
+  }
+
   Future<List<OperadorInstitucional>> _assignedOperators() async {
     final area = await InstitucionAreasService.instance.resolverYGuardar(
       institucionId: _instIdData,
@@ -1584,7 +1608,47 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
               const SizedBox(height: 14),
 
               _assignedOperatorsCard(),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
+
+              Text(
+                'Administración institucional',
+                style: (tt.titleMedium ?? const TextStyle()).copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: cs.onSurface,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Gestioná accesos y revisá la actividad de la institución.',
+                style: (tt.bodyMedium ?? const TextStyle()).copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _opCard(
+                icon: Icons.groups_outlined,
+                title: 'Operadores',
+                subtitle: 'Administrá operadores y sus áreas asignadas.',
+                semanticsLabel: 'Abrir gestión de operadores institucionales',
+                onTap: _openOperators,
+              ),
+              _opCard(
+                icon: Icons.history,
+                title: 'Historial de actividad',
+                subtitle: 'Consultá la trazabilidad de las operaciones.',
+                semanticsLabel: 'Abrir historial de actividad institucional',
+                onTap: _openActivityHistory,
+              ),
+
+              const SizedBox(height: 8),
+              Text(
+                'Funciones del área',
+                style: (tt.titleMedium ?? const TextStyle()).copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: cs.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
 
               _opCard(
                 icon: Icons.notifications,
