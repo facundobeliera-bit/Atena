@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/instituciones/area_operativa.dart';
+import '../../models/instituciones/asignacion_operador_area.dart';
 import '../../models/instituciones/operador_institucional.dart';
 import '../../services/institucion_areas_service.dart';
 import '../../services/institucion_operadores_service.dart';
@@ -28,6 +29,7 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
   bool _denied = false;
   List<OperadorInstitucional> _operators = const [];
   List<AreaOperativa> _areas = const [];
+  Map<String, List<AsignacionOperadorArea>> _assignments = const {};
   String? _activeId;
 
   Future<bool> _validSession() async {
@@ -71,10 +73,18 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
     final areas = await InstitucionAreasService.instance.listar(
       widget.institucionId,
     );
+    final assignments = <String, List<AsignacionOperadorArea>>{};
+    for (final operator in operators) {
+      assignments[operator.id] = await service.listarAsignacionesOperador(
+        widget.institucionId,
+        operator.id,
+      );
+    }
     if (mounted) {
       setState(() {
         _operators = operators;
         _areas = areas;
+        _assignments = assignments;
         _activeId = null;
         _loading = false;
         _denied = false;
@@ -216,12 +226,41 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
   };
 
   Future<void> _editCapabilities(OperadorInstitucional operator) async {
-    final selected = operator.capacidades.toSet();
+    final available = (_assignments[operator.id] ?? const [])
+        .where((value) => value.estaActiva)
+        .toList();
+    if (operator.esPropietario || available.isEmpty) return;
+    AsignacionOperadorArea? assignment;
+    if (available.length == 1) {
+      assignment = available.single;
+    } else {
+      assignment = await showDialog<AsignacionOperadorArea>(
+        context: context,
+        builder: (context) => SimpleDialog(
+          title: const Text('Elegí el área'),
+          children: [
+            for (final value in available)
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, value),
+                child: Text(
+                  _areas
+                          .where((area) => area.id == value.areaId)
+                          .map((area) => area.nombre)
+                          .firstOrNull ??
+                      value.areaId,
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+    if (assignment == null || !mounted) return;
+    final selected = assignment.capacidades.toSet();
     final result = await showDialog<Set<String>>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setLocalState) => AlertDialog(
-          title: Text('Capacidades de ${operator.nombreVisible}'),
+          title: Text('Capacidades en ${assignment!.areaId}'),
           content: SizedBox(
             width: 460,
             child: ListView(
@@ -229,18 +268,14 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
               children: CapacidadInstitucional.all
                   .map(
                     (capability) => CheckboxListTile(
-                      value:
-                          operator.esPropietario ||
-                          selected.contains(capability),
-                      onChanged: operator.esPropietario
-                          ? null
-                          : (enabled) => setLocalState(() {
-                              if (enabled == true) {
-                                selected.add(capability);
-                              } else {
-                                selected.remove(capability);
-                              }
-                            }),
+                      value: selected.contains(capability),
+                      onChanged: (enabled) => setLocalState(() {
+                        if (enabled == true) {
+                          selected.add(capability);
+                        } else {
+                          selected.remove(capability);
+                        }
+                      }),
                       title: Text(_capabilityLabel(capability)),
                       subtitle: Text(capability),
                     ),
@@ -254,9 +289,7 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
               child: const Text('Cancelar'),
             ),
             FilledButton(
-              onPressed: operator.esPropietario
-                  ? null
-                  : () => Navigator.pop(context, selected),
+              onPressed: () => Navigator.pop(context, selected),
               child: const Text('Guardar'),
             ),
           ],
@@ -264,9 +297,10 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
       ),
     );
     if (result == null) return;
-    await InstitucionOperadoresService.instance.setCapacidades(
+    await InstitucionOperadoresService.instance.setCapacidadesEnArea(
       institucionId: widget.institucionId,
       operadorId: operator.id,
+      areaId: assignment.areaId,
       capacidades: result,
     );
     await _load();
@@ -302,42 +336,104 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
                 const SizedBox(height: 12),
                 for (final operator in _operators)
                   Card(
-                    child: ListTile(
-                      title: Text(operator.nombreVisible),
-                      subtitle: Text(
-                        operator.esPropietario
-                            ? 'Propietario · acceso administrativo completo'
-                            : '${operator.estado.name} · ${operator.capacidades.length} capacidades',
-                      ),
-                      trailing: Wrap(
-                        children: [
-                          if (_activeId != operator.id)
-                            TextButton(
-                              onPressed: operator.puedeActivarse
-                                  ? () async {
-                                      await InstitucionOperadoresService
-                                          .instance
-                                          .activar(
-                                            institucionId: widget.institucionId,
-                                            operadorId: operator.id,
-                                          );
-                                      await _load();
-                                    }
-                                  : null,
-                              child: const Text('Usar'),
-                            )
-                          else
-                            const Chip(label: Text('Activo')),
-                          TextButton(
-                            onPressed: () => _editAreas(operator),
-                            child: const Text('Áreas'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          title: Text(operator.nombreVisible),
+                          subtitle: Text(
+                            operator.esPropietario
+                                ? 'Propietario · acceso administrativo completo'
+                                : operator.estado.name,
                           ),
-                          TextButton(
-                            onPressed: () => _editCapabilities(operator),
-                            child: const Text('Capacidades'),
+                          trailing: Wrap(
+                            children: [
+                              if (_activeId != operator.id)
+                                TextButton(
+                                  onPressed: operator.puedeActivarse
+                                      ? () async {
+                                          await InstitucionOperadoresService
+                                              .instance
+                                              .activar(
+                                                institucionId:
+                                                    widget.institucionId,
+                                                operadorId: operator.id,
+                                              );
+                                          await _load();
+                                        }
+                                      : null,
+                                  child: const Text('Usar'),
+                                )
+                              else
+                                const Chip(label: Text('Activo')),
+                              TextButton(
+                                onPressed: () => _editAreas(operator),
+                                child: const Text('Áreas'),
+                              ),
+                              TextButton(
+                                onPressed:
+                                    operator.esPropietario ||
+                                        (_assignments[operator.id] ?? const [])
+                                            .where((value) => value.estaActiva)
+                                            .isEmpty
+                                    ? null
+                                    : () => _editCapabilities(operator),
+                                child: const Text('Capacidades'),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        if (!operator.esPropietario)
+                          for (final assignment
+                              in _assignments[operator.id] ?? const [])
+                            if (assignment.estaActiva)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  0,
+                                  16,
+                                  12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        '${_areas.where((area) => area.id == assignment.areaId).map((area) => area.nombre).firstOrNull ?? assignment.areaId} · ${assignment.capacidades.length} capacidades${assignment.esResponsable ? ' · Responsable' : ''}',
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: assignment.esResponsable
+                                          ? () async {
+                                              await InstitucionOperadoresService
+                                                  .instance
+                                                  .quitarResponsable(
+                                                    institucionId:
+                                                        widget.institucionId,
+                                                    areaId: assignment.areaId,
+                                                  );
+                                              await _load();
+                                            }
+                                          : () async {
+                                              await InstitucionOperadoresService
+                                                  .instance
+                                                  .establecerResponsable(
+                                                    institucionId:
+                                                        widget.institucionId,
+                                                    areaId: assignment.areaId,
+                                                    operadorId: operator.id,
+                                                  );
+                                              await _load();
+                                            },
+                                      child: Text(
+                                        assignment.esResponsable
+                                            ? 'Quitar responsable'
+                                            : 'Hacer responsable',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                      ],
                     ),
                   ),
               ],

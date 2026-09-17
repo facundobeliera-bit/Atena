@@ -129,16 +129,22 @@ class InstitucionAuditoriaService {
     final records = await listarInterno(institucionId);
     Iterable<RegistroAuditoriaInstitucional> visible = records;
     if (!active.esPropietario) {
-      final assigned =
-          (await InstitucionOperadoresService.instance.areasAsignadas(
-            institucionId,
-            active.id,
-          )).toSet();
-      if (!active.capacidades.contains(CapacidadInstitucional.auditRead)) {
-        return const [];
+      final permittedAreas = <String>{};
+      for (final assignment
+          in await InstitucionOperadoresService.instance
+              .listarAsignacionesOperador(institucionId, active.id)) {
+        if (await InstitucionOperadoresService.instance.puedeRealizar(
+          institucionId: institucionId,
+          operadorId: active.id,
+          areaId: assignment.areaId,
+          capacidad: CapacidadInstitucional.auditRead,
+        )) {
+          permittedAreas.add(assignment.areaId);
+        }
       }
       visible = visible.where(
-        (record) => record.areaId != null && assigned.contains(record.areaId),
+        (record) =>
+            record.areaId != null && permittedAreas.contains(record.areaId),
       );
     }
     final area = (areaId ?? '').trim();
