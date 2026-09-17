@@ -4,6 +4,7 @@ import 'package:atena_app/models/calendario/evento_calendario.dart';
 import 'package:atena_app/models/cuentas/cuenta.dart';
 import 'package:atena_app/models/instituciones/area_operativa.dart';
 import 'package:atena_app/models/instituciones/operador_institucional.dart';
+import 'package:atena_app/models/instituciones/registro_auditoria_institucional.dart';
 import 'package:atena_app/models/instituciones/instituciones_integrado.dart'
     hide PerfilInstitucion;
 import 'package:atena_app/models/solicitudes/solicitud_alumno.dart';
@@ -13,6 +14,7 @@ import 'package:atena_app/services/alumno_service.dart';
 import 'package:atena_app/services/cuenta_service.dart';
 import 'package:atena_app/services/institucion_emisiones_service.dart';
 import 'package:atena_app/services/institucion_areas_service.dart';
+import 'package:atena_app/services/institucion_auditoria_service.dart';
 import 'package:atena_app/services/institucion_operadores_service.dart';
 import 'package:atena_app/services/institucion_grupos_autorizacion_service.dart';
 import 'package:atena_app/services/instituciones_helpers.dart' as helpers;
@@ -271,7 +273,83 @@ void main() {
     expect(saved?.estado, EstadoSolicitud.rechazada);
     expect(saved?.updatedByOperatorId, operator.id);
     expect(saved?.areaId, primary.id);
+    final audit = await InstitucionAuditoriaService.instance.listarInterno(
+      institution,
+    );
+    expect(audit, hasLength(1));
+    expect(audit.single.action, AccionAuditoriaInstitucional.requestRejected);
+    expect(audit.single.operatorId, operator.id);
+    await SolicitudesService.responderSolicitudInstitucional(
+      solicitudId: request.id,
+      institucionId: institution,
+      areaId: primary.id,
+      nuevoEstado: EstadoSolicitud.rechazada,
+    );
+    expect(
+      await InstitucionAuditoriaService.instance.listarInterno(institution),
+      hasLength(1),
+    );
   });
+
+  test(
+    'confirmación exitosa registra una vez; falta de cupo no registra',
+    () async {
+      await institutionalSession();
+      final primary = await area(institution, 'primaria');
+      final ownerOp = await ownerOperator();
+      await InstitucionOperadoresService.instance.activar(
+        institucionId: institution,
+        operadorId: ownerOp.id,
+      );
+      await helpers.guardarGruposInstitucion(institution, [
+        GrupoInstitucional(
+          id: 'audit-capacity-group',
+          institucionId: institution,
+          actividadNombre: 'Primaria',
+          nombreGrupo: '1° A',
+          aula: '1° A',
+          cupoMaximo: 1,
+          cupoOcupado: 0,
+          estado: EstadoCupo.disponible,
+        ),
+      ]);
+      final repository = SolicitudesRepositoryPrefs();
+      final accepted = pendingRequest(
+        primary.id,
+      ).copyWith(grupoCurricularId: 'audit-capacity-group', aula: '1° A');
+      await repository.saveSolicitudAlumno(accepted);
+      await SolicitudesService.responderSolicitudInstitucional(
+        solicitudId: accepted.id,
+        institucionId: institution,
+        areaId: primary.id,
+        nuevoEstado: EstadoSolicitud.confirmada,
+      );
+      expect(
+        (await InstitucionAuditoriaService.instance.listarInterno(
+          institution,
+        )).single.action,
+        AccionAuditoriaInstitucional.requestConfirmed,
+      );
+
+      final blocked = pendingRequest(
+        primary.id,
+      ).copyWith(grupoCurricularId: 'audit-capacity-group', aula: '1° A');
+      await repository.saveSolicitudAlumno(blocked);
+      await expectLater(
+        SolicitudesService.responderSolicitudInstitucional(
+          solicitudId: blocked.id,
+          institucionId: institution,
+          areaId: primary.id,
+          nuevoEstado: EstadoSolicitud.confirmada,
+        ),
+        throwsA(isA<SolicitudesException>()),
+      );
+      expect(
+        await InstitucionAuditoriaService.instance.listarInterno(institution),
+        hasLength(1),
+      );
+    },
+  );
 
   test('sólo lectura y manipulación de área no deciden solicitud', () async {
     await institutionalSession();
@@ -308,6 +386,10 @@ void main() {
         throwsA(isA<SolicitudesException>()),
       );
     }
+    expect(
+      await InstitucionAuditoriaService.instance.listarInterno(institution),
+      isEmpty,
+    );
   });
 
   test('evento autorizado conserva creador y última modificación', () async {
@@ -325,6 +407,12 @@ void main() {
     expect(saved.createdByOperatorId, ownerOp.id);
     expect(saved.updatedByOperatorId, ownerOp.id);
     expect(saved.areaId, primary.id);
+    expect(
+      (await InstitucionAuditoriaService.instance.listarInterno(
+        institution,
+      )).single.action,
+      AccionAuditoriaInstitucional.eventCreated,
+    );
   });
 
   test('modificación de grupos autorizada conserva actor y área', () async {
@@ -353,6 +441,12 @@ void main() {
     expect(saved.updatedByOperatorId, ownerOp.id);
     expect(saved.areaId, primary.id);
     expect(saved.cupoOcupado, 3);
+    expect(
+      (await InstitucionAuditoriaService.instance.listarInterno(
+        institution,
+      )).single.action,
+      AccionAuditoriaInstitucional.groupUpdated,
+    );
   });
 
   test('grupo cruzado se rechaza sin modificar almacenamiento', () async {
@@ -381,6 +475,10 @@ void main() {
       throwsStateError,
     );
     expect(await helpers.cargarGruposInstitucion(institution), isEmpty);
+    expect(
+      await InstitucionAuditoriaService.instance.listarInterno(institution),
+      isEmpty,
+    );
   });
 
   test('evento histórico sin actor continúa legible', () {
@@ -423,6 +521,12 @@ void main() {
       perfilId: student.perfilId!,
     );
     expect(raw.single['emittedByOperatorId'], ownerOp.id);
+    expect(
+      (await InstitucionAuditoriaService.instance.listarInterno(
+        institution,
+      )).single.action,
+      AccionAuditoriaInstitucional.communicationSent,
+    );
   });
 
   test('operador sin communications.write no emite', () async {
@@ -454,6 +558,10 @@ void main() {
         tipoEspecial: TipoEventoEspecial.otro,
       ),
       throwsStateError,
+    );
+    expect(
+      await InstitucionAuditoriaService.instance.listarInterno(institution),
+      isEmpty,
     );
   });
 

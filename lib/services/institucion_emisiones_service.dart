@@ -12,10 +12,12 @@ import 'dart:math';
 import '../models/calendario/evento_calendario.dart';
 import '../models/instituciones/area_operativa.dart';
 import '../models/instituciones/operador_institucional.dart';
+import '../models/instituciones/registro_auditoria_institucional.dart';
 import '../models/solicitudes/solicitud_alumno.dart';
 import 'alumno_service.dart';
 import 'institucion_areas_service.dart';
 import 'institucion_operadores_service.dart';
+import 'institucion_auditoria_service.dart';
 import 'solicitudes_service.dart';
 
 class InstitucionEmisionesService {
@@ -322,7 +324,7 @@ class InstitucionEmisionesService {
         'El operador activo no puede emitir comunicaciones en esta área.',
       );
     }
-    return emitirEventoEspecialAConfirmados(
+    final result = await emitirEventoEspecialAConfirmados(
       institucionId: institucionId,
       institucionNombre: institucionNombre,
       confirmados: confirmados,
@@ -342,6 +344,27 @@ class InstitucionEmisionesService {
       preNotiMinutes: preNotiMinutes,
       emittedByOperatorId: operator.id,
     );
+    if (result.isNotEmpty) {
+      final resourceId =
+          'communication_${DateTime.now().toUtc().microsecondsSinceEpoch}';
+      try {
+        await InstitucionAuditoriaService.instance.append(
+          institucionId: institucionId,
+          areaId: areaId,
+          operatorId: operator.id,
+          action: AccionAuditoriaInstitucional.communicationSent,
+          resourceType: 'communication',
+          resourceId: resourceId,
+          metadata: {
+            'recipientCount': result.length,
+            if ((grupoId ?? '').trim().isNotEmpty) 'groupId': grupoId!.trim(),
+          },
+        );
+      } catch (_) {
+        // La comunicación ya fue emitida; no se revierte por la traza local.
+      }
+    }
+    return result;
   }
 
   /// Conveniencia: emite a “AULA completa” (confirmados curricular o extra).

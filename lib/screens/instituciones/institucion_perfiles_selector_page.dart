@@ -45,6 +45,7 @@ import '../../services/institucion_service.dart';
 import '../../ui/atena_assets.dart';
 import 'institucion_area_page.dart';
 import 'institucion_operadores_page.dart';
+import 'institucion_historial_actividad_page.dart';
 
 // =====================================================
 // PREFS SAFE GET (timeout) – evita await colgado
@@ -1646,6 +1647,17 @@ class _InstitucionPerfilesSelectorPageState
         surfaceTintColor: Colors.transparent,
         title: Text(_l10nSelectActivityTitle(l10n)),
         actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => InstitucionHistorialActividadPage(
+                  institucionId: _instIdData,
+                ),
+              ),
+            ),
+            icon: const Icon(Icons.history),
+            label: const Text('Historial'),
+          ),
           TextButton.icon(
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(

@@ -69,6 +69,8 @@ import '../models/instituciones/grupo_curricular.dart';
 import '../models/notificaciones/notificacion_atena.dart';
 import '../models/solicitudes/solicitud_alumno.dart';
 import '../models/instituciones/operador_institucional.dart';
+import '../models/instituciones/registro_auditoria_institucional.dart';
+import 'institucion_auditoria_service.dart';
 import 'institucion_operadores_service.dart';
 import '../repositories/solicitudes_repository.dart';
 import '../repositories/solicitudes_repository_prefs.dart';
@@ -1592,6 +1594,27 @@ class SolicitudesService {
       updatedByOperatorId: operator.id,
       resolvedAreaId: area,
     );
+    final resulting = await _repo.getSolicitudAlumnoById(solicitudId);
+    if (request.estado != nuevoEstado && resulting?.estado == nuevoEstado) {
+      try {
+        await InstitucionAuditoriaService.instance.append(
+          institucionId: institution,
+          areaId: area,
+          operatorId: operator.id,
+          action: nuevoEstado == EstadoSolicitud.confirmada
+              ? AccionAuditoriaInstitucional.requestConfirmed
+              : AccionAuditoriaInstitucional.requestRejected,
+          resourceType: 'request',
+          resourceId: request.id,
+          metadata: {
+            'fromState': request.estado.name,
+            'toState': nuevoEstado.name,
+          },
+        );
+      } catch (_) {
+        // El recurso principal ya fue confirmado; la auditoría local es secundaria.
+      }
+    }
   }
 
   static Future<void> editarNotaInstitucion({

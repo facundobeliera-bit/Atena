@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/calendario/evento_calendario.dart';
 import '../models/instituciones/operador_institucional.dart';
+import '../models/instituciones/registro_auditoria_institucional.dart';
+import 'institucion_auditoria_service.dart';
 import 'institucion_operadores_service.dart';
 
 class CalendarioService {
@@ -89,6 +91,24 @@ class CalendarioService {
         updatedByOperatorId: operator.id,
       ),
     );
+    try {
+      await InstitucionAuditoriaService.instance.append(
+        institucionId: institution,
+        areaId: area,
+        operatorId: operator.id,
+        action: existing == null
+            ? AccionAuditoriaInstitucional.eventCreated
+            : AccionAuditoriaInstitucional.eventUpdated,
+        resourceType: 'event',
+        resourceId: event.id,
+        metadata: {
+          if ((event.grupoId ?? '').trim().isNotEmpty)
+            'groupId': event.grupoId!.trim(),
+        },
+      );
+    } catch (_) {
+      // El evento confirmado no se revierte por una falla de auditoría local.
+    }
   }
 
   /// Upsert batch (reduce IO cuando se actualizan múltiples eventos).

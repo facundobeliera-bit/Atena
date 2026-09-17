@@ -10,6 +10,7 @@ abstract final class CapacidadInstitucional {
   static const calendarWrite = 'calendar.write';
   static const responsesRead = 'responses.read';
   static const communicationsWrite = 'communications.write';
+  static const auditRead = 'audit.read';
 
   static const all = <String>{
     areaManage,
@@ -21,6 +22,7 @@ abstract final class CapacidadInstitucional {
     calendarWrite,
     responsesRead,
     communicationsWrite,
+    auditRead,
   };
 }
 

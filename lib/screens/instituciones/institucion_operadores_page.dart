@@ -211,6 +211,7 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
     CapacidadInstitucional.calendarWrite => 'Modificar calendario',
     CapacidadInstitucional.responsesRead => 'Consultar respuestas',
     CapacidadInstitucional.communicationsWrite => 'Emitir comunicaciones',
+    CapacidadInstitucional.auditRead => 'Consultar historial de actividad',
     _ => capability,
   };
 
