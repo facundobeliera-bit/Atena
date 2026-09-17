@@ -14,6 +14,7 @@ import 'package:atena_app/services/alumno_service.dart';
 import 'package:atena_app/services/cuenta_service.dart';
 import 'package:atena_app/services/institucion_emisiones_service.dart';
 import 'package:atena_app/services/institucion_areas_service.dart';
+import 'package:atena_app/services/institucion_contexto_operativo_service.dart';
 import 'package:atena_app/services/institucion_auditoria_service.dart';
 import 'package:atena_app/services/institucion_operadores_service.dart';
 import 'package:atena_app/services/institucion_grupos_autorizacion_service.dart';
@@ -51,6 +52,22 @@ Future<void> institutionalSession() async {
     rememberMe: true,
   );
   await SessionService.setInstitucionOwnerAccountId(owner);
+}
+
+Future<void> activateOperational(String operatorId, String areaId) async {
+  await InstitucionOperadoresService.instance.asignarArea(
+    institucionId: institution,
+    operadorId: operatorId,
+    areaId: areaId,
+  );
+  final context = await InstitucionContextoOperativoService.instance
+      .activarContextoOperativo(
+        institucionId: institution,
+        ownerAccountId: owner,
+        areaId: areaId,
+        operadorId: operatorId,
+      );
+  expect(context, isNotNull);
 }
 
 Future<void> seedStudentIdentity() async {
@@ -256,10 +273,7 @@ void main() {
       operadorId: operator.id,
       capacidades: {CapacidadInstitucional.requestsDecide},
     );
-    await InstitucionOperadoresService.instance.activar(
-      institucionId: institution,
-      operadorId: operator.id,
-    );
+    await activateOperational(operator.id, primary.id);
     final request = pendingRequest(primary.id);
     final repository = SolicitudesRepositoryPrefs();
     await repository.saveSolicitudAlumno(request);
@@ -297,10 +311,7 @@ void main() {
       await institutionalSession();
       final primary = await area(institution, 'primaria');
       final ownerOp = await ownerOperator();
-      await InstitucionOperadoresService.instance.activar(
-        institucionId: institution,
-        operadorId: ownerOp.id,
-      );
+      await activateOperational(ownerOp.id, primary.id);
       await helpers.guardarGruposInstitucion(institution, [
         GrupoInstitucional(
           id: 'audit-capacity-group',
@@ -369,10 +380,7 @@ void main() {
       operadorId: operator.id,
       capacidades: {CapacidadInstitucional.requestsRead},
     );
-    await InstitucionOperadoresService.instance.activar(
-      institucionId: institution,
-      operadorId: operator.id,
-    );
+    await activateOperational(operator.id, primary.id);
     final request = pendingRequest(primary.id);
     await SolicitudesRepositoryPrefs().saveSolicitudAlumno(request);
     for (final attemptedArea in [primary.id, secondary.id]) {
@@ -396,10 +404,7 @@ void main() {
     await institutionalSession();
     final primary = await area(institution, 'primaria');
     final ownerOp = await ownerOperator();
-    await InstitucionOperadoresService.instance.activar(
-      institucionId: institution,
-      operadorId: ownerOp.id,
-    );
+    await activateOperational(ownerOp.id, primary.id);
     await CalendarioService.addEventoInstitucional(calendarEvent(primary.id));
     final saved = (await CalendarioService.getEventos(
       ownerAccountId: owner,
@@ -419,10 +424,7 @@ void main() {
     await institutionalSession();
     final primary = await area(institution, 'primaria');
     final ownerOp = await ownerOperator();
-    await InstitucionOperadoresService.instance.activar(
-      institucionId: institution,
-      operadorId: ownerOp.id,
-    );
+    await activateOperational(ownerOp.id, primary.id);
     final group = GrupoInstitucional(
       id: 'group-1',
       institucionId: institution,
@@ -453,10 +455,7 @@ void main() {
     await institutionalSession();
     final primary = await area(institution, 'primaria');
     final ownerOp = await ownerOperator();
-    await InstitucionOperadoresService.instance.activar(
-      institucionId: institution,
-      operadorId: ownerOp.id,
-    );
+    await activateOperational(ownerOp.id, primary.id);
     final foreign = GrupoInstitucional(
       id: 'foreign-group',
       institucionId: otherInstitution,
@@ -496,10 +495,7 @@ void main() {
     await institutionalSession();
     final primary = await area(institution, 'primaria');
     final ownerOp = await ownerOperator();
-    await InstitucionOperadoresService.instance.activar(
-      institucionId: institution,
-      operadorId: ownerOp.id,
-    );
+    await activateOperational(ownerOp.id, primary.id);
     final student = pendingRequest(
       primary.id,
     ).copyWith(estado: EstadoSolicitud.confirmada);
@@ -541,10 +537,7 @@ void main() {
       operadorId: operator.id,
       areaId: primary.id,
     );
-    await InstitucionOperadoresService.instance.activar(
-      institucionId: institution,
-      operadorId: operator.id,
-    );
+    await activateOperational(operator.id, primary.id);
     await expectLater(
       InstitucionEmisionesService.instance.emitirEventoEspecialAutorizado(
         institucionId: institution,
@@ -569,10 +562,7 @@ void main() {
     await institutionalSession();
     final primary = await area(institution, 'primaria');
     final ownerOp = await ownerOperator();
-    await InstitucionOperadoresService.instance.activar(
-      institucionId: institution,
-      operadorId: ownerOp.id,
-    );
+    await activateOperational(ownerOp.id, primary.id);
     await SessionService.logout();
     expect(
       await InstitucionOperadoresService.instance.autorizarActivo(

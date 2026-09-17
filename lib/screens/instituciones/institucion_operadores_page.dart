@@ -137,10 +137,13 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
 
   Future<void> _editAreas(OperadorInstitucional operator) async {
     final assigned =
-        (await InstitucionOperadoresService.instance.areasAsignadas(
-          widget.institucionId,
-          operator.id,
-        )).toSet();
+        (await InstitucionOperadoresService.instance.listarAsignacionesOperador(
+              widget.institucionId,
+              operator.id,
+            ))
+            .where((value) => value.estaActiva)
+            .map((value) => value.areaId)
+            .toSet();
     if (!mounted) {
       return;
     }
@@ -157,17 +160,14 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
                   .where((area) => area.activa)
                   .map(
                     (area) => CheckboxListTile(
-                      value:
-                          operator.esPropietario || assigned.contains(area.id),
-                      onChanged: operator.esPropietario
-                          ? null
-                          : (value) => setLocalState(() {
-                              if (value == true) {
-                                assigned.add(area.id);
-                              } else {
-                                assigned.remove(area.id);
-                              }
-                            }),
+                      value: assigned.contains(area.id),
+                      onChanged: (value) => setLocalState(() {
+                        if (value == true) {
+                          assigned.add(area.id);
+                        } else {
+                          assigned.remove(area.id);
+                        }
+                      }),
                       title: Text(area.nombre),
                     ),
                   )
@@ -180,9 +180,7 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
               child: const Text('Cancelar'),
             ),
             FilledButton(
-              onPressed: operator.esPropietario
-                  ? null
-                  : () => Navigator.pop(context, assigned),
+              onPressed: () => Navigator.pop(context, assigned),
               child: const Text('Guardar'),
             ),
           ],

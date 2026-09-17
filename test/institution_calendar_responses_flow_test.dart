@@ -15,6 +15,8 @@ import 'package:atena_app/services/alumno_service.dart';
 import 'package:atena_app/services/cuenta_service.dart';
 import 'package:atena_app/services/institucion_emisiones_service.dart';
 import 'package:atena_app/services/institucion_areas_service.dart';
+import 'package:atena_app/services/institucion_operadores_service.dart';
+import 'package:atena_app/services/institucion_contexto_operativo_service.dart';
 import 'package:atena_app/services/instituciones_helpers.dart' as ih;
 import 'package:atena_app/services/session_service.dart';
 import 'package:atena_app/services/storage_service.dart';
@@ -434,6 +436,28 @@ void main() {
     (tester) async {
       await _activateInstitutionA();
       final institution = await ih.cargarInstitucionPorId(institutionA);
+      final area = (await InstitucionAreasService.instance.resolverYGuardar(
+        institucionId: institutionA,
+        tipo: TipoAreaOperativa.curricular,
+        claveOrigen: 'primaria',
+        nombre: 'Primaria',
+      ))!;
+      final operator = await InstitucionOperadoresService.instance.crearLocal(
+        institucionId: institutionA,
+        nombreVisible: 'Operador Primaria',
+      );
+      await InstitucionOperadoresService.instance.asignarArea(
+        institucionId: institutionA,
+        operadorId: operator.id,
+        areaId: area.id,
+      );
+      await InstitucionContextoOperativoService.instance
+          .activarContextoOperativo(
+            institucionId: institutionA,
+            ownerAccountId: institutionOwnerA,
+            areaId: area.id,
+            operadorId: operator.id,
+          );
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('es'),
@@ -447,6 +471,8 @@ void main() {
             actividadKey: 'primaria',
             actividadLabel: 'Primaria',
             workProfileId: 'wp_primaria_1',
+            areaId: area.id,
+            operatorId: operator.id,
           ),
         ),
       );

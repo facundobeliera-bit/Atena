@@ -59,6 +59,20 @@ class SessionData {
   });
 }
 
+class InstitutionOperationalContext {
+  final String institutionId;
+  final String ownerAccountId;
+  final String areaId;
+  final String operatorId;
+
+  const InstitutionOperationalContext({
+    required this.institutionId,
+    required this.ownerAccountId,
+    required this.areaId,
+    required this.operatorId,
+  });
+}
+
 class SessionService {
   // =====================================================
   // KEYS
@@ -78,6 +92,7 @@ class SessionService {
   static const String _kInstitucionOwnerAccountId =
       'v2_session_instOwnerAccountId';
   static const String _kInstitucionOperatorId = 'v2_session_instOperatorId';
+  static const String _kInstitucionAreaId = 'v2_session_instAreaId';
 
   static Future<SharedPreferences> _prefs() => SharedPreferences.getInstance();
 
@@ -153,6 +168,7 @@ class SessionService {
         // Cuenta: nunca arrastrar owner institucional ni DNI de otra cuenta.
         await p.remove(_kInstitucionOwnerAccountId);
         await p.remove(_kInstitucionOperatorId);
+        await p.remove(_kInstitucionAreaId);
         if (userChanged || roleChanged) await p.remove(_kPerfilSeleccionadoDni);
       } else {
         // Institución: limpiar perfil seleccionado de cuenta SIEMPRE
@@ -165,6 +181,7 @@ class SessionService {
         if (shouldClearInstOwner) {
           await p.remove(_kInstitucionOwnerAccountId);
           await p.remove(_kInstitucionOperatorId);
+          await p.remove(_kInstitucionAreaId);
         }
       }
     } catch (_) {
@@ -205,9 +222,11 @@ class SessionService {
           await p.remove(_kPerfilSeleccionadoDni);
           await p.remove(_kInstitucionOwnerAccountId); // anti-stale al ENTRAR
           await p.remove(_kInstitucionOperatorId);
+          await p.remove(_kInstitucionAreaId);
         } else {
           await p.remove(_kInstitucionOwnerAccountId);
           await p.remove(_kInstitucionOperatorId);
+          await p.remove(_kInstitucionAreaId);
         }
       } else {
         // Si no cambió, solo asegurar coherencia mínima:
@@ -239,6 +258,7 @@ class SessionService {
             p.getString(_kInstitucionOwnerAccountId) ?? '',
           ).isNotEmpty ||
           _normIdKey(p.getString(_kInstitucionOperatorId) ?? '').isNotEmpty ||
+          _normIdKey(p.getString(_kInstitucionAreaId) ?? '').isNotEmpty ||
           _normIdKey(p.getString(_kPerfilSeleccionadoDni) ?? '').isNotEmpty;
 
       if (hasResidue) {
@@ -296,6 +316,7 @@ class SessionService {
       await p.remove(_kPerfilSeleccionadoDni);
       await p.remove(_kInstitucionOwnerAccountId);
       await p.remove(_kInstitucionOperatorId);
+      await p.remove(_kInstitucionAreaId);
     } catch (_) {}
   }
 
@@ -308,7 +329,10 @@ class SessionService {
     final p = await _prefs();
     if (value.isEmpty) {
       await p.remove(_kInstitucionOperatorId);
+      await p.remove(_kInstitucionAreaId);
     } else {
+      // Compatibilidad legacy: un operatorId aislado no constituye contexto.
+      await p.remove(_kInstitucionAreaId);
       await p.setString(_kInstitucionOperatorId, value);
     }
   }
@@ -325,8 +349,46 @@ class SessionService {
     try {
       final p = await _prefs();
       await p.remove(_kInstitucionOperatorId);
+      await p.remove(_kInstitucionAreaId);
     } catch (_) {}
   }
+
+  static Future<void> setInstitutionOperationalContext(
+    InstitutionOperationalContext context,
+  ) async {
+    final session = await getSession();
+    final owner = await getInstitucionOwnerAccountIdLogueado();
+    if (session?.role != SessionRole.institucion ||
+        _normIdKey(session!.userId) != _normIdKey(context.institutionId) ||
+        _normIdKey(owner ?? '') != _normIdKey(context.ownerAccountId)) {
+      return;
+    }
+    final p = await _prefs();
+    await p.setString(_kInstitucionOperatorId, _normIdKey(context.operatorId));
+    await p.setString(_kInstitucionAreaId, _normIdKey(context.areaId));
+  }
+
+  static Future<InstitutionOperationalContext?>
+  getInstitutionOperationalContext() async {
+    final session = await getSession();
+    if (session?.role != SessionRole.institucion) return null;
+    final owner = _normIdKey(
+      await getInstitucionOwnerAccountIdLogueado() ?? '',
+    );
+    final p = await _prefs();
+    final area = _normIdKey(p.getString(_kInstitucionAreaId) ?? '');
+    final operator = _normIdKey(p.getString(_kInstitucionOperatorId) ?? '');
+    if (owner.isEmpty || area.isEmpty || operator.isEmpty) return null;
+    return InstitutionOperationalContext(
+      institutionId: session!.userId,
+      ownerAccountId: owner,
+      areaId: area,
+      operatorId: operator,
+    );
+  }
+
+  static Future<void> clearInstitutionOperationalContext() =>
+      clearInstitucionOperatorId();
 
   // =====================================================
   // PERFIL SELECCIONADO (DNI) – SOLO CUENTA

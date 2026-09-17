@@ -78,6 +78,7 @@ import '../../services/cuenta_service.dart';
 
 // ✅ Session v2 (owner institucional best-effort)
 import '../../services/session_service.dart';
+import '../../services/institucion_contexto_operativo_service.dart';
 
 // ✅ Assets
 import '../../ui/atena_assets.dart';
@@ -146,6 +147,8 @@ class InstitucionAreaPage extends StatefulWidget {
   // Perfil de trabajo
   final String? workProfileId;
   final String? workProfileName;
+  final String? areaId;
+  final String? operatorId;
 
   // Compat legacy
   final String pais;
@@ -163,6 +166,8 @@ class InstitucionAreaPage extends StatefulWidget {
     this.actividadLabel,
     this.workProfileId,
     this.workProfileName,
+    this.areaId,
+    this.operatorId,
     this.pais = 'Argentina',
     this.provincia = '',
     this.ciudad = '',
@@ -195,6 +200,9 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
   String _workProfileIdResolved = '';
   String _workProfileNameResolved = '';
   String _areaIdResolved = '';
+  String _operatorIdResolved = '';
+  String _operatorNameResolved = '';
+  bool _operatorIsResponsible = false;
 
   // Owner institucional best-effort
   String _ownerAccountIdResolved = '';
@@ -662,6 +670,8 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     _workProfileIdResolved = (widget.workProfileId ?? '').trim();
     _workProfileNameResolved = (widget.workProfileName ?? '').trim();
     _ownerAccountIdResolved = (widget.ownerAccountId ?? '').trim();
+    _areaIdResolved = (widget.areaId ?? '').trim();
+    _operatorIdResolved = (widget.operatorId ?? '').trim();
 
     // 2) Completar desde RouteSettings.arguments
     try {
@@ -739,6 +749,12 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
             'ownerAccountId',
             'ownerId',
           ]);
+        }
+        if (_areaIdResolved.isEmpty) {
+          _areaIdResolved = readString(const ['areaId']);
+        }
+        if (_operatorIdResolved.isEmpty) {
+          _operatorIdResolved = readString(const ['operatorId', 'operadorId']);
         }
 
         // ✅ scope explícito (si el selector lo manda)
@@ -926,44 +942,36 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
       return;
     }
 
-    final scopedArea = await InstitucionAreasService.instance.resolverYGuardar(
-      institucionId: _instIdData,
-      tipo: _isExtracurricularScope
-          ? TipoAreaOperativa.extracurricular
-          : TipoAreaOperativa.curricular,
-      claveOrigen: _actividadKeyResolved,
-      nombre: _actividadLabelResolved,
-    );
-    _areaIdResolved = scopedArea?.id ?? '';
-    if (scopedArea != null) {
-      final operatorService = InstitucionOperadoresService.instance;
-      final ownerOperator = await operatorService.asegurarPropietario(
-        institucionId: _instIdData,
-        ownerAccountId: owner,
-        perfilInstitucionId: _instIdData,
-        nombreVisible: '${widget.institucionNombre} · Propietario',
-      );
-      var active = await operatorService.operadorActivo(_instIdData);
-      active ??= ownerOperator;
-      if (await operatorService.operadorActivo(_instIdData) == null) {
-        await operatorService.activar(
-          institucionId: _instIdData,
-          operadorId: active.id,
-        );
-      }
-      if (!await operatorService.puedeAccederArea(
-        institucionId: _instIdData,
-        operadorId: active.id,
-        areaId: scopedArea.id,
-      )) {
-        if (!mounted) return;
-        setState(() {
-          _fatalError = 'El operador activo no está asignado a esta área.';
-          _loading = false;
-        });
-        return;
-      }
+    final operationalContext = await InstitucionContextoOperativoService
+        .instance
+        .reconstruirContextoOperativo();
+    final matchesOperationalContext =
+        operationalContext != null &&
+        operationalContext.institutionId == _instIdData &&
+        operationalContext.ownerAccountId == owner &&
+        operationalContext.areaId == _areaIdResolved &&
+        operationalContext.operatorId == _operatorIdResolved;
+    if (!matchesOperationalContext) {
+      if (!mounted) return;
+      setState(() {
+        _fatalError = l10n.sessionInvalidPleaseLogin;
+        _loading = false;
+      });
+      return;
     }
+    final activeOperator = await InstitucionOperadoresService.instance.buscar(
+      _instIdData,
+      _operatorIdResolved,
+    );
+    final activeAssignment = await InstitucionOperadoresService.instance
+        .obtenerAsignacion(
+          institucionId: _instIdData,
+          areaId: _areaIdResolved,
+          operadorId: _operatorIdResolved,
+        );
+    _operatorNameResolved =
+        activeOperator?.nombreVisible ?? _operatorIdResolved;
+    _operatorIsResponsible = activeAssignment?.esResponsable == true;
 
     final instFromSelector = widget.institucion;
     if (instFromSelector != null) {
@@ -1048,6 +1056,11 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
       MaterialPageRoute(builder: (_) => const InstitucionLoginPage()),
       (_) => false,
     );
+  }
+
+  Future<void> _leaveArea() async {
+    await SessionService.clearInstitutionOperationalContext();
+    if (mounted) Navigator.of(context).pop();
   }
 
   Future<void> _refrescar() async {
@@ -1341,23 +1354,6 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
       nombre: _actividadLabelResolved,
     );
     if (area == null) return const [];
-    final owner = await InstitucionOperadoresService.instance
-        .asegurarPropietario(
-          institucionId: _instIdData,
-          ownerAccountId: _ownerAccountIdResolved,
-          perfilInstitucionId: _instIdData,
-          nombreVisible:
-              '${_nombreUI.isEmpty ? 'Institución' : _nombreUI} · Propietario',
-        );
-    if (await InstitucionOperadoresService.instance.operadorActivo(
-          _instIdData,
-        ) ==
-        null) {
-      await InstitucionOperadoresService.instance.activar(
-        institucionId: _instIdData,
-        operadorId: owner.id,
-      );
-    }
     return InstitucionOperadoresService.instance.operadoresDelArea(
       _instIdData,
       area.id,
@@ -1409,48 +1405,54 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
   Widget _fatalView(BuildContext context, String msg) {
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.institucionAreaTitle),
-        actions: [
-          IconButton(
-            onPressed: _refrescar,
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.actionRefresh,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const SizedBox(height: 8),
-              Text(msg, textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _irAHomeHardReset,
-                      icon: const Icon(Icons.home),
-                      label: Text(l10n.actionBackHome),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _leaveArea();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.institucionAreaTitle),
+          actions: [
+            IconButton(
+              onPressed: _refrescar,
+              icon: const Icon(Icons.refresh),
+              tooltip: l10n.actionRefresh,
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                Text(msg, textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _irAHomeHardReset,
+                        icon: const Icon(Icons.home),
+                        label: Text(l10n.actionBackHome),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: _logout,
-                      child: Text(l10n.actionLogout),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: _logout,
+                        child: Text(l10n.actionLogout),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1481,10 +1483,6 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
         ? l10n.institucionAreaDefaultActivityLabel
         : _actividadLabelResolved.trim();
 
-    final workProfileName = _workProfileNameResolved.trim().isEmpty
-        ? l10n.institucionAreaDefaultWorkProfileName
-        : _workProfileNameResolved.trim();
-
     final ubicacion = (inst == null)
         ? ''
         : <String>[
@@ -1512,271 +1510,287 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
 
     final appBarTitle = _adminTitleForActividad(l10n, actividadLabel);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(appBarTitle),
-        backgroundColor: appBarBg,
-        surfaceTintColor: _alpha(cs.surfaceTint, 0.0),
-        actions: [
-          IconButton(
-            onPressed: _refrescar,
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.actionRefresh,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _leaveArea();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: _leaveArea,
+            icon: const Icon(Icons.arrow_back),
+            tooltip: 'Volver a áreas',
           ),
-          TextButton(onPressed: _logout, child: Text(l10n.actionLogout)),
-        ],
-      ),
-      extendBodyBehindAppBar: true,
-      body: _withBackground(
-        context,
-        SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            children: [
-              const SizedBox(height: 44),
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                color: _cardColor(context),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _nombreUI.isEmpty
-                            ? l10n.institucionGenericName
-                            : _nombreUI,
-                        style: (tt.titleMedium ?? const TextStyle()).copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: cs.onSurface,
+          title: Text(appBarTitle),
+          backgroundColor: appBarBg,
+          surfaceTintColor: _alpha(cs.surfaceTint, 0.0),
+          actions: [
+            IconButton(
+              onPressed: _refrescar,
+              icon: const Icon(Icons.refresh),
+              tooltip: l10n.actionRefresh,
+            ),
+            TextButton(onPressed: _logout, child: Text(l10n.actionLogout)),
+          ],
+        ),
+        extendBodyBehindAppBar: true,
+        body: _withBackground(
+          context,
+          SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              children: [
+                const SizedBox(height: 44),
+                Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  color: _cardColor(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _nombreUI.isEmpty
+                              ? l10n.institucionGenericName
+                              : _nombreUI,
+                          style: (tt.titleMedium ?? const TextStyle()).copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: cs.onSurface,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.institucionAreaIdLine(_instIdData),
-                        style: (tt.bodyMedium ?? const TextStyle()).copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      if (ubicacion.isNotEmpty) ...[
                         const SizedBox(height: 6),
                         Text(
-                          l10n.institucionAreaLocationLine(ubicacion),
+                          l10n.institucionAreaIdLine(_instIdData),
                           style: (tt.bodyMedium ?? const TextStyle()).copyWith(
                             color: cs.onSurfaceVariant,
                           ),
                         ),
-                      ],
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.institucionAreaActivityLine(appBarTitle),
-                        style: (tt.bodyMedium ?? const TextStyle()).copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        l10n.institucionAreaWorkProfileLine(workProfileName),
-                        style: (tt.bodyMedium ?? const TextStyle()).copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        l10n.institucionAreaAccessLine(curricularOk, extraOk),
-                        style: (tt.bodyMedium ?? const TextStyle()).copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      if (!canOperate) ...[
-                        const SizedBox(height: 10),
+                        if (ubicacion.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.institucionAreaLocationLine(ubicacion),
+                            style: (tt.bodyMedium ?? const TextStyle())
+                                .copyWith(color: cs.onSurfaceVariant),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
                         Text(
-                          l10n.institucionAreaMissingActivityHint,
+                          l10n.institucionAreaActivityLine(appBarTitle),
                           style: (tt.bodyMedium ?? const TextStyle()).copyWith(
                             color: cs.onSurfaceVariant,
-                            fontWeight: FontWeight.w700,
                           ),
                         ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Operador: $_operatorNameResolved${_operatorIsResponsible ? ' · Responsable del área' : ''}',
+                          style: (tt.bodyMedium ?? const TextStyle()).copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.institucionAreaAccessLine(curricularOk, extraOk),
+                          style: (tt.bodyMedium ?? const TextStyle()).copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        if (!canOperate) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            l10n.institucionAreaMissingActivityHint,
+                            style: (tt.bodyMedium ?? const TextStyle())
+                                .copyWith(
+                                  color: cs.onSurfaceVariant,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 14),
+                const SizedBox(height: 14),
 
-              _assignedOperatorsCard(),
-              const SizedBox(height: 14),
+                _assignedOperatorsCard(),
+                const SizedBox(height: 14),
 
-              Text(
-                'Administración institucional',
-                style: (tt.titleMedium ?? const TextStyle()).copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: cs.onSurface,
+                Text(
+                  'Administración institucional',
+                  style: (tt.titleMedium ?? const TextStyle()).copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.onSurface,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Gestioná accesos y revisá la actividad de la institución.',
-                style: (tt.bodyMedium ?? const TextStyle()).copyWith(
-                  color: cs.onSurfaceVariant,
+                const SizedBox(height: 4),
+                Text(
+                  'Gestioná accesos y revisá la actividad de la institución.',
+                  style: (tt.bodyMedium ?? const TextStyle()).copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              _opCard(
-                icon: Icons.groups_outlined,
-                title: 'Operadores',
-                subtitle: 'Administrá operadores y sus áreas asignadas.',
-                semanticsLabel: 'Abrir gestión de operadores institucionales',
-                onTap: _openOperators,
-              ),
-              _opCard(
-                icon: Icons.history,
-                title: 'Historial de actividad',
-                subtitle: 'Consultá la trazabilidad de las operaciones.',
-                semanticsLabel: 'Abrir historial de actividad institucional',
-                onTap: _openActivityHistory,
-              ),
-
-              const SizedBox(height: 8),
-              Text(
-                'Funciones del área',
-                style: (tt.titleMedium ?? const TextStyle()).copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: cs.onSurface,
+                const SizedBox(height: 8),
+                _opCard(
+                  icon: Icons.groups_outlined,
+                  title: 'Operadores',
+                  subtitle: 'Administrá operadores y sus áreas asignadas.',
+                  semanticsLabel: 'Abrir gestión de operadores institucionales',
+                  onTap: _openOperators,
                 ),
-              ),
-              const SizedBox(height: 8),
+                _opCard(
+                  icon: Icons.history,
+                  title: 'Historial de actividad',
+                  subtitle: 'Consultá la trazabilidad de las operaciones.',
+                  semanticsLabel: 'Abrir historial de actividad institucional',
+                  onTap: _openActivityHistory,
+                ),
 
-              _opCard(
-                icon: Icons.notifications,
-                title: l10n.institucionAreaCardNotificationsTitle,
-                subtitle: l10n.institucionAreaCardNotificationsSubtitle,
-                semanticsLabel: l10n.institucionAreaSemanticsOpenNotifications,
-                onTap: !canOperate
-                    ? null
-                    : () => _openWithLock(
-                        area: InstitucionAreaKey.notificaciones,
-                        builder: (_) => _buildNotificacionesPage(l10n: l10n),
-                      ),
-              ),
-              _opCard(
-                icon: Icons.how_to_reg_outlined,
-                title: 'Respuestas de calendario',
-                subtitle: 'Consultá las respuestas de $actividadLabel.',
-                semanticsLabel:
-                    'Abrir respuestas de calendario de $actividadLabel',
-                onTap: !canOperate ? null : _openCalendarResponses,
-              ),
-              _opCard(
-                icon: Icons.inbox,
-                title: l10n.institucionAreaCardSolicitudesTitle,
-                subtitle: l10n.institucionAreaCardSolicitudesSubtitle,
-                semanticsLabel: l10n.institucionAreaSemanticsOpenSolicitudes,
-                onTap: !canOperate
-                    ? null
-                    : () => _openWithLock(
-                        area: InstitucionAreaKey.solicitudes,
-                        builder: (_) => _buildSolicitudesPage(l10n: l10n),
-                      ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  'Funciones del área',
+                  style: (tt.titleMedium ?? const TextStyle()).copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
 
-              // ✅ BOTÓN CONTEXTUAL “VACANTES”
-              if (isExtraScope)
-                (extraOk
-                    ? _opCard(
-                        icon: Icons.extension,
-                        title: l10n.institucionAreaCardVacantesTitle,
-                        subtitle: l10n.institucionAreaCardExtraHubSubtitle,
-                        semanticsLabel:
-                            l10n.institucionAreaSemanticsOpenExtraHub,
-                        onTap: !canOperate
-                            ? null
-                            : () => _openWithLock(
-                                area: InstitucionAreaKey.extracurriculares,
-                                builder: (_) => _buildExtraHubPage(l10n: l10n),
-                              ),
-                      )
-                    : _opCard(
-                        icon: Icons.extension,
-                        title: l10n.institucionAreaCardVacantesTitle,
-                        subtitle:
-                            l10n.institucionAreaCardExtraHubLockedSubtitle,
-                        locked: true,
-                        semanticsLabel:
-                            l10n.institucionAreaSemanticsExtraHubLocked,
-                        onTap: null,
-                      ))
-              else
-                (!curricularOk
-                    ? _opCard(
-                        icon: Icons.school,
-                        title: l10n.institucionAreaCardVacantesTitle,
-                        subtitle:
-                            l10n.institucionAreaCardVacantesLockedSubtitle,
-                        locked: true,
-                        semanticsLabel:
-                            l10n.institucionAreaSemanticsVacantesLocked,
-                        onTap: null,
-                      )
-                    : _opCard(
-                        icon: Icons.school,
-                        title: l10n.institucionAreaCardVacantesTitle,
-                        subtitle: l10n.institucionAreaCardVacantesSubtitle,
-                        semanticsLabel:
-                            l10n.institucionAreaSemanticsOpenVacantes,
-                        onTap: !canOperate
-                            ? null
-                            : () => _openWithLock(
-                                area: InstitucionAreaKey.vacantes,
-                                builder: (_) => _buildVacantesPage(l10n: l10n),
-                              ),
-                      )),
+                _opCard(
+                  icon: Icons.notifications,
+                  title: l10n.institucionAreaCardNotificationsTitle,
+                  subtitle: l10n.institucionAreaCardNotificationsSubtitle,
+                  semanticsLabel:
+                      l10n.institucionAreaSemanticsOpenNotifications,
+                  onTap: !canOperate
+                      ? null
+                      : () => _openWithLock(
+                          area: InstitucionAreaKey.notificaciones,
+                          builder: (_) => _buildNotificacionesPage(l10n: l10n),
+                        ),
+                ),
+                _opCard(
+                  icon: Icons.how_to_reg_outlined,
+                  title: 'Respuestas de calendario',
+                  subtitle: 'Consultá las respuestas de $actividadLabel.',
+                  semanticsLabel:
+                      'Abrir respuestas de calendario de $actividadLabel',
+                  onTap: !canOperate ? null : _openCalendarResponses,
+                ),
+                _opCard(
+                  icon: Icons.inbox,
+                  title: l10n.institucionAreaCardSolicitudesTitle,
+                  subtitle: l10n.institucionAreaCardSolicitudesSubtitle,
+                  semanticsLabel: l10n.institucionAreaSemanticsOpenSolicitudes,
+                  onTap: !canOperate
+                      ? null
+                      : () => _openWithLock(
+                          area: InstitucionAreaKey.solicitudes,
+                          builder: (_) => _buildSolicitudesPage(l10n: l10n),
+                        ),
+                ),
 
-              _opCard(
-                icon: Icons.folder_shared,
-                title: l10n.institucionAreaCardDocumentacionTitle,
-                subtitle: l10n.institucionAreaCardDocumentacionSubtitle,
-                semanticsLabel: l10n.institucionAreaSemanticsOpenDocumentacion,
-                onTap: !canOperate
-                    ? null
-                    : () => _openWithLock(
-                        area: InstitucionAreaKey.documentacion,
-                        builder: (_) => _buildDocumentosPage(l10n: l10n),
-                      ),
-              ),
+                // ✅ BOTÓN CONTEXTUAL “VACANTES”
+                if (isExtraScope)
+                  (extraOk
+                      ? _opCard(
+                          icon: Icons.extension,
+                          title: l10n.institucionAreaCardVacantesTitle,
+                          subtitle: l10n.institucionAreaCardExtraHubSubtitle,
+                          semanticsLabel:
+                              l10n.institucionAreaSemanticsOpenExtraHub,
+                          onTap: !canOperate
+                              ? null
+                              : () => _openWithLock(
+                                  area: InstitucionAreaKey.extracurriculares,
+                                  builder: (_) =>
+                                      _buildExtraHubPage(l10n: l10n),
+                                ),
+                        )
+                      : _opCard(
+                          icon: Icons.extension,
+                          title: l10n.institucionAreaCardVacantesTitle,
+                          subtitle:
+                              l10n.institucionAreaCardExtraHubLockedSubtitle,
+                          locked: true,
+                          semanticsLabel:
+                              l10n.institucionAreaSemanticsExtraHubLocked,
+                          onTap: null,
+                        ))
+                else
+                  (!curricularOk
+                      ? _opCard(
+                          icon: Icons.school,
+                          title: l10n.institucionAreaCardVacantesTitle,
+                          subtitle:
+                              l10n.institucionAreaCardVacantesLockedSubtitle,
+                          locked: true,
+                          semanticsLabel:
+                              l10n.institucionAreaSemanticsVacantesLocked,
+                          onTap: null,
+                        )
+                      : _opCard(
+                          icon: Icons.school,
+                          title: l10n.institucionAreaCardVacantesTitle,
+                          subtitle: l10n.institucionAreaCardVacantesSubtitle,
+                          semanticsLabel:
+                              l10n.institucionAreaSemanticsOpenVacantes,
+                          onTap: !canOperate
+                              ? null
+                              : () => _openWithLock(
+                                  area: InstitucionAreaKey.vacantes,
+                                  builder: (_) =>
+                                      _buildVacantesPage(l10n: l10n),
+                                ),
+                        )),
 
-              const SizedBox(height: 10),
-              const Divider(),
+                _opCard(
+                  icon: Icons.folder_shared,
+                  title: l10n.institucionAreaCardDocumentacionTitle,
+                  subtitle: l10n.institucionAreaCardDocumentacionSubtitle,
+                  semanticsLabel:
+                      l10n.institucionAreaSemanticsOpenDocumentacion,
+                  onTap: !canOperate
+                      ? null
+                      : () => _openWithLock(
+                          area: InstitucionAreaKey.documentacion,
+                          builder: (_) => _buildDocumentosPage(l10n: l10n),
+                        ),
+                ),
 
-              // ✅ Croquis solo en scope curricular
-              if (!isExtraScope)
-                (croquisOk
-                    ? _opCard(
-                        icon: Icons.grid_on,
-                        title: l10n.institucionAreaCardCroquisTitle,
-                        subtitle: l10n.institucionAreaCardCroquisSubtitle,
-                        semanticsLabel:
-                            l10n.institucionAreaSemanticsOpenCroquis,
-                        onTap: !canOperate
-                            ? null
-                            : () => _openWithLock(
-                                area: InstitucionAreaKey.croquis,
-                                builder: (_) => _buildCroquisPage(l10n: l10n),
-                              ),
-                      )
-                    : _opCard(
-                        icon: Icons.grid_on,
-                        title: l10n.institucionAreaCardCroquisTitle,
-                        subtitle: l10n.institucionAreaCardCroquisLockedSubtitle,
-                        locked: true,
-                        semanticsLabel:
-                            l10n.institucionAreaSemanticsCroquisLocked,
-                        onTap: null,
-                      )),
-            ],
+                const SizedBox(height: 10),
+                const Divider(),
+
+                // ✅ Croquis solo en scope curricular
+                if (!isExtraScope)
+                  (croquisOk
+                      ? _opCard(
+                          icon: Icons.grid_on,
+                          title: l10n.institucionAreaCardCroquisTitle,
+                          subtitle: l10n.institucionAreaCardCroquisSubtitle,
+                          semanticsLabel:
+                              l10n.institucionAreaSemanticsOpenCroquis,
+                          onTap: !canOperate
+                              ? null
+                              : () => _openWithLock(
+                                  area: InstitucionAreaKey.croquis,
+                                  builder: (_) => _buildCroquisPage(l10n: l10n),
+                                ),
+                        )
+                      : _opCard(
+                          icon: Icons.grid_on,
+                          title: l10n.institucionAreaCardCroquisTitle,
+                          subtitle:
+                              l10n.institucionAreaCardCroquisLockedSubtitle,
+                          locked: true,
+                          semanticsLabel:
+                              l10n.institucionAreaSemanticsCroquisLocked,
+                          onTap: null,
+                        )),
+              ],
+            ),
           ),
         ),
       ),

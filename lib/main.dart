@@ -26,11 +26,14 @@ import 'services/app_settings_service.dart';
 import 'services/atena_data_bootstrap_service.dart';
 import 'services/session_service.dart';
 import 'services/cuenta_service.dart';
+import 'services/institucion_contexto_operativo_service.dart';
+import 'services/institucion_areas_service.dart';
 
 import 'screens/landing/landing_page.dart';
 import 'screens/alumno/alumno_area_page.dart';
 import 'screens/cuentas/cuenta_home_page.dart';
 import 'screens/instituciones/institucion_menu_page.dart';
+import 'screens/instituciones/institucion_area_page.dart';
 
 import 'routes/atena_router.dart';
 import 'routes/atena_deeplink.dart';
@@ -301,6 +304,32 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
             ),
           );
           return;
+        }
+
+        final operational = await InstitucionContextoOperativoService.instance
+            .reconstruirContextoOperativo();
+        if (operational != null) {
+          final area = await InstitucionAreasService.instance.buscarPorId(
+            userId,
+            operational.areaId,
+          );
+          if (area != null && mounted) {
+            nav.pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => InstitucionAreaPage(
+                  ownerAccountId: ownerAccountId,
+                  institucionId: userId,
+                  institucionNombre: 'Institución',
+                  areaId: area.id,
+                  operatorId: operational.operatorId,
+                  actividadKey: area.claveOrigen,
+                  actividadLabel: area.nombre,
+                  workProfileId: 'legacy_operator_${operational.operatorId}',
+                ),
+              ),
+            );
+            return;
+          }
         }
 
         nav.pushReplacement(

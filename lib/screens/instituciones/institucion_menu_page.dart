@@ -59,7 +59,7 @@ import '../../ui/atena_assets.dart';
 import 'institucion_perfil_page.dart' as perfil_page;
 
 // ✅ SELECTOR (Actividad → Perfiles → Área) — alias para evitar colisión
-import 'institucion_perfiles_selector_page.dart' as selector_page;
+import 'institucion_areas_operadores_selector_page.dart' as selector_page;
 
 // ✅ PLAN habilitación (canónico)
 import '../../guards/plan_habilitacion_guard.dart';
@@ -534,23 +534,13 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
 
       final nombreReal = _n(inst.nombre);
 
-      final ownerOperator = await InstitucionOperadoresService.instance
-          .asegurarPropietario(
-            institucionId: _instPerfilId,
-            ownerAccountId: _ownerId,
-            perfilInstitucionId: _instPerfilId,
-            nombreVisible:
-                '${nombreReal.isEmpty ? 'Institución' : nombreReal} · Propietario',
-          );
-      if (await InstitucionOperadoresService.instance.operadorActivo(
-            _instPerfilId,
-          ) ==
-          null) {
-        await InstitucionOperadoresService.instance.activar(
-          institucionId: _instPerfilId,
-          operadorId: ownerOperator.id,
-        );
-      }
+      await InstitucionOperadoresService.instance.asegurarPropietario(
+        institucionId: _instPerfilId,
+        ownerAccountId: _ownerId,
+        perfilInstitucionId: _instPerfilId,
+        nombreVisible:
+            '${nombreReal.isEmpty ? 'Institución' : nombreReal} · Propietario',
+      );
 
       _stopBootWatchdog();
 
@@ -835,10 +825,9 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
 
   Widget _buildSelectorPage({required Institucion inst}) {
     // ✅ CRÍTICO: SIEMPRE referenciar por alias para que NO se interprete como “función”.
-    return selector_page.InstitucionPerfilesSelectorPage(
+    return selector_page.InstitucionAreasOperadoresSelectorPage(
       ownerAccountId: _ownerId,
-      institucionPerfilId: _instPerfilId,
-      institucionId: _instPerfilId, // compat legacy
+      institucionId: _instPerfilId,
       institucionNombre: _nombreUI.trim().isEmpty ? inst.nombre : _nombreUI,
       institucion: inst,
     );

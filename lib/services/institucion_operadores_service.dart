@@ -338,7 +338,6 @@ class InstitucionOperadoresService {
         !operator.puedeActivarse) {
       return false;
     }
-    if (operator.esPropietario) return true;
     final all = await _readV2(institution);
     final index = all.indexWhere(
       (value) => value.areaId == area.id && value.operadorId == operator.id,
@@ -518,7 +517,13 @@ class InstitucionOperadoresService {
         _id(session!.userId) != _id(institucionId)) {
       return null;
     }
-    final operator = await operadorActivo(institucionId);
+    final context = await SessionService.getInstitutionOperationalContext();
+    if (context == null ||
+        _id(context.institutionId) != _id(institucionId) ||
+        _id(context.areaId) != _id(areaId)) {
+      return null;
+    }
+    final operator = await buscar(institucionId, context.operatorId);
     return operator != null &&
             await puedeRealizar(
               institucionId: institucionId,
@@ -597,9 +602,7 @@ class InstitucionOperadoresService {
   }) async {
     final institution = _id(institucionId);
     final operator = await buscar(institution, operadorId);
-    if (operator == null ||
-        operator.esPropietario ||
-        !operator.puedeActivarse) {
+    if (operator == null || !operator.puedeActivarse) {
       return false;
     }
     final all = await _readV2(institution);

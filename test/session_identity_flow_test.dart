@@ -12,6 +12,10 @@ import 'package:atena_app/screens/instituciones/institucion_menu_page.dart';
 import 'package:atena_app/services/cuenta_service.dart';
 import 'package:atena_app/services/session_service.dart';
 import 'package:atena_app/services/storage_service.dart';
+import 'package:atena_app/services/institucion_areas_service.dart';
+import 'package:atena_app/services/institucion_operadores_service.dart';
+import 'package:atena_app/services/institucion_contexto_operativo_service.dart';
+import 'package:atena_app/models/instituciones/area_operativa.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -548,6 +552,34 @@ void main() {
       await prepare(tester, remember: true);
       await CuentaService.activarContextoInstitucion(owner, institution);
       if (scenario == 'sin sesión') await CuentaService.logoutCuenta();
+      String? areaId;
+      String? operatorId;
+      if (scenario != 'sin sesión') {
+        final area = (await InstitucionAreasService.instance.resolverYGuardar(
+          institucionId: institution,
+          tipo: TipoAreaOperativa.curricular,
+          claveOrigen: 'primaria',
+          nombre: 'Primaria',
+        ))!;
+        final operator = await InstitucionOperadoresService.instance.crearLocal(
+          institucionId: institution,
+          nombreVisible: 'Operador válido',
+        );
+        await InstitucionOperadoresService.instance.asignarArea(
+          institucionId: institution,
+          operadorId: operator.id,
+          areaId: area.id,
+        );
+        await InstitucionContextoOperativoService.instance
+            .activarContextoOperativo(
+              institucionId: institution,
+              ownerAccountId: owner,
+              areaId: area.id,
+              operadorId: operator.id,
+            );
+        areaId = area.id;
+        operatorId = operator.id;
+      }
       final prefs = await SharedPreferences.getInstance();
       final before = {for (final key in prefs.getKeys()) key: prefs.get(key)};
       final domain = Institucion(
@@ -587,6 +619,8 @@ void main() {
                 actividadKey: 'curricular',
                 actividadLabel: 'Primaria',
                 workProfileId: 'direccion',
+                areaId: areaId,
+                operatorId: operatorId,
               ),
             ),
             (_) => false,

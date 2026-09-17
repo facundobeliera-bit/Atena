@@ -4,15 +4,19 @@ import 'package:atena_app/l10n/gen/app_localizations.dart';
 import 'package:atena_app/models/cuentas/cuenta.dart';
 import 'package:atena_app/models/instituciones/instituciones_integrado.dart'
     hide PerfilInstitucion;
+import 'package:atena_app/models/instituciones/area_operativa.dart';
 import 'package:atena_app/screens/instituciones/institucion_area_page.dart';
+import 'package:atena_app/screens/instituciones/institucion_areas_operadores_selector_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_historial_actividad_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_operadores_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_perfiles_selector_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_respuestas_calendario_page.dart';
 import 'package:atena_app/services/cuenta_service.dart';
 import 'package:atena_app/services/institucion_operadores_service.dart';
+import 'package:atena_app/services/institucion_areas_service.dart';
 import 'package:atena_app/services/instituciones_helpers.dart' as ih;
 import 'package:atena_app/services/storage_service.dart';
+import 'package:atena_app/services/session_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -92,15 +96,55 @@ void main() {
     'institución histórica recorre selector, administración y funciones nuevas',
     (tester) async {
       final institution = await _seedHistoricalInstitution();
+      final area = (await InstitucionAreasService.instance.resolverYGuardar(
+        institucionId: _institutionId,
+        tipo: TipoAreaOperativa.curricular,
+        claveOrigen: 'primaria',
+        nombre: 'Primaria',
+      ))!;
+      final operator = await InstitucionOperadoresService.instance.crearLocal(
+        institucionId: _institutionId,
+        nombreVisible: 'Facu',
+      );
+      await InstitucionOperadoresService.instance.asignarArea(
+        institucionId: _institutionId,
+        operadorId: operator.id,
+        areaId: area.id,
+      );
+      final secondary = (await InstitucionAreasService.instance
+          .resolverYGuardar(
+            institucionId: _institutionId,
+            tipo: TipoAreaOperativa.curricular,
+            claveOrigen: 'secundaria',
+            nombre: 'Secundaria',
+          ))!;
+      final secondaryOnly = await InstitucionOperadoresService.instance
+          .crearLocal(
+            institucionId: _institutionId,
+            nombreVisible: 'Sólo Secundaria',
+          );
+      await InstitucionOperadoresService.instance.asignarArea(
+        institucionId: _institutionId,
+        operadorId: secondaryOnly.id,
+        areaId: secondary.id,
+      );
+      for (var index = 1; index <= 3; index++) {
+        await InstitucionWorkProfilesStore.setProfileName(
+          instIdLocks: _institutionId,
+          actividadKey: 'primaria',
+          profileId: 'wp_primaria_$index',
+          name: 'Perfil de trabajo $index',
+        );
+      }
 
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('es'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: InstitucionPerfilesSelectorPage(
+          home: InstitucionAreasOperadoresSelectorPage(
             ownerAccountId: _ownerId,
-            institucionPerfilId: _institutionId,
+            institucionId: _institutionId,
             institucionNombre: institution.nombre,
             institucion: institution,
           ),
@@ -108,21 +152,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final activity = find
-          .textContaining('Primaria', findRichText: true)
-          .first;
-      expect(activity, findsOneWidget);
-      await tester.tap(activity);
+      expect(find.text('Primaria'), findsOneWidget);
+      expect(find.textContaining('Perfil de trabajo'), findsNothing);
+      await tester.tap(find.byKey(ValueKey('enter-area-${area.id}')));
       await tester.pumpAndSettle();
-
-      final historicalProfile = find.text('Perfil de trabajo 1');
-      expect(historicalProfile, findsOneWidget);
-      await tester.tap(historicalProfile);
-      await tester.pumpAndSettle();
-      final enter = find.text('Entrar');
-      await tester.drag(find.byType(ListView).first, const Offset(0, -300));
-      await tester.pumpAndSettle();
-      await tester.tap(enter);
+      expect(find.text('¿Quién está ingresando?'), findsOneWidget);
+      expect(find.text('Facu'), findsOneWidget);
+      expect(find.text('Sólo Secundaria'), findsNothing);
+      await tester.tap(find.text('Facu'));
       await tester.pumpAndSettle();
 
       expect(find.byType(InstitucionAreaPage), findsOneWidget);
@@ -137,7 +174,7 @@ void main() {
       expect(find.byType(InstitucionOperadoresPage), findsOneWidget);
       expect(
         await InstitucionOperadoresService.instance.listar(_institutionId),
-        hasLength(1),
+        hasLength(3),
       );
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
@@ -167,13 +204,17 @@ void main() {
 
       expect(find.byType(InstitucionAreaPage), findsOneWidget);
       expect(find.textContaining('Primaria'), findsWidgets);
-      expect(
-        await InstitucionWorkProfilesStore.getActiveProfileId(
-          _institutionId,
-          'primaria',
-        ),
-        'wp_primaria_1',
-      );
+      final prefs = await SharedPreferences.getInstance();
+      for (var index = 1; index <= 3; index++) {
+        expect(
+          prefs.getKeys().any((key) => key.contains('wp_primaria_$index')),
+          isTrue,
+        );
+      }
+      await tester.tap(find.byTooltip('Volver a áreas'));
+      await tester.pumpAndSettle();
+      expect(find.byType(InstitucionAreasOperadoresSelectorPage), findsOneWidget);
+      expect(await SessionService.getInstitutionOperationalContext(), isNull);
       expect(tester.takeException(), isNull);
     },
   );
