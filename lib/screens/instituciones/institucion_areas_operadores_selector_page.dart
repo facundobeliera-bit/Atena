@@ -223,10 +223,10 @@ class _InstitucionAreasOperadoresSelectorPageState
             Text('Operadores habilitados: ${assignments.length}'),
             const SizedBox(height: 12),
             if (assignments.isEmpty) ...[
-              const Text('Esta área todavía no tiene operadores asignados.'),
+              const Text('Sin operadores asignados'),
               TextButton(
                 onPressed: _manageOperators,
-                child: const Text('Administrar operadores'),
+                child: const Text('Configurar equipo'),
               ),
             ] else
               FilledButton(

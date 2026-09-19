@@ -8,6 +8,7 @@ import 'package:atena_app/models/instituciones/area_operativa.dart';
 import 'package:atena_app/screens/instituciones/institucion_area_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_areas_operadores_selector_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_historial_actividad_page.dart';
+import 'package:atena_app/screens/instituciones/institucion_menu_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_operadores_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_perfiles_selector_page.dart';
 import 'package:atena_app/screens/instituciones/institucion_respuestas_calendario_page.dart';
@@ -104,7 +105,7 @@ void main() {
       ))!;
       final operator = await InstitucionOperadoresService.instance.crearLocal(
         institucionId: _institutionId,
-        nombreVisible: 'Facu',
+        nombreVisible: 'facu',
       );
       await InstitucionOperadoresService.instance.asignarArea(
         institucionId: _institutionId,
@@ -133,7 +134,7 @@ void main() {
           instIdLocks: _institutionId,
           actividadKey: 'primaria',
           profileId: 'wp_primaria_$index',
-          name: 'Perfil de trabajo $index',
+          name: index == 1 ? 'facu' : 'Perfil de trabajo $index',
         );
       }
 
@@ -154,15 +155,22 @@ void main() {
 
       expect(find.text('Primaria'), findsOneWidget);
       expect(find.textContaining('Perfil de trabajo'), findsNothing);
+      expect(find.text('facu'), findsNothing);
       await tester.tap(find.byKey(ValueKey('enter-area-${area.id}')));
       await tester.pumpAndSettle();
       expect(find.text('¿Quién está ingresando?'), findsOneWidget);
-      expect(find.text('Facu'), findsOneWidget);
+      expect(find.byKey(ValueKey('operator-${operator.id}')), findsOneWidget);
+      expect(find.text('facu'), findsOneWidget);
       expect(find.text('Sólo Secundaria'), findsNothing);
-      await tester.tap(find.text('Facu'));
+      await tester.tap(find.byKey(ValueKey('operator-${operator.id}')));
       await tester.pumpAndSettle();
 
       expect(find.byType(InstitucionAreaPage), findsOneWidget);
+      final context = await SessionService.getInstitutionOperationalContext();
+      expect(context?.institutionId, _institutionId);
+      expect(context?.areaId, area.id);
+      expect(context?.operatorId, operator.id);
+      expect(find.textContaining('Operador: facu'), findsOneWidget);
       expect(find.text('Administración institucional'), findsOneWidget);
       expect(find.text('Operadores'), findsOneWidget);
       expect(find.text('Historial de actividad'), findsOneWidget);
@@ -213,9 +221,95 @@ void main() {
       }
       await tester.tap(find.byTooltip('Volver a áreas'));
       await tester.pumpAndSettle();
-      expect(find.byType(InstitucionAreasOperadoresSelectorPage), findsOneWidget);
+      expect(
+        find.byType(InstitucionAreasOperadoresSelectorPage),
+        findsOneWidget,
+      );
+      expect(await SessionService.getInstitutionOperationalContext(), isNull);
+      await tester.tap(find.byKey(ValueKey('enter-area-${secondary.id}')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(ValueKey('operator-${secondaryOnly.id}')),
+        findsOneWidget,
+      );
+      expect(find.byKey(ValueKey('operator-${operator.id}')), findsNothing);
       expect(await SessionService.getInstitutionOperationalContext(), isNull);
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('entrada histórica no expone perfiles de trabajo', (
+    tester,
+  ) async {
+    final institution = await _seedHistoricalInstitution();
+    for (var index = 1; index <= 3; index++) {
+      await InstitucionWorkProfilesStore.setProfileName(
+        instIdLocks: _institutionId,
+        actividadKey: 'primaria',
+        profileId: 'wp_primaria_$index',
+        name: index == 1 ? 'facu' : 'Perfil de trabajo $index',
+      );
+    }
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: InstitucionPerfilesSelectorPage(
+          ownerAccountId: _ownerId,
+          institucionPerfilId: _institutionId,
+          institucionNombre: institution.nombre,
+          institucion: institution,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final primary = find.text('Primaria').first;
+    await tester.tap(primary);
+    await tester.pumpAndSettle();
+    expect(find.text('Perfiles de trabajo'), findsNothing);
+    expect(find.text('Perfil de trabajo 2'), findsNothing);
+    expect(find.text('Perfil de trabajo 3'), findsNothing);
+    expect(find.text('facu'), findsNothing);
+    expect(find.text('Sin operadores asignados'), findsWidgets);
+    expect(find.text('Configurar equipo'), findsWidgets);
+    final prefs = await SharedPreferences.getInstance();
+    for (var index = 1; index <= 3; index++) {
+      expect(
+        prefs.getKeys().any((key) => key.contains('wp_primaria_$index')),
+        isTrue,
+      );
+    }
+  });
+
+  testWidgets('menú institucional real abre áreas sin perfiles históricos', (
+    tester,
+  ) async {
+    final institution = await _seedHistoricalInstitution();
+    await InstitucionWorkProfilesStore.setProfileName(
+      instIdLocks: _institutionId,
+      actividadKey: 'primaria',
+      profileId: 'wp_primaria_1',
+      name: 'facu',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: InstitucionMenuPage(
+          ownerAccountId: _ownerId,
+          institucionPerfilId: institution.id,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.admin_panel_settings));
+    await tester.pumpAndSettle();
+    expect(find.byType(InstitucionAreasOperadoresSelectorPage), findsOneWidget);
+    expect(find.byType(InstitucionPerfilesSelectorPage), findsNothing);
+    expect(find.text('Perfiles de trabajo'), findsNothing);
+    expect(find.text('Sin operadores asignados'), findsWidgets);
+    expect(find.text('Configurar equipo'), findsWidgets);
+  });
 }

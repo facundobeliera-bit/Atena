@@ -44,6 +44,7 @@ import '../../services/institucion_areas_service.dart';
 import '../../services/institucion_service.dart';
 import '../../ui/atena_assets.dart';
 import 'institucion_area_page.dart';
+import 'institucion_areas_operadores_selector_page.dart';
 
 // =====================================================
 // PREFS SAFE GET (timeout) – evita await colgado
@@ -877,8 +878,6 @@ class _InstitucionPerfilesSelectorPageState
   bool _loading = true;
   bool _refreshing = false;
 
-  bool _inChildRoute = false;
-
   String? _loadError;
 
   Timer? _loadWatchdog;
@@ -969,17 +968,18 @@ class _InstitucionPerfilesSelectorPageState
     _instDomain = widget.institucion;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // ignore: discarded_futures
-      _loadSafe();
-    });
-
-    _poll = Timer.periodic(const Duration(seconds: 3), (_) {
       if (!mounted) return;
-      if (_loading || _refreshing || _inChildRoute) return;
-      if (_loadError != null) return;
-      if (_actividadSeleccionada == null) return;
-      // ignore: discarded_futures
-      _refresh();
+      // Entrada de compatibilidad: nunca iniciar el selector de wp_*.
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => InstitucionAreasOperadoresSelectorPage(
+            ownerAccountId: (widget.ownerAccountId ?? '').trim(),
+            institucionId: widget.institucionIdData,
+            institucionNombre: widget.institucionNombre,
+            institucion: widget.institucion,
+          ),
+        ),
+      );
     });
   }
 
@@ -1581,7 +1581,6 @@ class _InstitucionPerfilesSelectorPageState
 
     setState(() {
       _navOverlay = true;
-      _inChildRoute = true;
     });
 
     try {
@@ -1609,7 +1608,6 @@ class _InstitucionPerfilesSelectorPageState
       if (mounted) {
         setState(() {
           _navOverlay = false;
-          _inChildRoute = false;
         });
         // ignore: discarded_futures
         _refresh(allowWhileLoading: true);
