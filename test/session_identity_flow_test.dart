@@ -112,7 +112,7 @@ Future<void> prepare(WidgetTester tester, {bool remember = false}) async {
     ),
   );
   await tester.pumpAndSettle();
-  await seed(remember: remember);
+  await tester.runAsync(() => seed(remember: remember));
   await openSelector(tester);
 }
 
@@ -320,7 +320,7 @@ void main() {
   testWidgets(
     'S10 bootstrap prioriza v2 aunque cuenta antigua contradiga owner',
     (tester) async {
-      await seed(remember: true);
+      await tester.runAsync(() => seed(remember: true));
       await CuentaService.setSesionCuentaId('otra-cuenta', recordarme: true);
       await SessionService.setSession(
         userId: institution,

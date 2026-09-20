@@ -46,6 +46,7 @@ import '../models/instituciones/instituciones_integrado.dart';
 
 // ✅ Para asegurar owner canónico existente
 import 'cuenta_service.dart';
+import 'local_password_hasher.dart';
 import '../models/cuentas/cuenta.dart';
 
 class InstitucionService {
@@ -86,10 +87,63 @@ class InstitucionService {
     return n.isEmpty ? 'Institución' : n;
   }
 
-  /// Hash simple (para compat con CuentaService prototipo, que usa base64).
-  /// No apto producción, pero mantiene coherencia si algún día se usa loginCuenta.
-  static String _hashPassCuenta(String pass) {
-    return base64Encode(utf8.encode(pass.trim()));
+  static String _legacyHashPassCuenta(String pass) =>
+      base64Encode(utf8.encode(pass.trim()));
+
+  static String _divergenceKey(String id) =>
+      'atena_credential_divergent_${_normIdKey(id)}';
+
+  static String _checkedKey(String id) =>
+      'atena_credential_relation_checked_${_normIdKey(id)}';
+
+  static Future<void> invalidateLinkedCredentialCheck(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_checkedKey(id));
+  }
+
+  /// A status marker only; no credential or identity is changed here.
+  static Future<void> noteLinkedCredentialFromAccount(
+    String accountId,
+    String authenticatedPassword,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_checkedKey(accountId)) == true) return;
+    final institution = await _cargarCuentaPorId(accountId);
+    if (institution == null) return;
+    final matches = LocalPasswordHasher.isModern(institution.passwordHash)
+        ? await LocalPasswordHasher.verify(
+            authenticatedPassword,
+            institution.passwordHash,
+          )
+        : institution.passwordHash == authenticatedPassword.trim();
+    if (matches) {
+      await prefs.remove(_divergenceKey(accountId));
+    } else {
+      await prefs.setBool(_divergenceKey(accountId), true);
+    }
+    await prefs.setBool(_checkedKey(accountId), true);
+  }
+
+  static Future<void> _noteLinkedCredentialFromInstitution(
+    String id,
+    String authenticatedPassword,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_checkedKey(id)) == true) return;
+    final owner = await CuentaService.getCuentaById(id);
+    if (owner == null) return;
+    final matches = LocalPasswordHasher.isModern(owner.passwordHash)
+        ? await LocalPasswordHasher.verify(
+            authenticatedPassword,
+            owner.passwordHash,
+          )
+        : owner.passwordHash == _legacyHashPassCuenta(authenticatedPassword);
+    if (matches) {
+      await prefs.remove(_divergenceKey(id));
+    } else {
+      await prefs.setBool(_divergenceKey(id), true);
+    }
+    await prefs.setBool(_checkedKey(id), true);
   }
 
   // =====================================================
@@ -193,7 +247,7 @@ class InstitucionService {
   static Future<void> _ensureOwnerCuentaBestEffort({
     required String institucionId,
     required String email,
-    required String passwordPlano,
+    String? passwordPlano,
     required String nombreInstitucion,
   }) async {
     final id = _normIdKey(institucionId);
@@ -216,10 +270,15 @@ class InstitucionService {
       final existente = await CuentaService.getCuentaById(id);
 
       if (existente == null) {
+        if (passwordPlano == null) {
+          throw StateError(
+            'Falta credencial para crear la cuenta propietaria.',
+          );
+        }
         final nueva = Cuenta(
           id: id,
           email: emailOwner,
-          passwordHash: _hashPassCuenta(passwordPlano),
+          passwordHash: await LocalPasswordHasher.hash(passwordPlano),
           perfilesAlumnoIds: <String>[],
           perfilesInstitucionIds: <String>[],
           recordarme: true,
@@ -230,30 +289,11 @@ class InstitucionService {
         return;
       }
 
-      // 3) Best-effort: mantener coherencia del email del owner,
-      //    pero sin generar colisiones (misma lógica).
-      final emailActual = _normEmail(existente.email);
-      if (emailActual != emailOwner) {
-        // Antes de cambiarlo, verificar que emailOwner no esté tomado por otra cuenta.
-        final cuentaEmailOwner = await CuentaService.getCuentaByEmail(
-          emailOwner,
-        );
-        if (cuentaEmailOwner == null || _normIdKey(cuentaEmailOwner.id) == id) {
-          final actualizada = Cuenta(
-            id: existente.id,
-            email: emailOwner,
-            passwordHash: existente.passwordHash,
-            perfilesAlumnoIds: existente.perfilesAlumnoIds,
-            perfilesInstitucionIds: existente.perfilesInstitucionIds,
-            recordarme: existente.recordarme,
-            creadaEl: existente.creadaEl,
-            ultimaSesion: existente.ultimaSesion,
-          );
-          await CuentaService.actualizarCuenta(actualizada);
-        }
-      }
+      // Existing owners have independent credentials and account identity.
+      // An institutional login must not rewrite either one.
     } catch (_) {
-      // Best-effort: no bloquear auth local.
+      // Credential migration is independent of best-effort owner creation.
+      // A failure here must not reject valid institutional credentials.
     }
   }
 
@@ -319,6 +359,10 @@ class InstitucionService {
 
     final idRaw = a.id.trim();
     final idN = _normIdKey(idRaw);
+    final previous = _tryDecode(prefs.getString(_kInstByIdV2(idRaw)));
+    if (previous != null && previous.passwordHash != a.passwordHash) {
+      await prefs.remove(_checkedKey(idRaw));
+    }
 
     // 1) Persistir entidad (v2) — bajo raw y normalized si difieren (cierra mismatch histórico)
     final payload = jsonEncode(
@@ -398,7 +442,7 @@ class InstitucionService {
     final nuevo = _InstAccount(
       id: _newId(), // ✅ AUTH LOCAL ID (FASE 2: se usa como ownerAccountId)
       email: e,
-      passwordHash: p, // prototipo: plano
+      passwordHash: await LocalPasswordHasher.hash(p),
       nombre: n,
     );
 
@@ -440,7 +484,11 @@ class InstitucionService {
     final a = await _cargarCuentaPorEmail(e);
     if (a == null) return null;
 
-    if (a.passwordHash != p) return null;
+    final modern = LocalPasswordHasher.isModern(a.passwordHash);
+    final valid = modern
+        ? await LocalPasswordHasher.verify(p, a.passwordHash)
+        : a.passwordHash == p;
+    if (!valid) return null;
 
     // ✅ Asegurar owner cuenta canónica (best-effort)
     await _ensureOwnerCuentaBestEffort(
@@ -449,6 +497,20 @@ class InstitucionService {
       passwordPlano: p,
       nombreInstitucion: a.nombre,
     );
+    if (!modern) {
+      await _guardarCuenta(
+        _InstAccount(
+          id: a.id,
+          email: a.email,
+          passwordHash: await LocalPasswordHasher.hash(p),
+          nombre: a.nombre,
+        ),
+      );
+    }
+    await _noteLinkedCredentialFromInstitution(a.id, p);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kInstByIdV1(a.id));
+    await prefs.remove(_kInstIdByEmailV1(a.email));
 
     return InstitucionLoginResult(
       institucionId: a.id,
@@ -641,11 +703,11 @@ class InstitucionService {
     if (actual == null) throw Exception('Institución inexistente');
 
     final emailFinal = _normEmail(nuevoEmail ?? actual.email);
-    final passFinal = (nuevoPassword ?? actual.passwordHash).trim();
+    final passFinal = nuevoPassword?.trim();
     final nombreFinal = (nuevoNombre ?? actual.nombre).trim();
 
     if (!_emailValido(emailFinal)) throw Exception('Email inválido');
-    if (!_passValida(passFinal)) {
+    if (passFinal != null && !_passValida(passFinal)) {
       throw Exception('Contraseña inválida (mín. $_minPassLen)');
     }
     if (nombreFinal.isEmpty) throw Exception('Nombre inválido');
@@ -677,19 +739,25 @@ class InstitucionService {
     final actualizado = _InstAccount(
       id: actual.id,
       email: emailFinal,
-      passwordHash: passFinal, // prototipo: plano
+      passwordHash: passFinal == null
+          ? actual.passwordHash
+          : await LocalPasswordHasher.hash(passFinal),
       nombre: nombreFinal,
     );
 
-    await _guardarCuenta(actualizado);
-
-    // ✅ Mantener coherencia de Cuenta owner (best-effort)
+    // Keep the owner's independently authenticated credential unchanged.
     await _ensureOwnerCuentaBestEffort(
       institucionId: actualizado.id,
       email: actualizado.email,
-      passwordPlano: actualizado.passwordHash,
+      passwordPlano: passFinal,
       nombreInstitucion: actualizado.nombre,
     );
+    await _guardarCuenta(actualizado);
+    if (passFinal != null) {
+      await prefs.remove(_kInstByIdV1(actualizado.id));
+      await prefs.remove(_kInstIdByEmailV1(actualizado.email));
+      await _noteLinkedCredentialFromInstitution(actualizado.id, passFinal);
+    }
   }
 }
 

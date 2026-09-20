@@ -60,6 +60,8 @@
 
 import 'dart:convert';
 import 'session_service.dart';
+import 'local_password_hasher.dart';
+import 'institucion_service.dart';
 import 'dart:math';
 
 import '../models/cuentas/cuenta.dart';
@@ -331,8 +333,8 @@ class CuentaService {
     return RegExp(r'^\d{7,9}$').hasMatch(d);
   }
 
-  // Hash simple (prototipo): NO apto producción
-  static String _hashPass(String pass) =>
+  // Legacy verifier only. New writes use LocalPasswordHasher.
+  static String _legacyHashPass(String pass) =>
       base64Encode(utf8.encode(pass.trim()));
 
   // =====================================================
@@ -574,9 +576,11 @@ class CuentaService {
         final c = Cuenta.fromJson(raw2);
 
         // Migración suave: re-save en key canónica (best-effort)
-        try {
-          await _saveCuenta(c);
-        } catch (_) {}
+        if (LocalPasswordHasher.isModern(c.passwordHash)) {
+          try {
+            await _saveCuenta(c);
+          } catch (_) {}
+        }
 
         return c;
       } catch (_) {
@@ -622,7 +626,7 @@ class CuentaService {
     final updated = Cuenta(
       id: cuenta.id.trim(),
       email: _normEmail(cuenta.email),
-      passwordHash: _hashPass(pass),
+      passwordHash: await LocalPasswordHasher.hash(pass),
       perfilesAlumnoIds: List<String>.from(cuenta.perfilesAlumnoIds),
       perfilesInstitucionIds: List<String>.from(cuenta.perfilesInstitucionIds),
       recordarme: cuenta.recordarme,
@@ -631,6 +635,7 @@ class CuentaService {
     );
 
     await _saveCuenta(updated);
+    await InstitucionService.noteLinkedCredentialFromAccount(id, pass);
   }
 
   static Future<void> _saveCuenta(Cuenta cuenta) async {
@@ -646,6 +651,9 @@ class CuentaService {
       final rawPrev = await storage.getString(_kCuentaById(idCanon));
       if (rawPrev != null && rawPrev.trim().isNotEmpty) {
         final prev = Cuenta.fromJson(rawPrev);
+        if (prev.passwordHash != cuenta.passwordHash) {
+          await InstitucionService.invalidateLinkedCredentialCheck(idCanon);
+        }
         final prevEmail = _normEmail(prev.email);
         if (prevEmail.isNotEmpty && prevEmail != normalizedEmail) {
           final oldKey = _kCuentaIdByEmail(prevEmail);
@@ -708,7 +716,7 @@ class CuentaService {
     final cuenta = Cuenta(
       id: _newCuentaId(),
       email: e,
-      passwordHash: _hashPass(password),
+      passwordHash: await LocalPasswordHasher.hash(password),
       perfilesAlumnoIds: <String>[],
       perfilesInstitucionIds: <String>[],
       recordarme: recordarme,
@@ -736,19 +744,39 @@ class CuentaService {
     final cuenta = await getCuentaByEmail(e);
     if (cuenta == null) throw Exception('No existe una cuenta con ese email.');
 
-    if (cuenta.passwordHash != _hashPass(password)) {
+    final modern = LocalPasswordHasher.isModern(cuenta.passwordHash);
+    final valid = modern
+        ? await LocalPasswordHasher.verify(password, cuenta.passwordHash)
+        : cuenta.passwordHash == _legacyHashPass(password);
+    if (!valid) {
       throw Exception('Email o contraseña incorrectos.');
     }
+    final authenticatedCuenta = modern
+        ? cuenta
+        : Cuenta(
+            id: cuenta.id,
+            email: cuenta.email,
+            passwordHash: await LocalPasswordHasher.hash(password),
+            perfilesAlumnoIds: cuenta.perfilesAlumnoIds,
+            perfilesInstitucionIds: cuenta.perfilesInstitucionIds,
+            recordarme: cuenta.recordarme,
+            creadaEl: cuenta.creadaEl,
+            ultimaSesion: cuenta.ultimaSesion,
+          );
 
-    cuenta.ultimaSesion = DateTime.now();
-    cuenta.recordarme = recordarme;
-    await _saveCuenta(cuenta);
+    authenticatedCuenta.ultimaSesion = DateTime.now();
+    authenticatedCuenta.recordarme = recordarme;
+    await _saveCuenta(authenticatedCuenta);
+    await InstitucionService.noteLinkedCredentialFromAccount(
+      cuenta.id,
+      password,
+    );
 
     await SessionService.logout();
-    await setSesionCuentaId(cuenta.id, recordarme: recordarme);
-    await activarContextoCuenta(cuenta.id);
+    await setSesionCuentaId(authenticatedCuenta.id, recordarme: recordarme);
+    await activarContextoCuenta(authenticatedCuenta.id);
 
-    return cuenta;
+    return authenticatedCuenta;
   }
 
   // =====================================================

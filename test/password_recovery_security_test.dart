@@ -130,12 +130,19 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
-        final idA = await register(institution, emailA);
+        final idA = (await tester.runAsync(
+          () => register(institution, emailA),
+        ))!;
         // Real registration generates IDs from wall time; separate fixtures.
         await tester.runAsync(
           () => Future<void>.delayed(const Duration(milliseconds: 20)),
         );
-        final idB = await register(institution, emailB);
+        final idB = (await tester.runAsync(
+          () => register(institution, emailB),
+        ))!;
+        Future<bool> loginWithRealClock(String email, String password) async =>
+            await tester.runAsync(() => login(institution, email, password)) ??
+            false;
         expect(
           idA != idB,
           isTrue,
@@ -157,13 +164,13 @@ void main() {
             );
           case 'new-login':
             expect(
-              await login(institution, emailA, replacement),
+              await loginWithRealClock(emailA, replacement),
               isFalse,
               reason: 'No debe funcionar la clave impuesta sin verificacion',
             );
           case 'old-login':
             expect(
-              await login(institution, emailA, original),
+              await loginWithRealClock(emailA, original),
               isTrue,
               reason:
                   'El intento no autorizado no debe invalidar la credencial original',
@@ -176,8 +183,8 @@ void main() {
               reason: 'No debe crear registros para un email inexistente',
             );
           case 'isolation':
-            expect(await login(institution, emailB, original), isTrue);
-            expect(await login(institution, emailB, replacement), isFalse);
+            expect(await loginWithRealClock(emailB, original), isTrue);
+            expect(await loginWithRealClock(emailB, replacement), isFalse);
           case 'repeat':
             final again = await recover(
               tester,
@@ -204,28 +211,23 @@ void main() {
         }
       });
     }
-    test(
-      'P1-B / $kind / almacenamiento no reversible',
-      () async {
-        final id = await register(institution, emailA);
-        final p = await SharedPreferences.getInstance();
-        final key = institution ? 'atena_inst_auth_by_id_$id' : 'cuenta_$id';
-        final m = jsonDecode(p.getString(key)!) as Map;
-        final value = m['passwordHash'] as String;
-        bool reversible = value == original;
-        try {
-          reversible =
-              reversible || utf8.decode(base64Decode(value)) == original;
-        } catch (_) {}
-        expect(
-          reversible,
-          isFalse,
-          reason:
-              'Una credencial persistida no debe ser texto plano ni Base64 reversible',
-        );
-      },
-      skip: 'P1-B pendiente: migrar almacenamiento reversible de credenciales',
-    );
+    test('P1-B / $kind / almacenamiento no reversible', () async {
+      final id = await register(institution, emailA);
+      final p = await SharedPreferences.getInstance();
+      final key = institution ? 'atena_inst_auth_by_id_$id' : 'cuenta_$id';
+      final m = jsonDecode(p.getString(key)!) as Map;
+      final value = m['passwordHash'] as String;
+      bool reversible = value == original;
+      try {
+        reversible = reversible || utf8.decode(base64Decode(value)) == original;
+      } catch (_) {}
+      expect(
+        reversible,
+        isFalse,
+        reason:
+            'Una credencial persistida no debe ser texto plano ni Base64 reversible',
+      );
+    });
     test(
       'P1-D / $kind / cambio invalida sesion persistente',
       () async {

@@ -245,7 +245,7 @@ void main() {
     tester,
   ) async {
     await _create('solicitud-desde-notificacion');
-    await _activateInstitution();
+    await tester.runAsync(_activateInstitution);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -278,7 +278,7 @@ void main() {
     tester,
   ) async {
     await _create('solicitud-ruta-directa');
-    await _activateInstitution();
+    await tester.runAsync(_activateInstitution);
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('es'),
@@ -303,7 +303,7 @@ void main() {
   testWidgets('ruta institucional contradictoria no adopta otra identidad', (
     tester,
   ) async {
-    await _activateInstitution();
+    await tester.runAsync(_activateInstitution);
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('es'),

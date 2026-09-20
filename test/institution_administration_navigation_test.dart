@@ -96,7 +96,7 @@ void main() {
   testWidgets(
     'institución histórica recorre selector, administración y funciones nuevas',
     (tester) async {
-      final institution = await _seedHistoricalInstitution();
+      final institution = (await tester.runAsync(_seedHistoricalInstitution))!;
       final area = (await InstitucionAreasService.instance.resolverYGuardar(
         institucionId: _institutionId,
         tipo: TipoAreaOperativa.curricular,
@@ -241,7 +241,7 @@ void main() {
   testWidgets('entrada histórica no expone perfiles de trabajo', (
     tester,
   ) async {
-    final institution = await _seedHistoricalInstitution();
+    final institution = (await tester.runAsync(_seedHistoricalInstitution))!;
     for (var index = 1; index <= 3; index++) {
       await InstitucionWorkProfilesStore.setProfileName(
         instIdLocks: _institutionId,
@@ -285,7 +285,7 @@ void main() {
   testWidgets('menú institucional real abre áreas sin perfiles históricos', (
     tester,
   ) async {
-    final institution = await _seedHistoricalInstitution();
+    final institution = (await tester.runAsync(_seedHistoricalInstitution))!;
     await InstitucionWorkProfilesStore.setProfileName(
       instIdLocks: _institutionId,
       actividadKey: 'primaria',

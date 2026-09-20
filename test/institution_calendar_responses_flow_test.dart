@@ -329,7 +329,7 @@ void main() {
       document: '31000001',
       response: RsvpStatusAtena.yes,
     );
-    await _activateInstitutionA();
+    await tester.runAsync(_activateInstitutionA);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -358,7 +358,7 @@ void main() {
       document: '32000001',
       response: RsvpStatusAtena.no,
     );
-    await _activateInstitutionA();
+    await tester.runAsync(_activateInstitutionA);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -412,7 +412,7 @@ void main() {
   testWidgets('menú institucional ya no ofrece respuestas globales', (
     tester,
   ) async {
-    await _activateInstitutionA();
+    await tester.runAsync(_activateInstitutionA);
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('es'),
@@ -434,7 +434,7 @@ void main() {
   testWidgets(
     'Administración de Primaria abre respuestas y Back conserva área',
     (tester) async {
-      await _activateInstitutionA();
+      await tester.runAsync(_activateInstitutionA);
       final institution = await ih.cargarInstitucionPorId(institutionA);
       final area = (await InstitucionAreasService.instance.resolverYGuardar(
         institucionId: institutionA,

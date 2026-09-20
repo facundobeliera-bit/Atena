@@ -43,6 +43,7 @@
 import 'dart:math';
 
 import 'storage_service.dart';
+import 'local_password_hasher.dart';
 
 import '../models/alumnos/alumnos_integrados.dart';
 
@@ -424,7 +425,11 @@ class AlumnoService {
     if (exists) return false;
 
     users.add(
-      AlumnoUsuario(documento: dniN, email: emailN, passwordHash: passwordHash),
+      AlumnoUsuario(
+        documento: dniN,
+        email: emailN,
+        passwordHash: await LocalPasswordHasher.hash(passwordHash),
+      ),
     );
 
     await _saveUsuarios(users);
@@ -438,13 +443,25 @@ class AlumnoService {
     final emailN = _normEmail(email);
     final users = await _getUsuarios();
 
-    try {
-      return users.firstWhere(
-        (u) => _normEmail(u.email) == emailN && u.passwordHash == passwordHash,
+    for (var i = 0; i < users.length; i++) {
+      final user = users[i];
+      if (_normEmail(user.email) != emailN) continue;
+      final modern = LocalPasswordHasher.isModern(user.passwordHash);
+      final valid = modern
+          ? await LocalPasswordHasher.verify(passwordHash, user.passwordHash)
+          : user.passwordHash == passwordHash;
+      if (!valid) return null;
+      if (modern) return user;
+      final migrated = AlumnoUsuario(
+        documento: user.documento,
+        email: user.email,
+        passwordHash: await LocalPasswordHasher.hash(passwordHash),
       );
-    } catch (_) {
-      return null;
+      users[i] = migrated;
+      await _saveUsuarios(users);
+      return migrated;
     }
+    return null;
   }
 
   /// Legacy recovery is disabled: knowing an email does not verify identity.
