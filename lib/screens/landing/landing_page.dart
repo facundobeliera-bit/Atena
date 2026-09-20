@@ -50,12 +50,15 @@ import '../../l10n/gen/app_localizations.dart';
 import '../../routes/atena_deeplink.dart';
 import '../../services/cuenta_service.dart';
 import '../../services/session_service.dart';
+import '../../services/remote/atena_supabase_client.dart';
+import '../../services/remote/pilot_remote_gateway.dart';
 import '../../ui/atena_assets.dart';
 
 import '../auth/alumno_login_page.dart';
 import '../auth/institucion_login_page.dart';
 import '../cuentas/cuenta_home_page.dart';
 import '../instituciones/institucion_menu_page.dart';
+import '../pilot/pilot_remote_page.dart';
 
 class LandingPage extends StatefulWidget {
   final Locale? locale;
@@ -643,43 +646,61 @@ class _LandingPageState extends State<LandingPage> {
                   // BOTONES REUBICADOS (2 columnas) — mejorados
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: _LandingColumn(
-                            title: _txtLandingHeadingStudents(t),
-                            buttonTitle: _txtLandingStudents(t),
-                            subtitle: ingresar,
-                            icon: Icons.school_rounded,
-                            isPrimary: true,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      AlumnoLoginPage(deeplink: deeplink),
+                        if (AtenaSupabaseClient.optionalClient
+                            case final client?)
+                          TextButton.icon(
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => PilotRemotePage(
+                                  gateway: SupabasePilotRemoteGateway(client),
                                 ),
-                              );
-                            },
+                              ),
+                            ),
+                            icon: const Icon(Icons.science_outlined),
+                            label: const Text('Abrir piloto remoto'),
                           ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _LandingColumn(
-                            title: _txtLandingHeadingInstitutions(t),
-                            buttonTitle: _txtLandingInstitutions(t),
-                            subtitle: ingresar,
-                            icon: Icons.account_balance_rounded,
-                            isPrimary: false,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      InstitucionLoginPage(deeplink: deeplink),
-                                ),
-                              );
-                            },
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: _LandingColumn(
+                                title: _txtLandingHeadingStudents(t),
+                                buttonTitle: _txtLandingStudents(t),
+                                subtitle: ingresar,
+                                icon: Icons.school_rounded,
+                                isPrimary: true,
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          AlumnoLoginPage(deeplink: deeplink),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: _LandingColumn(
+                                title: _txtLandingHeadingInstitutions(t),
+                                buttonTitle: _txtLandingInstitutions(t),
+                                subtitle: ingresar,
+                                icon: Icons.account_balance_rounded,
+                                isPrimary: false,
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => InstitucionLoginPage(
+                                        deeplink: deeplink,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

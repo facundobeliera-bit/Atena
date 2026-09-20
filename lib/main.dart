@@ -28,6 +28,7 @@ import 'services/session_service.dart';
 import 'services/cuenta_service.dart';
 import 'services/institucion_contexto_operativo_service.dart';
 import 'services/institucion_areas_service.dart';
+import 'services/remote/atena_supabase_client.dart';
 
 import 'screens/landing/landing_page.dart';
 import 'screens/alumno/alumno_area_page.dart';
@@ -40,6 +41,9 @@ import 'routes/atena_deeplink.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Optional, build-time selected pilot. Local persistence remains the default.
+  await AtenaSupabaseClient.initializeIfConfigured();
 
   // Sólo al iniciar el proceso, antes de cualquier ruta (incluidos enlaces).
   // Volver a '/' durante el uso no debe cerrar una sesión temporal activa.

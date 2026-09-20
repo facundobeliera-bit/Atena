@@ -44,3 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .vscode/
+
+# Supabase CLI link metadata may contain connection details.
+/supabase/.temp/

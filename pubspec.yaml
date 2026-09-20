@@ -15,6 +15,9 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.5
+  supabase_flutter: 2.14.2
+  # Mantiene el mínimo Flutter previo; Supabase acepta esta rama de app_links.
+  app_links: 6.4.1
   url_launcher: ^6.3.0
   pdf: ^3.11.0
   printing: ^5.12.0
