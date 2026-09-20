@@ -348,6 +348,38 @@ class CuentaService {
     await SessionService.logout();
   }
 
+  /// A password change must not leave an older local context authenticated.
+  static Future<void> invalidarSesionDeCuentaSiActiva(String cuentaId) async {
+    final id = _normIdKey(cuentaId);
+    final legacy = await getSesionCuentaId();
+    final session = await SessionService.getSession();
+    final owner = session?.role == SessionRole.institucion
+        ? await SessionService.getInstitucionOwnerAccountIdLogueado()
+        : null;
+    if (legacy == id ||
+        (session?.role == SessionRole.cuenta && session?.userId == id) ||
+        (session?.role == SessionRole.institucion && owner == id)) {
+      await logoutCuenta();
+    }
+  }
+
+  /// Institutional credentials are independent from the owner's password.
+  static Future<void> invalidarSesionInstitucionalSiActiva(
+    String institucionOwnerId,
+  ) async {
+    final id = _normIdKey(institucionOwnerId);
+    final session = await SessionService.getSession();
+    final legacy = await getSesionCuentaId();
+    final owner = session?.role == SessionRole.institucion
+        ? await SessionService.getInstitucionOwnerAccountIdLogueado()
+        : null;
+    if ((session?.role == SessionRole.institucion &&
+            (owner == id || legacy == id)) ||
+        (session == null && legacy == id)) {
+      await logoutCuenta();
+    }
+  }
+
   /// Llamar únicamente después de validar credenciales o registrar la cuenta.
   static Future<void> iniciarSesionAutenticada(
     String cuentaId, {
@@ -634,6 +666,7 @@ class CuentaService {
       ultimaSesion: DateTime.now(),
     );
 
+    await invalidarSesionDeCuentaSiActiva(id);
     await _saveCuenta(updated);
     await InstitucionService.noteLinkedCredentialFromAccount(id, pass);
   }

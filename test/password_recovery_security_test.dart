@@ -8,6 +8,8 @@ import 'package:atena_app/services/cuenta_service.dart';
 import 'package:atena_app/services/institucion_service.dart';
 import 'package:atena_app/services/session_service.dart';
 import 'package:atena_app/services/storage_service.dart';
+import 'package:atena_app/main.dart' as app;
+import 'package:atena_app/screens/landing/landing_page.dart';
 import 'package:atena_app/screens/auth/alumno_forgot_password_page.dart';
 import 'package:atena_app/screens/auth/institucion_forgot_password_page.dart';
 
@@ -228,17 +230,74 @@ void main() {
             'Una credencial persistida no debe ser texto plano ni Base64 reversible',
       );
     });
-    test(
-      'P1-D / $kind / cambio invalida sesion persistente',
-      () async {
+    test('P1-D / $kind / cambio invalida sesion persistente', () async {
+      final id = await register(institution, emailA);
+      await CuentaService.loginCuenta(
+        email: emailA,
+        password: original,
+        recordarme: true,
+      );
+      if (institution) {
+        final profile = await CuentaService.crearPerfilInstitucion(
+          cuentaId: id,
+          nombre: 'Institución de prueba',
+          emailContacto: emailA,
+          telefonoContacto: '',
+        );
+        await CuentaService.activarContextoInstitucion(id, profile.id);
+        final session = await SessionService.getSession();
+        expect(session?.role, SessionRole.institucion);
+        expect(session?.userId, profile.id);
+        expect(await SessionService.getInstitucionOwnerAccountIdLogueado(), id);
+      } else {
+        expect((await SessionService.getSession())?.role, SessionRole.cuenta);
+      }
+      expect(await CuentaService.getSesionCuentaId(), id);
+      if (institution) {
+        await InstitucionService.actualizarCredenciales(
+          institucionId: id,
+          nuevoPassword: replacement,
+        );
+      } else {
+        await CuentaService.actualizarPasswordCuenta(
+          cuentaId: id,
+          nuevoPassword: replacement,
+        );
+      }
+      StorageService.instance.resetCache();
+      expect(
+        await CuentaService.getSesionCuentaId() == null &&
+            await SessionService.getSession() == null,
+        isTrue,
+        reason: 'La sesion previa al cambio debe invalidarse',
+      );
+      if (institution) {
+        expect(
+          await SessionService.getInstitucionOwnerAccountIdLogueado(),
+          isNull,
+        );
+        expect(await SessionService.getPerfilSeleccionado(), isNull);
+      }
+    });
+  }
+  for (final institution in [false, true]) {
+    final role = institution ? 'institución' : 'cuenta';
+    testWidgets('P1-D / reinicio de $role no restaura áreas', (tester) async {
+      await tester.runAsync(() async {
         final id = await register(institution, emailA);
         await CuentaService.loginCuenta(
           email: emailA,
           password: original,
           recordarme: true,
         );
-        expect(await CuentaService.getSesionCuentaId(), isNotNull);
         if (institution) {
+          final profile = await CuentaService.crearPerfilInstitucion(
+            cuentaId: id,
+            nombre: 'Institución de prueba',
+            emailContacto: emailA,
+            telefonoContacto: '',
+          );
+          await CuentaService.activarContextoInstitucion(id, profile.id);
           await InstitucionService.actualizarCredenciales(
             institucionId: id,
             nuevoPassword: replacement,
@@ -249,18 +308,34 @@ void main() {
             nuevoPassword: replacement,
           );
         }
-        StorageService.instance.resetCache();
-        expect(
-          await CuentaService.getSesionCuentaId() == null &&
-              await SessionService.getSession() == null,
-          isTrue,
-          reason: 'La sesion previa al cambio debe invalidarse',
-        );
-      },
-      skip:
-          'P1-D pendiente: invalidar sesiones tras cambio legítimo de contraseña',
-    );
+      });
+      await tester.pumpWidget(const SizedBox.shrink());
+      StorageService.instance.resetCache();
+      await app.main();
+      await tester.pumpAndSettle();
+      expect(find.byType(LandingPage), findsOneWidget);
+      expect(await SessionService.getSession(), isNull);
+      expect(await CuentaService.getSesionCuentaId(), isNull);
+      expect(tester.takeException(), isNull);
+    });
   }
+
+  test('P1-D / cambiar otra credencial conserva la sesión actual', () async {
+    final first = await register(false, emailA);
+    final second = await register(false, emailB);
+    await CuentaService.loginCuenta(
+      email: emailA,
+      password: original,
+      recordarme: true,
+    );
+    await CuentaService.actualizarPasswordCuenta(
+      cuentaId: second,
+      nuevoPassword: replacement,
+    );
+    expect(await CuentaService.getSesionCuentaId(), first);
+    expect((await SessionService.getSession())?.userId, first);
+  });
+
   test('P0 / legacy reset deshabilitado sin mutaciones', () async {
     final service = AlumnoService.instance;
     await service.registrarAlumnoUsuario(

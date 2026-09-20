@@ -752,6 +752,9 @@ class InstitucionService {
       passwordPlano: passFinal,
       nombreInstitucion: actualizado.nombre,
     );
+    if (passFinal != null) {
+      await CuentaService.invalidarSesionInstitucionalSiActiva(actualizado.id);
+    }
     await _guardarCuenta(actualizado);
     if (passFinal != null) {
       await prefs.remove(_kInstByIdV1(actualizado.id));
