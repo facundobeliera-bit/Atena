@@ -1,47 +1,14 @@
 // lib/services/session_service.dart
 //
-// ATENA – SESSION SERVICE (CANÓNICO ÚNICO)
+// Sesión abierta en el dispositivo: quién entró y con qué rol.
 //
-// Objetivo:
-// - Mantener una sola sesión a la vez (userId + role).
-// - Persistencia controlada por rememberMe.
-// - Mantener compatibilidad con flujo CUENTA (perfil seleccionado),
-//   pero evitando arrastres entre roles.
-// - Helpers/guards claros para cuenta e institución.
+// - Una sola sesión a la vez (id + rol).
+// - Si el usuario no eligió "Recordarme", la sesión queda marcada como
+//   temporal y se descarta al reiniciar la app (ver AuthService.resolveHome).
+// - Para instituciones se guarda además el id de su cuenta contenedora.
 //
-// ✅ EXTENSIÓN (enero 2026) – Owner institución (best-effort):
-// - Key v2_session_instOwnerAccountId para resolver ownerAccountId de institución
-//   en pantallas operativas (ej: Documentos) sin mezclar stacks.
-// - No rompe llamadas existentes: NO cambia la firma de setSession().
-//
-// ✅ FIX (feb 2026) – No inferir/pisar owner institucional:
-// - El ownerAccountId institucional NO se puede inferir desde userId cuando userId = institucionPerfilId.
-// - setSession()/setRole() NO setean owner institucional automáticamente.
-// - El owner institucional se setea explícitamente vía setInstitucionOwnerAccountId()
-//   (ej: desde CuentaHome al entrar a institución).
-//
-// ✅ FIX (feb 2026) – rememberMe=false NO puede borrar rol:
-// - Aunque no persista entre reinicios, durante la ejecución actual necesitamos role/userId
-//   para boot routing y pantallas operativas.
-// - Solución: guardamos userId+role siempre, y marcamos sesión como temporal si rememberMe=false.
-//   Luego puede limpiarse en boot con clearTempIfNeeded().
-//
-// ✅ HARDENING (feb 2026) – Anti-stale owner institucional:
-// - Al entrar/switch a rol institución, limpiamos v2_session_instOwnerAccountId.
-//   (evita que quede “owner viejo” si alguien setea rol/sesión sin setear owner explícito)
-//
-// ✅ HARDENING (feb 2026) – Anti-bug silencioso:
-// - getSession() si ve residuos parciales, limpia y deja debug log claro.
-// - setRole() preserva flags existentes (remember/temp) cuando es posible.
-// - Todas las operaciones prefs están envueltas en try/catch (no debe crashear la app).
-//
-// ✅ FIX CRÍTICO (feb 2026 · E2E):
-// - NO borrar instOwner “siempre” en setRole()/setSession() cuando NO hubo switch real.
-//   Solo limpiamos instOwner cuando:
-//   - cambia role (cuenta ↔ institución), o
-//   - cambia userId (otra institución), o
-//   - se entra a rol institución desde otro rol.
-//   Esto evita el bug: setInstitucionOwnerAccountId() → luego setRole(institucion) → instOwner se borra.
+// La sesión de las cuentas familiares la lleva CuentaService; AuthService
+// coordina ambas.
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -60,435 +27,136 @@ class SessionData {
 }
 
 class SessionService {
-  // =====================================================
-  // KEYS
-  // =====================================================
+  const SessionService._();
 
   static const String _kUserId = 'v2_session_userId';
   static const String _kRole = 'v2_session_role';
   static const String _kRemember = 'v2_session_rememberMe';
-
-  /// ✅ Sesión temporal (si rememberMe=false)
   static const String _kTemp = 'v2_session_temp';
-
-  /// Perfil seleccionado dentro de la CUENTA (legacy controlado)
-  static const String _kPerfilSeleccionadoDni = 'v2_perfil_seleccionado_dni';
-
-  /// ✅ Owner de institución (best-effort) para notificaciones / operaciones institucionales.
   static const String _kInstitucionOwnerAccountId =
       'v2_session_instOwnerAccountId';
 
+  /// Clave de versiones anteriores; solo se limpia.
+  static const String _kPerfilSeleccionadoDni = 'v2_perfil_seleccionado_dni';
+
   static Future<SharedPreferences> _prefs() => SharedPreferences.getInstance();
 
-  // =====================================================
-  // NORMALIZACIÓN
-  // =====================================================
+  /// Ids como clave estable: sin espacios al inicio, al final ni internos.
+  static String _normId(String v) => v.trim().replaceAll(RegExp(r'\s+'), '');
 
-  static String _n(String v) => v.trim();
-
-  /// IDs: trim + colapsa whitespace interno (lo elimina) para uso como key/lookup estable.
-  /// ⚠️ Importante: NO lower-case. IDs canónicos pueden ser case-sensitive.
-  static String _normIdKey(String v) => v.trim().replaceAll(RegExp(r'\s+'), '');
-
-  static String _roleToString(SessionRole r) => r.name;
-
-  static SessionRole _roleFromString(String? v) {
-    final raw = _n(v ?? '');
-    if (raw.isEmpty) return SessionRole.cuenta;
-
-    final needle = raw.toLowerCase();
-
-    if (needle == 'cuenta') return SessionRole.cuenta;
-    if (needle == 'institucion' || needle == 'institución') {
-      return SessionRole.institucion;
-    }
-
-    try {
-      return SessionRole.values.firstWhere(
-        (e) => e.name.toLowerCase() == needle,
-      );
-    } catch (_) {
-      return SessionRole.cuenta;
-    }
+  static SessionRole _roleFromString(String v) {
+    final s = v.trim().toLowerCase();
+    return s == 'institucion' || s == 'institución'
+        ? SessionRole.institucion
+        : SessionRole.cuenta;
   }
-
-  // =====================================================
-  // SESIÓN
-  // =====================================================
 
   static Future<void> setSession({
     required String userId,
     required SessionRole role,
     required bool rememberMe,
   }) async {
-    SharedPreferences p;
-    try {
-      p = await _prefs();
-    } catch (_) {
-      return;
-    }
-
-    final id = _normIdKey(userId);
-    if (id.isEmpty) {
-      await logout();
-      return;
-    }
-
-    // 🔒 FIX: detectar cambios reales para limpiar instOwner solo cuando corresponde
-    final prevUserId = _normIdKey(p.getString(_kUserId) ?? '');
-    final prevRoleStr = _n(p.getString(_kRole) ?? '');
-    final prevRole = _roleFromString(prevRoleStr);
-
-    final roleChanged = prevRoleStr.isNotEmpty && prevRole != role;
-    final userChanged = prevUserId.isNotEmpty && prevUserId != id;
+    final id = _normId(userId);
+    if (id.isEmpty) return logout();
 
     try {
+      final p = await _prefs();
+      final idAnterior = _normId(p.getString(_kUserId) ?? '');
+      final rolAnterior = (p.getString(_kRole) ?? '').trim();
+      // La cuenta contenedora guardada solo vale para la misma institución.
+      final mismaInstitucion =
+          role == SessionRole.institucion &&
+          idAnterior == id &&
+          rolAnterior.isNotEmpty &&
+          _roleFromString(rolAnterior) == SessionRole.institucion;
+
       await p.setString(_kUserId, id);
-      await p.setString(_kRole, _roleToString(role));
+      await p.setString(_kRole, role.name);
       await p.setBool(_kRemember, rememberMe);
       await p.setBool(_kTemp, !rememberMe);
-
-      if (role == SessionRole.cuenta) {
-        // Cuenta: nunca arrastrar owner institucional
-        await p.remove(_kInstitucionOwnerAccountId);
-      } else {
-        // Institución: limpiar perfil seleccionado de cuenta SIEMPRE
-        await p.remove(_kPerfilSeleccionadoDni);
-
-        // Institución: limpiar instOwner SOLO si hubo switch real (role/user)
-        // (anti-stale sin romper E2E cuando solo “refrescamos” el rol)
-        final shouldClearInstOwner =
-            roleChanged || userChanged || prevRole != SessionRole.institucion;
-        if (shouldClearInstOwner) {
-          await p.remove(_kInstitucionOwnerAccountId);
-        }
-      }
+      await p.remove(_kPerfilSeleccionadoDni);
+      if (!mismaInstitucion) await p.remove(_kInstitucionOwnerAccountId);
     } catch (_) {
       await logout();
     }
-  }
-
-  static Future<void> setRole(SessionRole role) async {
-    SharedPreferences p;
-    try {
-      p = await _prefs();
-    } catch (_) {
-      return;
-    }
-
-    try {
-      // 🔒 FIX: si setRole se llama con el mismo rol, NO borres instOwner.
-      final prevRoleStr = _n(p.getString(_kRole) ?? '');
-      final prevRole = _roleFromString(prevRoleStr);
-      final roleChanged = prevRoleStr.isNotEmpty && prevRole != role;
-
-      await p.setString(_kRole, _roleToString(role));
-
-      final remember = p.getBool(_kRemember);
-      final temp = p.getBool(_kTemp);
-
-      if (remember != null && temp == null) {
-        await p.setBool(_kTemp, !remember);
-      }
-
-      if (remember == null && temp == null) {
-        await p.setBool(_kTemp, false);
-      }
-
-      // Limpiezas SOLO si hubo cambio real de rol
-      if (roleChanged) {
-        if (role == SessionRole.institucion) {
-          await p.remove(_kPerfilSeleccionadoDni);
-          await p.remove(_kInstitucionOwnerAccountId); // anti-stale al ENTRAR
-        } else {
-          await p.remove(_kInstitucionOwnerAccountId);
-        }
-      } else {
-        // Si no cambió, solo asegurar coherencia mínima:
-        if (role == SessionRole.institucion) {
-          await p.remove(_kPerfilSeleccionadoDni);
-        }
-      }
-    } catch (_) {}
   }
 
   static Future<SessionData?> getSession() async {
-    SharedPreferences p;
     try {
-      p = await _prefs();
+      final p = await _prefs();
+      final id = _normId(p.getString(_kUserId) ?? '');
+      final rol = (p.getString(_kRole) ?? '').trim();
+
+      if (id.isEmpty || rol.isEmpty) {
+        // Una sesión a medio guardar no sirve: se limpia.
+        if (id.isNotEmpty || rol.isNotEmpty) await logout();
+        return null;
+      }
+
+      return SessionData(
+        userId: id,
+        role: _roleFromString(rol),
+        rememberMe: p.getBool(_kRemember) ?? false,
+      );
     } catch (_) {
       return null;
     }
-
-    final id = _normIdKey(p.getString(_kUserId) ?? '');
-    final roleStr = _n(p.getString(_kRole) ?? '');
-
-    if (id.isEmpty || roleStr.isEmpty) {
-      final hasResidue =
-          id.isNotEmpty ||
-          roleStr.isNotEmpty ||
-          (p.getBool(_kRemember) != null) ||
-          (p.getBool(_kTemp) != null) ||
-          _normIdKey(
-            p.getString(_kInstitucionOwnerAccountId) ?? '',
-          ).isNotEmpty ||
-          _normIdKey(p.getString(_kPerfilSeleccionadoDni) ?? '').isNotEmpty;
-
-      if (hasResidue) {
-        // ignore: avoid_print
-        print(
-          '[ATENA][SESSION][getSession] residue detected (userId="$id", role="$roleStr") -> logout()',
-        );
-        await logout();
-      }
-      return null;
-    }
-
-    final role = _roleFromString(roleStr);
-    final remember = p.getBool(_kRemember) ?? false;
-
-    try {
-      final temp = p.getBool(_kTemp);
-      if (remember && temp == true) {
-        await p.setBool(_kTemp, false);
-      } else if (!remember && temp == null) {
-        await p.setBool(_kTemp, true);
-      }
-    } catch (_) {}
-
-    return SessionData(userId: id, role: role, rememberMe: remember);
   }
 
+  /// Descarta la sesión si se abrió sin "Recordarme".
   static Future<void> clearTempIfNeeded() async {
-    SharedPreferences p;
     try {
-      p = await _prefs();
-    } catch (_) {
-      return;
-    }
-
-    final isTemp = p.getBool(_kTemp) ?? false;
-    if (!isTemp) return;
-
-    await logout();
+      final p = await _prefs();
+      // Sesiones de versiones anteriores no traen la marca: se deduce.
+      final temporal = p.getBool(_kTemp) ?? !(p.getBool(_kRemember) ?? true);
+      if (temporal) await logout();
+    } catch (_) {}
   }
 
   static Future<void> logout() async {
-    SharedPreferences p;
     try {
-      p = await _prefs();
-    } catch (_) {
-      return;
-    }
-
-    try {
-      await p.remove(_kUserId);
-      await p.remove(_kRole);
-      await p.remove(_kRemember);
-      await p.remove(_kTemp);
-      await p.remove(_kPerfilSeleccionadoDni);
-      await p.remove(_kInstitucionOwnerAccountId);
+      final p = await _prefs();
+      for (final k in const [
+        _kUserId,
+        _kRole,
+        _kRemember,
+        _kTemp,
+        _kPerfilSeleccionadoDni,
+        _kInstitucionOwnerAccountId,
+      ]) {
+        await p.remove(k);
+      }
     } catch (_) {}
   }
 
-  static Future<void> clearAllSessionOnly() => logout();
-
-  // =====================================================
-  // PERFIL SELECCIONADO (DNI) – SOLO CUENTA
-  // =====================================================
-
-  static Future<void> setPerfilSeleccionado(String? dni) async {
-    SharedPreferences p;
-    try {
-      p = await _prefs();
-    } catch (_) {
-      return;
-    }
-
-    final v = _normIdKey(dni ?? '');
-
-    if (v.isEmpty) {
-      try {
-        await p.remove(_kPerfilSeleccionadoDni);
-      } catch (_) {}
-      return;
-    }
-
-    final s = await getSession();
-    if (s == null || s.role != SessionRole.cuenta) {
-      try {
-        await p.remove(_kPerfilSeleccionadoDni);
-      } catch (_) {}
-      return;
-    }
-
-    try {
-      await p.setString(_kPerfilSeleccionadoDni, v);
-    } catch (_) {}
-  }
-
-  static Future<String?> getPerfilSeleccionado() async {
-    SharedPreferences p;
-    try {
-      p = await _prefs();
-    } catch (_) {
-      return null;
-    }
-
-    final s = await getSession();
-    if (s == null || s.role != SessionRole.cuenta) return null;
-
-    final v = _normIdKey(p.getString(_kPerfilSeleccionadoDni) ?? '');
-    return v.isEmpty ? null : v;
-  }
-
-  static Future<void> clearPerfilSeleccionado() => setPerfilSeleccionado(null);
-
-  // =====================================================
-  // OWNER INSTITUCIÓN (BEST-EFFORT)
-  // =====================================================
+  // ---------------------------------------------------------------------------
+  // Cuenta contenedora de la institución en sesión
+  // ---------------------------------------------------------------------------
 
   static Future<String?> getInstitucionOwnerAccountIdLogueado() async {
     final s = await getSession();
-    if (s == null) return null;
-    if (s.role != SessionRole.institucion) return null;
-
-    SharedPreferences p;
+    if (s == null || s.role != SessionRole.institucion) return null;
     try {
-      p = await _prefs();
+      final p = await _prefs();
+      final v = _normId(p.getString(_kInstitucionOwnerAccountId) ?? '');
+      return v.isEmpty ? null : v;
     } catch (_) {
       return null;
     }
-
-    final v = _normIdKey(p.getString(_kInstitucionOwnerAccountId) ?? '');
-    return v.isEmpty ? null : v;
   }
 
   static Future<void> setInstitucionOwnerAccountId(
     String? ownerAccountId,
   ) async {
-    SharedPreferences p;
+    final v = _normId(ownerAccountId ?? '');
+    final s = await getSession();
     try {
-      p = await _prefs();
-    } catch (_) {
-      return;
-    }
-
-    final v = _normIdKey(ownerAccountId ?? '');
-    if (v.isEmpty) {
-      try {
+      final p = await _prefs();
+      if (v.isEmpty || s == null || s.role != SessionRole.institucion) {
         await p.remove(_kInstitucionOwnerAccountId);
-      } catch (_) {}
-      return;
-    }
-
-    final s = await getSession();
-    if (s == null || s.role != SessionRole.institucion) {
-      try {
-        await p.remove(_kInstitucionOwnerAccountId);
-      } catch (_) {}
-      return;
-    }
-
-    try {
-      await p.setString(_kInstitucionOwnerAccountId, v);
-    } catch (_) {}
-  }
-
-  static Future<void> clearInstitucionOwnerAccountId() =>
-      setInstitucionOwnerAccountId(null);
-
-  // =====================================================
-  // GUARDS / HELPERS
-  // =====================================================
-
-  static Future<bool> isRole(SessionRole role) async {
-    final s = await getSession();
-    return s != null && s.role == role && _normIdKey(s.userId).isNotEmpty;
-  }
-
-  static Future<SessionRole?> getRoleLogueado() async {
-    final s = await getSession();
-    return s?.role;
-  }
-
-  static Future<String?> getUserIdLogueado() async {
-    final s = await getSession();
-    if (s == null) return null;
-    final id = _normIdKey(s.userId);
-    return id.isEmpty ? null : id;
-  }
-
-  static Future<bool> hayCuentaLogueada() async {
-    final s = await getSession();
-    return s != null &&
-        s.role == SessionRole.cuenta &&
-        _normIdKey(s.userId).isNotEmpty;
-  }
-
-  static Future<String?> getCuentaIdLogueada() async {
-    final s = await getSession();
-    if (s == null) return null;
-    if (s.role != SessionRole.cuenta) return null;
-    final id = _normIdKey(s.userId);
-    return id.isEmpty ? null : id;
-  }
-
-  static Future<bool> hayInstitucionLogueada() async {
-    final s = await getSession();
-    return s != null &&
-        s.role == SessionRole.institucion &&
-        _normIdKey(s.userId).isNotEmpty;
-  }
-
-  static Future<String?> getInstitucionIdLogueada() async {
-    final s = await getSession();
-    if (s == null) return null;
-    if (s.role != SessionRole.institucion) return null;
-    final id = _normIdKey(s.userId);
-    return id.isEmpty ? null : id;
-  }
-
-  // =====================================================
-  // DEBUG
-  // =====================================================
-
-  static Future<Map<String, dynamic>> debugSnapshot() async {
-    SharedPreferences p;
-    try {
-      p = await _prefs();
-    } catch (_) {
-      return <String, dynamic>{'error': 'prefs_unavailable'};
-    }
-
-    final userId = _normIdKey(p.getString(_kUserId) ?? '');
-    final roleRaw = _n(p.getString(_kRole) ?? '');
-    final remember = p.getBool(_kRemember);
-    final temp = p.getBool(_kTemp);
-
-    final instOwner = _normIdKey(
-      p.getString(_kInstitucionOwnerAccountId) ?? '',
-    );
-    final perfilSel = _normIdKey(p.getString(_kPerfilSeleccionadoDni) ?? '');
-
-    final role = _roleFromString(roleRaw);
-
-    return <String, dynamic>{
-      'userId': userId,
-      'roleRaw': roleRaw,
-      'role': role.name,
-      'rememberMe': remember,
-      'temp': temp,
-      'instOwner': instOwner,
-      'perfilSeleccionadoDni': perfilSel,
-    };
-  }
-
-  static Future<void> debugPrintSnapshot(String tag) async {
-    try {
-      final snap = await debugSnapshot();
-      // ignore: avoid_print
-      print('[ATENA][SESSION][$tag] $snap');
+      } else {
+        await p.setString(_kInstitucionOwnerAccountId, v);
+      }
     } catch (_) {}
   }
 }

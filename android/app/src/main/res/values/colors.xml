@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores de marca para la pantalla de carga nativa. -->
+    <color name="atena_splash_background">#F5F7FC</color>
+    <color name="atena_splash_icon_background">#4F46E5</color>
+</resources>

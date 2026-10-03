@@ -106,161 +106,11 @@ abstract class AppLocalizations {
   /// **'ATENA'**
   String get appTitle;
 
-  /// No description provided for @alumnos.
-  ///
-  /// In es, this message translates to:
-  /// **'Alumnos'**
-  String get alumnos;
-
   /// No description provided for @instituciones.
   ///
   /// In es, this message translates to:
   /// **'Instituciones'**
   String get instituciones;
-
-  /// No description provided for @institution.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución'**
-  String get institution;
-
-  /// No description provided for @perfiles.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfiles'**
-  String get perfiles;
-
-  /// No description provided for @crearPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear perfil'**
-  String get crearPerfil;
-
-  /// No description provided for @crearPerfilTitulo.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear un nuevo perfil'**
-  String get crearPerfilTitulo;
-
-  /// No description provided for @tipoAlumno.
-  ///
-  /// In es, this message translates to:
-  /// **'Alumno'**
-  String get tipoAlumno;
-
-  /// No description provided for @tipoInstitucion.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución'**
-  String get tipoInstitucion;
-
-  /// No description provided for @actualizar.
-  ///
-  /// In es, this message translates to:
-  /// **'Actualizar'**
-  String get actualizar;
-
-  /// No description provided for @refresh.
-  ///
-  /// In es, this message translates to:
-  /// **'Actualizar'**
-  String get refresh;
-
-  /// No description provided for @update.
-  ///
-  /// In es, this message translates to:
-  /// **'Actualizar'**
-  String get update;
-
-  /// No description provided for @guardar.
-  ///
-  /// In es, this message translates to:
-  /// **'Guardar'**
-  String get guardar;
-
-  /// No description provided for @save.
-  ///
-  /// In es, this message translates to:
-  /// **'Guardar'**
-  String get save;
-
-  /// No description provided for @editar.
-  ///
-  /// In es, this message translates to:
-  /// **'Editar'**
-  String get editar;
-
-  /// No description provided for @edit.
-  ///
-  /// In es, this message translates to:
-  /// **'Editar'**
-  String get edit;
-
-  /// No description provided for @eliminar.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar'**
-  String get eliminar;
-
-  /// No description provided for @delete.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar'**
-  String get delete;
-
-  /// No description provided for @cancelar.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelar'**
-  String get cancelar;
-
-  /// No description provided for @cancel.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelar'**
-  String get cancel;
-
-  /// No description provided for @continuar.
-  ///
-  /// In es, this message translates to:
-  /// **'Continuar'**
-  String get continuar;
-
-  /// No description provided for @continuarUltimoPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Continuar con el último perfil'**
-  String get continuarUltimoPerfil;
-
-  /// No description provided for @accept.
-  ///
-  /// In es, this message translates to:
-  /// **'Aceptar'**
-  String get accept;
-
-  /// No description provided for @confirm.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmar'**
-  String get confirm;
-
-  /// No description provided for @reject.
-  ///
-  /// In es, this message translates to:
-  /// **'Rechazar'**
-  String get reject;
-
-  /// No description provided for @apply.
-  ///
-  /// In es, this message translates to:
-  /// **'Aplicar'**
-  String get apply;
-
-  /// No description provided for @clear.
-  ///
-  /// In es, this message translates to:
-  /// **'Limpiar'**
-  String get clear;
 
   /// No description provided for @retry.
   ///
@@ -268,376 +118,11 @@ abstract class AppLocalizations {
   /// **'Reintentar'**
   String get retry;
 
-  /// No description provided for @back.
-  ///
-  /// In es, this message translates to:
-  /// **'Volver'**
-  String get back;
-
-  /// No description provided for @open.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir'**
-  String get open;
-
-  /// No description provided for @cuentaLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Cuenta'**
-  String get cuentaLabel;
-
-  /// No description provided for @accountLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Cuenta: {ownerId}'**
-  String accountLabel(Object ownerId);
-
-  /// No description provided for @signIn.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresar'**
-  String get signIn;
-
-  /// No description provided for @signOut.
-  ///
-  /// In es, this message translates to:
-  /// **'Salir'**
-  String get signOut;
-
-  /// No description provided for @signInOrRegister.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresar o registrarse'**
-  String get signInOrRegister;
-
-  /// No description provided for @accessInstitutionAccount.
-  ///
-  /// In es, this message translates to:
-  /// **'Acceder a cuenta de institución'**
-  String get accessInstitutionAccount;
-
-  /// No description provided for @signInToEnableInstitutionFeatures.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá para habilitar funciones de institución'**
-  String get signInToEnableInstitutionFeatures;
-
-  /// No description provided for @errorGenerico.
-  ///
-  /// In es, this message translates to:
-  /// **'Error.'**
-  String get errorGenerico;
-
-  /// No description provided for @invalidSessionForThisAccount.
-  ///
-  /// In es, this message translates to:
-  /// **'Sesión inválida para esta cuenta.'**
-  String get invalidSessionForThisAccount;
-
-  /// No description provided for @cannotLoadInstitutionTryAgain.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cargar la institución. Intentá nuevamente.'**
-  String get cannotLoadInstitutionTryAgain;
-
-  /// No description provided for @noPerfilesTodavia.
-  ///
-  /// In es, this message translates to:
-  /// **'Todavía no hay perfiles.\nCreá uno para comenzar.'**
-  String get noPerfilesTodavia;
-
-  /// No description provided for @noPerfilesAlumnoTodavia.
-  ///
-  /// In es, this message translates to:
-  /// **'Todavía no hay perfiles de alumno.'**
-  String get noPerfilesAlumnoTodavia;
-
-  /// No description provided for @accionAlumnoSinPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Se recibió una acción para Alumnos, pero esta cuenta no tiene perfiles de Alumno.'**
-  String get accionAlumnoSinPerfil;
-
-  /// No description provided for @opcionNoDisponibleBuild.
-  ///
-  /// In es, this message translates to:
-  /// **'Esta opción todavía no está disponible en esta versión.'**
-  String get opcionNoDisponibleBuild;
-
-  /// No description provided for @ingresarCrearCuenta.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresar / Crear cuenta'**
-  String get ingresarCrearCuenta;
-
-  /// No description provided for @accesoAlumnos.
-  ///
-  /// In es, this message translates to:
-  /// **'Acceso de alumnos'**
-  String get accesoAlumnos;
-
-  /// No description provided for @ingresaCuentaEligePerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá con tu cuenta y elegí el perfil.'**
-  String get ingresaCuentaEligePerfil;
-
-  /// No description provided for @saving.
-  ///
-  /// In es, this message translates to:
-  /// **'Guardando…'**
-  String get saving;
-
-  /// No description provided for @registering.
-  ///
-  /// In es, this message translates to:
-  /// **'Registrando…'**
-  String get registering;
-
-  /// No description provided for @newLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Nuevo'**
-  String get newLabel;
-
-  /// No description provided for @modoOscuro.
-  ///
-  /// In es, this message translates to:
-  /// **'Modo oscuro'**
-  String get modoOscuro;
-
-  /// No description provided for @idioma.
-  ///
-  /// In es, this message translates to:
-  /// **'Idioma'**
-  String get idioma;
-
-  /// No description provided for @sistema.
-  ///
-  /// In es, this message translates to:
-  /// **'Sistema'**
-  String get sistema;
-
-  /// No description provided for @espanol.
-  ///
-  /// In es, this message translates to:
-  /// **'Español'**
-  String get espanol;
-
-  /// No description provided for @ingles.
-  ///
-  /// In es, this message translates to:
-  /// **'Inglés'**
-  String get ingles;
-
-  /// No description provided for @portugues.
-  ///
-  /// In es, this message translates to:
-  /// **'Portugués'**
-  String get portugues;
-
-  /// No description provided for @landingTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'ATENA'**
-  String get landingTitle;
-
-  /// No description provided for @landingIngresar.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresar'**
-  String get landingIngresar;
-
-  /// No description provided for @landingStudents.
-  ///
-  /// In es, this message translates to:
-  /// **'Alumnos'**
-  String get landingStudents;
-
-  /// No description provided for @landingInstitutions.
-  ///
-  /// In es, this message translates to:
-  /// **'Instituciones'**
-  String get landingInstitutions;
-
-  /// No description provided for @landingHeadingStudents.
-  ///
-  /// In es, this message translates to:
-  /// **'alumnos'**
-  String get landingHeadingStudents;
-
-  /// No description provided for @landingHeadingInstitutions.
-  ///
-  /// In es, this message translates to:
-  /// **'instituciones'**
-  String get landingHeadingInstitutions;
-
-  /// No description provided for @landingThemeSystem.
-  ///
-  /// In es, this message translates to:
-  /// **'Tema: Sistema'**
-  String get landingThemeSystem;
-
-  /// No description provided for @landingThemeLight.
-  ///
-  /// In es, this message translates to:
-  /// **'Tema: Claro'**
-  String get landingThemeLight;
-
-  /// No description provided for @landingThemeDark.
-  ///
-  /// In es, this message translates to:
-  /// **'Tema: Oscuro'**
-  String get landingThemeDark;
-
-  /// No description provided for @landingLanguageTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Idioma'**
-  String get landingLanguageTooltip;
-
-  /// No description provided for @landingLanguageSystem.
-  ///
-  /// In es, this message translates to:
-  /// **'Sistema'**
-  String get landingLanguageSystem;
-
-  /// No description provided for @landingLanguageEs.
-  ///
-  /// In es, this message translates to:
-  /// **'Español'**
-  String get landingLanguageEs;
-
-  /// No description provided for @landingLanguageEn.
-  ///
-  /// In es, this message translates to:
-  /// **'Inglés'**
-  String get landingLanguageEn;
-
-  /// No description provided for @landingLanguagePt.
-  ///
-  /// In es, this message translates to:
-  /// **'Portugués'**
-  String get landingLanguagePt;
-
-  /// No description provided for @landingMissingAsset.
-  ///
-  /// In es, this message translates to:
-  /// **'ARCHIVO AUSENTE:\n{path}'**
-  String landingMissingAsset(Object path);
-
-  /// No description provided for @vacancyManagement.
-  ///
-  /// In es, this message translates to:
-  /// **'Vacantes'**
-  String get vacancyManagement;
-
-  /// No description provided for @vacancyManagementTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestión de vacantes – {institucion}'**
-  String vacancyManagementTitle(Object institucion);
-
-  /// No description provided for @recalculateOccupiedTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Recalcular ocupadas (confirmadas)'**
-  String get recalculateOccupiedTooltip;
-
-  /// No description provided for @summaryLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Resumen'**
-  String get summaryLabel;
-
-  /// No description provided for @totalCapacityValue.
-  ///
-  /// In es, this message translates to:
-  /// **'Capacidad total: {valor}'**
-  String totalCapacityValue(Object valor);
-
-  /// No description provided for @occupiedValue.
-  ///
-  /// In es, this message translates to:
-  /// **'Ocupadas: {valor}'**
-  String occupiedValue(Object valor);
-
-  /// No description provided for @availableEstimatedValue.
-  ///
-  /// In es, this message translates to:
-  /// **'Disponibles (estimado): {valor}'**
-  String availableEstimatedValue(Object valor);
-
-  /// No description provided for @noGroupsLoaded.
-  ///
-  /// In es, this message translates to:
-  /// **'No se cargó ningún grupo/vacante.'**
-  String get noGroupsLoaded;
-
-  /// No description provided for @vacancyGroupSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'{actividad} · Capacidad {total} · Ocupadas {ocupados} · Disp {disponibles}'**
-  String vacancyGroupSubtitle(
-    Object actividad,
-    Object total,
-    Object ocupados,
-    Object disponibles,
-  );
-
-  /// No description provided for @newGroupTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Nuevo grupo/vacante'**
-  String get newGroupTitle;
-
-  /// No description provided for @editGroupTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Editar grupo/vacante'**
-  String get editGroupTitle;
-
-  /// No description provided for @available.
-  ///
-  /// In es, this message translates to:
-  /// **'Disponible'**
-  String get available;
-
-  /// No description provided for @availableShort.
-  ///
-  /// In es, this message translates to:
-  /// **'Disp'**
-  String get availableShort;
-
-  /// No description provided for @availableLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Disponibles'**
-  String get availableLabel;
-
-  /// No description provided for @fullLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Completo'**
-  String get fullLabel;
-
   /// No description provided for @curricular.
   ///
   /// In es, this message translates to:
   /// **'Curricular'**
   String get curricular;
-
-  /// No description provided for @curricularLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular'**
-  String get curricularLabel;
-
-  /// No description provided for @curricularPlural.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular'**
-  String get curricularPlural;
 
   /// No description provided for @extracurricular.
   ///
@@ -645,593 +130,11 @@ abstract class AppLocalizations {
   /// **'Extracurricular'**
   String get extracurricular;
 
-  /// No description provided for @extracurricularLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get extracurricularLabel;
-
-  /// No description provided for @extracurricularPlural.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get extracurricularPlural;
-
-  /// No description provided for @basic.
-  ///
-  /// In es, this message translates to:
-  /// **'Básico'**
-  String get basic;
-
-  /// No description provided for @standard.
-  ///
-  /// In es, this message translates to:
-  /// **'Estándar'**
-  String get standard;
-
-  /// No description provided for @premium.
-  ///
-  /// In es, this message translates to:
-  /// **'Premium'**
-  String get premium;
-
-  /// No description provided for @summary.
-  ///
-  /// In es, this message translates to:
-  /// **'Resumen'**
-  String get summary;
-
-  /// No description provided for @plan.
-  ///
-  /// In es, this message translates to:
-  /// **'Plan'**
-  String get plan;
-
   /// No description provided for @code.
   ///
   /// In es, this message translates to:
   /// **'Código'**
   String get code;
-
-  /// No description provided for @invalidInstitutionId.
-  ///
-  /// In es, this message translates to:
-  /// **'ID de institución inválido.'**
-  String get invalidInstitutionId;
-
-  /// No description provided for @institucionInvalidGeneric.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get institucionInvalidGeneric;
-
-  /// No description provided for @institutionGeneric.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución'**
-  String get institutionGeneric;
-
-  /// No description provided for @institutionNotLoadedYet.
-  ///
-  /// In es, this message translates to:
-  /// **'La institución todavía no se cargó.'**
-  String get institutionNotLoadedYet;
-
-  /// No description provided for @noActiveSessionGoBackToLogin.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay sesión activa. Volvé al login.'**
-  String get noActiveSessionGoBackToLogin;
-
-  /// No description provided for @institutionsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Instituciones'**
-  String get institutionsTitle;
-
-  /// No description provided for @backToHome.
-  ///
-  /// In es, this message translates to:
-  /// **'Volver al inicio'**
-  String get backToHome;
-
-  /// No description provided for @institutionAccess.
-  ///
-  /// In es, this message translates to:
-  /// **'Acceso de institución'**
-  String get institutionAccess;
-
-  /// No description provided for @institutionProfileIdLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'ID de perfil: {perfilId}'**
-  String institutionProfileIdLabel(Object perfilId);
-
-  /// No description provided for @planPlaceholder.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestión de plan'**
-  String get planPlaceholder;
-
-  /// No description provided for @profilePlaceholder.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil de institución'**
-  String get profilePlaceholder;
-
-  /// No description provided for @planUpper.
-  ///
-  /// In es, this message translates to:
-  /// **'PLAN'**
-  String get planUpper;
-
-  /// No description provided for @profileUpper.
-  ///
-  /// In es, this message translates to:
-  /// **'PERFIL'**
-  String get profileUpper;
-
-  /// No description provided for @administrationUpper.
-  ///
-  /// In es, this message translates to:
-  /// **'ADMINISTRACIÓN'**
-  String get administrationUpper;
-
-  /// No description provided for @planCardSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestionar plan y módulos'**
-  String get planCardSubtitle;
-
-  /// No description provided for @profileCardSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Detalles y presentación de la institución'**
-  String get profileCardSubtitle;
-
-  /// No description provided for @administrationCardSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Operación de la institución'**
-  String get administrationCardSubtitle;
-
-  /// No description provided for @planAndStatusLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Plan: {plan} · Estado: {estado}'**
-  String planAndStatusLine(Object plan, Object estado);
-
-  /// No description provided for @workProfilesUpToPremium.
-  ///
-  /// In es, this message translates to:
-  /// **'Hasta 10 perfiles de trabajo'**
-  String get workProfilesUpToPremium;
-
-  /// No description provided for @workProfilesUpToStandard.
-  ///
-  /// In es, this message translates to:
-  /// **'Hasta 3 perfiles de trabajo'**
-  String get workProfilesUpToStandard;
-
-  /// No description provided for @moduleLabelGeneric.
-  ///
-  /// In es, this message translates to:
-  /// **'Módulo'**
-  String get moduleLabelGeneric;
-
-  /// No description provided for @invalidModuleKeyShowingAll.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtro inválido ({key}). Mostrando todos los módulos.'**
-  String invalidModuleKeyShowingAll(Object key);
-
-  /// No description provided for @loadErrorWithDetails.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar: {error}'**
-  String loadErrorWithDetails(Object error);
-
-  /// No description provided for @confirmRequestTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmar solicitud'**
-  String get confirmRequestTitle;
-
-  /// No description provided for @rejectRequestTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Rechazar solicitud'**
-  String get rejectRequestTitle;
-
-  /// No description provided for @updateRequestTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Actualizar solicitud'**
-  String get updateRequestTitle;
-
-  /// No description provided for @confirmRequestBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés confirmar esta solicitud?'**
-  String get confirmRequestBody;
-
-  /// No description provided for @rejectRequestBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés rechazar esta solicitud?'**
-  String get rejectRequestBody;
-
-  /// No description provided for @updateRequestBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés actualizar esta solicitud?'**
-  String get updateRequestBody;
-
-  /// No description provided for @activityWithName.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad: {nombre}'**
-  String activityWithName(Object nombre);
-
-  /// No description provided for @activityWithValue.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad: {value}'**
-  String activityWithValue(Object value);
-
-  /// No description provided for @rejectionReasonOptionalLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Motivo (opcional)'**
-  String get rejectionReasonOptionalLabel;
-
-  /// No description provided for @noteToStudentOptionalLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Nota al alumno (opcional)'**
-  String get noteToStudentOptionalLabel;
-
-  /// No description provided for @requestStatusPending.
-  ///
-  /// In es, this message translates to:
-  /// **'Pendiente'**
-  String get requestStatusPending;
-
-  /// No description provided for @requestStatusConfirmed.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmada'**
-  String get requestStatusConfirmed;
-
-  /// No description provided for @requestStatusRejected.
-  ///
-  /// In es, this message translates to:
-  /// **'Rechazada'**
-  String get requestStatusRejected;
-
-  /// No description provided for @requestStatusCancelledByStudent.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelada por el alumno'**
-  String get requestStatusCancelledByStudent;
-
-  /// No description provided for @requestStatusCancelledByInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelada por la institución'**
-  String get requestStatusCancelledByInstitution;
-
-  /// No description provided for @requestConfirmed.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud confirmada.'**
-  String get requestConfirmed;
-
-  /// No description provided for @requestRejected.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud rechazada.'**
-  String get requestRejected;
-
-  /// No description provided for @requestUpdated.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud actualizada.'**
-  String get requestUpdated;
-
-  /// No description provided for @requestIsNoLongerPending.
-  ///
-  /// In es, this message translates to:
-  /// **'Esta solicitud ya no está pendiente.'**
-  String get requestIsNoLongerPending;
-
-  /// No description provided for @noRequestsInSection.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay solicitudes en esta sección.'**
-  String get noRequestsInSection;
-
-  /// No description provided for @noPendingRequests.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay solicitudes pendientes.'**
-  String get noPendingRequests;
-
-  /// No description provided for @actionErrorWithDetails.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo completar la acción: {error}'**
-  String actionErrorWithDetails(Object error);
-
-  /// No description provided for @cannotOpenDocumentsMissingOwnerOrProfile.
-  ///
-  /// In es, this message translates to:
-  /// **'No se puede abrir Documentación sin una sesión válida.'**
-  String get cannotOpenDocumentsMissingOwnerOrProfile;
-
-  /// No description provided for @requestsTitleWithInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitudes – {institucion} · {subtitle}'**
-  String requestsTitleWithInstitution(Object institucion, Object subtitle);
-
-  /// No description provided for @pendingWithCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Pendientes ({count})'**
-  String pendingWithCount(Object count);
-
-  /// No description provided for @confirmedWithCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmadas ({count})'**
-  String confirmedWithCount(Object count);
-
-  /// No description provided for @rejectedWithCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Rechazadas ({count})'**
-  String rejectedWithCount(Object count);
-
-  /// No description provided for @cancelledWithCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Canceladas ({count})'**
-  String cancelledWithCount(Object count);
-
-  /// No description provided for @invalidModuleFilterBanner.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtro de módulo inválido ({key})'**
-  String invalidModuleFilterBanner(Object key);
-
-  /// No description provided for @filteringByModuleBanner.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtrando por módulo: {module} ({key})'**
-  String filteringByModuleBanner(Object module, Object key);
-
-  /// No description provided for @studentDocumentLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Documento: {doc}'**
-  String studentDocumentLine(Object doc);
-
-  /// No description provided for @typeLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo: {tipo}'**
-  String typeLine(Object tipo);
-
-  /// No description provided for @moduleLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Módulo: {module}'**
-  String moduleLine(Object module);
-
-  /// No description provided for @groupOrClassLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Curso/Grupo: {valor}'**
-  String groupOrClassLine(Object valor);
-
-  /// No description provided for @shiftLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Turno: {valor}'**
-  String shiftLine(Object valor);
-
-  /// No description provided for @statusLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Estado: {estado}'**
-  String statusLine(Object estado);
-
-  /// No description provided for @requestOrViewDocumentsCta.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitar o ver documentación'**
-  String get requestOrViewDocumentsCta;
-
-  /// No description provided for @documentsMissingOwnerOrProfileDisabledCta.
-  ///
-  /// In es, this message translates to:
-  /// **'Documentación no disponible'**
-  String get documentsMissingOwnerOrProfileDisabledCta;
-
-  /// No description provided for @notificationsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificaciones'**
-  String get notificationsTitle;
-
-  /// No description provided for @notificationsTitleWithNewCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificaciones ({count} nuevas)'**
-  String notificationsTitleWithNewCount(Object count);
-
-  /// No description provided for @notificationsDeleted.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificaciones eliminadas.'**
-  String get notificationsDeleted;
-
-  /// No description provided for @loadNotificationsError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar notificaciones: {error}'**
-  String loadNotificationsError(Object error);
-
-  /// No description provided for @updateNotificationError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al actualizar notificación: {error}'**
-  String updateNotificationError(Object error);
-
-  /// No description provided for @deleteNotificationError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al eliminar notificación: {error}'**
-  String deleteNotificationError(Object error);
-
-  /// No description provided for @markAllReadError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo marcar todo como leído'**
-  String get markAllReadError;
-
-  /// No description provided for @deleteAll.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar todas'**
-  String get deleteAll;
-
-  /// No description provided for @deleteAllNotificationsError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo eliminar todo'**
-  String get deleteAllNotificationsError;
-
-  /// No description provided for @sessionInvalidTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Sesión inválida'**
-  String get sessionInvalidTitle;
-
-  /// No description provided for @sessionInvalidPleaseLogin.
-  ///
-  /// In es, this message translates to:
-  /// **'Sesión inválida. Iniciá sesión.'**
-  String get sessionInvalidPleaseLogin;
-
-  /// No description provided for @notificationsNeedOwnerSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Se requiere una sesión activa para ver notificaciones.'**
-  String get notificationsNeedOwnerSubtitle;
-
-  /// No description provided for @noNotificationsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin notificaciones'**
-  String get noNotificationsTitle;
-
-  /// No description provided for @noNotificationsSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay notificaciones disponibles.'**
-  String get noNotificationsSubtitle;
-
-  /// No description provided for @deleteNotificationTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar notificación'**
-  String get deleteNotificationTitle;
-
-  /// No description provided for @deleteNotificationBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés eliminar esta notificación?'**
-  String get deleteNotificationBody;
-
-  /// No description provided for @deleteAllNotificationsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar todas'**
-  String get deleteAllNotificationsTitle;
-
-  /// No description provided for @deleteAllNotificationsBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés eliminar todas las notificaciones?'**
-  String get deleteAllNotificationsBody;
-
-  /// No description provided for @deleteAllNotificationsTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar todas'**
-  String get deleteAllNotificationsTooltip;
-
-  /// No description provided for @markAsRead.
-  ///
-  /// In es, this message translates to:
-  /// **'Marcar como leída'**
-  String get markAsRead;
-
-  /// No description provided for @markAsUnread.
-  ///
-  /// In es, this message translates to:
-  /// **'Marcar como no leída'**
-  String get markAsUnread;
-
-  /// No description provided for @markAllAsReadTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Marcar todas como leídas'**
-  String get markAllAsReadTooltip;
-
-  /// No description provided for @institucionActividadCurricularGeneral.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad curricular'**
-  String get institucionActividadCurricularGeneral;
-
-  /// No description provided for @institucionActividadExtracurricularGeneral.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad extracurricular'**
-  String get institucionActividadExtracurricularGeneral;
-
-  /// No description provided for @institucionActividadExtracurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get institucionActividadExtracurricular;
-
-  /// No description provided for @institucionWorkProfileFallback.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil de trabajo'**
-  String get institucionWorkProfileFallback;
-
-  /// No description provided for @institucionChangeActivityTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Cambiar actividad'**
-  String get institucionChangeActivityTitle;
-
-  /// No description provided for @institucionChangeActivityBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccioná la actividad que querés gestionar'**
-  String get institucionChangeActivityBody;
-
-  /// No description provided for @institucionWorkProfileNameTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Nombre del perfil'**
-  String get institucionWorkProfileNameTitle;
 
   /// No description provided for @name.
   ///
@@ -1239,1850 +142,11 @@ abstract class AppLocalizations {
   /// **'Nombre'**
   String get name;
 
-  /// No description provided for @institucionWorkProfileNameHint.
-  ///
-  /// In es, this message translates to:
-  /// **'ej.: Administración, Dirección'**
-  String get institucionWorkProfileNameHint;
-
-  /// No description provided for @institucionWorkProfileNameInvalid.
-  ///
-  /// In es, this message translates to:
-  /// **'Nombre inválido.'**
-  String get institucionWorkProfileNameInvalid;
-
-  /// No description provided for @institucionAreaChip.
-  ///
-  /// In es, this message translates to:
-  /// **'{area} · {who}'**
-  String institucionAreaChip(Object area, Object who);
-
-  /// No description provided for @institucionAreaChipWithTtl.
-  ///
-  /// In es, this message translates to:
-  /// **'{area} · {who} · {ttl}'**
-  String institucionAreaChipWithTtl(Object area, Object who, Object ttl);
-
-  /// No description provided for @institucionAreasFree.
-  ///
-  /// In es, this message translates to:
-  /// **'Áreas libres'**
-  String get institucionAreasFree;
-
-  /// No description provided for @planFallbackNoStructured.
-  ///
-  /// In es, this message translates to:
-  /// **'Plan sin estructura detallada'**
-  String get planFallbackNoStructured;
-
-  /// No description provided for @idNoSession.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin sesión'**
-  String get idNoSession;
-
-  /// No description provided for @idWithValue.
-  ///
-  /// In es, this message translates to:
-  /// **'ID: {value}'**
-  String idWithValue(Object value);
-
-  /// No description provided for @institucionPlanAndProfilesPerActivity.
-  ///
-  /// In es, this message translates to:
-  /// **'Plan: {plan} · Perfiles: {max} por actividad'**
-  String institucionPlanAndProfilesPerActivity(Object plan, Object max);
-
-  /// No description provided for @institucionFirstSelectActivityBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Primero seleccioná una actividad'**
-  String get institucionFirstSelectActivityBody;
-
-  /// No description provided for @institucionWorkProfilesAreInternalNote.
-  ///
-  /// In es, this message translates to:
-  /// **'Los perfiles de trabajo son internos'**
-  String get institucionWorkProfilesAreInternalNote;
-
-  /// No description provided for @institucionNoActivitiesYet.
-  ///
-  /// In es, this message translates to:
-  /// **'Todavía no hay actividades configuradas'**
-  String get institucionNoActivitiesYet;
-
-  /// No description provided for @institucionManageCurricularActivity.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestionar actividad curricular'**
-  String get institucionManageCurricularActivity;
-
-  /// No description provided for @institucionManageExtracurricularModule.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestionar módulo extracurricular'**
-  String get institucionManageExtracurricularModule;
-
-  /// No description provided for @institucionPlanAndAvailableProfiles.
-  ///
-  /// In es, this message translates to:
-  /// **'Plan: {plan} · Perfiles disponibles: {max}'**
-  String institucionPlanAndAvailableProfiles(Object plan, Object max);
-
-  /// No description provided for @institucionConcurrentProfilesRule.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfiles simultáneos según el plan'**
-  String get institucionConcurrentProfilesRule;
-
-  /// No description provided for @institucionWorkProfilesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfiles de trabajo'**
-  String get institucionWorkProfilesTitle;
-
-  /// No description provided for @institucionWorkProfilesDescription.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestión de perfiles internos'**
-  String get institucionWorkProfilesDescription;
-
-  /// No description provided for @institucionProfileWorkingSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'{area} · {who}{ttl}'**
-  String institucionProfileWorkingSubtitle(Object area, Object who, Object ttl);
-
-  /// No description provided for @institucionWorkProfilesRenameTip.
-  ///
-  /// In es, this message translates to:
-  /// **'Podés renombrar este perfil'**
-  String get institucionWorkProfilesRenameTip;
-
-  /// No description provided for @institucionSelectActivityTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccionar actividad'**
-  String get institucionSelectActivityTitle;
-
-  /// No description provided for @institucionSelectWorkProfileTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccionar perfil de trabajo'**
-  String get institucionSelectWorkProfileTitle;
-
-  /// No description provided for @institucionChangeActivityTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Cambiar actividad'**
-  String get institucionChangeActivityTooltip;
-
-  /// No description provided for @institucionPlanTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Plan de institución'**
-  String get institucionPlanTitle;
-
-  /// No description provided for @institucionPlanHeader.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegí tu plan'**
-  String get institucionPlanHeader;
-
-  /// No description provided for @institucionPlanChooseYourPlanTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegí tu plan'**
-  String get institucionPlanChooseYourPlanTitle;
-
-  /// No description provided for @institucionPlanChooseYourPlanSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccioná el plan más adecuado'**
-  String get institucionPlanChooseYourPlanSubtitle;
-
-  /// No description provided for @institucionPlanNoModulesSelected.
-  ///
-  /// In es, this message translates to:
-  /// **'No se seleccionó ningún módulo.'**
-  String get institucionPlanNoModulesSelected;
-
-  /// No description provided for @institucionPlanInvalidInstitutionId.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get institucionPlanInvalidInstitutionId;
-
-  /// No description provided for @institucionPlanPickAtLeastOneModule.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccioná al menos un módulo.'**
-  String get institucionPlanPickAtLeastOneModule;
-
-  /// No description provided for @institucionPlanChooseStandardOrPremium.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegí Estándar o Premium.'**
-  String get institucionPlanChooseStandardOrPremium;
-
-  /// No description provided for @institucionPlanChooseBasicOrPremium.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegí Básico o Premium.'**
-  String get institucionPlanChooseBasicOrPremium;
-
-  /// No description provided for @institucionPlanPromoCleared.
-  ///
-  /// In es, this message translates to:
-  /// **'Código quitado'**
-  String get institucionPlanPromoCleared;
-
-  /// No description provided for @institucionPlanPromoSoldOut.
-  ///
-  /// In es, this message translates to:
-  /// **'Código agotado'**
-  String get institucionPlanPromoSoldOut;
-
-  /// No description provided for @institucionPlanPromoReservedAlready.
-  ///
-  /// In es, this message translates to:
-  /// **'Código ya reservado'**
-  String get institucionPlanPromoReservedAlready;
-
-  /// No description provided for @institucionPlanPromoReserved.
-  ///
-  /// In es, this message translates to:
-  /// **'Código reservado'**
-  String get institucionPlanPromoReserved;
-
-  /// No description provided for @institucionPlanPromoInvalid.
-  ///
-  /// In es, this message translates to:
-  /// **'Código inválido'**
-  String get institucionPlanPromoInvalid;
-
-  /// No description provided for @institucionPlanPromoApplied.
-  ///
-  /// In es, this message translates to:
-  /// **'Promo aplicada: {code}'**
-  String institucionPlanPromoApplied(Object code);
-
   /// No description provided for @invalidEmail.
   ///
   /// In es, this message translates to:
   /// **'Email inválido'**
   String get invalidEmail;
-
-  /// No description provided for @invalidPassword.
-  ///
-  /// In es, this message translates to:
-  /// **'Contraseña inválida'**
-  String get invalidPassword;
-
-  /// No description provided for @institucionPlanCodeRequiredForFreeActivation.
-  ///
-  /// In es, this message translates to:
-  /// **'Se requiere un código para activar el plan gratuito'**
-  String get institucionPlanCodeRequiredForFreeActivation;
-
-  /// No description provided for @argentina.
-  ///
-  /// In es, this message translates to:
-  /// **'Argentina'**
-  String get argentina;
-
-  /// No description provided for @emailAlreadyRegisteredLogin.
-  ///
-  /// In es, this message translates to:
-  /// **'Email ya registrado. Iniciá sesión.'**
-  String get emailAlreadyRegisteredLogin;
-
-  /// No description provided for @institucionPlanTierLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Plan {tier} ({price})'**
-  String institucionPlanTierLabel(Object tier, Object price);
-
-  /// No description provided for @usdToArsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Conversión USD → ARS'**
-  String get usdToArsTitle;
-
-  /// No description provided for @usdToArsSubtitleBestEffort.
-  ///
-  /// In es, this message translates to:
-  /// **'Estimación de referencia'**
-  String get usdToArsSubtitleBestEffort;
-
-  /// No description provided for @usdToArsUnavailable.
-  ///
-  /// In es, this message translates to:
-  /// **'Conversión no disponible'**
-  String get usdToArsUnavailable;
-
-  /// No description provided for @usdToArsValue.
-  ///
-  /// In es, this message translates to:
-  /// **'USD → ARS: {value}'**
-  String usdToArsValue(Object value);
-
-  /// No description provided for @usdToArsManualLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Cotización manual'**
-  String get usdToArsManualLabel;
-
-  /// No description provided for @usdToArsUsingManual.
-  ///
-  /// In es, this message translates to:
-  /// **'Usando cotización manual'**
-  String get usdToArsUsingManual;
-
-  /// No description provided for @updatedAt.
-  ///
-  /// In es, this message translates to:
-  /// **'Actualizado el {date}'**
-  String updatedAt(Object date);
-
-  /// No description provided for @promoCodeTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Código promocional'**
-  String get promoCodeTitle;
-
-  /// No description provided for @promoCodeOptionalSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Opcional'**
-  String get promoCodeOptionalSubtitle;
-
-  /// No description provided for @promoCodeLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Código'**
-  String get promoCodeLabel;
-
-  /// No description provided for @promoCodeHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá el código'**
-  String get promoCodeHint;
-
-  /// No description provided for @iHavePromoCode.
-  ///
-  /// In es, this message translates to:
-  /// **'Tengo un código'**
-  String get iHavePromoCode;
-
-  /// No description provided for @promoAppliedLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Promo aplicada: {code} · {label}'**
-  String promoAppliedLine(Object code, Object label);
-
-  /// No description provided for @subtotalUsd.
-  ///
-  /// In es, this message translates to:
-  /// **'Subtotal (USD)'**
-  String get subtotalUsd;
-
-  /// No description provided for @promoDiscountUsd.
-  ///
-  /// In es, this message translates to:
-  /// **'Descuento (USD)'**
-  String get promoDiscountUsd;
-
-  /// No description provided for @totalUsd.
-  ///
-  /// In es, this message translates to:
-  /// **'Total (USD)'**
-  String get totalUsd;
-
-  /// No description provided for @totalArs.
-  ///
-  /// In es, this message translates to:
-  /// **'Total (ARS)'**
-  String get totalArs;
-
-  /// No description provided for @institucionPlanSummarySubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Resumen del plan'**
-  String get institucionPlanSummarySubtitle;
-
-  /// No description provided for @notAvailable.
-  ///
-  /// In es, this message translates to:
-  /// **'No disponible'**
-  String get notAvailable;
-
-  /// No description provided for @calcDetailsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Detalles del cálculo'**
-  String get calcDetailsTitle;
-
-  /// No description provided for @calcDetailsSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Desglose de precios'**
-  String get calcDetailsSubtitle;
-
-  /// No description provided for @institucionPlanNoteNoPaymentsYet.
-  ///
-  /// In es, this message translates to:
-  /// **'Los pagos todavía no están habilitados en esta fase'**
-  String get institucionPlanNoteNoPaymentsYet;
-
-  /// No description provided for @institucionGenericName.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución'**
-  String get institucionGenericName;
-
-  /// No description provided for @countryArgentina.
-  ///
-  /// In es, this message translates to:
-  /// **'Argentina'**
-  String get countryArgentina;
-
-  /// No description provided for @institucionTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución'**
-  String get institucionTitle;
-
-  /// No description provided for @actionRetry.
-  ///
-  /// In es, this message translates to:
-  /// **'Reintentar'**
-  String get actionRetry;
-
-  /// No description provided for @actionBackHome.
-  ///
-  /// In es, this message translates to:
-  /// **'Volver al inicio'**
-  String get actionBackHome;
-
-  /// No description provided for @actionLogout.
-  ///
-  /// In es, this message translates to:
-  /// **'Salir'**
-  String get actionLogout;
-
-  /// No description provided for @actionRefresh.
-  ///
-  /// In es, this message translates to:
-  /// **'Actualizar'**
-  String get actionRefresh;
-
-  /// No description provided for @actionExit.
-  ///
-  /// In es, this message translates to:
-  /// **'Salir'**
-  String get actionExit;
-
-  /// No description provided for @actionLoad.
-  ///
-  /// In es, this message translates to:
-  /// **'Cargar'**
-  String get actionLoad;
-
-  /// No description provided for @actionSave.
-  ///
-  /// In es, this message translates to:
-  /// **'Guardar'**
-  String get actionSave;
-
-  /// No description provided for @actionSaving.
-  ///
-  /// In es, this message translates to:
-  /// **'Guardando…'**
-  String get actionSaving;
-
-  /// No description provided for @statusSaving.
-  ///
-  /// In es, this message translates to:
-  /// **'Guardando…'**
-  String get statusSaving;
-
-  /// No description provided for @actionDelete.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar'**
-  String get actionDelete;
-
-  /// No description provided for @actionEdit.
-  ///
-  /// In es, this message translates to:
-  /// **'Editar'**
-  String get actionEdit;
-
-  /// No description provided for @actionCancel.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelar'**
-  String get actionCancel;
-
-  /// No description provided for @actionRequest.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitar'**
-  String get actionRequest;
-
-  /// No description provided for @actionList.
-  ///
-  /// In es, this message translates to:
-  /// **'Listar'**
-  String get actionList;
-
-  /// No description provided for @actionIncrease.
-  ///
-  /// In es, this message translates to:
-  /// **'Aumentar'**
-  String get actionIncrease;
-
-  /// No description provided for @actionDecrease.
-  ///
-  /// In es, this message translates to:
-  /// **'Disminuir'**
-  String get actionDecrease;
-
-  /// No description provided for @valueEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'Vacío'**
-  String get valueEmpty;
-
-  /// No description provided for @valueNone.
-  ///
-  /// In es, this message translates to:
-  /// **'Ninguno'**
-  String get valueNone;
-
-  /// No description provided for @labelNotProvided.
-  ///
-  /// In es, this message translates to:
-  /// **'No informado'**
-  String get labelNotProvided;
-
-  /// No description provided for @validationTooShort.
-  ///
-  /// In es, this message translates to:
-  /// **'Muy corto'**
-  String get validationTooShort;
-
-  /// No description provided for @validationCannotBeNegative.
-  ///
-  /// In es, this message translates to:
-  /// **'No puede ser negativo'**
-  String get validationCannotBeNegative;
-
-  /// No description provided for @institucionAreaErrorLoadFailed.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cargar el área operativa.'**
-  String get institucionAreaErrorLoadFailed;
-
-  /// No description provided for @institucionAreaSnackNoInstitucion.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay institución cargada.'**
-  String get institucionAreaSnackNoInstitucion;
-
-  /// No description provided for @institucionAreaDefaultWorkProfileName.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil de trabajo'**
-  String get institucionAreaDefaultWorkProfileName;
-
-  /// No description provided for @institucionAreaSnackAreaInUse.
-  ///
-  /// In es, this message translates to:
-  /// **'Esta área está siendo usada por otro perfil.'**
-  String get institucionAreaSnackAreaInUse;
-
-  /// No description provided for @institucionAreaDefaultActivityLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad'**
-  String get institucionAreaDefaultActivityLabel;
-
-  /// No description provided for @institucionAreaTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Área operativa'**
-  String get institucionAreaTitle;
-
-  /// No description provided for @institucionAreaIdLine.
-  ///
-  /// In es, this message translates to:
-  /// **'ID: {id}'**
-  String institucionAreaIdLine(Object id);
-
-  /// No description provided for @institucionAreaLocationLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Ubicación: {location}'**
-  String institucionAreaLocationLine(Object location);
-
-  /// No description provided for @institucionAreaActivityLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad: {activity}'**
-  String institucionAreaActivityLine(Object activity);
-
-  /// No description provided for @institucionAreaWorkProfileLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil: {profile}'**
-  String institucionAreaWorkProfileLine(Object profile);
-
-  /// No description provided for @institucionAreaAccessLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Acceso: curricular {curricularOk} · extracurricular {extraOk}'**
-  String institucionAreaAccessLine(Object curricularOk, Object extraOk);
-
-  /// No description provided for @institucionAreaCardNotificationsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificaciones'**
-  String get institucionAreaCardNotificationsTitle;
-
-  /// No description provided for @institucionAreaCardNotificationsSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Ver notificaciones de la institución'**
-  String get institucionAreaCardNotificationsSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsOpenNotifications.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir notificaciones'**
-  String get institucionAreaSemanticsOpenNotifications;
-
-  /// No description provided for @institucionAreaCardSolicitudesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitudes'**
-  String get institucionAreaCardSolicitudesTitle;
-
-  /// No description provided for @institucionAreaCardSolicitudesSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestionar solicitudes de alumnos'**
-  String get institucionAreaCardSolicitudesSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsOpenSolicitudes.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir solicitudes'**
-  String get institucionAreaSemanticsOpenSolicitudes;
-
-  /// No description provided for @institucionAreaCardVacantesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Vacantes'**
-  String get institucionAreaCardVacantesTitle;
-
-  /// No description provided for @institucionAreaCardVacantesSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestionar grupos y capacidades'**
-  String get institucionAreaCardVacantesSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsOpenVacantes.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir vacantes'**
-  String get institucionAreaSemanticsOpenVacantes;
-
-  /// No description provided for @institucionAreaCardVacantesLockedSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'No disponible en este plan'**
-  String get institucionAreaCardVacantesLockedSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsVacantesLocked.
-  ///
-  /// In es, this message translates to:
-  /// **'Vacantes no disponibles'**
-  String get institucionAreaSemanticsVacantesLocked;
-
-  /// No description provided for @institucionAreaCardDocumentacionTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Documentación'**
-  String get institucionAreaCardDocumentacionTitle;
-
-  /// No description provided for @institucionAreaCardDocumentacionSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitar y revisar documentos'**
-  String get institucionAreaCardDocumentacionSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsOpenDocumentacion.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir documentación'**
-  String get institucionAreaSemanticsOpenDocumentacion;
-
-  /// No description provided for @institucionAreaCardExtraHubTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get institucionAreaCardExtraHubTitle;
-
-  /// No description provided for @institucionAreaCardExtraHubSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestionar módulos extracurriculares'**
-  String get institucionAreaCardExtraHubSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsOpenExtraHub.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir extracurricular'**
-  String get institucionAreaSemanticsOpenExtraHub;
-
-  /// No description provided for @institucionAreaCardExtraHubLockedSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'No disponible en este plan'**
-  String get institucionAreaCardExtraHubLockedSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsExtraHubLocked.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular no disponible'**
-  String get institucionAreaSemanticsExtraHubLocked;
-
-  /// No description provided for @institucionAreaCardCroquisTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Croquis'**
-  String get institucionAreaCardCroquisTitle;
-
-  /// No description provided for @institucionAreaCardCroquisSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestionar croquis del aula'**
-  String get institucionAreaCardCroquisSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsOpenCroquis.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir croquis'**
-  String get institucionAreaSemanticsOpenCroquis;
-
-  /// No description provided for @institucionAreaCardCroquisLockedSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'No disponible en este plan'**
-  String get institucionAreaCardCroquisLockedSubtitle;
-
-  /// No description provided for @institucionAreaSemanticsOpenCroquisLocked.
-  ///
-  /// In es, this message translates to:
-  /// **'Croquis no disponible'**
-  String get institucionAreaSemanticsOpenCroquisLocked;
-
-  /// No description provided for @institucionAreaSnackMissingActivityScope.
-  ///
-  /// In es, this message translates to:
-  /// **'Primero seleccioná una actividad para operar.'**
-  String get institucionAreaSnackMissingActivityScope;
-
-  /// No description provided for @institucionAreaMissingActivityHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Falta seleccionar una actividad. Volvé y elegí una para habilitar las acciones.'**
-  String get institucionAreaMissingActivityHint;
-
-  /// No description provided for @turnoMorning.
-  ///
-  /// In es, this message translates to:
-  /// **'Mañana'**
-  String get turnoMorning;
-
-  /// No description provided for @croquisTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Croquis del aula'**
-  String get croquisTitle;
-
-  /// No description provided for @croquisTurnoMorning.
-  ///
-  /// In es, this message translates to:
-  /// **'Mañana'**
-  String get croquisTurnoMorning;
-
-  /// No description provided for @croquisTurnoAfternoon.
-  ///
-  /// In es, this message translates to:
-  /// **'Tarde'**
-  String get croquisTurnoAfternoon;
-
-  /// No description provided for @croquisTurnoNight.
-  ///
-  /// In es, this message translates to:
-  /// **'Noche'**
-  String get croquisTurnoNight;
-
-  /// No description provided for @croquisTurnoFullDay.
-  ///
-  /// In es, this message translates to:
-  /// **'Jornada completa'**
-  String get croquisTurnoFullDay;
-
-  /// No description provided for @croquisSnackInvalidInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get croquisSnackInvalidInstitution;
-
-  /// No description provided for @croquisSnackEnterAulaBeforeSave.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá el nombre del aula antes de guardar.'**
-  String get croquisSnackEnterAulaBeforeSave;
-
-  /// No description provided for @croquisSnackSaved.
-  ///
-  /// In es, this message translates to:
-  /// **'Croquis guardado.'**
-  String get croquisSnackSaved;
-
-  /// No description provided for @croquisSnackSaveError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al guardar: {error}'**
-  String croquisSnackSaveError(Object error);
-
-  /// No description provided for @croquisDialogClearTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Limpiar grilla'**
-  String get croquisDialogClearTitle;
-
-  /// No description provided for @croquisDialogClearBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés limpiar toda la grilla?'**
-  String get croquisDialogClearBody;
-
-  /// No description provided for @croquisDialogCellTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Celda'**
-  String get croquisDialogCellTitle;
-
-  /// No description provided for @croquisFieldNameLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Nombre'**
-  String get croquisFieldNameLabel;
-
-  /// No description provided for @croquisDialogNewGroupTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Nuevo grupo'**
-  String get croquisDialogNewGroupTitle;
-
-  /// No description provided for @croquisFieldGroupTitleLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Nombre del grupo'**
-  String get croquisFieldGroupTitleLabel;
-
-  /// No description provided for @croquisFieldGroupColorLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Color del grupo'**
-  String get croquisFieldGroupColorLabel;
-
-  /// No description provided for @croquisFieldGroupColorHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegí un color'**
-  String get croquisFieldGroupColorHint;
-
-  /// No description provided for @croquisFieldRowLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Fila'**
-  String get croquisFieldRowLabel;
-
-  /// No description provided for @croquisFieldColLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Columna'**
-  String get croquisFieldColLabel;
-
-  /// No description provided for @croquisFieldHeightLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Alto'**
-  String get croquisFieldHeightLabel;
-
-  /// No description provided for @croquisFieldWidthLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Ancho'**
-  String get croquisFieldWidthLabel;
-
-  /// No description provided for @croquisDialogDeleteGroupTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar grupo'**
-  String get croquisDialogDeleteGroupTitle;
-
-  /// No description provided for @croquisDialogDeleteGroupBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés eliminar este grupo?'**
-  String get croquisDialogDeleteGroupBody;
-
-  /// No description provided for @croquisDialogUnsavedTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Cambios sin guardar'**
-  String get croquisDialogUnsavedTitle;
-
-  /// No description provided for @croquisDialogUnsavedBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Tenés cambios sin guardar. ¿Salir igual?'**
-  String get croquisDialogUnsavedBody;
-
-  /// No description provided for @croquisErrorInit.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al inicializar el croquis.'**
-  String get croquisErrorInit;
-
-  /// No description provided for @croquisSectionAulaTurno.
-  ///
-  /// In es, this message translates to:
-  /// **'Aula y turno'**
-  String get croquisSectionAulaTurno;
-
-  /// No description provided for @croquisFieldAulaLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Aula'**
-  String get croquisFieldAulaLabel;
-
-  /// No description provided for @croquisFieldAulaHint.
-  ///
-  /// In es, this message translates to:
-  /// **'ej.: Aula 1 / 3B'**
-  String get croquisFieldAulaHint;
-
-  /// No description provided for @croquisFieldTurnoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Turno'**
-  String get croquisFieldTurnoLabel;
-
-  /// No description provided for @croquisActionClearGrid.
-  ///
-  /// In es, this message translates to:
-  /// **'Limpiar grilla'**
-  String get croquisActionClearGrid;
-
-  /// No description provided for @croquisActionAddGroup.
-  ///
-  /// In es, this message translates to:
-  /// **'Agregar grupo'**
-  String get croquisActionAddGroup;
-
-  /// No description provided for @croquisTipTapCellAutosave.
-  ///
-  /// In es, this message translates to:
-  /// **'Tocá una celda para editar. Se guarda automáticamente.'**
-  String get croquisTipTapCellAutosave;
-
-  /// No description provided for @croquisSectionGrid.
-  ///
-  /// In es, this message translates to:
-  /// **'Grilla'**
-  String get croquisSectionGrid;
-
-  /// No description provided for @croquisGridSizeLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Tamaño: {rows}×{cols}'**
-  String croquisGridSizeLine(Object rows, Object cols);
-
-  /// No description provided for @croquisSectionGroups.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupos'**
-  String get croquisSectionGroups;
-
-  /// No description provided for @croquisGroupsEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay grupos creados.'**
-  String get croquisGroupsEmpty;
-
-  /// No description provided for @croquisGroupFallbackTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupo'**
-  String get croquisGroupFallbackTitle;
-
-  /// No description provided for @croquisGroupSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Miembros: {count}'**
-  String croquisGroupSubtitle(Object count);
-
-  /// No description provided for @institucionDocsWarnPerfilButNoOwner.
-  ///
-  /// In es, this message translates to:
-  /// **'Hay perfil, pero falta owner. Vista limitada.'**
-  String get institucionDocsWarnPerfilButNoOwner;
-
-  /// No description provided for @institucionDocsWarnOwnerButNoPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Hay owner, pero falta perfil. Vista limitada.'**
-  String get institucionDocsWarnOwnerButNoPerfil;
-
-  /// No description provided for @institucionDocsErrorInvalidInstitutionId.
-  ///
-  /// In es, this message translates to:
-  /// **'ID de institución inválido.'**
-  String get institucionDocsErrorInvalidInstitutionId;
-
-  /// No description provided for @institucionDocsSnackInvalidInstitutionEmptyId.
-  ///
-  /// In es, this message translates to:
-  /// **'ID de institución vacío.'**
-  String get institucionDocsSnackInvalidInstitutionEmptyId;
-
-  /// No description provided for @institucionDocsSnackNeedOwnerAndPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner y perfil son obligatorios para esta acción.'**
-  String get institucionDocsSnackNeedOwnerAndPerfil;
-
-  /// No description provided for @institucionDocsSnackNoDocTypes.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay tipos de documento disponibles.'**
-  String get institucionDocsSnackNoDocTypes;
-
-  /// No description provided for @institucionDocsSnackSolicitudCreated.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud creada.'**
-  String get institucionDocsSnackSolicitudCreated;
-
-  /// No description provided for @institucionDocsSnackNeedOwnerAndPerfilToUpload.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner y perfil son obligatorios para simular subida.'**
-  String get institucionDocsSnackNeedOwnerAndPerfilToUpload;
-
-  /// No description provided for @institucionDocsSnackMissingRef.
-  ///
-  /// In es, this message translates to:
-  /// **'Falta la referencia del archivo.'**
-  String get institucionDocsSnackMissingRef;
-
-  /// No description provided for @institucionDocsSnackTempDocSaved.
-  ///
-  /// In es, this message translates to:
-  /// **'Documento temporal guardado.'**
-  String get institucionDocsSnackTempDocSaved;
-
-  /// No description provided for @institucionDocsSnackNeedPerfilToCleanup.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil es obligatorio para limpiar expirados.'**
-  String get institucionDocsSnackNeedPerfilToCleanup;
-
-  /// No description provided for @institucionDocsSnackNoExpiredToRemove.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay expirados para eliminar.'**
-  String get institucionDocsSnackNoExpiredToRemove;
-
-  /// No description provided for @institucionDocsSnackExpiredRemoved.
-  ///
-  /// In es, this message translates to:
-  /// **'Se eliminaron {count} expirados.'**
-  String institucionDocsSnackExpiredRemoved(Object count);
-
-  /// No description provided for @institucionDocsDialogDeleteTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar'**
-  String get institucionDocsDialogDeleteTitle;
-
-  /// No description provided for @institucionDocsDialogDeleteBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Eliminar este ítem: {name}?'**
-  String institucionDocsDialogDeleteBody(Object name);
-
-  /// No description provided for @institucionDocsSnackExpiredUseCleanup.
-  ///
-  /// In es, this message translates to:
-  /// **'Expirado. Usá limpiar expirados.'**
-  String get institucionDocsSnackExpiredUseCleanup;
-
-  /// No description provided for @institucionDocsSnackDeleted.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminado.'**
-  String get institucionDocsSnackDeleted;
-
-  /// No description provided for @institucionDocsSnackCannotOpenMissingIds.
-  ///
-  /// In es, this message translates to:
-  /// **'No se puede abrir: faltan IDs.'**
-  String get institucionDocsSnackCannotOpenMissingIds;
-
-  /// No description provided for @institucionDocsSnackDeeplinkTooLong.
-  ///
-  /// In es, this message translates to:
-  /// **'Deeplink demasiado largo.'**
-  String get institucionDocsSnackDeeplinkTooLong;
-
-  /// No description provided for @institucionDocsSnackRouteNotRegistered.
-  ///
-  /// In es, this message translates to:
-  /// **'Ruta no registrada.'**
-  String get institucionDocsSnackRouteNotRegistered;
-
-  /// No description provided for @estadoSolicitudPendiente.
-  ///
-  /// In es, this message translates to:
-  /// **'Pendiente'**
-  String get estadoSolicitudPendiente;
-
-  /// No description provided for @estadoSolicitudCumplida.
-  ///
-  /// In es, this message translates to:
-  /// **'Cumplida'**
-  String get estadoSolicitudCumplida;
-
-  /// No description provided for @estadoSolicitudCancelada.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelada'**
-  String get estadoSolicitudCancelada;
-
-  /// No description provided for @estadoDocumentoExpirado.
-  ///
-  /// In es, this message translates to:
-  /// **'Expirado'**
-  String get estadoDocumentoExpirado;
-
-  /// No description provided for @estadoDocumentoActivo.
-  ///
-  /// In es, this message translates to:
-  /// **'Activo'**
-  String get estadoDocumentoActivo;
-
-  /// No description provided for @institucionDocsTooltipOpenAlumno.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir alumno'**
-  String get institucionDocsTooltipOpenAlumno;
-
-  /// No description provided for @institucionDocsTooltipExpiredUseCleanup.
-  ///
-  /// In es, this message translates to:
-  /// **'Expirado (usar limpieza)'**
-  String get institucionDocsTooltipExpiredUseCleanup;
-
-  /// No description provided for @institucionDocsViewAllInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Ver todo (institución)'**
-  String get institucionDocsViewAllInstitution;
-
-  /// No description provided for @institucionDocsViewFilteredOwnerPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtrado (owner+perfil)'**
-  String get institucionDocsViewFilteredOwnerPerfil;
-
-  /// No description provided for @institucionDocsViewFilteredPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtrado (perfil)'**
-  String get institucionDocsViewFilteredPerfil;
-
-  /// No description provided for @institucionDocsViewFilteredOwner.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtrado (owner)'**
-  String get institucionDocsViewFilteredOwner;
-
-  /// No description provided for @institucionDocsInstitutionIdLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución: {id}'**
-  String institucionDocsInstitutionIdLine(Object id);
-
-  /// No description provided for @institucionDocsInstitutionOwnerLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner: {owner}'**
-  String institucionDocsInstitutionOwnerLine(Object owner);
-
-  /// No description provided for @institucionDocsFieldOwnerAlumnoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner del alumno'**
-  String get institucionDocsFieldOwnerAlumnoLabel;
-
-  /// No description provided for @institucionDocsFieldPerfilAlumnoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil del alumno'**
-  String get institucionDocsFieldPerfilAlumnoLabel;
-
-  /// No description provided for @institucionDocsFieldTipoDocumentoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo de documento'**
-  String get institucionDocsFieldTipoDocumentoLabel;
-
-  /// No description provided for @institucionDocsFieldMensajeOpcionalLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Mensaje (opcional)'**
-  String get institucionDocsFieldMensajeOpcionalLabel;
-
-  /// No description provided for @institucionDocsFieldRefLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Referencia'**
-  String get institucionDocsFieldRefLabel;
-
-  /// No description provided for @institucionDocsFieldTtlDaysLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'TTL (días)'**
-  String get institucionDocsFieldTtlDaysLabel;
-
-  /// No description provided for @institucionDocsActionSimulateUpload.
-  ///
-  /// In es, this message translates to:
-  /// **'Simular subida'**
-  String get institucionDocsActionSimulateUpload;
-
-  /// No description provided for @institucionDocsActionCleanupExpired.
-  ///
-  /// In es, this message translates to:
-  /// **'Limpiar expirados'**
-  String get institucionDocsActionCleanupExpired;
-
-  /// No description provided for @institucionDocsEmptySolicitudes.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin solicitudes.'**
-  String get institucionDocsEmptySolicitudes;
-
-  /// No description provided for @institucionDocsEmptyDocumentos.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin documentos.'**
-  String get institucionDocsEmptyDocumentos;
-
-  /// No description provided for @institucionDocsSolicitudTipoLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo: {tipo}'**
-  String institucionDocsSolicitudTipoLine(Object tipo);
-
-  /// No description provided for @institucionDocsSolicitudSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'{estado} · {fecha}'**
-  String institucionDocsSolicitudSubtitle(Object estado, Object fecha);
-
-  /// No description provided for @institucionDocsDocumentoTipoLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo: {tipo}'**
-  String institucionDocsDocumentoTipoLine(Object tipo);
-
-  /// No description provided for @institucionDocsDocumentoSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'{estado} · {vence}'**
-  String institucionDocsDocumentoSubtitle(Object estado, Object vence);
-
-  /// No description provided for @institucionDocsAppBarTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'{institucion} – Documentación'**
-  String institucionDocsAppBarTitle(Object institucion);
-
-  /// No description provided for @tabSolicitudes.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitudes'**
-  String get tabSolicitudes;
-
-  /// No description provided for @tabDocumentos.
-  ///
-  /// In es, this message translates to:
-  /// **'Documentos'**
-  String get tabDocumentos;
-
-  /// No description provided for @institucionDocsErrorTimeout.
-  ///
-  /// In es, this message translates to:
-  /// **'Tiempo de espera agotado. Intentá nuevamente.'**
-  String get institucionDocsErrorTimeout;
-
-  /// No description provided for @institucionExtracGrupoGuiaBloqueTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Guía del bloque'**
-  String get institucionExtracGrupoGuiaBloqueTitle;
-
-  /// No description provided for @institucionExtracGrupoInvalidInstitutionId.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get institucionExtracGrupoInvalidInstitutionId;
-
-  /// No description provided for @institucionExtracGrupoWarnModuleKeyMismatch.
-  ///
-  /// In es, this message translates to:
-  /// **'moduleKey no coincide con la esperada: {expected}'**
-  String institucionExtracGrupoWarnModuleKeyMismatch(Object expected);
-
-  /// No description provided for @institucionExtracGrupoWarnModuleKeyNotCanonical.
-  ///
-  /// In es, this message translates to:
-  /// **'moduleKey no canónica: {value}'**
-  String institucionExtracGrupoWarnModuleKeyNotCanonical(Object value);
-
-  /// No description provided for @institucionExtracGrupoSaveFailed.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo guardar: {error}'**
-  String institucionExtracGrupoSaveFailed(Object error);
-
-  /// No description provided for @institucionExtracGrupoEditTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Editar grupo'**
-  String get institucionExtracGrupoEditTitle;
-
-  /// No description provided for @institucionExtracGrupoCreateTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear grupo'**
-  String get institucionExtracGrupoCreateTitle;
-
-  /// No description provided for @institucionExtracGrupoHeaderBloqueLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Bloque: {bloque} · moduleKey: {moduleKey}'**
-  String institucionExtracGrupoHeaderBloqueLine(
-    Object bloque,
-    Object moduleKey,
-  );
-
-  /// No description provided for @institucionExtracGrupoHeaderNotePrototype.
-  ///
-  /// In es, this message translates to:
-  /// **'Prototipo (sin backend)'**
-  String get institucionExtracGrupoHeaderNotePrototype;
-
-  /// No description provided for @institucionExtracGrupoWarnKeyMismatch.
-  ///
-  /// In es, this message translates to:
-  /// **'Clave no coincide con la esperada: {expected}'**
-  String institucionExtracGrupoWarnKeyMismatch(Object expected);
-
-  /// No description provided for @institucionExtracGrupoWarnKeyNotCanonical.
-  ///
-  /// In es, this message translates to:
-  /// **'Clave no canónica: {value}'**
-  String institucionExtracGrupoWarnKeyNotCanonical(Object value);
-
-  /// No description provided for @institucionExtracGrupoFieldActividadLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad'**
-  String get institucionExtracGrupoFieldActividadLabel;
-
-  /// No description provided for @institucionExtracGrupoFieldActividadHint.
-  ///
-  /// In es, this message translates to:
-  /// **'ej.: Fútbol'**
-  String get institucionExtracGrupoFieldActividadHint;
-
-  /// No description provided for @institucionExtracGrupoValActividadRequired.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad es obligatoria'**
-  String get institucionExtracGrupoValActividadRequired;
-
-  /// No description provided for @institucionExtracGrupoFieldGrupoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupo'**
-  String get institucionExtracGrupoFieldGrupoLabel;
-
-  /// No description provided for @institucionExtracGrupoFieldGrupoHint.
-  ///
-  /// In es, this message translates to:
-  /// **'ej.: Grupo A'**
-  String get institucionExtracGrupoFieldGrupoHint;
-
-  /// No description provided for @institucionExtracGrupoValGrupoRequired.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupo es obligatorio'**
-  String get institucionExtracGrupoValGrupoRequired;
-
-  /// No description provided for @institucionExtracGrupoFieldTurnoOptionalLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Turno (opcional)'**
-  String get institucionExtracGrupoFieldTurnoOptionalLabel;
-
-  /// No description provided for @institucionExtracGrupoFieldTurnoOptionalHint.
-  ///
-  /// In es, this message translates to:
-  /// **'ej.: Mañana'**
-  String get institucionExtracGrupoFieldTurnoOptionalHint;
-
-  /// No description provided for @institucionExtracGrupoFieldAulaOptionalLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Aula (opcional)'**
-  String get institucionExtracGrupoFieldAulaOptionalLabel;
-
-  /// No description provided for @institucionExtracGrupoFieldAulaOptionalHint.
-  ///
-  /// In es, this message translates to:
-  /// **'ej.: Gimnasio'**
-  String get institucionExtracGrupoFieldAulaOptionalHint;
-
-  /// No description provided for @institucionExtracGrupoFieldCupoMaxLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Capacidad máxima'**
-  String get institucionExtracGrupoFieldCupoMaxLabel;
-
-  /// No description provided for @institucionExtracGrupoFieldCupoMaxHint.
-  ///
-  /// In es, this message translates to:
-  /// **'ej.: 25'**
-  String get institucionExtracGrupoFieldCupoMaxHint;
-
-  /// No description provided for @institucionExtracGrupoFieldCupoOcupadoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Ocupadas'**
-  String get institucionExtracGrupoFieldCupoOcupadoLabel;
-
-  /// No description provided for @institucionExtracGrupoValOccExceedsMax.
-  ///
-  /// In es, this message translates to:
-  /// **'Ocupadas no puede exceder el máximo'**
-  String get institucionExtracGrupoValOccExceedsMax;
-
-  /// No description provided for @institucionExtracGrupoFieldActivoTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Activo'**
-  String get institucionExtracGrupoFieldActivoTitle;
-
-  /// No description provided for @institucionExtracGrupoFieldActivoSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Permite solicitudes'**
-  String get institucionExtracGrupoFieldActivoSubtitle;
-
-  /// No description provided for @institucionExtracBaseErrInvalidInstId.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get institucionExtracBaseErrInvalidInstId;
-
-  /// No description provided for @institucionExtracBaseErrInvalidModuleKeySnake.
-  ///
-  /// In es, this message translates to:
-  /// **'moduleKey inválida (snake_case).'**
-  String get institucionExtracBaseErrInvalidModuleKeySnake;
-
-  /// No description provided for @institucionExtracBaseErrModuleKeyMismatch.
-  ///
-  /// In es, this message translates to:
-  /// **'moduleKey no coincide con la esperada: {expected}'**
-  String institucionExtracBaseErrModuleKeyMismatch(Object expected);
-
-  /// No description provided for @institucionExtracBaseErrModuleKeyNotCanonical.
-  ///
-  /// In es, this message translates to:
-  /// **'moduleKey no canónica: {value}'**
-  String institucionExtracBaseErrModuleKeyNotCanonical(Object value);
-
-  /// No description provided for @institucionExtracBaseCuposNotManaged.
-  ///
-  /// In es, this message translates to:
-  /// **'Capacidades no gestionadas'**
-  String get institucionExtracBaseCuposNotManaged;
-
-  /// No description provided for @institucionExtracBaseCuposManaged.
-  ///
-  /// In es, this message translates to:
-  /// **'Disponibles: {disp} de {max}'**
-  String institucionExtracBaseCuposManaged(Object disp, Object max);
-
-  /// No description provided for @institucionExtracBaseInvalidDataGeneric.
-  ///
-  /// In es, this message translates to:
-  /// **'Datos inválidos.'**
-  String get institucionExtracBaseInvalidDataGeneric;
-
-  /// No description provided for @institucionExtracBaseInvalidDataForCupos.
-  ///
-  /// In es, this message translates to:
-  /// **'Datos inválidos para capacidades.'**
-  String get institucionExtracBaseInvalidDataForCupos;
-
-  /// No description provided for @institucionExtracBaseCuposRequireMax.
-  ///
-  /// In es, this message translates to:
-  /// **'Capacidad máxima es obligatoria.'**
-  String get institucionExtracBaseCuposRequireMax;
-
-  /// No description provided for @institucionExtracBaseCuposDialogTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Editar capacidades'**
-  String get institucionExtracBaseCuposDialogTitle;
-
-  /// No description provided for @institucionExtracBaseCuposDialogActividad.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad: {actividad}'**
-  String institucionExtracBaseCuposDialogActividad(Object actividad);
-
-  /// No description provided for @institucionExtracBaseCuposDialogGrupo.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupo: {grupo}'**
-  String institucionExtracBaseCuposDialogGrupo(Object grupo);
-
-  /// No description provided for @institucionExtracBaseCuposDialogMax.
-  ///
-  /// In es, this message translates to:
-  /// **'Máx: {max}'**
-  String institucionExtracBaseCuposDialogMax(Object max);
-
-  /// No description provided for @institucionExtracBaseCuposDialogOcupado.
-  ///
-  /// In es, this message translates to:
-  /// **'Ocupadas: {ocupado}'**
-  String institucionExtracBaseCuposDialogOcupado(Object ocupado);
-
-  /// No description provided for @institucionExtracBaseCuposDialogDisponibles.
-  ///
-  /// In es, this message translates to:
-  /// **'Disponibles: {disp}'**
-  String institucionExtracBaseCuposDialogDisponibles(Object disp);
-
-  /// No description provided for @institucionExtracBaseCuposUpdated.
-  ///
-  /// In es, this message translates to:
-  /// **'Capacidades actualizadas.'**
-  String get institucionExtracBaseCuposUpdated;
-
-  /// No description provided for @institucionExtracBaseCuposSaveFailed.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo guardar capacidades: {error}'**
-  String institucionExtracBaseCuposSaveFailed(Object error);
-
-  /// No description provided for @institucionExtracBaseInvalidDataForDelete.
-  ///
-  /// In es, this message translates to:
-  /// **'No se puede eliminar: datos inválidos.'**
-  String get institucionExtracBaseInvalidDataForDelete;
-
-  /// No description provided for @institucionExtracBaseDeleteDialogTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar grupo'**
-  String get institucionExtracBaseDeleteDialogTitle;
-
-  /// No description provided for @institucionExtracBaseDeleteDialogBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Eliminar {actividad} ({grupo})?'**
-  String institucionExtracBaseDeleteDialogBody(Object actividad, Object grupo);
-
-  /// No description provided for @institucionExtracBaseDeletedOk.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminado.'**
-  String get institucionExtracBaseDeletedOk;
-
-  /// No description provided for @institucionExtracBaseDeleteFailed.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo eliminar: {error}'**
-  String institucionExtracBaseDeleteFailed(Object error);
-
-  /// No description provided for @institucionExtracBaseAppBarTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'{module}'**
-  String institucionExtracBaseAppBarTitle(Object module);
-
-  /// No description provided for @institucionExtracBaseChipModuleKey.
-  ///
-  /// In es, this message translates to:
-  /// **'moduleKey: {key}'**
-  String institucionExtracBaseChipModuleKey(Object key);
-
-  /// No description provided for @institucionExtracBaseChipInstId.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución: {id}'**
-  String institucionExtracBaseChipInstId(Object id);
-
-  /// No description provided for @institucionExtracBaseHeaderNote.
-  ///
-  /// In es, this message translates to:
-  /// **'Gestión del módulo (prototipo)'**
-  String get institucionExtracBaseHeaderNote;
-
-  /// No description provided for @institucionExtracBaseQuickGuideTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Guía rápida'**
-  String get institucionExtracBaseQuickGuideTitle;
-
-  /// No description provided for @institucionExtracBaseQuickGuideEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay guía disponible.'**
-  String get institucionExtracBaseQuickGuideEmpty;
-
-  /// No description provided for @institucionExtracBaseQuickGuideFootnote.
-  ///
-  /// In es, this message translates to:
-  /// **'Los textos pueden cambiar.'**
-  String get institucionExtracBaseQuickGuideFootnote;
-
-  /// No description provided for @institucionExtracBaseGroupsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupos'**
-  String get institucionExtracBaseGroupsTitle;
-
-  /// No description provided for @institucionExtracBaseInvalidDataToList.
-  ///
-  /// In es, this message translates to:
-  /// **'No se puede listar: datos inválidos.'**
-  String get institucionExtracBaseInvalidDataToList;
-
-  /// No description provided for @institucionExtracBaseLoadFailed.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cargar.'**
-  String get institucionExtracBaseLoadFailed;
-
-  /// No description provided for @institucionExtracBaseNoGroupsYet.
-  ///
-  /// In es, this message translates to:
-  /// **'Todavía no hay grupos.'**
-  String get institucionExtracBaseNoGroupsYet;
-
-  /// No description provided for @institucionExtracBaseWithCupos.
-  ///
-  /// In es, this message translates to:
-  /// **'Con capacidades'**
-  String get institucionExtracBaseWithCupos;
-
-  /// No description provided for @institucionExtracBaseNoCupos.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin capacidades'**
-  String get institucionExtracBaseNoCupos;
-
-  /// No description provided for @institucionExtracBaseGroupLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupo: {group}'**
-  String institucionExtracBaseGroupLine(Object group);
-
-  /// No description provided for @institucionExtracBaseTurnoLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Turno: {turno}'**
-  String institucionExtracBaseTurnoLine(Object turno);
-
-  /// No description provided for @institucionExtracBaseAulaLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Aula: {aula}'**
-  String institucionExtracBaseAulaLine(Object aula);
-
-  /// No description provided for @institucionExtracBaseActionCupos.
-  ///
-  /// In es, this message translates to:
-  /// **'Capacidades'**
-  String get institucionExtracBaseActionCupos;
-
-  /// No description provided for @institucionExtracBaseCreateGroupTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear grupo'**
-  String get institucionExtracBaseCreateGroupTitle;
-
-  /// No description provided for @institucionExtracBaseCreateGroupSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Agregar un nuevo grupo'**
-  String get institucionExtracBaseCreateGroupSubtitle;
-
-  /// No description provided for @institucionExtracBaseRulesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Reglas'**
-  String get institucionExtracBaseRulesTitle;
-
-  /// No description provided for @institucionExtracBaseRulesSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Pendiente'**
-  String get institucionExtracBaseRulesSubtitle;
-
-  /// No description provided for @institucionExtracBaseRulesPendingToast.
-  ///
-  /// In es, this message translates to:
-  /// **'Reglas pendientes: {value}'**
-  String institucionExtracBaseRulesPendingToast(Object value);
-
-  /// No description provided for @institucionExtracBaseSolicitudesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitudes'**
-  String get institucionExtracBaseSolicitudesTitle;
-
-  /// No description provided for @institucionExtracBaseSolicitudesSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Ver solicitudes del módulo: {moduleKey}'**
-  String institucionExtracBaseSolicitudesSubtitle(Object moduleKey);
-
-  /// No description provided for @institucionExtracHubTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get institucionExtracHubTitle;
-
-  /// No description provided for @institucionExtracHubHeaderInstOk.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución: {instIdCanon}'**
-  String institucionExtracHubHeaderInstOk(Object instIdCanon);
-
-  /// No description provided for @institucionExtracHubHeaderInstInvalid.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get institucionExtracHubHeaderInstInvalid;
-
-  /// No description provided for @institucionExtracHubIntro.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccioná un módulo para gestionar.'**
-  String get institucionExtracHubIntro;
-
-  /// No description provided for @institucionExtracHubInvalidInstIdHelp.
-  ///
-  /// In es, this message translates to:
-  /// **'Volvé y reintentá con una institución válida.'**
-  String get institucionExtracHubInvalidInstIdHelp;
-
-  /// No description provided for @institucionExtracHubTileSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'{descripcion} · moduleKey: {moduleKey}'**
-  String institucionExtracHubTileSubtitle(Object descripcion, Object moduleKey);
-
-  /// No description provided for @institucionExtracHubToastInvalidInstId.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get institucionExtracHubToastInvalidInstId;
-
-  /// No description provided for @institucionExtracHubToastInvalidModuleKey.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo abrir el módulo: {bloque}'**
-  String institucionExtracHubToastInvalidModuleKey(Object bloque);
-
-  /// No description provided for @errorLoadingGroups.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar grupos: {error}'**
-  String errorLoadingGroups(Object error);
-
-  /// No description provided for @errorSaving.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al guardar: {error}'**
-  String errorSaving(Object error);
-
-  /// No description provided for @occupiedRecalculatedOk.
-  ///
-  /// In es, this message translates to:
-  /// **'Ocupadas recalculadas.'**
-  String get occupiedRecalculatedOk;
-
-  /// No description provided for @errorRecalculating.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al recalcular: {error}'**
-  String errorRecalculating(Object error);
-
-  /// No description provided for @groupNameLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Nombre del grupo'**
-  String get groupNameLabel;
-
-  /// No description provided for @activityLabelShort.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad'**
-  String get activityLabelShort;
-
-  /// No description provided for @maxCapacityLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Capacidad máxima'**
-  String get maxCapacityLabel;
-
-  /// No description provided for @completeRequiredFields.
-  ///
-  /// In es, this message translates to:
-  /// **'Completá los campos obligatorios.'**
-  String get completeRequiredFields;
 
   /// No description provided for @commonRefresh.
   ///
@@ -3102,467 +166,17 @@ abstract class AppLocalizations {
   /// **'Eliminar'**
   String get commonDelete;
 
-  /// No description provided for @commonNo.
-  ///
-  /// In es, this message translates to:
-  /// **'No'**
-  String get commonNo;
-
-  /// No description provided for @commonNone.
-  ///
-  /// In es, this message translates to:
-  /// **'Ninguno'**
-  String get commonNone;
-
-  /// No description provided for @commonProfile.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil'**
-  String get commonProfile;
-
-  /// No description provided for @commonModule.
-  ///
-  /// In es, this message translates to:
-  /// **'Módulo'**
-  String get commonModule;
-
-  /// No description provided for @commonPending.
-  ///
-  /// In es, this message translates to:
-  /// **'Pendiente'**
-  String get commonPending;
-
-  /// No description provided for @commonCompleted.
-  ///
-  /// In es, this message translates to:
-  /// **'Cumplida'**
-  String get commonCompleted;
-
-  /// No description provided for @commonCancelled.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelada'**
-  String get commonCancelled;
-
-  /// No description provided for @commonConfirmed.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmada'**
-  String get commonConfirmed;
-
-  /// No description provided for @commonRejected.
-  ///
-  /// In es, this message translates to:
-  /// **'Rechazada'**
-  String get commonRejected;
-
-  /// No description provided for @commonExpired.
-  ///
-  /// In es, this message translates to:
-  /// **'Expirado'**
-  String get commonExpired;
-
-  /// No description provided for @commonActive.
-  ///
-  /// In es, this message translates to:
-  /// **'Activo'**
-  String get commonActive;
-
-  /// No description provided for @commonCurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular'**
-  String get commonCurricular;
-
-  /// No description provided for @commonExtracurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get commonExtracurricular;
-
   /// No description provided for @commonInstitution.
   ///
   /// In es, this message translates to:
   /// **'Institución'**
   String get commonInstitution;
 
-  /// No description provided for @commonType.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo'**
-  String get commonType;
-
-  /// No description provided for @commonClassGroup.
-  ///
-  /// In es, this message translates to:
-  /// **'Curso/Grupo'**
-  String get commonClassGroup;
-
-  /// No description provided for @commonShift.
-  ///
-  /// In es, this message translates to:
-  /// **'Turno'**
-  String get commonShift;
-
-  /// No description provided for @commonStatus.
-  ///
-  /// In es, this message translates to:
-  /// **'Estado'**
-  String get commonStatus;
-
   /// No description provided for @commonGenerating.
   ///
   /// In es, this message translates to:
   /// **'Generando…'**
   String get commonGenerating;
-
-  /// No description provided for @commonErrorWithDetails.
-  ///
-  /// In es, this message translates to:
-  /// **'Error: {error}'**
-  String commonErrorWithDetails(Object error);
-
-  /// No description provided for @alumnoDocumentosTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Documentación'**
-  String get alumnoDocumentosTitle;
-
-  /// No description provided for @alumnoDocumentosInvalidOwner.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner inválido.'**
-  String get alumnoDocumentosInvalidOwner;
-
-  /// No description provided for @alumnoDocumentosInvalidPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil inválido.'**
-  String get alumnoDocumentosInvalidPerfil;
-
-  /// No description provided for @alumnoDocumentosOwnerMismatchAutoscrollIgnored.
-  ///
-  /// In es, this message translates to:
-  /// **'Este deeplink pertenece a otra cuenta. Autoscroll ignorado.'**
-  String get alumnoDocumentosOwnerMismatchAutoscrollIgnored;
-
-  /// No description provided for @alumnoDocumentosDeeplinkSolicitudNotFound.
-  ///
-  /// In es, this message translates to:
-  /// **'No se encontró la solicitud del deeplink.'**
-  String get alumnoDocumentosDeeplinkSolicitudNotFound;
-
-  /// No description provided for @alumnoDocumentosDeeplinkDocumentoNotFound.
-  ///
-  /// In es, this message translates to:
-  /// **'No se encontró el documento del deeplink.'**
-  String get alumnoDocumentosDeeplinkDocumentoNotFound;
-
-  /// No description provided for @alumnoDocumentosEmptySolicitudes.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin solicitudes.'**
-  String get alumnoDocumentosEmptySolicitudes;
-
-  /// No description provided for @alumnoDocumentosEmptyDocumentos.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin documentos.'**
-  String get alumnoDocumentosEmptyDocumentos;
-
-  /// No description provided for @alumnoDocumentosFieldMensaje.
-  ///
-  /// In es, this message translates to:
-  /// **'Mensaje'**
-  String get alumnoDocumentosFieldMensaje;
-
-  /// No description provided for @alumnoDocumentosFieldTipo.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo'**
-  String get alumnoDocumentosFieldTipo;
-
-  /// No description provided for @alumnoDocumentosFieldId.
-  ///
-  /// In es, this message translates to:
-  /// **'ID'**
-  String get alumnoDocumentosFieldId;
-
-  /// No description provided for @alumnoDocumentosFieldEstado.
-  ///
-  /// In es, this message translates to:
-  /// **'Estado'**
-  String get alumnoDocumentosFieldEstado;
-
-  /// No description provided for @alumnoDocumentosFieldInstitucion.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución'**
-  String get alumnoDocumentosFieldInstitucion;
-
-  /// No description provided for @alumnoDocumentosFieldCreada.
-  ///
-  /// In es, this message translates to:
-  /// **'Creada'**
-  String get alumnoDocumentosFieldCreada;
-
-  /// No description provided for @alumnoDocumentosFieldOwner.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner'**
-  String get alumnoDocumentosFieldOwner;
-
-  /// No description provided for @alumnoDocumentosFieldPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil'**
-  String get alumnoDocumentosFieldPerfil;
-
-  /// No description provided for @alumnoDocumentosFieldSubido.
-  ///
-  /// In es, this message translates to:
-  /// **'Subido'**
-  String get alumnoDocumentosFieldSubido;
-
-  /// No description provided for @alumnoDocumentosFieldExpira.
-  ///
-  /// In es, this message translates to:
-  /// **'Expira'**
-  String get alumnoDocumentosFieldExpira;
-
-  /// No description provided for @alumnoDocumentosExpiredWillBeDeletedOnClean.
-  ///
-  /// In es, this message translates to:
-  /// **'será eliminado al limpiar expirados'**
-  String get alumnoDocumentosExpiredWillBeDeletedOnClean;
-
-  /// No description provided for @alumnoDocumentosFieldSolicitud.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud'**
-  String get alumnoDocumentosFieldSolicitud;
-
-  /// No description provided for @alumnoDocumentosFieldRef.
-  ///
-  /// In es, this message translates to:
-  /// **'Referencia'**
-  String get alumnoDocumentosFieldRef;
-
-  /// No description provided for @alumnoDocumentosNoExpiredToClean.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay expirados para limpiar.'**
-  String get alumnoDocumentosNoExpiredToClean;
-
-  /// No description provided for @alumnoDocumentosExpiredCleanedCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Se limpiaron {count} expirados.'**
-  String alumnoDocumentosExpiredCleanedCount(Object count);
-
-  /// No description provided for @alumnoDocumentosDocExpiredUseClean.
-  ///
-  /// In es, this message translates to:
-  /// **'Este documento está expirado. Usá “Limpiar expirados”.'**
-  String get alumnoDocumentosDocExpiredUseClean;
-
-  /// No description provided for @alumnoDocumentosExpiredTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Expirado (usar limpieza)'**
-  String get alumnoDocumentosExpiredTooltip;
-
-  /// No description provided for @alumnoDocumentosDeleteDocTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar documento'**
-  String get alumnoDocumentosDeleteDocTitle;
-
-  /// No description provided for @alumnoDocumentosDeleteDocBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Eliminar documento {id}?'**
-  String alumnoDocumentosDeleteDocBody(Object id);
-
-  /// No description provided for @alumnoDocumentosDocDeleted.
-  ///
-  /// In es, this message translates to:
-  /// **'Documento eliminado.'**
-  String get alumnoDocumentosDocDeleted;
-
-  /// No description provided for @alumnoDocumentosCleanExpired.
-  ///
-  /// In es, this message translates to:
-  /// **'Limpiar expirados'**
-  String get alumnoDocumentosCleanExpired;
-
-  /// No description provided for @alumnoDocumentosTabSolicitudes.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitudes'**
-  String get alumnoDocumentosTabSolicitudes;
-
-  /// No description provided for @alumnoDocumentosTabDocumentos.
-  ///
-  /// In es, this message translates to:
-  /// **'Documentos'**
-  String get alumnoDocumentosTabDocumentos;
-
-  /// No description provided for @alumnoMisSolicitudesTitleOwner.
-  ///
-  /// In es, this message translates to:
-  /// **'Mis solicitudes'**
-  String get alumnoMisSolicitudesTitleOwner;
-
-  /// No description provided for @alumnoMisSolicitudesTitlePerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitudes – {perfil}'**
-  String alumnoMisSolicitudesTitlePerfil(Object perfil);
-
-  /// No description provided for @alumnoMisSolicitudesInvalidOwner.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner inválido.'**
-  String get alumnoMisSolicitudesInvalidOwner;
-
-  /// No description provided for @alumnoMisSolicitudesInvalidPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil inválido.'**
-  String get alumnoMisSolicitudesInvalidPerfil;
-
-  /// No description provided for @alumnoMisSolicitudesLoadError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar: {error}'**
-  String alumnoMisSolicitudesLoadError(Object error);
-
-  /// No description provided for @alumnoMisSolicitudesStatusCancelledYou.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelada por vos'**
-  String get alumnoMisSolicitudesStatusCancelledYou;
-
-  /// No description provided for @alumnoMisSolicitudesStatusCancelledInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelada por la institución'**
-  String get alumnoMisSolicitudesStatusCancelledInstitution;
-
-  /// No description provided for @alumnoMisSolicitudesNotPending.
-  ///
-  /// In es, this message translates to:
-  /// **'Esta solicitud ya no está pendiente.'**
-  String get alumnoMisSolicitudesNotPending;
-
-  /// No description provided for @alumnoMisSolicitudesCancelTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelar solicitud'**
-  String get alumnoMisSolicitudesCancelTitle;
-
-  /// No description provided for @alumnoMisSolicitudesCancelBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés cancelar esta solicitud?'**
-  String get alumnoMisSolicitudesCancelBody;
-
-  /// No description provided for @alumnoMisSolicitudesCancelCta.
-  ///
-  /// In es, this message translates to:
-  /// **'Cancelar'**
-  String get alumnoMisSolicitudesCancelCta;
-
-  /// No description provided for @alumnoMisSolicitudesCancelledOk.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud cancelada.'**
-  String get alumnoMisSolicitudesCancelledOk;
-
-  /// No description provided for @alumnoMisSolicitudesCancelError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cancelar: {error}'**
-  String alumnoMisSolicitudesCancelError(Object error);
-
-  /// No description provided for @alumnoMisSolicitudesDeleteTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar solicitud'**
-  String get alumnoMisSolicitudesDeleteTitle;
-
-  /// No description provided for @alumnoMisSolicitudesDeleteBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés eliminar esta solicitud? (solo curricular pendiente)'**
-  String get alumnoMisSolicitudesDeleteBody;
-
-  /// No description provided for @alumnoMisSolicitudesDeletedOk.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud eliminada.'**
-  String get alumnoMisSolicitudesDeletedOk;
-
-  /// No description provided for @alumnoMisSolicitudesCanonicalContextMissing.
-  ///
-  /// In es, this message translates to:
-  /// **'Falta contexto canónico (owner/perfil) para generar el PDF.'**
-  String get alumnoMisSolicitudesCanonicalContextMissing;
-
-  /// No description provided for @alumnoMisSolicitudesPdfGenerated.
-  ///
-  /// In es, this message translates to:
-  /// **'PDF generado: {path}'**
-  String alumnoMisSolicitudesPdfGenerated(Object path);
-
-  /// No description provided for @alumnoMisSolicitudesPdfError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo generar el PDF: {error}'**
-  String alumnoMisSolicitudesPdfError(Object error);
-
-  /// No description provided for @alumnoMisSolicitudesDownloadPdf.
-  ///
-  /// In es, this message translates to:
-  /// **'Descargar PDF'**
-  String get alumnoMisSolicitudesDownloadPdf;
-
-  /// No description provided for @alumnoMisSolicitudesTabPendingCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Pendientes ({count})'**
-  String alumnoMisSolicitudesTabPendingCount(Object count);
-
-  /// No description provided for @alumnoMisSolicitudesTabConfirmedCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmadas ({count})'**
-  String alumnoMisSolicitudesTabConfirmedCount(Object count);
-
-  /// No description provided for @alumnoMisSolicitudesTabRejectedCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Rechazadas ({count})'**
-  String alumnoMisSolicitudesTabRejectedCount(Object count);
-
-  /// No description provided for @alumnoMisSolicitudesTabCancelledCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Canceladas ({count})'**
-  String alumnoMisSolicitudesTabCancelledCount(Object count);
-
-  /// No description provided for @alumnoMisSolicitudesEmptySection.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay solicitudes en esta sección.'**
-  String get alumnoMisSolicitudesEmptySection;
-
-  /// No description provided for @alumnoMisSolicitudesEmptyPending.
-  ///
-  /// In es, this message translates to:
-  /// **'No tenés solicitudes pendientes.'**
-  String get alumnoMisSolicitudesEmptyPending;
 
   /// No description provided for @commonBack.
   ///
@@ -3582,12 +196,6 @@ abstract class AppLocalizations {
   /// **'Guardando…'**
   String get commonSaving;
 
-  /// No description provided for @commonGenericError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error.'**
-  String get commonGenericError;
-
   /// No description provided for @commonEmail.
   ///
   /// In es, this message translates to:
@@ -3600,12 +208,6 @@ abstract class AppLocalizations {
   /// **'Ingresá tu email.'**
   String get commonEmailRequired;
 
-  /// No description provided for @commonEmailInvalid.
-  ///
-  /// In es, this message translates to:
-  /// **'Email inválido.'**
-  String get commonEmailInvalid;
-
   /// No description provided for @commonPassword.
   ///
   /// In es, this message translates to:
@@ -3617,12 +219,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Nueva contraseña'**
   String get commonNewPassword;
-
-  /// No description provided for @commonConfirmPassword.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmar contraseña'**
-  String get commonConfirmPassword;
 
   /// No description provided for @commonPasswordsDontMatch.
   ///
@@ -3660,18 +256,6 @@ abstract class AppLocalizations {
   /// **'Ingresando…'**
   String get commonSigningIn;
 
-  /// No description provided for @commonRegister.
-  ///
-  /// In es, this message translates to:
-  /// **'Registrarse'**
-  String get commonRegister;
-
-  /// No description provided for @commonPasswordMinLength4.
-  ///
-  /// In es, this message translates to:
-  /// **'La contraseña debe tener al menos 4 caracteres.'**
-  String get commonPasswordMinLength4;
-
   /// No description provided for @commonCreateAccount.
   ///
   /// In es, this message translates to:
@@ -3684,513 +268,11 @@ abstract class AppLocalizations {
   /// **'Creando…'**
   String get commonCreating;
 
-  /// No description provided for @commonFeatureUnavailablePrototype.
-  ///
-  /// In es, this message translates to:
-  /// **'Esta función no está disponible en este prototipo.'**
-  String get commonFeatureUnavailablePrototype;
-
-  /// No description provided for @alumnoLoginAppBar.
-  ///
-  /// In es, this message translates to:
-  /// **'Acceso de alumnos'**
-  String get alumnoLoginAppBar;
-
-  /// No description provided for @alumnoLoginTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresar'**
-  String get alumnoLoginTitle;
-
-  /// No description provided for @alumnoLoginForgotPassword.
-  ///
-  /// In es, this message translates to:
-  /// **'Olvidé mi contraseña'**
-  String get alumnoLoginForgotPassword;
-
-  /// No description provided for @alumnoLoginRegistroNoDisponible.
-  ///
-  /// In es, this message translates to:
-  /// **'Registro no disponible.'**
-  String get alumnoLoginRegistroNoDisponible;
-
-  /// No description provided for @alumnoRegistroAppBar.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear cuenta'**
-  String get alumnoRegistroAppBar;
-
-  /// No description provided for @alumnoRegistroTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear cuenta'**
-  String get alumnoRegistroTitle;
-
-  /// No description provided for @alumnoRegistroPasswordRequired.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá una contraseña.'**
-  String get alumnoRegistroPasswordRequired;
-
-  /// No description provided for @alumnoForgotPasswordTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Restablecer contraseña'**
-  String get alumnoForgotPasswordTitle;
-
-  /// No description provided for @alumnoForgotPasswordIntro.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá tu email y elegí una nueva contraseña.'**
-  String get alumnoForgotPasswordIntro;
-
-  /// No description provided for @alumnoForgotPasswordEmailLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Email'**
-  String get alumnoForgotPasswordEmailLabel;
-
-  /// No description provided for @alumnoForgotPasswordNewPasswordLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Nueva contraseña'**
-  String get alumnoForgotPasswordNewPasswordLabel;
-
-  /// No description provided for @alumnoForgotPasswordConfirmPasswordLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmar contraseña'**
-  String get alumnoForgotPasswordConfirmPasswordLabel;
-
-  /// No description provided for @alumnoForgotPasswordShowPassword.
-  ///
-  /// In es, this message translates to:
-  /// **'Mostrar contraseña'**
-  String get alumnoForgotPasswordShowPassword;
-
-  /// No description provided for @alumnoForgotPasswordHidePassword.
-  ///
-  /// In es, this message translates to:
-  /// **'Ocultar contraseña'**
-  String get alumnoForgotPasswordHidePassword;
-
-  /// No description provided for @alumnoForgotPasswordEnterEmailError.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá tu email.'**
-  String get alumnoForgotPasswordEnterEmailError;
-
-  /// No description provided for @alumnoForgotPasswordInvalidEmailError.
-  ///
-  /// In es, this message translates to:
-  /// **'Email inválido.'**
-  String get alumnoForgotPasswordInvalidEmailError;
-
-  /// No description provided for @alumnoForgotPasswordEnterPasswordError.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá una contraseña.'**
-  String get alumnoForgotPasswordEnterPasswordError;
-
-  /// No description provided for @alumnoForgotPasswordPasswordTooShortError.
-  ///
-  /// In es, this message translates to:
-  /// **'Contraseña muy corta.'**
-  String get alumnoForgotPasswordPasswordTooShortError;
-
-  /// No description provided for @alumnoForgotPasswordPasswordsDontMatchError.
-  ///
-  /// In es, this message translates to:
-  /// **'Las contraseñas no coinciden.'**
-  String get alumnoForgotPasswordPasswordsDontMatchError;
-
-  /// No description provided for @alumnoForgotPasswordPasswordsDontMatch.
-  ///
-  /// In es, this message translates to:
-  /// **'Las contraseñas no coinciden.'**
-  String get alumnoForgotPasswordPasswordsDontMatch;
-
-  /// No description provided for @alumnoForgotPasswordAccountNotFound.
-  ///
-  /// In es, this message translates to:
-  /// **'No se encontró ninguna cuenta para este email.'**
-  String get alumnoForgotPasswordAccountNotFound;
-
-  /// No description provided for @alumnoForgotPasswordPasswordUpdatedPrototype.
-  ///
-  /// In es, this message translates to:
-  /// **'Contraseña actualizada (prototipo).'**
-  String get alumnoForgotPasswordPasswordUpdatedPrototype;
-
-  /// No description provided for @institucionForgotPasswordTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Restablecer contraseña'**
-  String get institucionForgotPasswordTitle;
-
-  /// No description provided for @institucionForgotPasswordIntro.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá el email de la institución y elegí una nueva contraseña.'**
-  String get institucionForgotPasswordIntro;
-
-  /// No description provided for @institucionForgotPasswordEnterEmailError.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá el email.'**
-  String get institucionForgotPasswordEnterEmailError;
-
-  /// No description provided for @institucionForgotPasswordInvalidEmailError.
-  ///
-  /// In es, this message translates to:
-  /// **'Email inválido.'**
-  String get institucionForgotPasswordInvalidEmailError;
-
-  /// No description provided for @institucionForgotPasswordEnterPasswordError.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá una contraseña.'**
-  String get institucionForgotPasswordEnterPasswordError;
-
-  /// No description provided for @institucionForgotPasswordPasswordTooShortError.
-  ///
-  /// In es, this message translates to:
-  /// **'Contraseña muy corta.'**
-  String get institucionForgotPasswordPasswordTooShortError;
-
-  /// No description provided for @institucionForgotPasswordPasswordsDontMatchError.
-  ///
-  /// In es, this message translates to:
-  /// **'Las contraseñas no coinciden.'**
-  String get institucionForgotPasswordPasswordsDontMatchError;
-
-  /// No description provided for @institucionForgotPasswordAccountNotFound.
-  ///
-  /// In es, this message translates to:
-  /// **'No se encontró ninguna institución para este email.'**
-  String get institucionForgotPasswordAccountNotFound;
-
-  /// No description provided for @institucionForgotPasswordPasswordUpdatedPrototype.
-  ///
-  /// In es, this message translates to:
-  /// **'Contraseña actualizada (prototipo).'**
-  String get institucionForgotPasswordPasswordUpdatedPrototype;
-
-  /// No description provided for @invalidOwner.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner inválido.'**
-  String get invalidOwner;
-
-  /// No description provided for @noNotifications.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin notificaciones.'**
-  String get noNotifications;
-
-  /// No description provided for @onlyUnread.
-  ///
-  /// In es, this message translates to:
-  /// **'Solo no leídas'**
-  String get onlyUnread;
-
-  /// No description provided for @showAll.
-  ///
-  /// In es, this message translates to:
-  /// **'Mostrar todas'**
-  String get showAll;
-
-  /// No description provided for @allProfiles.
-  ///
-  /// In es, this message translates to:
-  /// **'Todos los perfiles'**
-  String get allProfiles;
-
-  /// No description provided for @filterByProfile.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtrar por perfil'**
-  String get filterByProfile;
-
-  /// No description provided for @filterForcedByCaller.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtro forzado por la pantalla de origen (no modificable desde aquí).'**
-  String get filterForcedByCaller;
-
-  /// No description provided for @clearPerfilFilter.
-  ///
-  /// In es, this message translates to:
-  /// **'Limpiar filtro de perfil'**
-  String get clearPerfilFilter;
-
-  /// No description provided for @noResultsForFilter.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin resultados para este filtro.'**
-  String get noResultsForFilter;
-
-  /// No description provided for @notificationDeleted.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificación eliminada.'**
-  String get notificationDeleted;
-
-  /// No description provided for @notificationNoDestination.
-  ///
-  /// In es, this message translates to:
-  /// **'Esta notificación no tiene destino.'**
-  String get notificationNoDestination;
-
-  /// No description provided for @invalidDeeplink.
-  ///
-  /// In es, this message translates to:
-  /// **'Deeplink inválido.'**
-  String get invalidDeeplink;
-
-  /// No description provided for @deeplinkOwnerMismatch.
-  ///
-  /// In es, this message translates to:
-  /// **'Este deeplink pertenece a otra cuenta.'**
-  String get deeplinkOwnerMismatch;
-
-  /// No description provided for @missingPerfilIdForOpen.
-  ///
-  /// In es, this message translates to:
-  /// **'Falta perfilId para abrir este destino.'**
-  String get missingPerfilIdForOpen;
-
-  /// No description provided for @deeplinkNotSupported.
-  ///
-  /// In es, this message translates to:
-  /// **'Deeplink no soportado: {path}'**
-  String deeplinkNotSupported(Object path);
-
-  /// No description provided for @notificationPerfilLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil: {perfil}'**
-  String notificationPerfilLine(Object perfil);
-
-  /// No description provided for @institucionAreaErrorEmptyId.
-  ///
-  /// In es, this message translates to:
-  /// **'ID de institución vacío.'**
-  String get institucionAreaErrorEmptyId;
-
-  /// No description provided for @alumnoGrupoExtraInvalidInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get alumnoGrupoExtraInvalidInstitution;
-
-  /// No description provided for @alumnoGrupoExtraMissingOwnerPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Falta contexto de sesión (owner/perfil).'**
-  String get alumnoGrupoExtraMissingOwnerPerfil;
-
-  /// No description provided for @alumnoGrupoExtraTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupos extracurriculares'**
-  String get alumnoGrupoExtraTitle;
-
-  /// No description provided for @alumnoGrupoExtraLoadErrorTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cargar'**
-  String get alumnoGrupoExtraLoadErrorTitle;
-
-  /// No description provided for @alumnoGrupoExtraSearchHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar actividad o institución…'**
-  String get alumnoGrupoExtraSearchHint;
-
-  /// No description provided for @alumnoGrupoExtraBlockOptionalLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Bloque (opcional)'**
-  String get alumnoGrupoExtraBlockOptionalLabel;
-
-  /// No description provided for @alumnoGrupoExtraEmptyFiltered.
-  ///
-  /// In es, this message translates to:
-  /// **'No se encontró ningún grupo para este filtro.'**
-  String get alumnoGrupoExtraEmptyFiltered;
-
-  /// No description provided for @alumnoGrupoExtraCupoUnmanaged.
-  ///
-  /// In es, this message translates to:
-  /// **'Capacidades no gestionadas'**
-  String get alumnoGrupoExtraCupoUnmanaged;
-
-  /// No description provided for @alumnoGrupoExtraOpenSolicitudError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo abrir Solicitudes: {error}'**
-  String alumnoGrupoExtraOpenSolicitudError(Object error);
-
-  /// No description provided for @alumnoGrupoExtraCupoManaged.
-  ///
-  /// In es, this message translates to:
-  /// **'Disponibles: {disp} de {max}'**
-  String alumnoGrupoExtraCupoManaged(Object disp, Object max);
-
-  /// No description provided for @alumnoGrupoExtraSemanticsItem.
-  ///
-  /// In es, this message translates to:
-  /// **'{actividad} · {institucion} · {cupo}'**
-  String alumnoGrupoExtraSemanticsItem(
-    Object actividad,
-    Object institucion,
-    Object cupo,
-  );
-
-  /// No description provided for @commonYes.
-  ///
-  /// In es, this message translates to:
-  /// **'Sí'**
-  String get commonYes;
-
-  /// No description provided for @commonOk.
-  ///
-  /// In es, this message translates to:
-  /// **'OK'**
-  String get commonOk;
-
-  /// No description provided for @commonClose.
-  ///
-  /// In es, this message translates to:
-  /// **'Cerrar'**
-  String get commonClose;
-
-  /// No description provided for @commonSearch.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar'**
-  String get commonSearch;
-
-  /// No description provided for @commonSearchHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar…'**
-  String get commonSearchHint;
-
-  /// No description provided for @commonOptional.
-  ///
-  /// In es, this message translates to:
-  /// **'Opcional'**
-  String get commonOptional;
-
-  /// No description provided for @commonRequired.
-  ///
-  /// In es, this message translates to:
-  /// **'Obligatorio'**
-  String get commonRequired;
-
-  /// No description provided for @commonDeletePhotoTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar foto'**
-  String get commonDeletePhotoTitle;
-
-  /// No description provided for @commonDeletePhotoConfirm.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés eliminar esta foto?'**
-  String get commonDeletePhotoConfirm;
-
-  /// No description provided for @commonNotificationsTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificaciones'**
-  String get commonNotificationsTooltip;
-
-  /// No description provided for @commonBackToProfiles.
-  ///
-  /// In es, this message translates to:
-  /// **'Volver a perfiles'**
-  String get commonBackToProfiles;
-
-  /// No description provided for @commonEmailLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Email'**
-  String get commonEmailLabel;
-
-  /// No description provided for @commonPhoneLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Teléfono'**
-  String get commonPhoneLabel;
-
-  /// No description provided for @commonChangePhoto.
-  ///
-  /// In es, this message translates to:
-  /// **'Cambiar foto'**
-  String get commonChangePhoto;
-
-  /// No description provided for @commonDeletePhoto.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar foto'**
-  String get commonDeletePhoto;
-
-  /// No description provided for @commonCalendar.
-  ///
-  /// In es, this message translates to:
-  /// **'Calendario'**
-  String get commonCalendar;
-
-  /// No description provided for @commonDocumentsPdf.
-  ///
-  /// In es, this message translates to:
-  /// **'Documentos (PDF)'**
-  String get commonDocumentsPdf;
-
-  /// No description provided for @commonStudentPdfSub.
-  ///
-  /// In es, this message translates to:
-  /// **'Ficha del alumno (PDF)'**
-  String get commonStudentPdfSub;
-
-  /// No description provided for @commonNotifications.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificaciones'**
-  String get commonNotifications;
-
   /// No description provided for @commonLogout.
   ///
   /// In es, this message translates to:
   /// **'Cerrar sesión'**
   String get commonLogout;
-
-  /// No description provided for @commonPendingConnect.
-  ///
-  /// In es, this message translates to:
-  /// **'Pendiente de conexión'**
-  String get commonPendingConnect;
-
-  /// No description provided for @commonPasteRealScreenHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Pegá la screen real aquí.'**
-  String get commonPasteRealScreenHint;
-
-  /// No description provided for @commonSelectDate.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccionar fecha'**
-  String get commonSelectDate;
-
-  /// No description provided for @commonInvalidSessionAccountId.
-  ///
-  /// In es, this message translates to:
-  /// **'Sesión inválida para esta cuenta.'**
-  String get commonInvalidSessionAccountId;
 
   /// No description provided for @commonNameLabel.
   ///
@@ -4198,23 +280,11 @@ abstract class AppLocalizations {
   /// **'Nombre'**
   String get commonNameLabel;
 
-  /// No description provided for @commonEnterName.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá tu nombre.'**
-  String get commonEnterName;
-
   /// No description provided for @commonLastNameLabel.
   ///
   /// In es, this message translates to:
   /// **'Apellido'**
   String get commonLastNameLabel;
-
-  /// No description provided for @commonEnterLastName.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá tu apellido.'**
-  String get commonEnterLastName;
 
   /// No description provided for @commonEmailOptionalLabel.
   ///
@@ -4222,83 +292,11 @@ abstract class AppLocalizations {
   /// **'Email (opcional)'**
   String get commonEmailOptionalLabel;
 
-  /// No description provided for @commonInvalidEmail.
-  ///
-  /// In es, this message translates to:
-  /// **'Email inválido.'**
-  String get commonInvalidEmail;
-
   /// No description provided for @commonPhoneOptionalLabel.
   ///
   /// In es, this message translates to:
   /// **'Teléfono (opcional)'**
   String get commonPhoneOptionalLabel;
-
-  /// No description provided for @commonSaveProfile.
-  ///
-  /// In es, this message translates to:
-  /// **'Guardar perfil'**
-  String get commonSaveProfile;
-
-  /// No description provided for @commonClear.
-  ///
-  /// In es, this message translates to:
-  /// **'Limpiar'**
-  String get commonClear;
-
-  /// No description provided for @commonAll.
-  ///
-  /// In es, this message translates to:
-  /// **'Todos'**
-  String get commonAll;
-
-  /// No description provided for @commonApply.
-  ///
-  /// In es, this message translates to:
-  /// **'Aplicar'**
-  String get commonApply;
-
-  /// No description provided for @commonLoadMore.
-  ///
-  /// In es, this message translates to:
-  /// **'Cargar más'**
-  String get commonLoadMore;
-
-  /// No description provided for @commonEndOfResults.
-  ///
-  /// In es, this message translates to:
-  /// **'Fin de resultados.'**
-  String get commonEndOfResults;
-
-  /// No description provided for @commonOwnerInvalid.
-  ///
-  /// In es, this message translates to:
-  /// **'Owner inválido.'**
-  String get commonOwnerInvalid;
-
-  /// No description provided for @commonPerfilInvalid.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil inválido.'**
-  String get commonPerfilInvalid;
-
-  /// No description provided for @commonDeleteTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar'**
-  String get commonDeleteTitle;
-
-  /// No description provided for @commonEvent.
-  ///
-  /// In es, this message translates to:
-  /// **'Evento'**
-  String get commonEvent;
-
-  /// No description provided for @commonPersonal.
-  ///
-  /// In es, this message translates to:
-  /// **'Personal'**
-  String get commonPersonal;
 
   /// No description provided for @commonDate.
   ///
@@ -4306,83 +304,11 @@ abstract class AppLocalizations {
   /// **'Fecha'**
   String get commonDate;
 
-  /// No description provided for @commonSpecialEvent.
-  ///
-  /// In es, this message translates to:
-  /// **'Evento especial'**
-  String get commonSpecialEvent;
-
-  /// No description provided for @commonId.
-  ///
-  /// In es, this message translates to:
-  /// **'ID'**
-  String get commonId;
-
-  /// No description provided for @commonMandatory.
-  ///
-  /// In es, this message translates to:
-  /// **'Obligatorio'**
-  String get commonMandatory;
-
-  /// No description provided for @commonDetail.
-  ///
-  /// In es, this message translates to:
-  /// **'Detalle'**
-  String get commonDetail;
-
-  /// No description provided for @commonAttendance.
-  ///
-  /// In es, this message translates to:
-  /// **'Asistencia'**
-  String get commonAttendance;
-
-  /// No description provided for @commonAttendancePending.
-  ///
-  /// In es, this message translates to:
-  /// **'Pendiente'**
-  String get commonAttendancePending;
-
-  /// No description provided for @commonAttendanceYes.
-  ///
-  /// In es, this message translates to:
-  /// **'Sí'**
-  String get commonAttendanceYes;
-
-  /// No description provided for @commonAttendanceMaybe.
-  ///
-  /// In es, this message translates to:
-  /// **'Quizás'**
-  String get commonAttendanceMaybe;
-
-  /// No description provided for @commonAttendanceNo.
-  ///
-  /// In es, this message translates to:
-  /// **'No'**
-  String get commonAttendanceNo;
-
-  /// No description provided for @commonPolicy.
-  ///
-  /// In es, this message translates to:
-  /// **'Política'**
-  String get commonPolicy;
-
   /// No description provided for @commonConfirm.
   ///
   /// In es, this message translates to:
   /// **'Confirmar'**
   String get commonConfirm;
-
-  /// No description provided for @commonMaybe.
-  ///
-  /// In es, this message translates to:
-  /// **'Quizás'**
-  String get commonMaybe;
-
-  /// No description provided for @commonDecline.
-  ///
-  /// In es, this message translates to:
-  /// **'Declinar'**
-  String get commonDecline;
 
   /// No description provided for @commonPrevMonth.
   ///
@@ -4396,35 +322,11 @@ abstract class AppLocalizations {
   /// **'Mes siguiente'**
   String get commonNextMonth;
 
-  /// No description provided for @commonEvents.
-  ///
-  /// In es, this message translates to:
-  /// **'Eventos'**
-  String get commonEvents;
-
-  /// No description provided for @commonAlarm.
-  ///
-  /// In es, this message translates to:
-  /// **'Alarma'**
-  String get commonAlarm;
-
-  /// No description provided for @commonNoTime.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin horario'**
-  String get commonNoTime;
-
   /// No description provided for @commonEdit.
   ///
   /// In es, this message translates to:
   /// **'Editar'**
   String get commonEdit;
-
-  /// No description provided for @commonNew.
-  ///
-  /// In es, this message translates to:
-  /// **'Nuevo'**
-  String get commonNew;
 
   /// No description provided for @commonTitle.
   ///
@@ -4432,143 +334,17 @@ abstract class AppLocalizations {
   /// **'Título'**
   String get commonTitle;
 
-  /// No description provided for @commonNoteOptional.
-  ///
-  /// In es, this message translates to:
-  /// **'Nota (opcional)'**
-  String get commonNoteOptional;
-
-  /// No description provided for @commonTime.
-  ///
-  /// In es, this message translates to:
-  /// **'Hora'**
-  String get commonTime;
-
-  /// No description provided for @commonChoose.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegir'**
-  String get commonChoose;
-
   /// No description provided for @commonView.
   ///
   /// In es, this message translates to:
   /// **'Ver'**
   String get commonView;
 
-  /// No description provided for @commonShare.
-  ///
-  /// In es, this message translates to:
-  /// **'Compartir'**
-  String get commonShare;
-
-  /// No description provided for @commonGroup.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupo'**
-  String get commonGroup;
-
-  /// No description provided for @commonInstitutionUnavailable.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución no disponible.'**
-  String get commonInstitutionUnavailable;
-
-  /// No description provided for @commonRequestCreated.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud creada.'**
-  String get commonRequestCreated;
-
-  /// No description provided for @commonScheduleLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Horario: {value}'**
-  String commonScheduleLabel(Object value);
-
-  /// No description provided for @commonAgeLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Edad: {value}'**
-  String commonAgeLabel(Object value);
-
-  /// No description provided for @commonSlotsLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Cupos: {value}'**
-  String commonSlotsLabel(Object value);
-
-  /// No description provided for @commonProfileLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil: {value}'**
-  String commonProfileLabel(Object value);
-
-  /// No description provided for @commonInstitutionLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución: {value}'**
-  String commonInstitutionLabel(Object value);
-
-  /// No description provided for @commonActivityLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad: {value}'**
-  String commonActivityLabel(Object value);
-
-  /// No description provided for @commonTypeLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo: {value}'**
-  String commonTypeLabel(Object value);
-
-  /// No description provided for @commonModuleKeyLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'moduleKey: {value}'**
-  String commonModuleKeyLabel(Object value);
-
-  /// No description provided for @commonAulaGrupoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Aula/Grupo: {value}'**
-  String commonAulaGrupoLabel(Object value);
-
-  /// No description provided for @commonShiftOrScheduleLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Turno/Horario: {value}'**
-  String commonShiftOrScheduleLabel(Object value);
-
-  /// No description provided for @commonSend.
-  ///
-  /// In es, this message translates to:
-  /// **'Enviar'**
-  String get commonSend;
-
   /// No description provided for @commonSending.
   ///
   /// In es, this message translates to:
   /// **'Enviando…'**
   String get commonSending;
-
-  /// No description provided for @commonRequestSentOk.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitud enviada.'**
-  String get commonRequestSentOk;
-
-  /// No description provided for @commonError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error.'**
-  String get commonError;
-
-  /// No description provided for @commonCreate.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear'**
-  String get commonCreate;
 
   /// No description provided for @commonFieldRequired.
   ///
@@ -4594,29 +370,11 @@ abstract class AppLocalizations {
   /// **'Teléfono inválido.'**
   String get commonPhoneInvalid;
 
-  /// No description provided for @commonRemove.
-  ///
-  /// In es, this message translates to:
-  /// **'Quitar'**
-  String get commonRemove;
-
-  /// No description provided for @commonAdd.
-  ///
-  /// In es, this message translates to:
-  /// **'Agregar'**
-  String get commonAdd;
-
   /// No description provided for @commonContinuing.
   ///
   /// In es, this message translates to:
   /// **'Continuando…'**
   String get commonContinuing;
-
-  /// No description provided for @commonContinue.
-  ///
-  /// In es, this message translates to:
-  /// **'Continuar'**
-  String get commonContinue;
 
   /// No description provided for @commonContinueToPlan.
   ///
@@ -4629,909 +387,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ingresá una contraseña.'**
   String get commonPasswordRequired;
-
-  /// No description provided for @commonForgotPassword.
-  ///
-  /// In es, this message translates to:
-  /// **'Olvidé mi contraseña'**
-  String get commonForgotPassword;
-
-  /// No description provided for @commonLoggingIn.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresando…'**
-  String get commonLoggingIn;
-
-  /// No description provided for @commonLogin.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresar'**
-  String get commonLogin;
-
-  /// No description provided for @commonDash.
-  ///
-  /// In es, this message translates to:
-  /// **'—'**
-  String get commonDash;
-
-  /// No description provided for @alumnoAreaTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Área de alumno'**
-  String get alumnoAreaTitle;
-
-  /// No description provided for @cerrarSesion.
-  ///
-  /// In es, this message translates to:
-  /// **'Cerrar sesión'**
-  String get cerrarSesion;
-
-  /// No description provided for @alumnoPerfilInvalido.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil inválido.'**
-  String get alumnoPerfilInvalido;
-
-  /// No description provided for @alumnoBuscarInstituciones.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar instituciones'**
-  String get alumnoBuscarInstituciones;
-
-  /// No description provided for @alumnoBuscarInstitucionesSub.
-  ///
-  /// In es, this message translates to:
-  /// **'Encontrá instituciones y actividades.'**
-  String get alumnoBuscarInstitucionesSub;
-
-  /// No description provided for @alumnoBuscarInstitucionesPlaceholderTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Búsqueda'**
-  String get alumnoBuscarInstitucionesPlaceholderTitle;
-
-  /// No description provided for @alumnoBuscarPlaceholderEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay resultados.'**
-  String get alumnoBuscarPlaceholderEmpty;
-
-  /// No description provided for @alumnoBuscarPlaceholderQuery.
-  ///
-  /// In es, this message translates to:
-  /// **'Búsqueda: {query}'**
-  String alumnoBuscarPlaceholderQuery(Object query);
-
-  /// No description provided for @alumnoDashboardTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Inicio'**
-  String get alumnoDashboardTitle;
-
-  /// No description provided for @alumnoDashboardMiDni.
-  ///
-  /// In es, this message translates to:
-  /// **'Mi DNI'**
-  String get alumnoDashboardMiDni;
-
-  /// No description provided for @alumnoDashboardMisSolicitudes.
-  ///
-  /// In es, this message translates to:
-  /// **'Mis solicitudes'**
-  String get alumnoDashboardMisSolicitudes;
-
-  /// No description provided for @alumnoDashboardMisSolicitudesSub.
-  ///
-  /// In es, this message translates to:
-  /// **'Ver el estado de tus solicitudes'**
-  String get alumnoDashboardMisSolicitudesSub;
-
-  /// No description provided for @alumnoDashboardBuscarInstituciones.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar instituciones'**
-  String get alumnoDashboardBuscarInstituciones;
-
-  /// No description provided for @alumnoDashboardBuscarInstitucionesSub.
-  ///
-  /// In es, this message translates to:
-  /// **'Encontrá instituciones y actividades'**
-  String get alumnoDashboardBuscarInstitucionesSub;
-
-  /// No description provided for @alumnoDashboardCerrarSesionSub.
-  ///
-  /// In es, this message translates to:
-  /// **'Cerrar tu sesión actual'**
-  String get alumnoDashboardCerrarSesionSub;
-
-  /// No description provided for @alumnoMisSolicitudesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Mis solicitudes'**
-  String get alumnoMisSolicitudesTitle;
-
-  /// No description provided for @alumnoBuscarInstitucionesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar instituciones'**
-  String get alumnoBuscarInstitucionesTitle;
-
-  /// No description provided for @alumnoBuscarPlaceholderTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar'**
-  String get alumnoBuscarPlaceholderTitle;
-
-  /// No description provided for @alumnoMenuTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Menú'**
-  String get alumnoMenuTitle;
-
-  /// No description provided for @alumnoMenuHeader.
-  ///
-  /// In es, this message translates to:
-  /// **'ATENA'**
-  String get alumnoMenuHeader;
-
-  /// No description provided for @alumnoMenuBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegí una opción para continuar.'**
-  String get alumnoMenuBody;
-
-  /// No description provided for @alumnoMenuCtaLogin.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresar'**
-  String get alumnoMenuCtaLogin;
-
-  /// No description provided for @alumnoFechaNacimientoNoFutura.
-  ///
-  /// In es, this message translates to:
-  /// **'La fecha de nacimiento no puede ser futura.'**
-  String get alumnoFechaNacimientoNoFutura;
-
-  /// No description provided for @alumnoSeleccionaFechaNacimiento.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccioná tu fecha de nacimiento.'**
-  String get alumnoSeleccionaFechaNacimiento;
-
-  /// No description provided for @alumnoNoSePudoCrearPerfilPerfilIdVacio.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo crear el perfil: perfilId vacío.'**
-  String get alumnoNoSePudoCrearPerfilPerfilIdVacio;
-
-  /// No description provided for @alumnoPerfilRegistroTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Registro de alumno'**
-  String get alumnoPerfilRegistroTitle;
-
-  /// No description provided for @alumnoDocumentoDniLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'DNI'**
-  String get alumnoDocumentoDniLabel;
-
-  /// No description provided for @alumnoIngresaDni.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá tu DNI.'**
-  String get alumnoIngresaDni;
-
-  /// No description provided for @alumnoDniInvalidoRango.
-  ///
-  /// In es, this message translates to:
-  /// **'DNI inválido (rango).'**
-  String get alumnoDniInvalidoRango;
-
-  /// No description provided for @alumnoFechaNacimientoPrefix.
-  ///
-  /// In es, this message translates to:
-  /// **'Fecha de nacimiento'**
-  String get alumnoFechaNacimientoPrefix;
-
-  /// No description provided for @alumnoBuscarExtracurricularesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar extracurriculares'**
-  String get alumnoBuscarExtracurricularesTitle;
-
-  /// No description provided for @alumnoBuscarExtracurricularesHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar actividad, institución o grupo…'**
-  String get alumnoBuscarExtracurricularesHint;
-
-  /// No description provided for @alumnoBuscarExtracurricularesBloqueOpcional.
-  ///
-  /// In es, this message translates to:
-  /// **'Bloque (opcional)'**
-  String get alumnoBuscarExtracurricularesBloqueOpcional;
-
-  /// No description provided for @alumnoBuscarExtracurricularesEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay extracurriculares disponibles.'**
-  String get alumnoBuscarExtracurricularesEmpty;
-
-  /// No description provided for @alumnoBuscarExtracurricularesGruposConCupo.
-  ///
-  /// In es, this message translates to:
-  /// **'Grupos con cupo: {count}'**
-  String alumnoBuscarExtracurricularesGruposConCupo(Object count);
-
-  /// No description provided for @alumnoBuscarExtracurricularesErrorCargar.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar extracurriculares: {error}'**
-  String alumnoBuscarExtracurricularesErrorCargar(Object error);
-
-  /// No description provided for @alumnoBuscarInstitucionesErrorCargar.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar instituciones: {error}'**
-  String alumnoBuscarInstitucionesErrorCargar(Object error);
-
-  /// No description provided for @alumnoBuscarInstitucionesErrorCargarMas.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar más: {error}'**
-  String alumnoBuscarInstitucionesErrorCargarMas(Object error);
-
-  /// No description provided for @alumnoBuscarInstitucionesExtraEnConstruccion.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurriculares (en construcción)'**
-  String get alumnoBuscarInstitucionesExtraEnConstruccion;
-
-  /// No description provided for @alumnoBuscarInstitucionesExtraAll.
-  ///
-  /// In es, this message translates to:
-  /// **'Todos'**
-  String get alumnoBuscarInstitucionesExtraAll;
-
-  /// No description provided for @alumnoBuscarInstitucionesExtraSelected.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccionado: {value}'**
-  String alumnoBuscarInstitucionesExtraSelected(Object value);
-
-  /// No description provided for @alumnoBuscarInstitucionesFiltroExtraTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtro extracurricular'**
-  String get alumnoBuscarInstitucionesFiltroExtraTitle;
-
-  /// No description provided for @alumnoBuscarInstitucionesNoHayInstituciones.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay instituciones registradas.'**
-  String get alumnoBuscarInstitucionesNoHayInstituciones;
-
-  /// No description provided for @alumnoBuscarInstitucionesNoResultadosConFiltro.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay resultados para este filtro.'**
-  String get alumnoBuscarInstitucionesNoResultadosConFiltro;
-
-  /// No description provided for @alumnoBuscarInstitucionesCurricularDisponible.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular disponible'**
-  String get alumnoBuscarInstitucionesCurricularDisponible;
-
-  /// No description provided for @alumnoBuscarInstitucionesCurricularNoDisponible.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular no disponible'**
-  String get alumnoBuscarInstitucionesCurricularNoDisponible;
-
-  /// No description provided for @alumnoBuscarInstitucionesExtraSinModulos.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin módulos extracurriculares'**
-  String get alumnoBuscarInstitucionesExtraSinModulos;
-
-  /// No description provided for @alumnoBuscarInstitucionesExtraConModulos.
-  ///
-  /// In es, this message translates to:
-  /// **'Módulos: {count}'**
-  String alumnoBuscarInstitucionesExtraConModulos(Object count);
-
-  /// No description provided for @alumnoBuscarInstitucionesExtraNoDisponible.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular no disponible'**
-  String get alumnoBuscarInstitucionesExtraNoDisponible;
-
-  /// No description provided for @alumnoBuscarInstitucionesBtnCurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular'**
-  String get alumnoBuscarInstitucionesBtnCurricular;
-
-  /// No description provided for @alumnoBuscarInstitucionesBtnExtracurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get alumnoBuscarInstitucionesBtnExtracurricular;
-
-  /// No description provided for @alumnoCalendarioEspecialInicioClases.
-  ///
-  /// In es, this message translates to:
-  /// **'Inicio de clases'**
-  String get alumnoCalendarioEspecialInicioClases;
-
-  /// No description provided for @alumnoCalendarioEspecialFinClases.
-  ///
-  /// In es, this message translates to:
-  /// **'Fin de clases'**
-  String get alumnoCalendarioEspecialFinClases;
-
-  /// No description provided for @alumnoCalendarioEspecialReceso.
-  ///
-  /// In es, this message translates to:
-  /// **'Receso'**
-  String get alumnoCalendarioEspecialReceso;
-
-  /// No description provided for @alumnoCalendarioEspecialInicioCiclo.
-  ///
-  /// In es, this message translates to:
-  /// **'Inicio de ciclo'**
-  String get alumnoCalendarioEspecialInicioCiclo;
-
-  /// No description provided for @alumnoCalendarioEspecialFinCiclo.
-  ///
-  /// In es, this message translates to:
-  /// **'Fin de ciclo'**
-  String get alumnoCalendarioEspecialFinCiclo;
-
-  /// No description provided for @alumnoCalendarioSnackNoDeclinar.
-  ///
-  /// In es, this message translates to:
-  /// **'No se puede declinar este evento.'**
-  String get alumnoCalendarioSnackNoDeclinar;
-
-  /// No description provided for @alumnoCalendarioSnackAsistenciaConfirmada.
-  ///
-  /// In es, this message translates to:
-  /// **'Asistencia confirmada.'**
-  String get alumnoCalendarioSnackAsistenciaConfirmada;
-
-  /// No description provided for @alumnoCalendarioSnackAsistenciaQuizas.
-  ///
-  /// In es, this message translates to:
-  /// **'Asistencia: quizás.'**
-  String get alumnoCalendarioSnackAsistenciaQuizas;
-
-  /// No description provided for @alumnoCalendarioSnackAsistenciaDeclinada.
-  ///
-  /// In es, this message translates to:
-  /// **'Asistencia declinada.'**
-  String get alumnoCalendarioSnackAsistenciaDeclinada;
-
-  /// No description provided for @alumnoCalendarioSnackNoGuardarRsvp.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo guardar asistencia: {error}'**
-  String alumnoCalendarioSnackNoGuardarRsvp(Object error);
-
-  /// No description provided for @alumnoCalendarioSnackNoGuardarNota.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo guardar nota: {error}'**
-  String alumnoCalendarioSnackNoGuardarNota(Object error);
-
-  /// No description provided for @alumnoCalendarioSnackNoActualizarNota.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo actualizar nota: {error}'**
-  String alumnoCalendarioSnackNoActualizarNota(Object error);
-
-  /// No description provided for @alumnoCalendarioEliminarConfirm.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés eliminar este evento?'**
-  String get alumnoCalendarioEliminarConfirm;
-
-  /// No description provided for @alumnoCalendarioSnackNoEliminarNota.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo eliminar nota: {error}'**
-  String alumnoCalendarioSnackNoEliminarNota(Object error);
-
-  /// No description provided for @alumnoCalendarioNoRequiereAsistencia.
-  ///
-  /// In es, this message translates to:
-  /// **'Este evento no requiere asistencia.'**
-  String get alumnoCalendarioNoRequiereAsistencia;
-
-  /// No description provided for @alumnoCalendarioNotaCanonica.
-  ///
-  /// In es, this message translates to:
-  /// **'Nota canónica'**
-  String get alumnoCalendarioNotaCanonica;
-
-  /// No description provided for @alumnoCalendarioTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Calendario'**
-  String get alumnoCalendarioTitle;
-
-  /// No description provided for @alumnoCalendarioFabNotaAlarma.
-  ///
-  /// In es, this message translates to:
-  /// **'Nota / Alarma'**
-  String get alumnoCalendarioFabNotaAlarma;
-
-  /// No description provided for @alumnoCalendarioNoEventosDia.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay eventos para este día.'**
-  String get alumnoCalendarioNoEventosDia;
-
-  /// No description provided for @alumnoCalendarioConfirmarAsistencia.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmar asistencia'**
-  String get alumnoCalendarioConfirmarAsistencia;
-
-  /// No description provided for @alumnoCalendarioDialogNotaAlarma.
-  ///
-  /// In es, this message translates to:
-  /// **'Nota y alarma'**
-  String get alumnoCalendarioDialogNotaAlarma;
-
-  /// No description provided for @alumnoCalendarioDialogIngresarTitulo.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá un título'**
-  String get alumnoCalendarioDialogIngresarTitulo;
-
-  /// No description provided for @alumnoCalendarioDialogAlarmaLocal.
-  ///
-  /// In es, this message translates to:
-  /// **'Alarma local'**
-  String get alumnoCalendarioDialogAlarmaLocal;
-
-  /// No description provided for @alumnoCalendarioDialogAlarmaLocalDesc.
-  ///
-  /// In es, this message translates to:
-  /// **'Se guardará solo en este dispositivo.'**
-  String get alumnoCalendarioDialogAlarmaLocalDesc;
-
-  /// No description provided for @alumnoCalendarioDialogAvisoNotificacion.
-  ///
-  /// In es, this message translates to:
-  /// **'Aviso: notificación'**
-  String get alumnoCalendarioDialogAvisoNotificacion;
-
-  /// No description provided for @alumnoNotificacionesDeleteOneTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar notificación'**
-  String get alumnoNotificacionesDeleteOneTitle;
-
-  /// No description provided for @alumnoNotificacionesDeleteOneBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés eliminar esta notificación?'**
-  String get alumnoNotificacionesDeleteOneBody;
-
-  /// No description provided for @alumnoNotificacionesDeleteAllTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar todas'**
-  String get alumnoNotificacionesDeleteAllTitle;
-
-  /// No description provided for @alumnoNotificacionesDeleteAllBody.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Querés eliminar todas las notificaciones?'**
-  String get alumnoNotificacionesDeleteAllBody;
-
-  /// No description provided for @alumnoNotificacionesDeleteAllCta.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar todas'**
-  String get alumnoNotificacionesDeleteAllCta;
-
-  /// No description provided for @alumnoNotificacionesDeleteAllFailed.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo eliminar todo.'**
-  String get alumnoNotificacionesDeleteAllFailed;
-
-  /// No description provided for @alumnoNotificacionesActionOpenDocumentos.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir Documentación'**
-  String get alumnoNotificacionesActionOpenDocumentos;
-
-  /// No description provided for @alumnoNotificacionesActionOpenCalendario.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir Calendario'**
-  String get alumnoNotificacionesActionOpenCalendario;
-
-  /// No description provided for @alumnoNotificacionesActionOpenBoletines.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir Boletines'**
-  String get alumnoNotificacionesActionOpenBoletines;
-
-  /// No description provided for @alumnoNotificacionesActionOpenBecas.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir Becas'**
-  String get alumnoNotificacionesActionOpenBecas;
-
-  /// No description provided for @alumnoNotificacionesActionOpenConvivencia.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir Convivencia'**
-  String get alumnoNotificacionesActionOpenConvivencia;
-
-  /// No description provided for @alumnoNotificacionesActionOpenEquivalencias.
-  ///
-  /// In es, this message translates to:
-  /// **'Abrir Equivalencias'**
-  String get alumnoNotificacionesActionOpenEquivalencias;
-
-  /// No description provided for @alumnoNotificacionesActionViewDetail.
-  ///
-  /// In es, this message translates to:
-  /// **'Ver detalle'**
-  String get alumnoNotificacionesActionViewDetail;
-
-  /// No description provided for @alumnoNotificacionesSectionNotReady.
-  ///
-  /// In es, this message translates to:
-  /// **'Sección no disponible todavía.'**
-  String get alumnoNotificacionesSectionNotReady;
-
-  /// No description provided for @alumnoNotificacionesDialogActionLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Acción: {value}'**
-  String alumnoNotificacionesDialogActionLine(Object value);
-
-  /// No description provided for @alumnoNotificacionesDialogProfileLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil: {value}'**
-  String alumnoNotificacionesDialogProfileLine(Object value);
-
-  /// No description provided for @alumnoNotificacionesDialogDateLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Fecha: {value}'**
-  String alumnoNotificacionesDialogDateLine(Object value);
-
-  /// No description provided for @alumnoNotificacionesDialogDeeplinkLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Deeplink: {value}'**
-  String alumnoNotificacionesDialogDeeplinkLine(Object value);
-
-  /// No description provided for @alumnoNotificacionesTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificaciones'**
-  String get alumnoNotificacionesTitle;
-
-  /// No description provided for @alumnoNotificacionesTitleWithUnread.
-  ///
-  /// In es, this message translates to:
-  /// **'Notificaciones ({count} sin leer)'**
-  String alumnoNotificacionesTitleWithUnread(Object count);
-
-  /// No description provided for @alumnoNotificacionesDeleteAllTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Eliminar todas'**
-  String get alumnoNotificacionesDeleteAllTooltip;
-
-  /// No description provided for @alumnoNotificacionesNoOwnerBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Se requiere sesión activa para ver notificaciones.'**
-  String get alumnoNotificacionesNoOwnerBody;
-
-  /// No description provided for @alumnoNotificacionesEmptyTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin notificaciones'**
-  String get alumnoNotificacionesEmptyTitle;
-
-  /// No description provided for @alumnoNotificacionesEmptyBody.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay notificaciones disponibles.'**
-  String get alumnoNotificacionesEmptyBody;
-
-  /// No description provided for @alumnoNotificacionesMarkRead.
-  ///
-  /// In es, this message translates to:
-  /// **'Marcar como leída'**
-  String get alumnoNotificacionesMarkRead;
-
-  /// No description provided for @alumnoNotificacionesMarkUnread.
-  ///
-  /// In es, this message translates to:
-  /// **'Marcar como no leída'**
-  String get alumnoNotificacionesMarkUnread;
-
-  /// No description provided for @alumnoNotificacionesFilterStatusLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Estado'**
-  String get alumnoNotificacionesFilterStatusLabel;
-
-  /// No description provided for @alumnoNotificacionesFilterTypeLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo'**
-  String get alumnoNotificacionesFilterTypeLabel;
-
-  /// No description provided for @alumnoNotificacionesShowingCount.
-  ///
-  /// In es, this message translates to:
-  /// **'Mostrando: {count}'**
-  String alumnoNotificacionesShowingCount(Object count);
-
-  /// No description provided for @alumnoNotificacionesShowingCountWithPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Mostrando: {count} · Perfil: {perfil}'**
-  String alumnoNotificacionesShowingCountWithPerfil(
-    Object count,
-    Object perfil,
-  );
-
-  /// No description provided for @alumnoPdfsInvalidPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil inválido.'**
-  String get alumnoPdfsInvalidPerfil;
-
-  /// No description provided for @alumnoPdfsSavedPath.
-  ///
-  /// In es, this message translates to:
-  /// **'Guardado en: {path}'**
-  String alumnoPdfsSavedPath(Object path);
-
-  /// No description provided for @alumnoPdfsTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'PDFs'**
-  String get alumnoPdfsTitle;
-
-  /// No description provided for @alumnoPdfsFichaTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Ficha'**
-  String get alumnoPdfsFichaTitle;
-
-  /// No description provided for @alumnoPdfsPerfilId.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil: {perfilId}'**
-  String alumnoPdfsPerfilId(Object perfilId);
-
-  /// No description provided for @alumnoPdfsCroquisTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Croquis'**
-  String get alumnoPdfsCroquisTitle;
-
-  /// No description provided for @alumnoPdfsCroquisPlaceholder.
-  ///
-  /// In es, this message translates to:
-  /// **'Croquis no disponible.'**
-  String get alumnoPdfsCroquisPlaceholder;
-
-  /// No description provided for @alumnoSeleccionGrupoInstitutionLoadFailed.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cargar la institución.'**
-  String get alumnoSeleccionGrupoInstitutionLoadFailed;
-
-  /// No description provided for @alumnoSeleccionGrupoLoadError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar: {error}'**
-  String alumnoSeleccionGrupoLoadError(Object error);
-
-  /// No description provided for @alumnoSeleccionGrupoExtraLoadError.
-  ///
-  /// In es, this message translates to:
-  /// **'Error al cargar extracurriculares: {error}'**
-  String alumnoSeleccionGrupoExtraLoadError(Object error);
-
-  /// No description provided for @alumnoSeleccionGrupoPickCourseAndShift.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegí curso/grupo y turno.'**
-  String get alumnoSeleccionGrupoPickCourseAndShift;
-
-  /// No description provided for @alumnoSeleccionGrupoPickExtraActivity.
-  ///
-  /// In es, this message translates to:
-  /// **'Elegí una actividad extracurricular.'**
-  String get alumnoSeleccionGrupoPickExtraActivity;
-
-  /// No description provided for @alumnoSeleccionGrupoExtraNoSlots.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay cupos disponibles.'**
-  String get alumnoSeleccionGrupoExtraNoSlots;
-
-  /// No description provided for @alumnoSeleccionGrupoNoSlotsShort.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin cupos'**
-  String get alumnoSeleccionGrupoNoSlotsShort;
-
-  /// No description provided for @alumnoSeleccionGrupoNoSlots.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay cupos disponibles.'**
-  String get alumnoSeleccionGrupoNoSlots;
-
-  /// No description provided for @alumnoSeleccionGrupoExtraFilterByBlock.
-  ///
-  /// In es, this message translates to:
-  /// **'Filtrar por bloque'**
-  String get alumnoSeleccionGrupoExtraFilterByBlock;
-
-  /// No description provided for @alumnoSeleccionGrupoExtraEmpty.
-  ///
-  /// In es, this message translates to:
-  /// **'No hay resultados para este filtro.'**
-  String get alumnoSeleccionGrupoExtraEmpty;
-
-  /// No description provided for @alumnoSeleccionGrupoModeCurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular'**
-  String get alumnoSeleccionGrupoModeCurricular;
-
-  /// No description provided for @alumnoSeleccionGrupoModeExtracurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get alumnoSeleccionGrupoModeExtracurricular;
-
-  /// No description provided for @alumnoSeleccionGrupoTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccionar grupo – {mode}'**
-  String alumnoSeleccionGrupoTitle(Object mode);
-
-  /// No description provided for @alumnoSeleccionGrupoExtraRefresh.
-  ///
-  /// In es, this message translates to:
-  /// **'Actualizar'**
-  String get alumnoSeleccionGrupoExtraRefresh;
-
-  /// No description provided for @alumnoSeleccionGrupoCtaCurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Continuar (curricular)'**
-  String get alumnoSeleccionGrupoCtaCurricular;
-
-  /// No description provided for @alumnoSeleccionGrupoCtaExtracurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Continuar (extracurricular)'**
-  String get alumnoSeleccionGrupoCtaExtracurricular;
-
-  /// No description provided for @alumnoSolicitarVacanteMissingOwnerPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Falta contexto de sesión (owner/perfil).'**
-  String get alumnoSolicitarVacanteMissingOwnerPerfil;
-
-  /// No description provided for @alumnoSolicitarVacanteInvalidInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución inválida.'**
-  String get alumnoSolicitarVacanteInvalidInstitution;
-
-  /// No description provided for @alumnoSolicitarVacanteInvalidActivity.
-  ///
-  /// In es, this message translates to:
-  /// **'Actividad inválida.'**
-  String get alumnoSolicitarVacanteInvalidActivity;
-
-  /// No description provided for @alumnoSolicitarVacanteCurricularRequiresAula.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular requiere aula/grupo.'**
-  String get alumnoSolicitarVacanteCurricularRequiresAula;
-
-  /// No description provided for @alumnoSolicitarVacanteConfirmTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Confirmar solicitud'**
-  String get alumnoSolicitarVacanteConfirmTitle;
-
-  /// No description provided for @alumnoSolicitarVacanteTypeCurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular'**
-  String get alumnoSolicitarVacanteTypeCurricular;
-
-  /// No description provided for @alumnoSolicitarVacanteTypeExtracurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get alumnoSolicitarVacanteTypeExtracurricular;
-
-  /// No description provided for @alumnoSolicitarVacanteTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Solicitar vacante'**
-  String get alumnoSolicitarVacanteTitle;
-
-  /// No description provided for @alumnoSolicitarVacanteSummarySemantics.
-  ///
-  /// In es, this message translates to:
-  /// **'Resumen: {value}'**
-  String alumnoSolicitarVacanteSummarySemantics(Object value);
-
-  /// No description provided for @alumnoSolicitarVacanteSendCta.
-  ///
-  /// In es, this message translates to:
-  /// **'Enviar solicitud'**
-  String get alumnoSolicitarVacanteSendCta;
-
-  /// No description provided for @institucionLoginBadCredentials.
-  ///
-  /// In es, this message translates to:
-  /// **'Credenciales incorrectas.'**
-  String get institucionLoginBadCredentials;
-
-  /// No description provided for @institucionLoginInvalidInstitutionId.
-  ///
-  /// In es, this message translates to:
-  /// **'ID de institución inválido.'**
-  String get institucionLoginInvalidInstitutionId;
-
-  /// No description provided for @institucionLoginTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresar'**
-  String get institucionLoginTitle;
-
-  /// No description provided for @institucionLoginAppBar.
-  ///
-  /// In es, this message translates to:
-  /// **'Acceso de institución'**
-  String get institucionLoginAppBar;
-
-  /// No description provided for @institucionRegistroPickAtLeastOneModule.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccioná al menos un módulo.'**
-  String get institucionRegistroPickAtLeastOneModule;
-
-  /// No description provided for @institucionRegistroAppBar.
-  ///
-  /// In es, this message translates to:
-  /// **'Registro de institución'**
-  String get institucionRegistroAppBar;
-
-  /// No description provided for @institucionRegistroIntro.
-  ///
-  /// In es, this message translates to:
-  /// **'Completá los datos para registrar la institución.'**
-  String get institucionRegistroIntro;
 
   /// No description provided for @institucionRegistroSectionBasics.
   ///
@@ -5593,1055 +448,7269 @@ abstract class AppLocalizations {
   /// **'Acceso y contacto'**
   String get institucionRegistroSectionAccessContact;
 
-  /// No description provided for @institucionRegistroSectionConfig.
-  ///
-  /// In es, this message translates to:
-  /// **'Configuración'**
-  String get institucionRegistroSectionConfig;
-
-  /// No description provided for @institucionRegistroInstitutionType.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo de institución'**
-  String get institucionRegistroInstitutionType;
-
-  /// No description provided for @institucionRegistroModality.
-  ///
-  /// In es, this message translates to:
-  /// **'Modalidad'**
-  String get institucionRegistroModality;
-
-  /// No description provided for @institucionRegistroSectionModules.
-  ///
-  /// In es, this message translates to:
-  /// **'Módulos'**
-  String get institucionRegistroSectionModules;
-
-  /// No description provided for @institucionRegistroCurricularSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccioná niveles curriculares'**
-  String get institucionRegistroCurricularSubtitle;
-
-  /// No description provided for @institucionRegistroCurricularChipSemantics.
-  ///
-  /// In es, this message translates to:
-  /// **'Nivel curricular: {value}'**
-  String institucionRegistroCurricularChipSemantics(Object value);
-
-  /// No description provided for @institucionRegistroExtracurricularSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Seleccioná bloques extracurriculares'**
-  String get institucionRegistroExtracurricularSubtitle;
-
-  /// No description provided for @institucionRegistroExtracurricularChipSemantics.
-  ///
-  /// In es, this message translates to:
-  /// **'Bloque extracurricular: {value}'**
-  String institucionRegistroExtracurricularChipSemantics(Object value);
-
-  /// No description provided for @cuentaHomeDeeplinkOwnerMismatch.
-  ///
-  /// In es, this message translates to:
-  /// **'Este deeplink pertenece a otra cuenta.'**
-  String get cuentaHomeDeeplinkOwnerMismatch;
-
-  /// No description provided for @cuentaHomeDeeplinkAlumnoRequired.
-  ///
-  /// In es, this message translates to:
-  /// **'Se requiere un perfil de alumno para este deeplink.'**
-  String get cuentaHomeDeeplinkAlumnoRequired;
-
-  /// No description provided for @cuentaHomeDestinoCalendario.
-  ///
-  /// In es, this message translates to:
-  /// **'Calendario'**
-  String get cuentaHomeDestinoCalendario;
-
-  /// No description provided for @cuentaHomeDestinoDocumentos.
-  ///
-  /// In es, this message translates to:
-  /// **'Documentación'**
-  String get cuentaHomeDestinoDocumentos;
-
-  /// No description provided for @cuentaHomeDeeplinkMissingPerfilId.
-  ///
-  /// In es, this message translates to:
-  /// **'Falta perfilId para abrir este deeplink: {path}'**
-  String cuentaHomeDeeplinkMissingPerfilId(Object path);
-
-  /// No description provided for @cuentaHomeCrearInstitucionTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear institución'**
-  String get cuentaHomeCrearInstitucionTitle;
-
-  /// No description provided for @cuentaHomeCrearInstitucionNombreLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Nombre'**
-  String get cuentaHomeCrearInstitucionNombreLabel;
-
-  /// No description provided for @cuentaHomeCrearInstitucionNombreRequired.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá el nombre.'**
-  String get cuentaHomeCrearInstitucionNombreRequired;
-
-  /// No description provided for @cuentaHomeCrearInstitucionEmailLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Email'**
-  String get cuentaHomeCrearInstitucionEmailLabel;
-
-  /// No description provided for @cuentaHomeCrearInstitucionEmailRequired.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá el email.'**
-  String get cuentaHomeCrearInstitucionEmailRequired;
-
-  /// No description provided for @cuentaHomeCrearInstitucionTelefonoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Teléfono'**
-  String get cuentaHomeCrearInstitucionTelefonoLabel;
-
-  /// No description provided for @cuentaHomeCrearInstitucionTelefonoRequired.
-  ///
-  /// In es, this message translates to:
-  /// **'Ingresá el teléfono.'**
-  String get cuentaHomeCrearInstitucionTelefonoRequired;
-
-  /// No description provided for @cuentaHomeCrearPerfilTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear perfil'**
-  String get cuentaHomeCrearPerfilTitle;
-
-  /// No description provided for @cuentaHomeTipoAlumno.
-  ///
-  /// In es, this message translates to:
-  /// **'Alumno'**
-  String get cuentaHomeTipoAlumno;
-
-  /// No description provided for @cuentaHomeTipoInstitucion.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución'**
-  String get cuentaHomeTipoInstitucion;
-
-  /// No description provided for @cuentaHomeContinuarUltimoPerfil.
-  ///
-  /// In es, this message translates to:
-  /// **'Continuar con el último perfil'**
-  String get cuentaHomeContinuarUltimoPerfil;
-
-  /// No description provided for @cuentaHomeTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Cuenta'**
-  String get cuentaHomeTitle;
-
-  /// No description provided for @cuentaHomeRedirectingInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Redirigiendo a institución…'**
-  String get cuentaHomeRedirectingInstitution;
-
-  /// No description provided for @cuentaHomePreparingInstitution.
-  ///
-  /// In es, this message translates to:
-  /// **'Preparando institución…'**
-  String get cuentaHomePreparingInstitution;
-
-  /// No description provided for @cuentaHomeCreateProfileCta.
-  ///
-  /// In es, this message translates to:
-  /// **'Crear perfil'**
-  String get cuentaHomeCreateProfileCta;
-
-  /// No description provided for @cuentaHomeAccountLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Cuenta: {ownerId}'**
-  String cuentaHomeAccountLine(Object ownerId);
-
-  /// No description provided for @cuentaHomeNoProfiles.
-  ///
-  /// In es, this message translates to:
-  /// **'Todavía no hay perfiles.'**
-  String get cuentaHomeNoProfiles;
-
-  /// No description provided for @cuentaHomeInstitutionsSection.
-  ///
-  /// In es, this message translates to:
-  /// **'Instituciones'**
-  String get cuentaHomeInstitutionsSection;
-
-  /// No description provided for @cuentaHomeInstitutionIdLine.
-  ///
-  /// In es, this message translates to:
-  /// **'Institución: {id}'**
-  String cuentaHomeInstitutionIdLine(Object id);
-
-  /// No description provided for @cuentaHomeStudentsSection.
-  ///
-  /// In es, this message translates to:
-  /// **'Alumnos'**
-  String get cuentaHomeStudentsSection;
-
-  /// No description provided for @cuentaHomeNoStudents.
-  ///
-  /// In es, this message translates to:
-  /// **'Todavía no hay alumnos.'**
-  String get cuentaHomeNoStudents;
-
-  /// No description provided for @cuentaHomeStudentDniLine.
-  ///
-  /// In es, this message translates to:
-  /// **'DNI: {dni}'**
-  String cuentaHomeStudentDniLine(Object dni);
-
-  /// No description provided for @commonPreview.
-  ///
-  /// In es, this message translates to:
-  /// **'Vista previa'**
-  String get commonPreview;
-
-  /// No description provided for @alumnoBuscarInstitucionesHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Buscar institución o actividad…'**
-  String get alumnoBuscarInstitucionesHint;
-
-  /// No description provided for @commonMon.
-  ///
-  /// In es, this message translates to:
-  /// **'Lun'**
-  String get commonMon;
-
-  /// No description provided for @commonTue.
-  ///
-  /// In es, this message translates to:
-  /// **'Mar'**
-  String get commonTue;
-
-  /// No description provided for @commonWed.
-  ///
-  /// In es, this message translates to:
-  /// **'Mié'**
-  String get commonWed;
-
-  /// No description provided for @commonThu.
-  ///
-  /// In es, this message translates to:
-  /// **'Jue'**
-  String get commonThu;
-
-  /// No description provided for @commonFri.
-  ///
-  /// In es, this message translates to:
-  /// **'Vie'**
-  String get commonFri;
-
-  /// No description provided for @commonSat.
-  ///
-  /// In es, this message translates to:
-  /// **'Sáb'**
-  String get commonSat;
-
-  /// No description provided for @commonSun.
-  ///
-  /// In es, this message translates to:
-  /// **'Dom'**
-  String get commonSun;
-
-  /// No description provided for @commonInvalidSession.
-  ///
-  /// In es, this message translates to:
-  /// **'Sesión inválida.'**
-  String get commonInvalidSession;
-
-  /// No description provided for @commonUnread.
-  ///
-  /// In es, this message translates to:
-  /// **'No leída'**
-  String get commonUnread;
-
-  /// No description provided for @commonRead.
-  ///
-  /// In es, this message translates to:
-  /// **'Leída'**
-  String get commonRead;
-
-  /// No description provided for @commonRetry.
-  ///
-  /// In es, this message translates to:
-  /// **'Reintentar'**
-  String get commonRetry;
-
-  /// No description provided for @commonShiftMorning.
-  ///
-  /// In es, this message translates to:
-  /// **'Mañana'**
-  String get commonShiftMorning;
-
-  /// No description provided for @commonShiftAfternoon.
-  ///
-  /// In es, this message translates to:
-  /// **'Tarde'**
-  String get commonShiftAfternoon;
-
-  /// No description provided for @commonShiftNight.
-  ///
-  /// In es, this message translates to:
-  /// **'Noche'**
-  String get commonShiftNight;
-
-  /// No description provided for @alumnoSeleccionGrupoOpenSolicitudError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo abrir Solicitudes: {error}'**
-  String alumnoSeleccionGrupoOpenSolicitudError(Object error);
-
-  /// No description provided for @alumnoSeleccionGrupoSlotsAvailable.
-  ///
-  /// In es, this message translates to:
-  /// **'Cupos disponibles: {count}'**
-  String alumnoSeleccionGrupoSlotsAvailable(Object count);
-
-  /// No description provided for @institucionAreaSemanticsCroquisLocked.
-  ///
-  /// In es, this message translates to:
-  /// **'Croquis no disponible'**
-  String get institucionAreaSemanticsCroquisLocked;
-
-  /// No description provided for @institucionPlanBillingTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Facturación y cobro'**
-  String get institucionPlanBillingTitle;
-
-  /// No description provided for @institucionPlanBillingSubtitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Cómo funciona el cobro en ATENA (fase 2)'**
-  String get institucionPlanBillingSubtitle;
-
-  /// No description provided for @institucionPlanBillingIntro.
-  ///
-  /// In es, this message translates to:
-  /// **'Antes de confirmar, tené en cuenta lo siguiente:'**
-  String get institucionPlanBillingIntro;
-
-  /// No description provided for @institucionPlanBillingPoint1.
-  ///
-  /// In es, this message translates to:
-  /// **'ATENA solo cobra a instituciones (no a alumnos).'**
-  String get institucionPlanBillingPoint1;
-
-  /// No description provided for @institucionPlanBillingPoint2.
-  ///
-  /// In es, this message translates to:
-  /// **'En fase 2 no hay cobros reales: la confirmación es local/prototipo.'**
-  String get institucionPlanBillingPoint2;
-
-  /// No description provided for @institucionPlanBillingPoint3.
-  ///
-  /// In es, this message translates to:
-  /// **'El plan habilita niveles y módulos; podés cambiarlo más adelante.'**
-  String get institucionPlanBillingPoint3;
-
-  /// No description provided for @institucionPlanBillingPoint4.
-  ///
-  /// In es, this message translates to:
-  /// **'Las instituciones pueden administrar sus perfiles de trabajo por actividad sin compartir credenciales.'**
-  String get institucionPlanBillingPoint4;
-
-  /// No description provided for @institucionPlanBillingPoint5.
-  ///
-  /// In es, this message translates to:
-  /// **'Cuando integremos pagos reales, se aplicarán términos, facturación y políticas de reembolso según la configuración final.'**
-  String get institucionPlanBillingPoint5;
-
-  /// No description provided for @institutionProfileTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Perfil de institución – {name}'**
-  String institutionProfileTitle(Object name);
-
-  /// No description provided for @institutionProfileLoadError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo cargar el perfil: {error}'**
-  String institutionProfileLoadError(Object error);
-
-  /// No description provided for @institutionProfileSaveError.
-  ///
-  /// In es, this message translates to:
-  /// **'No se pudo guardar el perfil: {error}'**
-  String institutionProfileSaveError(Object error);
-
-  /// No description provided for @institutionProfileSectionIdentity.
-  ///
-  /// In es, this message translates to:
-  /// **'Identidad'**
-  String get institutionProfileSectionIdentity;
-
-  /// No description provided for @institutionProfileSectionContact.
-  ///
-  /// In es, this message translates to:
-  /// **'Contacto'**
-  String get institutionProfileSectionContact;
-
-  /// No description provided for @institutionProfileSectionLocation.
-  ///
-  /// In es, this message translates to:
-  /// **'Ubicación'**
-  String get institutionProfileSectionLocation;
-
-  /// No description provided for @institutionProfileSectionSettings.
-  ///
-  /// In es, this message translates to:
-  /// **'Configuración'**
-  String get institutionProfileSectionSettings;
-
-  /// No description provided for @institutionProfileFieldName.
-  ///
-  /// In es, this message translates to:
-  /// **'Nombre'**
-  String get institutionProfileFieldName;
-
-  /// No description provided for @institutionProfileFieldCuit.
-  ///
-  /// In es, this message translates to:
-  /// **'CUIT'**
-  String get institutionProfileFieldCuit;
-
-  /// No description provided for @institutionProfileFieldEmail.
-  ///
-  /// In es, this message translates to:
-  /// **'Email'**
-  String get institutionProfileFieldEmail;
-
-  /// No description provided for @institutionProfileFieldPhone.
-  ///
-  /// In es, this message translates to:
-  /// **'Teléfono'**
-  String get institutionProfileFieldPhone;
-
-  /// No description provided for @institutionProfileFieldAddress.
-  ///
-  /// In es, this message translates to:
-  /// **'Dirección'**
-  String get institutionProfileFieldAddress;
-
-  /// No description provided for @institutionProfileFieldCountry.
-  ///
-  /// In es, this message translates to:
-  /// **'País'**
-  String get institutionProfileFieldCountry;
-
-  /// No description provided for @institutionProfileFieldProvince.
-  ///
-  /// In es, this message translates to:
-  /// **'Provincia'**
-  String get institutionProfileFieldProvince;
-
-  /// No description provided for @institutionProfileFieldCity.
-  ///
-  /// In es, this message translates to:
-  /// **'Ciudad'**
-  String get institutionProfileFieldCity;
-
-  /// No description provided for @institutionProfileFieldModalidad.
-  ///
-  /// In es, this message translates to:
-  /// **'Modalidad'**
-  String get institutionProfileFieldModalidad;
-
-  /// No description provided for @institutionProfileFieldType.
-  ///
-  /// In es, this message translates to:
-  /// **'Tipo de institución'**
-  String get institutionProfileFieldType;
-
-  /// No description provided for @institutionProfileFieldCurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Curricular'**
-  String get institutionProfileFieldCurricular;
-
-  /// No description provided for @institutionProfileFieldExtracurricular.
-  ///
-  /// In es, this message translates to:
-  /// **'Extracurricular'**
-  String get institutionProfileFieldExtracurricular;
-
-  /// No description provided for @institutionProfileModalidadLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'{key}'**
-  String institutionProfileModalidadLabel(Object key);
-
-  /// No description provided for @institutionProfileTipoLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'{key}'**
-  String institutionProfileTipoLabel(Object key);
-
-  /// No description provided for @commonFixErrors.
-  ///
-  /// In es, this message translates to:
-  /// **'Corregí los errores del formulario.'**
-  String get commonFixErrors;
-
   /// No description provided for @commonRequiredField.
   ///
   /// In es, this message translates to:
   /// **'Campo obligatorio.'**
   String get commonRequiredField;
 
-  /// No description provided for @commonSaved.
+  /// No description provided for @uiSomethingWentWrong.
   ///
   /// In es, this message translates to:
-  /// **'Guardado.'**
-  String get commonSaved;
+  /// **'Algo salió mal'**
+  String get uiSomethingWentWrong;
 
-  /// No description provided for @saved.
+  /// No description provided for @landingTagline.
   ///
   /// In es, this message translates to:
-  /// **'Guardado.'**
-  String get saved;
+  /// **'Educación conectada'**
+  String get landingTagline;
 
-  /// No description provided for @primeroSeleccionaUnaActividad.
+  /// No description provided for @landingHeadline.
   ///
   /// In es, this message translates to:
-  /// **'Primero seleccioná una actividad'**
-  String get primeroSeleccionaUnaActividad;
+  /// **'Alumnos e instituciones, en un mismo lugar.'**
+  String get landingHeadline;
 
-  /// No description provided for @losPerfilesDeTrabajoSonInternos.
+  /// No description provided for @landingSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Los perfiles de trabajo son internos'**
-  String get losPerfilesDeTrabajoSonInternos;
+  /// **'Inscripciones, vacantes, documentos y calendario, sin papeles ni idas y vueltas.'**
+  String get landingSubtitle;
 
-  /// No description provided for @perfilesDeTrabajo.
+  /// No description provided for @landingStudentTitle.
   ///
   /// In es, this message translates to:
-  /// **'Perfiles de trabajo'**
-  String get perfilesDeTrabajo;
+  /// **'Soy alumno o familia'**
+  String get landingStudentTitle;
 
-  /// No description provided for @entrar.
+  /// No description provided for @landingStudentSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Entrar'**
-  String get entrar;
+  /// **'Buscá instituciones, pedí tu vacante y seguí cada trámite.'**
+  String get landingStudentSubtitle;
 
-  /// No description provided for @bloqueadoPorVos.
+  /// No description provided for @landingInstitutionTitle.
   ///
   /// In es, this message translates to:
-  /// **'Bloqueado por vos'**
-  String get bloqueadoPorVos;
+  /// **'Soy una institución'**
+  String get landingInstitutionTitle;
 
-  /// No description provided for @bloqueado.
+  /// No description provided for @landingInstitutionSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Bloqueado'**
-  String get bloqueado;
+  /// **'Gestioná vacantes, solicitudes, grupos y comunicaciones.'**
+  String get landingInstitutionSubtitle;
 
-  /// No description provided for @bloqueadoPor.
+  /// No description provided for @landingChooseHowToEnter.
   ///
   /// In es, this message translates to:
-  /// **'Bloqueado por {who}'**
-  String bloqueadoPor(Object who);
+  /// **'¿Cómo querés ingresar?'**
+  String get landingChooseHowToEnter;
 
-  /// No description provided for @seleccionarActividad.
+  /// No description provided for @landingChooseHowToEnterSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Seleccionar actividad'**
-  String get seleccionarActividad;
+  /// **'Elegí tu perfil para continuar.'**
+  String get landingChooseHowToEnterSubtitle;
 
-  /// No description provided for @noHayActividadesHabilitadas.
+  /// No description provided for @landingBulletRequests.
   ///
   /// In es, this message translates to:
-  /// **'Todavía no hay actividades configuradas'**
-  String get noHayActividadesHabilitadas;
+  /// **'Solicitudes de vacantes en línea'**
+  String get landingBulletRequests;
 
-  /// No description provided for @institutionPublicProfileTitle.
+  /// No description provided for @landingBulletDocuments.
   ///
   /// In es, this message translates to:
-  /// **'Perfil público – {name}'**
-  String institutionPublicProfileTitle(Object name);
+  /// **'Fichas y documentos en PDF'**
+  String get landingBulletDocuments;
 
-  /// No description provided for @institutionPublicProfileSectionOverview.
+  /// No description provided for @landingBulletCalendar.
   ///
   /// In es, this message translates to:
-  /// **'Presentación'**
-  String get institutionPublicProfileSectionOverview;
+  /// **'Calendario y avisos al instante'**
+  String get landingBulletCalendar;
 
-  /// No description provided for @institutionPublicProfileSectionServices.
+  /// No description provided for @landingFooter.
   ///
   /// In es, this message translates to:
-  /// **'Servicios'**
-  String get institutionPublicProfileSectionServices;
+  /// **'© {year} ATENA · Plataforma educativa'**
+  String landingFooter(Object year);
 
-  /// No description provided for @institutionPublicProfileSectionCourses.
+  /// No description provided for @prefsTitle.
   ///
   /// In es, this message translates to:
-  /// **'Cursos'**
-  String get institutionPublicProfileSectionCourses;
+  /// **'Preferencias'**
+  String get prefsTitle;
 
-  /// No description provided for @institutionPublicProfileSectionAdminHours.
+  /// No description provided for @prefsTheme.
   ///
   /// In es, this message translates to:
-  /// **'Horarios de atención'**
-  String get institutionPublicProfileSectionAdminHours;
+  /// **'Apariencia'**
+  String get prefsTheme;
 
-  /// No description provided for @institutionPublicProfileSectionOnline.
+  /// No description provided for @prefsThemeSystem.
   ///
   /// In es, this message translates to:
-  /// **'Web y redes'**
-  String get institutionPublicProfileSectionOnline;
+  /// **'Automático'**
+  String get prefsThemeSystem;
 
-  /// No description provided for @institutionPublicProfileSectionPhotos.
+  /// No description provided for @prefsThemeLight.
   ///
   /// In es, this message translates to:
-  /// **'Fotos'**
-  String get institutionPublicProfileSectionPhotos;
+  /// **'Claro'**
+  String get prefsThemeLight;
 
-  /// No description provided for @institutionPublicProfileAboutLabel.
+  /// No description provided for @prefsThemeDark.
   ///
   /// In es, this message translates to:
-  /// **'Descripción'**
-  String get institutionPublicProfileAboutLabel;
+  /// **'Oscuro'**
+  String get prefsThemeDark;
 
-  /// No description provided for @institutionPublicProfileAboutHint.
+  /// No description provided for @prefsLanguage.
   ///
   /// In es, this message translates to:
-  /// **'Contá brevemente qué ofrece la institución (máx. 500 caracteres).'**
-  String get institutionPublicProfileAboutHint;
+  /// **'Idioma'**
+  String get prefsLanguage;
 
-  /// No description provided for @institutionPublicProfileServicesLabel.
+  /// No description provided for @prefsLanguageSystem.
   ///
   /// In es, this message translates to:
-  /// **'Servicios'**
-  String get institutionPublicProfileServicesLabel;
+  /// **'Automático (idioma del dispositivo)'**
+  String get prefsLanguageSystem;
 
-  /// No description provided for @institutionPublicProfileServicesHint.
+  /// No description provided for @authFamiliaLoginTitle.
   ///
   /// In es, this message translates to:
-  /// **'ej.: apoyo escolar, talleres, comedor, transporte…'**
-  String get institutionPublicProfileServicesHint;
+  /// **'Ingresá a tu cuenta'**
+  String get authFamiliaLoginTitle;
 
-  /// No description provided for @institutionPublicProfileAddService.
+  /// No description provided for @authFamiliaLoginSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Agregar servicio'**
-  String get institutionPublicProfileAddService;
+  /// **'Alumnos y familias'**
+  String get authFamiliaLoginSubtitle;
 
-  /// No description provided for @institutionPublicProfileServiceNameLabel.
+  /// No description provided for @authInstitucionLoginTitle.
   ///
   /// In es, this message translates to:
-  /// **'Servicio'**
-  String get institutionPublicProfileServiceNameLabel;
+  /// **'Ingreso de instituciones'**
+  String get authInstitucionLoginTitle;
 
-  /// No description provided for @institutionPublicProfileServiceNameHint.
+  /// No description provided for @authInstitucionLoginSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'ej.: Apoyo escolar'**
-  String get institutionPublicProfileServiceNameHint;
+  /// **'Gestioná vacantes, solicitudes y comunicaciones.'**
+  String get authInstitucionLoginSubtitle;
 
-  /// No description provided for @institutionPublicProfileServiceInvalid.
+  /// No description provided for @authForgotPassword.
   ///
   /// In es, this message translates to:
-  /// **'Servicio inválido.'**
-  String get institutionPublicProfileServiceInvalid;
+  /// **'¿Olvidaste tu contraseña?'**
+  String get authForgotPassword;
 
-  /// No description provided for @institutionPublicProfileShortCoursesLabel.
+  /// No description provided for @authNoAccount.
   ///
   /// In es, this message translates to:
-  /// **'Ofrece cursos cortos'**
-  String get institutionPublicProfileShortCoursesLabel;
+  /// **'¿Todavía no tenés cuenta?'**
+  String get authNoAccount;
 
-  /// No description provided for @institutionPublicProfileCourseDurationLabel.
+  /// No description provided for @authNoInstitution.
   ///
   /// In es, this message translates to:
-  /// **'Duración (opcional)'**
-  String get institutionPublicProfileCourseDurationLabel;
+  /// **'¿Tu institución todavía no está en ATENA?'**
+  String get authNoInstitution;
 
-  /// No description provided for @institutionPublicProfileCourseDurationHint.
+  /// No description provided for @authRegisterInstitution.
   ///
   /// In es, this message translates to:
-  /// **'ej.: 4 semanas / 2 meses'**
-  String get institutionPublicProfileCourseDurationHint;
+  /// **'Registrar institución'**
+  String get authRegisterInstitution;
 
-  /// No description provided for @institutionPublicProfileCourseDurationInvalid.
+  /// No description provided for @authHaveAccount.
   ///
   /// In es, this message translates to:
-  /// **'Duración inválida.'**
-  String get institutionPublicProfileCourseDurationInvalid;
+  /// **'¿Ya tenés cuenta?'**
+  String get authHaveAccount;
 
-  /// No description provided for @institutionPublicProfileTeachingModeLabel.
+  /// No description provided for @authFamiliaRegisterTitle.
   ///
   /// In es, this message translates to:
-  /// **'Tipo de cursado'**
-  String get institutionPublicProfileTeachingModeLabel;
+  /// **'Creá tu cuenta'**
+  String get authFamiliaRegisterTitle;
 
-  /// No description provided for @institutionPublicProfileTeachingModePresencial.
+  /// No description provided for @authFamiliaRegisterSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'En dos minutos vas a poder buscar instituciones y pedir vacantes.'**
+  String get authFamiliaRegisterSubtitle;
+
+  /// No description provided for @authStudentSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos del alumno'**
+  String get authStudentSection;
+
+  /// No description provided for @authStudentSectionHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Si sos madre, padre o tutor, cargá los datos del alumno. Después podés sumar más alumnos a la misma cuenta.'**
+  String get authStudentSectionHelp;
+
+  /// No description provided for @authAccessSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos de acceso'**
+  String get authAccessSection;
+
+  /// No description provided for @authBirthDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de nacimiento'**
+  String get authBirthDate;
+
+  /// No description provided for @authBirthDateRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí la fecha de nacimiento.'**
+  String get authBirthDateRequired;
+
+  /// No description provided for @authDniLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'DNI'**
+  String get authDniLabel;
+
+  /// No description provided for @authDniHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo números, sin puntos.'**
+  String get authDniHelper;
+
+  /// No description provided for @authPasswordHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Mínimo 8 caracteres.'**
+  String get authPasswordHelper;
+
+  /// No description provided for @authPasswordConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Repetí la contraseña'**
+  String get authPasswordConfirm;
+
+  /// No description provided for @authResetTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Restablecer contraseña'**
+  String get authResetTitle;
+
+  /// No description provided for @authResetFamiliaSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmá tu identidad con el DNI de un alumno de la cuenta y elegí una contraseña nueva.'**
+  String get authResetFamiliaSubtitle;
+
+  /// No description provided for @authResetInstitucionSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmá tu identidad con el CUIT registrado y elegí una contraseña nueva.'**
+  String get authResetInstitucionSubtitle;
+
+  /// No description provided for @authResetDniLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'DNI de un alumno de la cuenta'**
+  String get authResetDniLabel;
+
+  /// No description provided for @authCuitHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'11 dígitos, sin guiones.'**
+  String get authCuitHelper;
+
+  /// No description provided for @authResetCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar contraseña nueva'**
+  String get authResetCta;
+
+  /// No description provided for @authResetDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo. Ya podés ingresar con tu contraseña nueva.'**
+  String get authResetDone;
+
+  /// No description provided for @authInstRegisterTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrá tu institución'**
+  String get authInstRegisterTitle;
+
+  /// No description provided for @authInstRegisterSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Completá los datos y en el siguiente paso elegí los módulos de tu plan.'**
+  String get authInstRegisterSubtitle;
+
+  /// No description provided for @authStepOf.
+  ///
+  /// In es, this message translates to:
+  /// **'Paso {step} de {total}'**
+  String authStepOf(Object step, Object total);
+
+  /// No description provided for @authErrInvalidEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'El email no es válido.'**
+  String get authErrInvalidEmail;
+
+  /// No description provided for @authErrWeakPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña debe tener al menos 8 caracteres.'**
+  String get authErrWeakPassword;
+
+  /// No description provided for @authErrEmailInUse.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya existe una cuenta con ese email.'**
+  String get authErrEmailInUse;
+
+  /// No description provided for @authErrAccountNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos una cuenta con esos datos.'**
+  String get authErrAccountNotFound;
+
+  /// No description provided for @authErrWrongCredentials.
+  ///
+  /// In es, this message translates to:
+  /// **'Email o contraseña incorrectos.'**
+  String get authErrWrongCredentials;
+
+  /// No description provided for @authErrInvalidDni.
+  ///
+  /// In es, this message translates to:
+  /// **'El DNI debe tener entre 7 y 9 dígitos.'**
+  String get authErrInvalidDni;
+
+  /// No description provided for @authErrDuplicateDni.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hay un alumno con ese DNI en tu cuenta.'**
+  String get authErrDuplicateDni;
+
+  /// No description provided for @authErrIdentityMismatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Los datos no coinciden con los de la cuenta.'**
+  String get authErrIdentityMismatch;
+
+  /// No description provided for @authErrInvalidName.
+  ///
+  /// In es, this message translates to:
+  /// **'Completá nombre y apellido.'**
+  String get authErrInvalidName;
+
+  /// No description provided for @authErrInvalidAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'La sesión no es válida. Volvé a ingresar.'**
+  String get authErrInvalidAccount;
+
+  /// No description provided for @lblNivelJardin.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel inicial'**
+  String get lblNivelJardin;
+
+  /// No description provided for @lblNivelPrimaria.
+  ///
+  /// In es, this message translates to:
+  /// **'Primaria'**
+  String get lblNivelPrimaria;
+
+  /// No description provided for @lblNivelSecundaria.
+  ///
+  /// In es, this message translates to:
+  /// **'Secundaria'**
+  String get lblNivelSecundaria;
+
+  /// No description provided for @lblNivelTecnica.
+  ///
+  /// In es, this message translates to:
+  /// **'Técnica'**
+  String get lblNivelTecnica;
+
+  /// No description provided for @lblNivelTerciario.
+  ///
+  /// In es, this message translates to:
+  /// **'Terciario'**
+  String get lblNivelTerciario;
+
+  /// No description provided for @lblBloqueDeporte.
+  ///
+  /// In es, this message translates to:
+  /// **'Deporte y movimiento'**
+  String get lblBloqueDeporte;
+
+  /// No description provided for @lblBloqueArte.
+  ///
+  /// In es, this message translates to:
+  /// **'Arte y expresión'**
+  String get lblBloqueArte;
+
+  /// No description provided for @lblBloqueIdiomas.
+  ///
+  /// In es, this message translates to:
+  /// **'Idiomas y comunicación'**
+  String get lblBloqueIdiomas;
+
+  /// No description provided for @lblBloqueCiencia.
+  ///
+  /// In es, this message translates to:
+  /// **'Ciencia, tecnología y robótica'**
+  String get lblBloqueCiencia;
+
+  /// No description provided for @lblBloqueApoyo.
+  ///
+  /// In es, this message translates to:
+  /// **'Apoyo académico'**
+  String get lblBloqueApoyo;
+
+  /// No description provided for @lblBloqueBienestar.
+  ///
+  /// In es, this message translates to:
+  /// **'Desarrollo personal y bienestar'**
+  String get lblBloqueBienestar;
+
+  /// No description provided for @lblBloqueOtros.
+  ///
+  /// In es, this message translates to:
+  /// **'Otras actividades'**
+  String get lblBloqueOtros;
+
+  /// No description provided for @lblTurnoManana.
+  ///
+  /// In es, this message translates to:
+  /// **'Mañana'**
+  String get lblTurnoManana;
+
+  /// No description provided for @lblTurnoTarde.
+  ///
+  /// In es, this message translates to:
+  /// **'Tarde'**
+  String get lblTurnoTarde;
+
+  /// No description provided for @lblTurnoNoche.
+  ///
+  /// In es, this message translates to:
+  /// **'Noche'**
+  String get lblTurnoNoche;
+
+  /// No description provided for @lblTurnoCompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Jornada completa'**
+  String get lblTurnoCompleto;
+
+  /// No description provided for @lblModalidadPresencial.
   ///
   /// In es, this message translates to:
   /// **'Presencial'**
-  String get institutionPublicProfileTeachingModePresencial;
+  String get lblModalidadPresencial;
 
-  /// No description provided for @institutionPublicProfileTeachingModeRemoto.
+  /// No description provided for @lblModalidadRemoto.
   ///
   /// In es, this message translates to:
   /// **'A distancia'**
-  String get institutionPublicProfileTeachingModeRemoto;
+  String get lblModalidadRemoto;
 
-  /// No description provided for @institutionPublicProfileTeachingModeHibrido.
+  /// No description provided for @lblModalidadHibrido.
   ///
   /// In es, this message translates to:
-  /// **'Híbrido'**
-  String get institutionPublicProfileTeachingModeHibrido;
+  /// **'Híbrida'**
+  String get lblModalidadHibrido;
 
-  /// No description provided for @institutionPublicProfileAdminHoursLabel.
+  /// No description provided for @lblTipoInstJardin.
   ///
   /// In es, this message translates to:
-  /// **'Horario de atención administrativa'**
-  String get institutionPublicProfileAdminHoursLabel;
+  /// **'Jardín de infantes'**
+  String get lblTipoInstJardin;
 
-  /// No description provided for @institutionPublicProfileAdminHoursHint.
+  /// No description provided for @lblTipoInstPrimaria.
   ///
   /// In es, this message translates to:
-  /// **'ej.: Lun a Vie 9:00 a 17:00'**
-  String get institutionPublicProfileAdminHoursHint;
+  /// **'Escuela primaria'**
+  String get lblTipoInstPrimaria;
 
-  /// No description provided for @institutionPublicProfilePhoneOptionalLabel.
+  /// No description provided for @lblTipoInstSecundaria.
   ///
   /// In es, this message translates to:
-  /// **'Teléfono (opcional)'**
-  String get institutionPublicProfilePhoneOptionalLabel;
+  /// **'Escuela secundaria'**
+  String get lblTipoInstSecundaria;
 
-  /// No description provided for @institutionPublicProfileWebsiteLabel.
+  /// No description provided for @lblTipoInstTecnica.
   ///
   /// In es, this message translates to:
-  /// **'Página web (opcional)'**
-  String get institutionPublicProfileWebsiteLabel;
+  /// **'Escuela técnica'**
+  String get lblTipoInstTecnica;
 
-  /// No description provided for @institutionPublicProfileWebsiteHint.
+  /// No description provided for @lblTipoInstTerciario.
   ///
   /// In es, this message translates to:
-  /// **'https://…'**
-  String get institutionPublicProfileWebsiteHint;
+  /// **'Instituto terciario'**
+  String get lblTipoInstTerciario;
 
-  /// No description provided for @institutionPublicProfileWebsiteInvalid.
+  /// No description provided for @lblTipoInstTaller.
   ///
   /// In es, this message translates to:
-  /// **'URL inválida.'**
-  String get institutionPublicProfileWebsiteInvalid;
+  /// **'Taller o academia'**
+  String get lblTipoInstTaller;
 
-  /// No description provided for @institutionPublicProfileInstagramLabel.
+  /// No description provided for @lblTipoInstClub.
   ///
   /// In es, this message translates to:
-  /// **'Instagram (opcional)'**
-  String get institutionPublicProfileInstagramLabel;
+  /// **'Club'**
+  String get lblTipoInstClub;
 
-  /// No description provided for @institutionPublicProfileFacebookLabel.
+  /// No description provided for @lblTipoInstOtra.
   ///
   /// In es, this message translates to:
-  /// **'Facebook (opcional)'**
-  String get institutionPublicProfileFacebookLabel;
+  /// **'Otra institución'**
+  String get lblTipoInstOtra;
 
-  /// No description provided for @institutionPublicProfileXLabel.
+  /// No description provided for @lblCurricular.
   ///
   /// In es, this message translates to:
-  /// **'X / Twitter (opcional)'**
-  String get institutionPublicProfileXLabel;
+  /// **'Curricular'**
+  String get lblCurricular;
 
-  /// No description provided for @institutionPublicProfileYoutubeLabel.
+  /// No description provided for @lblExtracurricular.
   ///
   /// In es, this message translates to:
-  /// **'YouTube (opcional)'**
-  String get institutionPublicProfileYoutubeLabel;
+  /// **'Extracurricular'**
+  String get lblExtracurricular;
 
-  /// No description provided for @institutionPublicProfileTiktokLabel.
+  /// No description provided for @lblEstadoPendiente.
   ///
   /// In es, this message translates to:
-  /// **'TikTok (opcional)'**
-  String get institutionPublicProfileTiktokLabel;
+  /// **'Pendiente'**
+  String get lblEstadoPendiente;
 
-  /// No description provided for @institutionPublicProfileLinkedinLabel.
+  /// No description provided for @lblEstadoConfirmada.
   ///
   /// In es, this message translates to:
-  /// **'LinkedIn (opcional)'**
-  String get institutionPublicProfileLinkedinLabel;
+  /// **'Confirmada'**
+  String get lblEstadoConfirmada;
 
-  /// No description provided for @institutionPublicProfileOtherLinkLabel.
+  /// No description provided for @lblEstadoRechazada.
   ///
   /// In es, this message translates to:
-  /// **'Otro link (opcional)'**
-  String get institutionPublicProfileOtherLinkLabel;
+  /// **'No aceptada'**
+  String get lblEstadoRechazada;
 
-  /// No description provided for @institutionPublicProfilePricesLabel.
+  /// No description provided for @lblEstadoCanceladaAlumno.
   ///
   /// In es, this message translates to:
-  /// **'Precios (opcional)'**
-  String get institutionPublicProfilePricesLabel;
+  /// **'Cancelada'**
+  String get lblEstadoCanceladaAlumno;
 
-  /// No description provided for @institutionPublicProfilePricesHint.
+  /// No description provided for @lblEstadoCanceladaInstitucion.
   ///
   /// In es, this message translates to:
-  /// **'ej.: desde \$… / rango / consultar'**
-  String get institutionPublicProfilePricesHint;
+  /// **'Dada de baja'**
+  String get lblEstadoCanceladaInstitucion;
 
-  /// No description provided for @institutionPublicProfilePricesTooLong.
+  /// No description provided for @lblDocDni.
   ///
   /// In es, this message translates to:
-  /// **'Texto demasiado largo.'**
-  String get institutionPublicProfilePricesTooLong;
+  /// **'DNI del alumno'**
+  String get lblDocDni;
 
-  /// No description provided for @institutionPublicProfilePhotosLabel.
+  /// No description provided for @lblDocDniResponsable.
   ///
   /// In es, this message translates to:
-  /// **'Galería (hasta {max})'**
-  String institutionPublicProfilePhotosLabel(Object max);
+  /// **'DNI del adulto responsable'**
+  String get lblDocDniResponsable;
 
-  /// No description provided for @institutionPublicProfileAddPhoto.
+  /// No description provided for @lblDocPartida.
+  ///
+  /// In es, this message translates to:
+  /// **'Partida de nacimiento'**
+  String get lblDocPartida;
+
+  /// No description provided for @lblDocCertMedico.
+  ///
+  /// In es, this message translates to:
+  /// **'Certificado médico'**
+  String get lblDocCertMedico;
+
+  /// No description provided for @lblDocVacunas.
+  ///
+  /// In es, this message translates to:
+  /// **'Carnet de vacunas'**
+  String get lblDocVacunas;
+
+  /// No description provided for @lblDocBoletin.
+  ///
+  /// In es, this message translates to:
+  /// **'Boletín de calificaciones'**
+  String get lblDocBoletin;
+
+  /// No description provided for @lblDocPase.
+  ///
+  /// In es, this message translates to:
+  /// **'Constancia de pase'**
+  String get lblDocPase;
+
+  /// No description provided for @lblDocFoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto carnet'**
+  String get lblDocFoto;
+
+  /// No description provided for @lblDocDomicilio.
+  ///
+  /// In es, this message translates to:
+  /// **'Constancia de domicilio'**
+  String get lblDocDomicilio;
+
+  /// No description provided for @lblDocOtro.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro documento'**
+  String get lblDocOtro;
+
+  /// No description provided for @lblDocEstadoPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Por entregar'**
+  String get lblDocEstadoPendiente;
+
+  /// No description provided for @lblDocEstadoEntregado.
+  ///
+  /// In es, this message translates to:
+  /// **'En revisión'**
+  String get lblDocEstadoEntregado;
+
+  /// No description provided for @lblDocEstadoAprobado.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprobado'**
+  String get lblDocEstadoAprobado;
+
+  /// No description provided for @lblDocEstadoRechazado.
+  ///
+  /// In es, this message translates to:
+  /// **'Para corregir'**
+  String get lblDocEstadoRechazado;
+
+  /// No description provided for @lblDocEstadoCancelado.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelado'**
+  String get lblDocEstadoCancelado;
+
+  /// No description provided for @lblDocVencido.
+  ///
+  /// In es, this message translates to:
+  /// **'Vencido'**
+  String get lblDocVencido;
+
+  /// No description provided for @lblEvGeneral.
+  ///
+  /// In es, this message translates to:
+  /// **'Evento'**
+  String get lblEvGeneral;
+
+  /// No description provided for @lblEvReunion.
+  ///
+  /// In es, this message translates to:
+  /// **'Reunión'**
+  String get lblEvReunion;
+
+  /// No description provided for @lblEvExamen.
+  ///
+  /// In es, this message translates to:
+  /// **'Evaluación'**
+  String get lblEvExamen;
+
+  /// No description provided for @lblEvActo.
+  ///
+  /// In es, this message translates to:
+  /// **'Acto escolar'**
+  String get lblEvActo;
+
+  /// No description provided for @lblEvSalida.
+  ///
+  /// In es, this message translates to:
+  /// **'Salida educativa'**
+  String get lblEvSalida;
+
+  /// No description provided for @lblEvInicioClases.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio de clases'**
+  String get lblEvInicioClases;
+
+  /// No description provided for @lblEvFinClases.
+  ///
+  /// In es, this message translates to:
+  /// **'Fin de clases'**
+  String get lblEvFinClases;
+
+  /// No description provided for @lblEvVacaciones.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacaciones'**
+  String get lblEvVacaciones;
+
+  /// No description provided for @lblEvFeriado.
+  ///
+  /// In es, this message translates to:
+  /// **'Feriado'**
+  String get lblEvFeriado;
+
+  /// No description provided for @lblAsisSi.
+  ///
+  /// In es, this message translates to:
+  /// **'Asistiré'**
+  String get lblAsisSi;
+
+  /// No description provided for @lblAsisTalVez.
+  ///
+  /// In es, this message translates to:
+  /// **'Tal vez'**
+  String get lblAsisTalVez;
+
+  /// No description provided for @lblAsisNo.
+  ///
+  /// In es, this message translates to:
+  /// **'No asistiré'**
+  String get lblAsisNo;
+
+  /// No description provided for @lblEdadAnios.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 año} other{{n} años}}'**
+  String lblEdadAnios(int n);
+
+  /// No description provided for @lblRangoEdad.
+  ///
+  /// In es, this message translates to:
+  /// **'De {min} a {max} años'**
+  String lblRangoEdad(Object min, Object max);
+
+  /// No description provided for @lblEdadDesde.
+  ///
+  /// In es, this message translates to:
+  /// **'Desde {min} años'**
+  String lblEdadDesde(Object min);
+
+  /// No description provided for @lblEdadHasta.
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta {max} años'**
+  String lblEdadHasta(Object max);
+
+  /// No description provided for @lblCupos.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Sin vacantes} =1{1 vacante} other{{n} vacantes}}'**
+  String lblCupos(int n);
+
+  /// No description provided for @lblCuposDeTotal.
+  ///
+  /// In es, this message translates to:
+  /// **'{libres} de {total} libres'**
+  String lblCuposDeTotal(int libres, int total);
+
+  /// No description provided for @notiBienvenidaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Te damos la bienvenida a ATENA!'**
+  String get notiBienvenidaTitle;
+
+  /// No description provided for @notiBienvenidaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya podés buscar instituciones y pedir vacantes.'**
+  String get notiBienvenidaBody;
+
+  /// No description provided for @notiSolicitudEnviadaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud enviada'**
+  String get notiSolicitudEnviadaTitle;
+
+  /// No description provided for @notiSolicitudEnviadaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{alumno} · {oferta} en {institucion}. Te avisamos cuando respondan.'**
+  String notiSolicitudEnviadaBody(
+    Object alumno,
+    Object oferta,
+    Object institucion,
+  );
+
+  /// No description provided for @notiSolicitudRecibidaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva solicitud'**
+  String get notiSolicitudRecibidaTitle;
+
+  /// No description provided for @notiSolicitudRecibidaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{alumno} pidió vacante en {oferta}.'**
+  String notiSolicitudRecibidaBody(Object alumno, Object oferta);
+
+  /// No description provided for @notiSolicitudConfirmadaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Vacante confirmada!'**
+  String get notiSolicitudConfirmadaTitle;
+
+  /// No description provided for @notiSolicitudConfirmadaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} confirmó a {alumno} en {oferta}.'**
+  String notiSolicitudConfirmadaBody(
+    Object institucion,
+    Object alumno,
+    Object oferta,
+  );
+
+  /// No description provided for @notiSolicitudRechazadaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud no aceptada'**
+  String get notiSolicitudRechazadaTitle;
+
+  /// No description provided for @notiSolicitudRechazadaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} no pudo aceptar la solicitud de {alumno} para {oferta}.'**
+  String notiSolicitudRechazadaBody(
+    Object institucion,
+    Object alumno,
+    Object oferta,
+  );
+
+  /// No description provided for @notiSolicitudCanceladaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud cancelada'**
+  String get notiSolicitudCanceladaTitle;
+
+  /// No description provided for @notiSolicitudCanceladaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{alumno} canceló su solicitud para {oferta}.'**
+  String notiSolicitudCanceladaBody(Object alumno, Object oferta);
+
+  /// No description provided for @notiSolicitudBajaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Baja de vacante'**
+  String get notiSolicitudBajaTitle;
+
+  /// No description provided for @notiSolicitudBajaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} dio de baja a {alumno} de {oferta}.'**
+  String notiSolicitudBajaBody(
+    Object institucion,
+    Object alumno,
+    Object oferta,
+  );
+
+  /// No description provided for @notiDocSolicitadoTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Te pidieron un documento'**
+  String get notiDocSolicitadoTitle;
+
+  /// No description provided for @notiDocSolicitadoBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} necesita: {documento}.'**
+  String notiDocSolicitadoBody(Object institucion, Object documento);
+
+  /// No description provided for @notiDocEntregadoTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Documento recibido'**
+  String get notiDocEntregadoTitle;
+
+  /// No description provided for @notiDocEntregadoBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{alumno} entregó: {documento}.'**
+  String notiDocEntregadoBody(Object alumno, Object documento);
+
+  /// No description provided for @notiDocAprobadoTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Documento aprobado'**
+  String get notiDocAprobadoTitle;
+
+  /// No description provided for @notiDocAprobadoBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} aprobó: {documento}.'**
+  String notiDocAprobadoBody(Object institucion, Object documento);
+
+  /// No description provided for @notiDocRechazadoTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Documento para corregir'**
+  String get notiDocRechazadoTitle;
+
+  /// No description provided for @notiDocRechazadoBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} pidió corregir: {documento}.'**
+  String notiDocRechazadoBody(Object institucion, Object documento);
+
+  /// No description provided for @notiEventoTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo evento en el calendario'**
+  String get notiEventoTitle;
+
+  /// No description provided for @notiEventoBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion}: {evento}, el {fecha}.'**
+  String notiEventoBody(Object institucion, Object evento, Object fecha);
+
+  /// No description provided for @notiAvisoDe.
+  ///
+  /// In es, this message translates to:
+  /// **'Aviso de {institucion}'**
+  String notiAvisoDe(Object institucion);
+
+  /// No description provided for @notiNota.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje: {nota}'**
+  String notiNota(Object nota);
+
+  /// No description provided for @errNoEncontrado.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos lo que buscabas. Puede que se haya eliminado.'**
+  String get errNoEncontrado;
+
+  /// No description provided for @errNoAutorizado.
+  ///
+  /// In es, this message translates to:
+  /// **'No tenés permiso para hacer esto.'**
+  String get errNoAutorizado;
+
+  /// No description provided for @errDatosInvalidos.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisá los datos ingresados.'**
+  String get errDatosInvalidos;
+
+  /// No description provided for @errOfertaInactiva.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta vacante no está recibiendo solicitudes por ahora.'**
+  String get errOfertaInactiva;
+
+  /// No description provided for @errSinCupo.
+  ///
+  /// In es, this message translates to:
+  /// **'No quedan vacantes disponibles.'**
+  String get errSinCupo;
+
+  /// No description provided for @errSolicitudDuplicada.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hay una solicitud activa para esta vacante.'**
+  String get errSolicitudDuplicada;
+
+  /// No description provided for @errEstadoInvalido.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta acción ya no está disponible.'**
+  String get errEstadoInvalido;
+
+  /// No description provided for @errOfertaConSolicitudes.
+  ///
+  /// In es, this message translates to:
+  /// **'No se puede eliminar porque tiene solicitudes activas. Podés pausarla.'**
+  String get errOfertaConSolicitudes;
+
+  /// No description provided for @errArchivoMuyGrande.
+  ///
+  /// In es, this message translates to:
+  /// **'El archivo es demasiado grande.'**
+  String get errArchivoMuyGrande;
+
+  /// No description provided for @errFormatoNoSoportado.
+  ///
+  /// In es, this message translates to:
+  /// **'Formato no admitido. Usá PDF o una imagen.'**
+  String get errFormatoNoSoportado;
+
+  /// No description provided for @errSinEspacio.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay espacio suficiente en el dispositivo.'**
+  String get errSinEspacio;
+
+  /// No description provided for @uiJustNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Recién'**
+  String get uiJustNow;
+
+  /// No description provided for @uiMinutesAgo.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {n} min'**
+  String uiMinutesAgo(int n);
+
+  /// No description provided for @uiHoursAgo.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {n} h'**
+  String uiHoursAgo(int n);
+
+  /// No description provided for @uiYesterday.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayer'**
+  String get uiYesterday;
+
+  /// No description provided for @uiToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy'**
+  String get uiToday;
+
+  /// No description provided for @uiTomorrow.
+  ///
+  /// In es, this message translates to:
+  /// **'Mañana'**
+  String get uiTomorrow;
+
+  /// No description provided for @uiUndo.
+  ///
+  /// In es, this message translates to:
+  /// **'Deshacer'**
+  String get uiUndo;
+
+  /// No description provided for @uiMoreOptions.
+  ///
+  /// In es, this message translates to:
+  /// **'Más opciones'**
+  String get uiMoreOptions;
+
+  /// No description provided for @uiSeeAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver todas'**
+  String get uiSeeAll;
+
+  /// No description provided for @uiClose.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar'**
+  String get uiClose;
+
+  /// No description provided for @uiLogoutConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Querés cerrar la sesión?'**
+  String get uiLogoutConfirm;
+
+  /// No description provided for @notifTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones'**
+  String get notifTitle;
+
+  /// No description provided for @notifMarkAllRead.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar todas como leídas'**
+  String get notifMarkAllRead;
+
+  /// No description provided for @notifDeleteAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar todas'**
+  String get notifDeleteAll;
+
+  /// No description provided for @notifDeleteAllConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar todas las notificaciones?'**
+  String get notifDeleteAllConfirm;
+
+  /// No description provided for @notifEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Estás al día'**
+  String get notifEmptyTitle;
+
+  /// No description provided for @notifEmptyBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Acá vas a ver las novedades de solicitudes, documentos y eventos.'**
+  String get notifEmptyBody;
+
+  /// No description provided for @notifFilterAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas'**
+  String get notifFilterAll;
+
+  /// No description provided for @notifFilterUnread.
+  ///
+  /// In es, this message translates to:
+  /// **'No leídas'**
+  String get notifFilterUnread;
+
+  /// No description provided for @notifDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificación eliminada'**
+  String get notifDeleted;
+
+  /// No description provided for @notifMarkRead.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar como leída'**
+  String get notifMarkRead;
+
+  /// No description provided for @notifMarkUnread.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar como no leída'**
+  String get notifMarkUnread;
+
+  /// No description provided for @notifDelete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get notifDelete;
+
+  /// No description provided for @notifUnreadCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 sin leer} other{{n} sin leer}}'**
+  String notifUnreadCount(int n);
+
+  /// No description provided for @homeHello.
+  ///
+  /// In es, this message translates to:
+  /// **'Hola, {nombre}'**
+  String homeHello(Object nombre);
+
+  /// No description provided for @homeStudentSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué querés hacer hoy?'**
+  String get homeStudentSubtitle;
+
+  /// No description provided for @homeSwitchStudent.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar alumno'**
+  String get homeSwitchStudent;
+
+  /// No description provided for @homeStatActiveRequests.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes activas'**
+  String get homeStatActiveRequests;
+
+  /// No description provided for @homeStatUpcomingEvents.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximos eventos'**
+  String get homeStatUpcomingEvents;
+
+  /// No description provided for @homeStatPendingDocs.
+  ///
+  /// In es, this message translates to:
+  /// **'Documentos por entregar'**
+  String get homeStatPendingDocs;
+
+  /// No description provided for @homeActionExplore.
+  ///
+  /// In es, this message translates to:
+  /// **'Explorar instituciones'**
+  String get homeActionExplore;
+
+  /// No description provided for @homeActionExploreSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscá y pedí tu vacante'**
+  String get homeActionExploreSub;
+
+  /// No description provided for @homeActionRequests.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis solicitudes'**
+  String get homeActionRequests;
+
+  /// No description provided for @homeActionRequestsSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguí el estado de cada trámite'**
+  String get homeActionRequestsSub;
+
+  /// No description provided for @homeActionCalendar.
+  ///
+  /// In es, this message translates to:
+  /// **'Calendario'**
+  String get homeActionCalendar;
+
+  /// No description provided for @homeActionCalendarSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Eventos y recordatorios'**
+  String get homeActionCalendarSub;
+
+  /// No description provided for @homeActionDocuments.
+  ///
+  /// In es, this message translates to:
+  /// **'Documentos'**
+  String get homeActionDocuments;
+
+  /// No description provided for @homeActionDocumentsSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo que te piden las instituciones'**
+  String get homeActionDocumentsSub;
+
+  /// No description provided for @homeActionNotificationsSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Novedades y avisos'**
+  String get homeActionNotificationsSub;
+
+  /// No description provided for @homeActionProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'Ficha del alumno'**
+  String get homeActionProfile;
+
+  /// No description provided for @homeActionProfileSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos personales y PDF'**
+  String get homeActionProfileSub;
+
+  /// No description provided for @homeRecentRequests.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus solicitudes'**
+  String get homeRecentRequests;
+
+  /// No description provided for @homeNoRequestsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no pediste vacantes'**
+  String get homeNoRequestsTitle;
+
+  /// No description provided for @homeNoRequestsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Explorá instituciones y enviá tu primera solicitud en pocos pasos.'**
+  String get homeNoRequestsBody;
+
+  /// No description provided for @homeNoEvents.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay eventos próximos.'**
+  String get homeNoEvents;
+
+  /// No description provided for @hubTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Con qué alumno querés continuar?'**
+  String get hubTitle;
+
+  /// No description provided for @hubSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Podés gestionar a varios alumnos desde la misma cuenta.'**
+  String get hubSubtitle;
+
+  /// No description provided for @hubAddStudent.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar alumno'**
+  String get hubAddStudent;
+
+  /// No description provided for @hubAddStudentSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Sumá a otro hijo o hija a tu cuenta'**
+  String get hubAddStudentSub;
+
+  /// No description provided for @hubEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregá el primer alumno'**
+  String get hubEmptyTitle;
+
+  /// No description provided for @hubEmptyBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargá los datos del alumno para empezar a buscar instituciones.'**
+  String get hubEmptyBody;
+
+  /// No description provided for @hubLastUsed.
+  ///
+  /// In es, this message translates to:
+  /// **'Último usado'**
+  String get hubLastUsed;
+
+  /// No description provided for @hubAccountLine.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta: {email}'**
+  String hubAccountLine(Object email);
+
+  /// No description provided for @studentFormTitleNew.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo alumno'**
+  String get studentFormTitleNew;
+
+  /// No description provided for @studentFormTitleEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar datos'**
+  String get studentFormTitleEdit;
+
+  /// No description provided for @studentFormSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos guardados.'**
+  String get studentFormSaved;
+
+  /// No description provided for @studentFormCreated.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumno agregado.'**
+  String get studentFormCreated;
+
+  /// No description provided for @instHomeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Panel de la institución'**
+  String get instHomeSubtitle;
+
+  /// No description provided for @instPlanTrialUntil.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba hasta el {fecha}'**
+  String instPlanTrialUntil(Object fecha);
+
+  /// No description provided for @instPlanTrialEnded.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba vencida'**
+  String get instPlanTrialEnded;
+
+  /// No description provided for @instPlanActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan activo'**
+  String get instPlanActive;
+
+  /// No description provided for @instPlanSuspended.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan suspendido'**
+  String get instPlanSuspended;
+
+  /// No description provided for @instPlanNone.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin plan'**
+  String get instPlanNone;
+
+  /// No description provided for @instStatPending.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes pendientes'**
+  String get instStatPending;
+
+  /// No description provided for @instStatStudents.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos confirmados'**
+  String get instStatStudents;
+
+  /// No description provided for @instStatFreeSpots.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacantes libres'**
+  String get instStatFreeSpots;
+
+  /// No description provided for @instStatOffers.
+  ///
+  /// In es, this message translates to:
+  /// **'Ofertas activas'**
+  String get instStatOffers;
+
+  /// No description provided for @instActionRequests.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes'**
+  String get instActionRequests;
+
+  /// No description provided for @instActionRequestsSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisá y respondé pedidos de vacante'**
+  String get instActionRequestsSub;
+
+  /// No description provided for @instActionOffers.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacantes'**
+  String get instActionOffers;
+
+  /// No description provided for @instActionOffersSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Cursos, grupos y cupos'**
+  String get instActionOffersSub;
+
+  /// No description provided for @instActionStudents.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos'**
+  String get instActionStudents;
+
+  /// No description provided for @instActionStudentsSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Inscriptos por curso y grupo'**
+  String get instActionStudentsSub;
+
+  /// No description provided for @instActionComms.
+  ///
+  /// In es, this message translates to:
+  /// **'Comunicaciones'**
+  String get instActionComms;
+
+  /// No description provided for @instActionCommsSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Calendario y avisos'**
+  String get instActionCommsSub;
+
+  /// No description provided for @instActionDocs.
+  ///
+  /// In es, this message translates to:
+  /// **'Documentación'**
+  String get instActionDocs;
+
+  /// No description provided for @instActionDocsSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedidos y revisión de documentos'**
+  String get instActionDocsSub;
+
+  /// No description provided for @instActionCroquis.
+  ///
+  /// In es, this message translates to:
+  /// **'Croquis de aula'**
+  String get instActionCroquis;
+
+  /// No description provided for @instActionCroquisSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Distribución de bancos'**
+  String get instActionCroquisSub;
+
+  /// No description provided for @instActionProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil público'**
+  String get instActionProfile;
+
+  /// No description provided for @instActionProfileSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo te ven las familias'**
+  String get instActionProfileSub;
+
+  /// No description provided for @instActionPlan.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan'**
+  String get instActionPlan;
+
+  /// No description provided for @instActionPlanSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Niveles, módulos y costo'**
+  String get instActionPlanSub;
+
+  /// No description provided for @instGettingStarted.
+  ///
+  /// In es, this message translates to:
+  /// **'Primeros pasos'**
+  String get instGettingStarted;
+
+  /// No description provided for @instGettingStartedSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Completá estos pasos para empezar a recibir alumnos.'**
+  String get instGettingStartedSub;
+
+  /// No description provided for @instStepProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'Completá tu perfil público'**
+  String get instStepProfile;
+
+  /// No description provided for @instStepOffer.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicá tu primera vacante'**
+  String get instStepOffer;
+
+  /// No description provided for @instStepRequest.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibí tu primera solicitud'**
+  String get instStepRequest;
+
+  /// No description provided for @instToReview.
+  ///
+  /// In es, this message translates to:
+  /// **'Para revisar'**
+  String get instToReview;
+
+  /// No description provided for @instNoPending.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay solicitudes pendientes. ¡Todo al día!'**
+  String get instNoPending;
+
+  /// No description provided for @instLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar los datos de la institución.'**
+  String get instLoadError;
+
+  /// No description provided for @instSignInAgain.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver a ingresar'**
+  String get instSignInAgain;
+
+  /// No description provided for @notifOlder.
+  ///
+  /// In es, this message translates to:
+  /// **'Anteriores'**
+  String get notifOlder;
+
+  /// No description provided for @prefsAbout.
+  ///
+  /// In es, this message translates to:
+  /// **'Acerca de ATENA'**
+  String get prefsAbout;
+
+  /// No description provided for @prefsVersion.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión {version}'**
+  String prefsVersion(Object version);
+
+  /// No description provided for @prefsPrivacyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Privacidad y datos'**
+  String get prefsPrivacyTitle;
+
+  /// No description provided for @prefsPrivacyBody.
+  ///
+  /// In es, this message translates to:
+  /// **'En esta versión, ATENA guarda toda la información (cuentas, alumnos, solicitudes, documentos y fotos) únicamente en este dispositivo. No se envía a servidores ni a terceros. Las contraseñas se guardan protegidas con un hash seguro. Podés eliminar tu cuenta cuando quieras desde el menú «Más opciones» de tu inicio.'**
+  String get prefsPrivacyBody;
+
+  /// No description provided for @prefsDeleteData.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar todos los datos de este dispositivo'**
+  String get prefsDeleteData;
+
+  /// No description provided for @prefsDeleteDataConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Borrar todos los datos?'**
+  String get prefsDeleteDataConfirmTitle;
+
+  /// No description provided for @prefsDeleteDataConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Se eliminarán todas las cuentas, alumnos, instituciones, solicitudes y documentos guardados en este dispositivo. Esta acción no se puede deshacer.'**
+  String get prefsDeleteDataConfirm;
+
+  /// No description provided for @prefsDeleteDataCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar todo'**
+  String get prefsDeleteDataCta;
+
+  /// No description provided for @prefsDeleteDataDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borraron todos los datos.'**
+  String get prefsDeleteDataDone;
+
+  /// No description provided for @demoLink.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar con datos de ejemplo'**
+  String get demoLink;
+
+  /// No description provided for @demoConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cargar datos de ejemplo?'**
+  String get demoConfirmTitle;
+
+  /// No description provided for @demoConfirmBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Vamos a crear en este dispositivo tres instituciones y una familia de ejemplo para que recorras ATENA. Podés borrarlos cuando quieras desde Preferencias.'**
+  String get demoConfirmBody;
+
+  /// No description provided for @demoConfirmCta.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargar ejemplo'**
+  String get demoConfirmCta;
+
+  /// No description provided for @demoLoading.
+  ///
+  /// In es, this message translates to:
+  /// **'Preparando los datos de ejemplo…'**
+  String get demoLoading;
+
+  /// No description provided for @demoReadyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Listo! Ya podés recorrer ATENA'**
+  String get demoReadyTitle;
+
+  /// No description provided for @demoReadyBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Usá estas cuentas de ejemplo. La contraseña de todas es {password}.'**
+  String demoReadyBody(Object password);
+
+  /// No description provided for @demoFamilyLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Familia con dos alumnos'**
+  String get demoFamilyLabel;
+
+  /// No description provided for @demoInstitutionsLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Instituciones'**
+  String get demoInstitutionsLabel;
+
+  /// No description provided for @demoEnterFamily.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrar como familia'**
+  String get demoEnterFamily;
+
+  /// No description provided for @demoEnterInstitution.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrar como el colegio'**
+  String get demoEnterInstitution;
+
+  /// No description provided for @demoAlreadyLoaded.
+  ///
+  /// In es, this message translates to:
+  /// **'Los datos de ejemplo ya estaban cargados.'**
+  String get demoAlreadyLoaded;
+
+  /// No description provided for @calAlTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Calendario'**
+  String get calAlTitulo;
+
+  /// No description provided for @calAlNuevaNota.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva nota'**
+  String get calAlNuevaNota;
+
+  /// No description provided for @calAlEditarNota.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar nota'**
+  String get calAlEditarNota;
+
+  /// No description provided for @calAlEliminarNota.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar nota'**
+  String get calAlEliminarNota;
+
+  /// No description provided for @calAlEliminarNotaConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar la nota?'**
+  String get calAlEliminarNotaConfirm;
+
+  /// No description provided for @calAlEliminarNotaMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'«{titulo}» se va a quitar de tu calendario.'**
+  String calAlEliminarNotaMensaje(String titulo);
+
+  /// No description provided for @calAlNotaGuardada.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota guardada.'**
+  String get calAlNotaGuardada;
+
+  /// No description provided for @calAlNotaEliminada.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota eliminada.'**
+  String get calAlNotaEliminada;
+
+  /// No description provided for @calAlNotaTituloHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Llevar la autorización firmada'**
+  String get calAlNotaTituloHint;
+
+  /// No description provided for @calAlNotaHora.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora (opcional)'**
+  String get calAlNotaHora;
+
+  /// No description provided for @calAlNotaQuitarHora.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar hora'**
+  String get calAlNotaQuitarHora;
+
+  /// No description provided for @calAlNotaDetalle.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle (opcional)'**
+  String get calAlNotaDetalle;
+
+  /// No description provided for @calAlNotaPersonal.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota personal'**
+  String get calAlNotaPersonal;
+
+  /// No description provided for @calAlNotaAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus notas son privadas: solo las ves vos.'**
+  String get calAlNotaAyuda;
+
+  /// No description provided for @calAlTodoElDia.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo el día'**
+  String get calAlTodoElDia;
+
+  /// No description provided for @calAlRango.
+  ///
+  /// In es, this message translates to:
+  /// **'Del {desde} al {hasta}'**
+  String calAlRango(String desde, String hasta);
+
+  /// No description provided for @calAlCuando.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuándo'**
+  String get calAlCuando;
+
+  /// No description provided for @calAlLugar.
+  ///
+  /// In es, this message translates to:
+  /// **'Lugar'**
+  String get calAlLugar;
+
+  /// No description provided for @calAlAsistenciaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Vas a asistir?'**
+  String get calAlAsistenciaTitulo;
+
+  /// No description provided for @calAlAsistenciaAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución te pide que confirmes tu asistencia.'**
+  String get calAlAsistenciaAyuda;
+
+  /// No description provided for @calAlAsistenciaPasado.
+  ///
+  /// In es, this message translates to:
+  /// **'Este evento ya pasó.'**
+  String get calAlAsistenciaPasado;
+
+  /// No description provided for @calAlAsistenciaGuardada.
+  ///
+  /// In es, this message translates to:
+  /// **'Respuesta enviada: {respuesta}.'**
+  String calAlAsistenciaGuardada(String respuesta);
+
+  /// No description provided for @calAlResponder.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmá tu asistencia'**
+  String get calAlResponder;
+
+  /// No description provided for @calAlNadaEsteDia.
+  ///
+  /// In es, this message translates to:
+  /// **'No tenés nada agendado para este día.'**
+  String get calAlNadaEsteDia;
+
+  /// No description provided for @calAlAgregarNota.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar una nota'**
+  String get calAlAgregarNota;
+
+  /// No description provided for @calAlProximos.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximos'**
+  String get calAlProximos;
+
+  /// No description provided for @calAlVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu calendario está listo'**
+  String get calAlVacioTitulo;
+
+  /// No description provided for @calAlVacioMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Acá vas a ver los eventos que publiquen las instituciones donde tengas la vacante confirmada: reuniones, actos, salidas y más. También podés agregar tus propias notas y recordatorios.'**
+  String get calAlVacioMensaje;
+
+  /// No description provided for @calAlSinEventos.
+  ///
+  /// In es, this message translates to:
+  /// **'Los eventos de tus instituciones van a aparecer acá cuando tengas una vacante confirmada.'**
+  String get calAlSinEventos;
+
+  /// No description provided for @calAlDiaItems.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Nada agendado} =1{1 actividad} other{{n} actividades}}'**
+  String calAlDiaItems(int n);
+
+  /// No description provided for @calAlEventoNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Este evento ya no está disponible.'**
+  String get calAlEventoNoDisponible;
+
+  /// No description provided for @docAlTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Documentos'**
+  String get docAlTitulo;
+
+  /// No description provided for @docAlHeroPendientes.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Tenés 1 documento para entregar} other{Tenés {n} documentos para entregar}}'**
+  String docAlHeroPendientes(int n);
+
+  /// No description provided for @docAlHeroPendientesSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Subilos desde acá: podés sacar una foto o elegir un archivo.'**
+  String get docAlHeroPendientesSub;
+
+  /// No description provided for @docAlHeroAlDia.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Todo al día!'**
+  String get docAlHeroAlDia;
+
+  /// No description provided for @docAlHeroAlDiaSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Te avisamos si una institución te pide algo nuevo.'**
+  String get docAlHeroAlDiaSub;
+
+  /// No description provided for @docAlSeccionEntregar.
+  ///
+  /// In es, this message translates to:
+  /// **'Para entregar'**
+  String get docAlSeccionEntregar;
+
+  /// No description provided for @docAlSeccionEntregarSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Subilos para completar la inscripción.'**
+  String get docAlSeccionEntregarSub;
+
+  /// No description provided for @docAlSeccionRevision.
+  ///
+  /// In es, this message translates to:
+  /// **'En revisión'**
+  String get docAlSeccionRevision;
+
+  /// No description provided for @docAlSeccionRevisionSub.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución los está revisando. Te avisamos cuando responda.'**
+  String get docAlSeccionRevisionSub;
+
+  /// No description provided for @docAlSeccionAprobados.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprobados'**
+  String get docAlSeccionAprobados;
+
+  /// No description provided for @docAlSeccionHistorial.
+  ///
+  /// In es, this message translates to:
+  /// **'Historial'**
+  String get docAlSeccionHistorial;
+
+  /// No description provided for @docAlSeccionHistorialSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedidos que la institución canceló'**
+  String get docAlSeccionHistorialSub;
+
+  /// No description provided for @docAlNadaParaEntregar.
+  ///
+  /// In es, this message translates to:
+  /// **'No tenés documentos para entregar.'**
+  String get docAlNadaParaEntregar;
+
+  /// No description provided for @docAlVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No tenés documentos pendientes'**
+  String get docAlVacioTitulo;
+
+  /// No description provided for @docAlVacioMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando una institución te pida un documento, como el DNI o un certificado médico, lo vas a ver acá y vas a poder subirlo en un par de pasos.'**
+  String get docAlVacioMensaje;
+
+  /// No description provided for @docAlSubirArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir archivo'**
+  String get docAlSubirArchivo;
+
+  /// No description provided for @docAlReemplazarArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Reemplazar archivo'**
+  String get docAlReemplazarArchivo;
+
+  /// No description provided for @docAlVerArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver archivo'**
+  String get docAlVerArchivo;
+
+  /// No description provided for @docAlSubiendo.
+  ///
+  /// In es, this message translates to:
+  /// **'Subiendo…'**
+  String get docAlSubiendo;
+
+  /// No description provided for @docAlEntregado.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Listo! Enviamos el documento a la institución.'**
+  String get docAlEntregado;
+
+  /// No description provided for @docAlMotivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo'**
+  String get docAlMotivo;
+
+  /// No description provided for @docAlRechazadoSinMotivo.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución pidió que vuelvas a subirlo.'**
+  String get docAlRechazadoSinMotivo;
+
+  /// No description provided for @docAlEntregarHasta.
+  ///
+  /// In es, this message translates to:
+  /// **'Entregar hasta el {fecha}'**
+  String docAlEntregarHasta(String fecha);
+
+  /// No description provided for @docAlVencio.
+  ///
+  /// In es, this message translates to:
+  /// **'Venció el {fecha}'**
+  String docAlVencio(String fecha);
+
+  /// No description provided for @docAlVenceHoy.
+  ///
+  /// In es, this message translates to:
+  /// **'Vence hoy'**
+  String get docAlVenceHoy;
+
+  /// No description provided for @docAlVenceManiana.
+  ///
+  /// In es, this message translates to:
+  /// **'Vence mañana'**
+  String get docAlVenceManiana;
+
+  /// No description provided for @docAlPedidoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedido el {fecha}'**
+  String docAlPedidoEl(String fecha);
+
+  /// No description provided for @docAlEntregadoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Entregado el {fecha}'**
+  String docAlEntregadoEl(String fecha);
+
+  /// No description provided for @docAlAprobadoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprobado el {fecha}'**
+  String docAlAprobadoEl(String fecha);
+
+  /// No description provided for @docAlCanceladoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelado el {fecha}'**
+  String docAlCanceladoEl(String fecha);
+
+  /// No description provided for @docAlIndicaciones.
+  ///
+  /// In es, this message translates to:
+  /// **'Indicaciones'**
+  String get docAlIndicaciones;
+
+  /// No description provided for @docAlFechaPedido.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha del pedido'**
+  String get docAlFechaPedido;
+
+  /// No description provided for @docAlFechaLimite.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha límite'**
+  String get docAlFechaLimite;
+
+  /// No description provided for @docAlArchivoEntregado.
+  ///
+  /// In es, this message translates to:
+  /// **'Archivo entregado'**
+  String get docAlArchivoEntregado;
+
+  /// No description provided for @docAlAyudaPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Subí el archivo para que la institución pueda revisarlo.'**
+  String get docAlAyudaPendiente;
+
+  /// No description provided for @docAlAyudaVencido.
+  ///
+  /// In es, this message translates to:
+  /// **'La fecha límite ya pasó. Subilo lo antes posible.'**
+  String get docAlAyudaVencido;
+
+  /// No description provided for @docAlAyudaRevision.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución lo está revisando. Si te equivocaste de archivo, podés reemplazarlo.'**
+  String get docAlAyudaRevision;
+
+  /// No description provided for @docAlAyudaAprobado.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución aprobó este documento. No tenés que hacer nada más.'**
+  String get docAlAyudaAprobado;
+
+  /// No description provided for @docAlAyudaCancelado.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución canceló este pedido. Ya no hace falta entregarlo.'**
+  String get docAlAyudaCancelado;
+
+  /// No description provided for @docAlFuenteTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo querés subirlo?'**
+  String get docAlFuenteTitulo;
+
+  /// No description provided for @docAlFuenteArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir un archivo'**
+  String get docAlFuenteArchivo;
+
+  /// No description provided for @docAlFuenteArchivoSub.
+  ///
+  /// In es, this message translates to:
+  /// **'PDF o imagen (JPG, PNG, WEBP o HEIC) de hasta 3 MB'**
+  String get docAlFuenteArchivoSub;
+
+  /// No description provided for @docAlFuenteCamara.
+  ///
+  /// In es, this message translates to:
+  /// **'Sacar una foto'**
+  String get docAlFuenteCamara;
+
+  /// No description provided for @docAlFuenteCamaraSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Fotografiá el documento con la cámara'**
+  String get docAlFuenteCamaraSub;
+
+  /// No description provided for @docAlFuenteGaleria.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir una foto'**
+  String get docAlFuenteGaleria;
+
+  /// No description provided for @docAlFuenteGaleriaSub.
+  ///
+  /// In es, this message translates to:
+  /// **'De las imágenes guardadas en tu dispositivo'**
+  String get docAlFuenteGaleriaSub;
+
+  /// No description provided for @docAlFuenteTip.
+  ///
+  /// In es, this message translates to:
+  /// **'Consejo: sacá la foto con buena luz y asegurate de que se lea todo el documento.'**
+  String get docAlFuenteTip;
+
+  /// No description provided for @docAlErrorSeleccion.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos abrir el archivo ni la cámara. Revisá los permisos e intentá de nuevo.'**
+  String get docAlErrorSeleccion;
+
+  /// No description provided for @docAlErrorArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos el archivo entregado.'**
+  String get docAlErrorArchivo;
+
+  /// No description provided for @docAlErrorPdf.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos abrir el PDF. Probá de nuevo en unos minutos.'**
+  String get docAlErrorPdf;
+
+  /// No description provided for @docAlSinVistaPrevia.
+  ///
+  /// In es, this message translates to:
+  /// **'No se puede mostrar la vista previa de esta imagen.'**
+  String get docAlSinVistaPrevia;
+
+  /// No description provided for @docAlNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Este pedido ya no está disponible.'**
+  String get docAlNoDisponible;
+
+  /// No description provided for @fichaAlTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ficha del alumno'**
+  String get fichaAlTitulo;
+
+  /// No description provided for @fichaAlDni.
+  ///
+  /// In es, this message translates to:
+  /// **'DNI {dni}'**
+  String fichaAlDni(String dni);
+
+  /// No description provided for @fichaAlAgregarFoto.
   ///
   /// In es, this message translates to:
   /// **'Agregar foto'**
-  String get institutionPublicProfileAddPhoto;
+  String get fichaAlAgregarFoto;
 
-  /// No description provided for @institutionPublicProfileChangePhoto.
+  /// No description provided for @fichaAlCambiarFoto.
   ///
   /// In es, this message translates to:
   /// **'Cambiar foto'**
-  String get institutionPublicProfileChangePhoto;
+  String get fichaAlCambiarFoto;
 
-  /// No description provided for @institutionPublicProfileRemovePhoto.
+  /// No description provided for @fichaAlFotoCamara.
   ///
   /// In es, this message translates to:
-  /// **'Eliminar foto'**
-  String get institutionPublicProfileRemovePhoto;
+  /// **'Sacar una foto'**
+  String get fichaAlFotoCamara;
 
-  /// No description provided for @institutionPublicProfilePhotoLimitReached.
+  /// No description provided for @fichaAlFotoGaleria.
   ///
   /// In es, this message translates to:
-  /// **'Ya cargaste el máximo de fotos ({max}).'**
-  String institutionPublicProfilePhotoLimitReached(Object max);
+  /// **'Elegir de la galería'**
+  String get fichaAlFotoGaleria;
 
-  /// No description provided for @institutionPublicProfileNoPhotosYet.
+  /// No description provided for @fichaAlFotoArchivo.
   ///
   /// In es, this message translates to:
-  /// **'Todavía no hay fotos.'**
-  String get institutionPublicProfileNoPhotosYet;
+  /// **'Elegir una imagen'**
+  String get fichaAlFotoArchivo;
 
-  /// No description provided for @institutionPublicProfilePickPhotoError.
+  /// No description provided for @fichaAlQuitarFoto.
   ///
   /// In es, this message translates to:
-  /// **'No se pudo cargar la foto: {error}'**
-  String institutionPublicProfilePickPhotoError(Object error);
+  /// **'Quitar foto'**
+  String get fichaAlQuitarFoto;
 
-  /// No description provided for @institutionPublicProfileSaveOk.
+  /// No description provided for @fichaAlQuitarFotoConfirm.
   ///
   /// In es, this message translates to:
-  /// **'Perfil guardado.'**
-  String get institutionPublicProfileSaveOk;
+  /// **'¿Quitar la foto?'**
+  String get fichaAlQuitarFotoConfirm;
 
-  /// No description provided for @institutionPublicProfileSaveFailed.
+  /// No description provided for @fichaAlQuitarFotoMensaje.
   ///
   /// In es, this message translates to:
-  /// **'No se pudo guardar el perfil: {error}'**
-  String institutionPublicProfileSaveFailed(Object error);
+  /// **'En su lugar se van a mostrar las iniciales del alumno.'**
+  String get fichaAlQuitarFotoMensaje;
 
-  /// No description provided for @institucionGeneric.
+  /// No description provided for @fichaAlFotoGuardada.
   ///
   /// In es, this message translates to:
-  /// **'Institución'**
-  String get institucionGeneric;
+  /// **'Foto actualizada.'**
+  String get fichaAlFotoGuardada;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaTitle.
+  /// No description provided for @fichaAlFotoEliminada.
   ///
   /// In es, this message translates to:
-  /// **'Emitir ficha'**
-  String get institucionExtracBaseEmitirFichaTitle;
+  /// **'Foto eliminada.'**
+  String get fichaAlFotoEliminada;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaSubtitle.
+  /// No description provided for @fichaAlFotoError.
   ///
   /// In es, this message translates to:
-  /// **'Crear una ficha para {group} y enviarla a alumnos/solicitudes.'**
-  String institucionExtracBaseEmitirFichaSubtitle(Object group);
+  /// **'No pudimos abrir la cámara ni la galería. Revisá los permisos e intentá de nuevo.'**
+  String get fichaAlFotoError;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaGrupoLabel.
+  /// No description provided for @fichaAlDatosPersonales.
   ///
   /// In es, this message translates to:
-  /// **'Grupo'**
-  String get institucionExtracBaseEmitirFichaGrupoLabel;
+  /// **'Datos personales'**
+  String get fichaAlDatosPersonales;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaTituloLabel.
+  /// No description provided for @fichaAlEditarDatos.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar datos'**
+  String get fichaAlEditarDatos;
+
+  /// No description provided for @fichaAlInstituciones.
+  ///
+  /// In es, this message translates to:
+  /// **'Instituciones'**
+  String get fichaAlInstituciones;
+
+  /// No description provided for @fichaAlInstitucionesSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Donde tiene la vacante confirmada'**
+  String get fichaAlInstitucionesSub;
+
+  /// No description provided for @fichaAlSinInstituciones.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay vacantes confirmadas. Cuando una institución confirme una solicitud, la vas a ver acá.'**
+  String get fichaAlSinInstituciones;
+
+  /// No description provided for @fichaAlConfirmadaEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmada el {fecha}'**
+  String fichaAlConfirmadaEl(String fecha);
+
+  /// No description provided for @fichaAlPdf.
+  ///
+  /// In es, this message translates to:
+  /// **'Ficha en PDF'**
+  String get fichaAlPdf;
+
+  /// No description provided for @fichaAlPdfSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Para presentar en una institución o guardar una copia'**
+  String get fichaAlPdfSub;
+
+  /// No description provided for @fichaAlDescargarPdf.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargar ficha en PDF'**
+  String get fichaAlDescargarPdf;
+
+  /// No description provided for @fichaAlDescargarPdfSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Con los datos personales, la foto y las instituciones'**
+  String get fichaAlDescargarPdfSub;
+
+  /// No description provided for @fichaAlImprimir.
+  ///
+  /// In es, this message translates to:
+  /// **'Imprimir'**
+  String get fichaAlImprimir;
+
+  /// No description provided for @fichaAlImprimirSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrí la vista previa para imprimir la ficha'**
+  String get fichaAlImprimirSub;
+
+  /// No description provided for @fichaAlGenerando.
+  ///
+  /// In es, this message translates to:
+  /// **'Generando PDF…'**
+  String get fichaAlGenerando;
+
+  /// No description provided for @fichaAlPdfError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos generar el PDF. Probá de nuevo en unos minutos.'**
+  String get fichaAlPdfError;
+
+  /// No description provided for @ofertasNueva.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva vacante'**
+  String get ofertasNueva;
+
+  /// No description provided for @ofertasErrorCarga.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar las vacantes.'**
+  String get ofertasErrorCarga;
+
+  /// No description provided for @ofertasSinPlanTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan todavía no incluye niveles ni actividades'**
+  String get ofertasSinPlanTitulo;
+
+  /// No description provided for @ofertasSinPlanMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Para publicar vacantes, habilitá niveles curriculares o actividades extracurriculares en Plan, desde el panel de la institución.'**
+  String get ofertasSinPlanMensaje;
+
+  /// No description provided for @ofertasVolverPanel.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver al panel'**
+  String get ofertasVolverPanel;
+
+  /// No description provided for @ofertasTipoFueraDelPlan.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan actual no incluye este tipo de vacantes. Podés editar, pausar o eliminar las que ya publicaste.'**
+  String get ofertasTipoFueraDelPlan;
+
+  /// No description provided for @ofertasFueraDelPlan.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuera de tu plan'**
+  String get ofertasFueraDelPlan;
+
+  /// No description provided for @ofertasVacioCurricularTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no publicaste vacantes curriculares'**
+  String get ofertasVacioCurricularTitulo;
+
+  /// No description provided for @ofertasVacioCurricularMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Creá los grados, años o salas con su cupo para que las familias puedan pedir vacante.'**
+  String get ofertasVacioCurricularMensaje;
+
+  /// No description provided for @ofertasVacioExtraTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no publicaste actividades extracurriculares'**
+  String get ofertasVacioExtraTitulo;
+
+  /// No description provided for @ofertasVacioExtraMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Sumá talleres, deportes o idiomas con su cupo y horario para que las familias puedan inscribirse.'**
+  String get ofertasVacioExtraMensaje;
+
+  /// No description provided for @ofertasNOfertas.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 oferta} other{{n} ofertas}}'**
+  String ofertasNOfertas(int n);
+
+  /// No description provided for @ofertasNLibres.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Sin vacantes libres} =1{1 vacante libre} other{{n} vacantes libres}}'**
+  String ofertasNLibres(int n);
+
+  /// No description provided for @ofertasAgregarEn.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar vacante en {categoria}'**
+  String ofertasAgregarEn(Object categoria);
+
+  /// No description provided for @ofertasActiva.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa'**
+  String get ofertasActiva;
+
+  /// No description provided for @ofertasPausada.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausada'**
+  String get ofertasPausada;
+
+  /// No description provided for @ofertasCompleta.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa'**
+  String get ofertasCompleta;
+
+  /// No description provided for @ofertasConfirmados.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Sin confirmados} =1{1 confirmado} other{{n} confirmados}}'**
+  String ofertasConfirmados(int n);
+
+  /// No description provided for @ofertasPendientes.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 pendiente} other{{n} pendientes}}'**
+  String ofertasPendientes(int n);
+
+  /// No description provided for @ofertasOcupacion.
+  ///
+  /// In es, this message translates to:
+  /// **'{confirmados} de {total} lugares ocupados'**
+  String ofertasOcupacion(int confirmados, int total);
+
+  /// No description provided for @ofertasPausar.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausar'**
+  String get ofertasPausar;
+
+  /// No description provided for @ofertasReanudar.
+  ///
+  /// In es, this message translates to:
+  /// **'Reanudar'**
+  String get ofertasReanudar;
+
+  /// No description provided for @ofertasDuplicar.
+  ///
+  /// In es, this message translates to:
+  /// **'Duplicar'**
+  String get ofertasDuplicar;
+
+  /// No description provided for @ofertasVerSolicitudes.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver solicitudes'**
+  String get ofertasVerSolicitudes;
+
+  /// No description provided for @ofertasPausadaOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante pausada: no recibe nuevas solicitudes.'**
+  String get ofertasPausadaOk;
+
+  /// No description provided for @ofertasReanudadaOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante reanudada: ya recibe solicitudes.'**
+  String get ofertasReanudadaOk;
+
+  /// No description provided for @ofertasEliminarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar «{nombre}»?'**
+  String ofertasEliminarTitulo(Object nombre);
+
+  /// No description provided for @ofertasEliminarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Las familias ya no la van a ver. Esta acción no se puede deshacer.'**
+  String get ofertasEliminarMensaje;
+
+  /// No description provided for @ofertasEliminadaOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante eliminada.'**
+  String get ofertasEliminadaOk;
+
+  /// No description provided for @ofertasFormEditar.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar vacante'**
+  String get ofertasFormEditar;
+
+  /// No description provided for @ofertasFormDuplicar.
+  ///
+  /// In es, this message translates to:
+  /// **'Duplicar vacante'**
+  String get ofertasFormDuplicar;
+
+  /// No description provided for @ofertasFormCopiaAviso.
+  ///
+  /// In es, this message translates to:
+  /// **'Estás creando una copia de «{nombre}». Cambiá lo que necesites (por ejemplo, el grupo) y guardala.'**
+  String ofertasFormCopiaAviso(Object nombre);
+
+  /// No description provided for @ofertasFormConfirmadosAviso.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Esta vacante tiene 1 alumno confirmado. Las solicitudes ya enviadas conservan los datos originales.} other{Esta vacante tiene {n} alumnos confirmados. Las solicitudes ya enviadas conservan los datos originales.}}'**
+  String ofertasFormConfirmadosAviso(int n);
+
+  /// No description provided for @ofertasSeccionTipo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo de vacante'**
+  String get ofertasSeccionTipo;
+
+  /// No description provided for @ofertasTipoCurricularDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Grados, años y salas'**
+  String get ofertasTipoCurricularDesc;
+
+  /// No description provided for @ofertasTipoExtraDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Talleres, deportes y actividades'**
+  String get ofertasTipoExtraDesc;
+
+  /// No description provided for @ofertasSeccionNivel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel'**
+  String get ofertasSeccionNivel;
+
+  /// No description provided for @ofertasSeccionCategoria.
+  ///
+  /// In es, this message translates to:
+  /// **'Categoría'**
+  String get ofertasSeccionCategoria;
+
+  /// No description provided for @ofertasElegiNivel.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí un nivel.'**
+  String get ofertasElegiNivel;
+
+  /// No description provided for @ofertasElegiCategoria.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí una categoría.'**
+  String get ofertasElegiCategoria;
+
+  /// No description provided for @ofertasSeccionDatos.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos de la vacante'**
+  String get ofertasSeccionDatos;
+
+  /// No description provided for @ofertasTituloCurricularLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Grado, año o sala'**
+  String get ofertasTituloCurricularLabel;
+
+  /// No description provided for @ofertasTituloExtraLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividad'**
+  String get ofertasTituloExtraLabel;
+
+  /// No description provided for @ofertasSugerenciasAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Tocá una sugerencia o escribilo a tu manera.'**
+  String get ofertasSugerenciasAyuda;
+
+  /// No description provided for @ofertasSugSala.
+  ///
+  /// In es, this message translates to:
+  /// **'Sala de {n}'**
+  String ofertasSugSala(int n);
+
+  /// No description provided for @ofertasSugGrado.
+  ///
+  /// In es, this message translates to:
+  /// **'{n}° grado'**
+  String ofertasSugGrado(int n);
+
+  /// No description provided for @ofertasSugAnio.
+  ///
+  /// In es, this message translates to:
+  /// **'{n}° año'**
+  String ofertasSugAnio(int n);
+
+  /// No description provided for @ofertasEjemplosGeneral.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Fútbol, Inglés, Robótica'**
+  String get ofertasEjemplosGeneral;
+
+  /// No description provided for @ofertasEjemplosDeporte.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Fútbol, Vóley, Natación'**
+  String get ofertasEjemplosDeporte;
+
+  /// No description provided for @ofertasEjemplosArte.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Teatro, Coro, Pintura'**
+  String get ofertasEjemplosArte;
+
+  /// No description provided for @ofertasEjemplosIdiomas.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Inglés inicial, Portugués, Oratoria'**
+  String get ofertasEjemplosIdiomas;
+
+  /// No description provided for @ofertasEjemplosCiencia.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Robótica, Programación, Club de ciencias'**
+  String get ofertasEjemplosCiencia;
+
+  /// No description provided for @ofertasEjemplosApoyo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Apoyo escolar, Técnicas de estudio'**
+  String get ofertasEjemplosApoyo;
+
+  /// No description provided for @ofertasEjemplosBienestar.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Yoga, Taller de emociones, Orientación vocacional'**
+  String get ofertasEjemplosBienestar;
+
+  /// No description provided for @ofertasEjemplosOtros.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Ajedrez, Cocina, Huerta'**
+  String get ofertasEjemplosOtros;
+
+  /// No description provided for @ofertasGrupoLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'División o grupo (opcional)'**
+  String get ofertasGrupoLabel;
+
+  /// No description provided for @ofertasGrupoHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: A, B, Grupo sábados'**
+  String get ofertasGrupoHelper;
+
+  /// No description provided for @ofertasSeccionHorario.
+  ///
+  /// In es, this message translates to:
+  /// **'Turno y horario'**
+  String get ofertasSeccionHorario;
+
+  /// No description provided for @ofertasTurnoLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Turno'**
+  String get ofertasTurnoLabel;
+
+  /// No description provided for @ofertasHoraDesde.
+  ///
+  /// In es, this message translates to:
+  /// **'Desde'**
+  String get ofertasHoraDesde;
+
+  /// No description provided for @ofertasHoraHasta.
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta'**
+  String get ofertasHoraHasta;
+
+  /// No description provided for @ofertasHorarioRango.
+  ///
+  /// In es, this message translates to:
+  /// **'{desde} a {hasta}'**
+  String ofertasHorarioRango(Object desde, Object hasta);
+
+  /// No description provided for @ofertasHorarioInvalido.
+  ///
+  /// In es, this message translates to:
+  /// **'La hora de fin tiene que ser posterior a la de inicio.'**
+  String get ofertasHorarioInvalido;
+
+  /// No description provided for @ofertasHorarioIncompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Completá las dos horas o dejá ambas vacías.'**
+  String get ofertasHorarioIncompleto;
+
+  /// No description provided for @ofertasHorarioActual.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario actual: {horario}. Elegí las horas para reemplazarlo.'**
+  String ofertasHorarioActual(Object horario);
+
+  /// No description provided for @ofertasQuitarHorario.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar horario'**
+  String get ofertasQuitarHorario;
+
+  /// No description provided for @ofertasDiasLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Días'**
+  String get ofertasDiasLabel;
+
+  /// No description provided for @ofertasDiaLun.
+  ///
+  /// In es, this message translates to:
+  /// **'Lun'**
+  String get ofertasDiaLun;
+
+  /// No description provided for @ofertasDiaMar.
+  ///
+  /// In es, this message translates to:
+  /// **'Mar'**
+  String get ofertasDiaMar;
+
+  /// No description provided for @ofertasDiaMie.
+  ///
+  /// In es, this message translates to:
+  /// **'Mié'**
+  String get ofertasDiaMie;
+
+  /// No description provided for @ofertasDiaJue.
+  ///
+  /// In es, this message translates to:
+  /// **'Jue'**
+  String get ofertasDiaJue;
+
+  /// No description provided for @ofertasDiaVie.
+  ///
+  /// In es, this message translates to:
+  /// **'Vie'**
+  String get ofertasDiaVie;
+
+  /// No description provided for @ofertasDiaSab.
+  ///
+  /// In es, this message translates to:
+  /// **'Sáb'**
+  String get ofertasDiaSab;
+
+  /// No description provided for @ofertasDiaDom.
+  ///
+  /// In es, this message translates to:
+  /// **'Dom'**
+  String get ofertasDiaDom;
+
+  /// No description provided for @ofertasDiasRango.
+  ///
+  /// In es, this message translates to:
+  /// **'{desde} a {hasta}'**
+  String ofertasDiasRango(Object desde, Object hasta);
+
+  /// No description provided for @ofertasDiasLista.
+  ///
+  /// In es, this message translates to:
+  /// **'{lista} y {ultimo}'**
+  String ofertasDiasLista(Object lista, Object ultimo);
+
+  /// No description provided for @ofertasDiasTodos.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos los días'**
+  String get ofertasDiasTodos;
+
+  /// No description provided for @ofertasDiasActual.
+  ///
+  /// In es, this message translates to:
+  /// **'Días actuales: {dias}. Elegilos para reemplazarlos.'**
+  String ofertasDiasActual(Object dias);
+
+  /// No description provided for @ofertasSeccionCupo.
+  ///
+  /// In es, this message translates to:
+  /// **'Cupo y requisitos'**
+  String get ofertasSeccionCupo;
+
+  /// No description provided for @ofertasCupoLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cupo total'**
+  String get ofertasCupoLabel;
+
+  /// No description provided for @ofertasCupoHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantidad de alumnos que pueden inscribirse.'**
+  String get ofertasCupoHelper;
+
+  /// No description provided for @ofertasCupoConfirmadosHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Hay 1 alumno confirmado.} other{Hay {n} alumnos confirmados.}}'**
+  String ofertasCupoConfirmadosHelper(int n);
+
+  /// No description provided for @ofertasCupoMinimo.
+  ///
+  /// In es, this message translates to:
+  /// **'El cupo tiene que ser de al menos 1.'**
+  String get ofertasCupoMinimo;
+
+  /// No description provided for @ofertasCupoMenorConfirmados.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Ya hay 1 alumno confirmado: el cupo no puede ser menor.} other{Ya hay {n} alumnos confirmados: el cupo no puede ser menor.}}'**
+  String ofertasCupoMenorConfirmados(int n);
+
+  /// No description provided for @ofertasRestarUno.
+  ///
+  /// In es, this message translates to:
+  /// **'Restar uno'**
+  String get ofertasRestarUno;
+
+  /// No description provided for @ofertasSumarUno.
+  ///
+  /// In es, this message translates to:
+  /// **'Sumar uno'**
+  String get ofertasSumarUno;
+
+  /// No description provided for @ofertasEdadMinLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Edad mínima'**
+  String get ofertasEdadMinLabel;
+
+  /// No description provided for @ofertasEdadMaxLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Edad máxima'**
+  String get ofertasEdadMaxLabel;
+
+  /// No description provided for @ofertasAniosSufijo.
+  ///
+  /// In es, this message translates to:
+  /// **'años'**
+  String get ofertasAniosSufijo;
+
+  /// No description provided for @ofertasEdadHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Opcional: dejalas vacías si no hay límite de edad.'**
+  String get ofertasEdadHelper;
+
+  /// No description provided for @ofertasEdadRangoInvalido.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiene que ser igual o mayor que la edad mínima.'**
+  String get ofertasEdadRangoInvalido;
+
+  /// No description provided for @ofertasArancelLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Arancel (opcional)'**
+  String get ofertasArancelLabel;
+
+  /// No description provided for @ofertasArancelHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: \$ 15.000 por mes. Dejalo vacío si es gratuita.'**
+  String get ofertasArancelHelper;
+
+  /// No description provided for @ofertasDescripcionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Descripción (opcional)'**
+  String get ofertasDescripcionLabel;
+
+  /// No description provided for @ofertasDescripcionHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Contales a las familias qué incluye, requisitos o materiales.'**
+  String get ofertasDescripcionHelper;
+
+  /// No description provided for @ofertasSeccionPublicacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicación'**
+  String get ofertasSeccionPublicacion;
+
+  /// No description provided for @ofertasActivaLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibe solicitudes'**
+  String get ofertasActivaLabel;
+
+  /// No description provided for @ofertasActivaOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa: las familias pueden pedir vacante.'**
+  String get ofertasActivaOn;
+
+  /// No description provided for @ofertasActivaOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausada: las familias no pueden pedir vacante por ahora.'**
+  String get ofertasActivaOff;
+
+  /// No description provided for @ofertasCrear.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear vacante'**
+  String get ofertasCrear;
+
+  /// No description provided for @ofertasCreadaOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante creada.'**
+  String get ofertasCreadaOk;
+
+  /// No description provided for @ofertasGuardadaOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambios guardados.'**
+  String get ofertasGuardadaOk;
+
+  /// No description provided for @ofertasDescartarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Descartar los cambios?'**
+  String get ofertasDescartarTitulo;
+
+  /// No description provided for @ofertasDescartarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Los cambios que hiciste no se van a guardar.'**
+  String get ofertasDescartarMensaje;
+
+  /// No description provided for @ofertasDescartar.
+  ///
+  /// In es, this message translates to:
+  /// **'Descartar'**
+  String get ofertasDescartar;
+
+  /// No description provided for @ofertasRevisaCampos.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisá los campos marcados.'**
+  String get ofertasRevisaCampos;
+
+  /// No description provided for @crqNuevo.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo croquis'**
+  String get crqNuevo;
+
+  /// No description provided for @crqErrorCarga.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar los croquis.'**
+  String get crqErrorCarga;
+
+  /// No description provided for @crqVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no armaste ningún croquis'**
+  String get crqVacioTitulo;
+
+  /// No description provided for @crqVacioMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Diseñá la distribución de bancos de cada aula y ubicá a tus alumnos. Después podés exportarla en PDF.'**
+  String get crqVacioMensaje;
+
+  /// No description provided for @crqFilasColumnas.
+  ///
+  /// In es, this message translates to:
+  /// **'{filas} × {columnas} bancos'**
+  String crqFilasColumnas(int filas, int columnas);
+
+  /// No description provided for @crqOcupados.
+  ///
+  /// In es, this message translates to:
+  /// **'{ocupados} de {total} lugares ocupados'**
+  String crqOcupados(int ocupados, int total);
+
+  /// No description provided for @crqSinVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin vacante asociada'**
+  String get crqSinVacante;
+
+  /// No description provided for @crqVacanteAsociada.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante asociada'**
+  String get crqVacanteAsociada;
+
+  /// No description provided for @crqVacanteAsociadaHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Te vamos a sugerir sus alumnos confirmados al ubicar los bancos.'**
+  String get crqVacanteAsociadaHelper;
+
+  /// No description provided for @crqVacanteNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'La vacante asociada ya no existe'**
+  String get crqVacanteNoDisponible;
+
+  /// No description provided for @crqCambiarVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar vacante asociada'**
+  String get crqCambiarVacante;
+
+  /// No description provided for @crqAsociarVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'Asociar una vacante'**
+  String get crqAsociarVacante;
+
+  /// No description provided for @crqVacanteActualizada.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante asociada actualizada.'**
+  String get crqVacanteActualizada;
+
+  /// No description provided for @crqNombreLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del croquis'**
+  String get crqNombreLabel;
+
+  /// No description provided for @crqNombreHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: 1° grado A, Aula 3, Laboratorio'**
+  String get crqNombreHelper;
+
+  /// No description provided for @crqFilas.
+  ///
+  /// In es, this message translates to:
+  /// **'Filas'**
+  String get crqFilas;
+
+  /// No description provided for @crqColumnas.
+  ///
+  /// In es, this message translates to:
+  /// **'Columnas'**
+  String get crqColumnas;
+
+  /// No description provided for @crqQuitarUno.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar uno'**
+  String get crqQuitarUno;
+
+  /// No description provided for @crqAgregarUno.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar uno'**
+  String get crqAgregarUno;
+
+  /// No description provided for @crqCrear.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear croquis'**
+  String get crqCrear;
+
+  /// No description provided for @crqVistaPrevia.
+  ///
+  /// In es, this message translates to:
+  /// **'Vista previa'**
+  String get crqVistaPrevia;
+
+  /// No description provided for @crqFrente.
+  ///
+  /// In es, this message translates to:
+  /// **'Frente del aula · Pizarrón'**
+  String get crqFrente;
+
+  /// No description provided for @crqBanco.
+  ///
+  /// In es, this message translates to:
+  /// **'Banco {n}'**
+  String crqBanco(int n);
+
+  /// No description provided for @crqBancoLibre.
+  ///
+  /// In es, this message translates to:
+  /// **'Libre'**
+  String get crqBancoLibre;
+
+  /// No description provided for @crqAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Tocá un banco para ubicar a un alumno. Mantenelo presionado y arrastralo para cambiarlo de lugar.'**
+  String get crqAyuda;
+
+  /// No description provided for @crqAyudaScroll.
+  ///
+  /// In es, this message translates to:
+  /// **'Deslizá hacia los costados para ver toda el aula.'**
+  String get crqAyudaScroll;
+
+  /// No description provided for @crqOcupadoPor.
+  ///
+  /// In es, this message translates to:
+  /// **'Ocupado por {nombre}'**
+  String crqOcupadoPor(Object nombre);
+
+  /// No description provided for @crqBuscarAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar alumno'**
+  String get crqBuscarAlumno;
+
+  /// No description provided for @crqAlumnosDeVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos confirmados en {oferta}'**
+  String crqAlumnosDeVacante(Object oferta);
+
+  /// No description provided for @crqAlumnosInstitucion.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos confirmados de la institución'**
+  String get crqAlumnosInstitucion;
+
+  /// No description provided for @crqTodosSentados.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos los alumnos confirmados ya tienen banco.'**
+  String get crqTodosSentados;
+
+  /// No description provided for @crqSinConfirmados.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay alumnos confirmados. Podés escribir un nombre.'**
+  String get crqSinConfirmados;
+
+  /// No description provided for @crqSinResultados.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay alumnos que coincidan con la búsqueda.'**
+  String get crqSinResultados;
+
+  /// No description provided for @crqErrorAlumnos.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar los alumnos confirmados. Podés escribir un nombre.'**
+  String get crqErrorAlumnos;
+
+  /// No description provided for @crqNombreLibre.
+  ///
+  /// In es, this message translates to:
+  /// **'O escribí un nombre'**
+  String get crqNombreLibre;
+
+  /// No description provided for @crqNombreLibreLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre y apellido'**
+  String get crqNombreLibreLabel;
+
+  /// No description provided for @crqAsignar.
+  ///
+  /// In es, this message translates to:
+  /// **'Ubicar'**
+  String get crqAsignar;
+
+  /// No description provided for @crqDejarLibre.
+  ///
+  /// In es, this message translates to:
+  /// **'Dejar libre'**
+  String get crqDejarLibre;
+
+  /// No description provided for @crqMovidoDesde.
+  ///
+  /// In es, this message translates to:
+  /// **'{nombre} pasó del banco {desde} al {hasta}.'**
+  String crqMovidoDesde(Object nombre, int desde, int hasta);
+
+  /// No description provided for @crqGuardado.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardado'**
+  String get crqGuardado;
+
+  /// No description provided for @crqSinGuardar.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin guardar'**
+  String get crqSinGuardar;
+
+  /// No description provided for @crqErrorGuardar.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos guardar el último cambio. Tocá «Sin guardar» para reintentar.'**
+  String get crqErrorGuardar;
+
+  /// No description provided for @crqRenombrar.
+  ///
+  /// In es, this message translates to:
+  /// **'Renombrar'**
+  String get crqRenombrar;
+
+  /// No description provided for @crqRenombrarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Renombrar croquis'**
+  String get crqRenombrarTitulo;
+
+  /// No description provided for @crqTamanoCorto.
+  ///
+  /// In es, this message translates to:
+  /// **'Tamaño'**
+  String get crqTamanoCorto;
+
+  /// No description provided for @crqTamanoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tamaño del aula'**
+  String get crqTamanoTitulo;
+
+  /// No description provided for @crqTamanoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Las filas van del pizarrón hacia el fondo; las columnas, de izquierda a derecha.'**
+  String get crqTamanoAyuda;
+
+  /// No description provided for @crqTamanoPierde.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 alumno quedaría fuera del aula y se quitaría del croquis.} other{{n} alumnos quedarían fuera del aula y se quitarían del croquis.}}'**
+  String crqTamanoPierde(int n);
+
+  /// No description provided for @crqTamanoConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Achicar el aula?'**
+  String get crqTamanoConfirmarTitulo;
+
+  /// No description provided for @crqAplicar.
+  ///
+  /// In es, this message translates to:
+  /// **'Aplicar'**
+  String get crqAplicar;
+
+  /// No description provided for @crqVaciar.
+  ///
+  /// In es, this message translates to:
+  /// **'Vaciar'**
+  String get crqVaciar;
+
+  /// No description provided for @crqVaciarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Vaciar el croquis?'**
+  String get crqVaciarTitulo;
+
+  /// No description provided for @crqVaciarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Se va a liberar 1 lugar ocupado. La distribución de bancos se mantiene.} other{Se van a liberar {n} lugares ocupados. La distribución de bancos se mantiene.}}'**
+  String crqVaciarMensaje(int n);
+
+  /// No description provided for @crqVaciadoOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Croquis vaciado.'**
+  String get crqVaciadoOk;
+
+  /// No description provided for @crqYaVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'El croquis ya está vacío.'**
+  String get crqYaVacio;
+
+  /// No description provided for @crqPdfCorto.
+  ///
+  /// In es, this message translates to:
+  /// **'PDF'**
+  String get crqPdfCorto;
+
+  /// No description provided for @crqExportarPdf.
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar PDF'**
+  String get crqExportarPdf;
+
+  /// No description provided for @crqPdfError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos generar el PDF. Probá de nuevo en un momento.'**
+  String get crqPdfError;
+
+  /// No description provided for @crqPdfArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'croquis_{nombre}'**
+  String crqPdfArchivo(Object nombre);
+
+  /// No description provided for @crqEliminarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar «{nombre}»?'**
+  String crqEliminarTitulo(Object nombre);
+
+  /// No description provided for @crqEliminarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Se va a borrar la distribución de bancos. Esta acción no se puede deshacer.'**
+  String get crqEliminarMensaje;
+
+  /// No description provided for @crqEliminadoOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Croquis eliminado.'**
+  String get crqEliminadoOk;
+
+  /// No description provided for @comInstTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Comunicaciones'**
+  String get comInstTitle;
+
+  /// No description provided for @comInstTabCalendario.
+  ///
+  /// In es, this message translates to:
+  /// **'Calendario'**
+  String get comInstTabCalendario;
+
+  /// No description provided for @comInstTabAvisos.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisos'**
+  String get comInstTabAvisos;
+
+  /// No description provided for @comInstLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar las comunicaciones.'**
+  String get comInstLoadError;
+
+  /// No description provided for @comInstProximos.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximos'**
+  String get comInstProximos;
+
+  /// No description provided for @comInstPasados.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasados'**
+  String get comInstPasados;
+
+  /// No description provided for @comInstNuevoEvento.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo evento'**
+  String get comInstNuevoEvento;
+
+  /// No description provided for @comInstEditarEvento.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar evento'**
+  String get comInstEditarEvento;
+
+  /// No description provided for @comInstEliminarEvento.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar evento'**
+  String get comInstEliminarEvento;
+
+  /// No description provided for @comInstTodoElDia.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo el día'**
+  String get comInstTodoElDia;
+
+  /// No description provided for @comInstRangoFechas.
+  ///
+  /// In es, this message translates to:
+  /// **'Del {desde} al {hasta}'**
+  String comInstRangoFechas(Object desde, Object hasta);
+
+  /// No description provided for @comInstParaTodos.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos los alumnos'**
+  String get comInstParaTodos;
+
+  /// No description provided for @comInstEnCurso.
+  ///
+  /// In es, this message translates to:
+  /// **'En curso'**
+  String get comInstEnCurso;
+
+  /// No description provided for @comInstOfertaEliminada.
+  ///
+  /// In es, this message translates to:
+  /// **'Curso o grupo eliminado'**
+  String get comInstOfertaEliminada;
+
+  /// No description provided for @comInstYMas.
+  ///
+  /// In es, this message translates to:
+  /// **'{nombres} y {n} más'**
+  String comInstYMas(Object nombres, int n);
+
+  /// No description provided for @comInstAsistiran.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 asistirá} other{{n} asistirán}}'**
+  String comInstAsistiran(int n);
+
+  /// No description provided for @comInstTalVez.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 tal vez} other{{n} tal vez}}'**
+  String comInstTalVez(int n);
+
+  /// No description provided for @comInstNoAsistiran.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 no asistirá} other{{n} no asistirán}}'**
+  String comInstNoAsistiran(int n);
+
+  /// No description provided for @comInstSinRespuestas.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin respuestas todavía'**
+  String get comInstSinRespuestas;
+
+  /// No description provided for @comInstSinProximosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay eventos próximos'**
+  String get comInstSinProximosTitulo;
+
+  /// No description provided for @comInstSinProximosMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicá reuniones, actos, evaluaciones o vacaciones: aparecen en el calendario de cada familia y les llega un aviso.'**
+  String get comInstSinProximosMensaje;
+
+  /// No description provided for @comInstSinPasadosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay eventos pasados'**
+  String get comInstSinPasadosTitulo;
+
+  /// No description provided for @comInstSinPasadosMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Acá vas a ver los eventos que ya ocurrieron.'**
+  String get comInstSinPasadosMensaje;
+
+  /// No description provided for @comInstSeccionTipo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo de evento'**
+  String get comInstSeccionTipo;
+
+  /// No description provided for @comInstSeccionTipoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayuda a las familias a reconocerlo de un vistazo.'**
+  String get comInstSeccionTipoAyuda;
+
+  /// No description provided for @comInstSeccionDatos.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos del evento'**
+  String get comInstSeccionDatos;
+
+  /// No description provided for @comInstCampoTitulo.
   ///
   /// In es, this message translates to:
   /// **'Título'**
-  String get institucionExtracBaseEmitirFichaTituloLabel;
+  String get comInstCampoTitulo;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaTituloHint.
+  /// No description provided for @comInstCampoTituloAyuda.
   ///
   /// In es, this message translates to:
-  /// **'ej.: Reunión informativa'**
-  String get institucionExtracBaseEmitirFichaTituloHint;
+  /// **'Ej.: Reunión de familias de 1.er grado'**
+  String get comInstCampoTituloAyuda;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaContenidoLabel.
+  /// No description provided for @comInstCampoDescripcion.
   ///
   /// In es, this message translates to:
-  /// **'Contenido'**
-  String get institucionExtracBaseEmitirFichaContenidoLabel;
+  /// **'Descripción (opcional)'**
+  String get comInstCampoDescripcion;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaContenidoHint.
+  /// No description provided for @comInstCampoDescripcionAyuda.
   ///
   /// In es, this message translates to:
-  /// **'Escribí el detalle de la ficha…'**
-  String get institucionExtracBaseEmitirFichaContenidoHint;
+  /// **'Lo que las familias necesitan saber: qué llevar, cómo llegar, horarios.'**
+  String get comInstCampoDescripcionAyuda;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaAddToCalendar.
+  /// No description provided for @comInstCampoLugar.
   ///
   /// In es, this message translates to:
-  /// **'Agregar al calendario'**
-  String get institucionExtracBaseEmitirFichaAddToCalendar;
+  /// **'Lugar (opcional)'**
+  String get comInstCampoLugar;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaAddToCalendarHelp.
+  /// No description provided for @comInstSeccionCuando.
   ///
   /// In es, this message translates to:
-  /// **'Si está activado, se crea un evento en el calendario del alumno.'**
-  String get institucionExtracBaseEmitirFichaAddToCalendarHelp;
+  /// **'Cuándo'**
+  String get comInstSeccionCuando;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaRequireRsvp.
+  /// No description provided for @comInstCampoFecha.
   ///
   /// In es, this message translates to:
-  /// **'Requiere confirmación'**
-  String get institucionExtracBaseEmitirFichaRequireRsvp;
+  /// **'Fecha'**
+  String get comInstCampoFecha;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaRequireRsvpHelp.
+  /// No description provided for @comInstCampoFechaFin.
   ///
   /// In es, this message translates to:
-  /// **'Si está activado, el alumno podrá confirmar asistencia (sí / quizás / no).'**
-  String get institucionExtracBaseEmitirFichaRequireRsvpHelp;
+  /// **'Fecha de fin (opcional)'**
+  String get comInstCampoFechaFin;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaDestinatariosTitle.
+  /// No description provided for @comInstCampoFechaFinAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Para eventos de varios días, como vacaciones.'**
+  String get comInstCampoFechaFinAyuda;
+
+  /// No description provided for @comInstQuitarFechaFin.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar fecha de fin'**
+  String get comInstQuitarFechaFin;
+
+  /// No description provided for @comInstErrorFecha.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí la fecha.'**
+  String get comInstErrorFecha;
+
+  /// No description provided for @comInstErrorFechaFin.
+  ///
+  /// In es, this message translates to:
+  /// **'Tiene que ser posterior a la fecha de inicio.'**
+  String get comInstErrorFechaFin;
+
+  /// No description provided for @comInstTodoElDiaAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Desactivalo para indicar la hora de inicio.'**
+  String get comInstTodoElDiaAyuda;
+
+  /// No description provided for @comInstCampoHora.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora de inicio'**
+  String get comInstCampoHora;
+
+  /// No description provided for @comInstErrorHora.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí la hora de inicio.'**
+  String get comInstErrorHora;
+
+  /// No description provided for @comInstSeccionDestinatarios.
   ///
   /// In es, this message translates to:
   /// **'Destinatarios'**
-  String get institucionExtracBaseEmitirFichaDestinatariosTitle;
+  String get comInstSeccionDestinatarios;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaDestinatariosEmptyHelp.
+  /// No description provided for @comInstSeccionDestinatariosAyuda.
   ///
   /// In es, this message translates to:
-  /// **'No hay destinatarios disponibles para este grupo.'**
-  String get institucionExtracBaseEmitirFichaDestinatariosEmptyHelp;
+  /// **'Lo reciben las familias de los alumnos confirmados.'**
+  String get comInstSeccionDestinatariosAyuda;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaManualLabel.
+  /// No description provided for @comInstDestOfertas.
   ///
   /// In es, this message translates to:
-  /// **'Destinatarios manuales'**
-  String get institucionExtracBaseEmitirFichaManualLabel;
+  /// **'Cursos o grupos'**
+  String get comInstDestOfertas;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaManualHint.
+  /// No description provided for @comInstDestElegirAyuda.
   ///
   /// In es, this message translates to:
-  /// **'Ingresá uno o más documentos/IDs, separados por coma'**
-  String get institucionExtracBaseEmitirFichaManualHint;
+  /// **'Elegí uno o más cursos o grupos.'**
+  String get comInstDestElegirAyuda;
 
-  /// No description provided for @actionSelectAll.
+  /// No description provided for @comInstDestErrorVacio.
   ///
   /// In es, this message translates to:
-  /// **'Seleccionar todo'**
-  String get actionSelectAll;
+  /// **'Elegí al menos un curso o grupo.'**
+  String get comInstDestErrorVacio;
 
-  /// No description provided for @actionSelectNone.
+  /// No description provided for @comInstDestSinOfertas.
   ///
   /// In es, this message translates to:
-  /// **'Seleccionar ninguno'**
-  String get actionSelectNone;
+  /// **'Cuando publiques vacantes vas a poder elegir cursos o grupos puntuales.'**
+  String get comInstDestSinOfertas;
 
-  /// No description provided for @actionEmit.
+  /// No description provided for @comInstAlumnosConfirmados.
   ///
   /// In es, this message translates to:
-  /// **'Emitir'**
-  String get actionEmit;
+  /// **'{n, plural, =0{Sin alumnos confirmados} =1{1 alumno confirmado} other{{n} alumnos confirmados}}'**
+  String comInstAlumnosConfirmados(int n);
 
-  /// No description provided for @institucionExtracBaseEmitirFichaDefaultTitle.
+  /// No description provided for @comInstPedirConfirmacion.
   ///
   /// In es, this message translates to:
-  /// **'Ficha – {module}'**
-  String institucionExtracBaseEmitirFichaDefaultTitle(Object module);
+  /// **'Pedir confirmación de asistencia'**
+  String get comInstPedirConfirmacion;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaDefaultBody.
+  /// No description provided for @comInstPedirConfirmacionAyuda.
   ///
   /// In es, this message translates to:
-  /// **'Se generó una ficha para compartir información del grupo.'**
-  String get institucionExtracBaseEmitirFichaDefaultBody;
+  /// **'Las familias podrán responder si asisten y vas a ver las respuestas acá.'**
+  String get comInstPedirConfirmacionAyuda;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaNoRecipients.
+  /// No description provided for @comInstSeAvisaraA.
   ///
   /// In es, this message translates to:
-  /// **'No hay destinatarios seleccionados.'**
-  String get institucionExtracBaseEmitirFichaNoRecipients;
+  /// **'{n, plural, =1{Se avisará a 1 alumno} other{Se avisará a {n} alumnos}}'**
+  String comInstSeAvisaraA(int n);
 
-  /// No description provided for @institucionExtracBaseEmitirFichaOk.
+  /// No description provided for @comInstSeAvisaraAyuda.
   ///
   /// In es, this message translates to:
-  /// **'Ficha emitida.'**
-  String get institucionExtracBaseEmitirFichaOk;
+  /// **'Les llega una notificación y el evento aparece en su calendario.'**
+  String get comInstSeAvisaraAyuda;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaServiceMissing.
+  /// No description provided for @comInstCalculando.
   ///
   /// In es, this message translates to:
-  /// **'Servicio no disponible.'**
-  String get institucionExtracBaseEmitirFichaServiceMissing;
+  /// **'Calculando destinatarios…'**
+  String get comInstCalculando;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaFailed.
+  /// No description provided for @comInstSinDestinatariosEvento.
   ///
   /// In es, this message translates to:
-  /// **'No se pudo emitir la ficha: {error}'**
-  String institucionExtracBaseEmitirFichaFailed(Object error);
+  /// **'Todavía no hay alumnos confirmados en esta selección. Nadie recibirá el aviso ahora, pero el evento va a aparecer en el calendario de quienes se sumen.'**
+  String get comInstSinDestinatariosEvento;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaBanner.
+  /// No description provided for @comInstEditarSinAviso.
   ///
   /// In es, this message translates to:
-  /// **'Emití fichas como notificación y, opcionalmente, como evento de calendario.'**
-  String get institucionExtracBaseEmitirFichaBanner;
+  /// **'Los cambios se guardan sin enviar una notificación nueva.'**
+  String get comInstEditarSinAviso;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaCardTitle.
+  /// No description provided for @comInstPublicar.
   ///
   /// In es, this message translates to:
-  /// **'Emitir ficha'**
-  String get institucionExtracBaseEmitirFichaCardTitle;
+  /// **'Publicar evento'**
+  String get comInstPublicar;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaCardSubtitle.
+  /// No description provided for @comInstPublicando.
   ///
   /// In es, this message translates to:
-  /// **'Crear una ficha informativa para el grupo seleccionado'**
-  String get institucionExtracBaseEmitirFichaCardSubtitle;
+  /// **'Publicando…'**
+  String get comInstPublicando;
 
-  /// No description provided for @institucionExtracBaseOpenInboxCta.
+  /// No description provided for @comInstGuardarCambios.
   ///
   /// In es, this message translates to:
-  /// **'Abrir notificaciones'**
-  String get institucionExtracBaseOpenInboxCta;
+  /// **'Guardar cambios'**
+  String get comInstGuardarCambios;
 
-  /// No description provided for @institucionExtracBaseEmitirFichaCardFootnote.
+  /// No description provided for @comInstEventoPublicado.
   ///
   /// In es, this message translates to:
-  /// **'Las fichas se guardan como notificación (prototipo).'**
-  String get institucionExtracBaseEmitirFichaCardFootnote;
+  /// **'{n, plural, =0{Evento publicado.} =1{Evento publicado. Le avisamos a 1 alumno.} other{Evento publicado. Les avisamos a {n} alumnos.}}'**
+  String comInstEventoPublicado(int n);
 
-  /// No description provided for @send.
+  /// No description provided for @comInstEventoActualizado.
   ///
   /// In es, this message translates to:
-  /// **'Enviar'**
-  String get send;
+  /// **'Cambios guardados.'**
+  String get comInstEventoActualizado;
+
+  /// No description provided for @comInstEventoEliminado.
+  ///
+  /// In es, this message translates to:
+  /// **'Evento eliminado.'**
+  String get comInstEventoEliminado;
+
+  /// No description provided for @comInstEliminarEventoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar este evento?'**
+  String get comInstEliminarEventoTitulo;
+
+  /// No description provided for @comInstEliminarEventoMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Se quita del calendario de las familias junto con sus respuestas. No se puede deshacer.'**
+  String get comInstEliminarEventoMensaje;
+
+  /// No description provided for @comInstDescartarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Descartar los cambios?'**
+  String get comInstDescartarTitulo;
+
+  /// No description provided for @comInstDescartarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo que completaste no se va a guardar.'**
+  String get comInstDescartarMensaje;
+
+  /// No description provided for @comInstDescartar.
+  ///
+  /// In es, this message translates to:
+  /// **'Descartar'**
+  String get comInstDescartar;
+
+  /// No description provided for @comInstSeguirEditando.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguir editando'**
+  String get comInstSeguirEditando;
+
+  /// No description provided for @comInstDetalleTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle del evento'**
+  String get comInstDetalleTitulo;
+
+  /// No description provided for @comInstInfoFecha.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha'**
+  String get comInstInfoFecha;
+
+  /// No description provided for @comInstInfoHorario.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario'**
+  String get comInstInfoHorario;
+
+  /// No description provided for @comInstInfoLugar.
+  ///
+  /// In es, this message translates to:
+  /// **'Lugar'**
+  String get comInstInfoLugar;
+
+  /// No description provided for @comInstInfoAlcance.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos alcanzados'**
+  String get comInstInfoAlcance;
+
+  /// No description provided for @comInstInfoDescripcion.
+  ///
+  /// In es, this message translates to:
+  /// **'Descripción'**
+  String get comInstInfoDescripcion;
+
+  /// No description provided for @comInstPublicadoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicado el {fecha}'**
+  String comInstPublicadoEl(Object fecha);
+
+  /// No description provided for @comInstRespuestasTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmaciones de asistencia'**
+  String get comInstRespuestasTitulo;
+
+  /// No description provided for @comInstRespuestasConteo.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Nadie respondió todavía} =1{1 respuesta} other{{n} respuestas}}'**
+  String comInstRespuestasConteo(int n);
+
+  /// No description provided for @comInstStatAsistiran.
+  ///
+  /// In es, this message translates to:
+  /// **'Asistirán'**
+  String get comInstStatAsistiran;
+
+  /// No description provided for @comInstStatTalVez.
+  ///
+  /// In es, this message translates to:
+  /// **'Tal vez'**
+  String get comInstStatTalVez;
+
+  /// No description provided for @comInstStatNoAsistiran.
+  ///
+  /// In es, this message translates to:
+  /// **'No asistirán'**
+  String get comInstStatNoAsistiran;
+
+  /// No description provided for @comInstStatSinResponder.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin responder'**
+  String get comInstStatSinResponder;
+
+  /// No description provided for @comInstSinRespuestasDetalle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía nadie respondió. Las respuestas aparecen acá a medida que las familias confirman.'**
+  String get comInstSinRespuestasDetalle;
+
+  /// No description provided for @comInstNoPideConfirmacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Este evento no pide confirmación de asistencia. Podés activarla editándolo.'**
+  String get comInstNoPideConfirmacion;
+
+  /// No description provided for @comInstNuevoAviso.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo aviso'**
+  String get comInstNuevoAviso;
+
+  /// No description provided for @comInstNuevoAvisoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Llega como notificación a las familias de tus alumnos confirmados.'**
+  String get comInstNuevoAvisoAyuda;
+
+  /// No description provided for @comInstAvisoCampoTituloAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Cambio de horario de salida'**
+  String get comInstAvisoCampoTituloAyuda;
+
+  /// No description provided for @comInstAvisoCampoMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje'**
+  String get comInstAvisoCampoMensaje;
+
+  /// No description provided for @comInstLlegaraA.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Llegará a 1 alumno} other{Llegará a {n} alumnos}}'**
+  String comInstLlegaraA(int n);
+
+  /// No description provided for @comInstSinDestinatariosAviso.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay alumnos confirmados en esta selección. Cuando confirmes solicitudes vas a poder enviarles avisos.'**
+  String get comInstSinDestinatariosAviso;
+
+  /// No description provided for @comInstEnviarAviso.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar aviso'**
+  String get comInstEnviarAviso;
+
+  /// No description provided for @comInstConfirmarEnvio.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{¿Enviar a 1 alumno?} other{¿Enviar a {n} alumnos?}}'**
+  String comInstConfirmarEnvio(int n);
+
+  /// No description provided for @comInstConfirmarEnvioMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Las familias lo reciben como notificación. Una vez enviado, no se puede editar ni borrar.'**
+  String get comInstConfirmarEnvioMensaje;
+
+  /// No description provided for @comInstAvisoEnviado.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Aviso enviado a 1 alumno.} other{Aviso enviado a {n} alumnos.}}'**
+  String comInstAvisoEnviado(int n);
+
+  /// No description provided for @comInstAvisosVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no enviaste avisos'**
+  String get comInstAvisosVacioTitulo;
+
+  /// No description provided for @comInstAvisosVacioMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Los avisos llegan como notificación a las familias de los alumnos confirmados. Usalos para recordatorios, cambios de horario o novedades.'**
+  String get comInstAvisosVacioMensaje;
+
+  /// No description provided for @comInstAvisosEnviados.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisos enviados'**
+  String get comInstAvisosEnviados;
+
+  /// No description provided for @comInstAvisoAlcance.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{No llegó a ningún alumno} =1{Llegó a 1 alumno} other{Llegó a {n} alumnos}}'**
+  String comInstAvisoAlcance(int n);
+
+  /// No description provided for @comInstEnviadoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviado el {fecha}'**
+  String comInstEnviadoEl(Object fecha);
+
+  /// No description provided for @docInstTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Documentación'**
+  String get docInstTitle;
+
+  /// No description provided for @docInstTabRevisar.
+  ///
+  /// In es, this message translates to:
+  /// **'Para revisar'**
+  String get docInstTabRevisar;
+
+  /// No description provided for @docInstTabPendientes.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendientes'**
+  String get docInstTabPendientes;
+
+  /// No description provided for @docInstTabAprobados.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprobados'**
+  String get docInstTabAprobados;
+
+  /// No description provided for @docInstTabCancelados.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelados'**
+  String get docInstTabCancelados;
+
+  /// No description provided for @docInstLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar la documentación.'**
+  String get docInstLoadError;
+
+  /// No description provided for @docInstPedirDocumento.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir documento'**
+  String get docInstPedirDocumento;
+
+  /// No description provided for @docInstPedidoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedido el {fecha}'**
+  String docInstPedidoEl(Object fecha);
+
+  /// No description provided for @docInstLimite.
+  ///
+  /// In es, this message translates to:
+  /// **'Límite: {fecha}'**
+  String docInstLimite(Object fecha);
+
+  /// No description provided for @docInstEntregadoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Entregado el {fecha}'**
+  String docInstEntregadoEl(Object fecha);
+
+  /// No description provided for @docInstVacioRevisarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay documentos para revisar'**
+  String get docInstVacioRevisarTitulo;
+
+  /// No description provided for @docInstVacioRevisarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando una familia suba un documento que pediste, lo vas a ver acá.'**
+  String get docInstVacioRevisarMensaje;
+
+  /// No description provided for @docInstVacioPendientesTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay pedidos pendientes'**
+  String get docInstVacioPendientesTitulo;
+
+  /// No description provided for @docInstVacioPendientesMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedí DNI, partida de nacimiento, certificados y más. A la familia le llega un aviso y lo sube desde la app.'**
+  String get docInstVacioPendientesMensaje;
+
+  /// No description provided for @docInstVacioAprobadosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no aprobaste documentos'**
+  String get docInstVacioAprobadosTitulo;
+
+  /// No description provided for @docInstVacioAprobadosMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Los documentos que apruebes quedan guardados acá.'**
+  String get docInstVacioAprobadosMensaje;
+
+  /// No description provided for @docInstVacioCanceladosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay pedidos cancelados'**
+  String get docInstVacioCanceladosTitulo;
+
+  /// No description provided for @docInstVacioCanceladosMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Si cancelás un pedido que ya no necesitás, aparece acá.'**
+  String get docInstVacioCanceladosMensaje;
+
+  /// No description provided for @docInstPedirTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir un documento'**
+  String get docInstPedirTitulo;
+
+  /// No description provided for @docInstPedirAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Le avisamos a la familia y lo sube desde la app.'**
+  String get docInstPedirAyuda;
+
+  /// No description provided for @docInstElegirAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'¿A qué alumno?'**
+  String get docInstElegirAlumno;
+
+  /// No description provided for @docInstBuscarAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar por nombre o DNI'**
+  String get docInstBuscarAlumno;
+
+  /// No description provided for @docInstLimpiarBusqueda.
+  ///
+  /// In es, this message translates to:
+  /// **'Limpiar búsqueda'**
+  String get docInstLimpiarBusqueda;
+
+  /// No description provided for @docInstSinResultados.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos alumnos con esa búsqueda.'**
+  String get docInstSinResultados;
+
+  /// No description provided for @docInstSinAlumnosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no tenés alumnos'**
+  String get docInstSinAlumnosTitulo;
+
+  /// No description provided for @docInstSinAlumnosMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Podés pedir documentos a los alumnos con solicitudes pendientes o confirmadas. Cuando recibas la primera solicitud, vas a poder hacerlo desde acá.'**
+  String get docInstSinAlumnosMensaje;
+
+  /// No description provided for @docInstSolicitudPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud pendiente'**
+  String get docInstSolicitudPendiente;
+
+  /// No description provided for @docInstCambiarAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar'**
+  String get docInstCambiarAlumno;
+
+  /// No description provided for @docInstQueDocumento.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué documento necesitás?'**
+  String get docInstQueDocumento;
+
+  /// No description provided for @docInstIndicacionesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Indicaciones (opcional)'**
+  String get docInstIndicacionesLabel;
+
+  /// No description provided for @docInstIndicacionesAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Fotocopia de ambos lados'**
+  String get docInstIndicacionesAyuda;
+
+  /// No description provided for @docInstNombreOtroLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del documento'**
+  String get docInstNombreOtroLabel;
+
+  /// No description provided for @docInstNombreOtroAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: Autorización para salidas educativas'**
+  String get docInstNombreOtroAyuda;
+
+  /// No description provided for @docInstFechaLimiteLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha límite (opcional)'**
+  String get docInstFechaLimiteLabel;
+
+  /// No description provided for @docInstQuitarFechaLimite.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar fecha límite'**
+  String get docInstQuitarFechaLimite;
+
+  /// No description provided for @docInstPedidoEnviado.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedido enviado: {documento} · {alumno}'**
+  String docInstPedidoEnviado(Object documento, Object alumno);
+
+  /// No description provided for @docInstDetalleTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedido de documento'**
+  String get docInstDetalleTitulo;
+
+  /// No description provided for @docInstAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumno'**
+  String get docInstAlumno;
+
+  /// No description provided for @docInstFechaPedido.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha del pedido'**
+  String get docInstFechaPedido;
+
+  /// No description provided for @docInstFechaLimite.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha límite'**
+  String get docInstFechaLimite;
+
+  /// No description provided for @docInstSinFechaLimite.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin fecha límite'**
+  String get docInstSinFechaLimite;
+
+  /// No description provided for @docInstIndicaciones.
+  ///
+  /// In es, this message translates to:
+  /// **'Indicaciones'**
+  String get docInstIndicaciones;
+
+  /// No description provided for @docInstEsperandoArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Esperando que la familia suba el archivo.'**
+  String get docInstEsperandoArchivo;
+
+  /// No description provided for @docInstRevisarAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisá el archivo y aprobalo o pedí una corrección.'**
+  String get docInstRevisarAyuda;
+
+  /// No description provided for @docInstMotivoCorreccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Pediste una corrección'**
+  String get docInstMotivoCorreccion;
+
+  /// No description provided for @docInstAprobadoInfo.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprobado el {fecha}.'**
+  String docInstAprobadoInfo(Object fecha);
+
+  /// No description provided for @docInstCanceladoInfo.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelaste este pedido el {fecha}.'**
+  String docInstCanceladoInfo(Object fecha);
+
+  /// No description provided for @docInstArchivoEntregado.
+  ///
+  /// In es, this message translates to:
+  /// **'Archivo entregado'**
+  String get docInstArchivoEntregado;
+
+  /// No description provided for @docInstArchivoAnterior.
+  ///
+  /// In es, this message translates to:
+  /// **'Último archivo entregado'**
+  String get docInstArchivoAnterior;
+
+  /// No description provided for @docInstSubidoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Subido el {fecha}'**
+  String docInstSubidoEl(Object fecha);
+
+  /// No description provided for @docInstTipoPdf.
+  ///
+  /// In es, this message translates to:
+  /// **'Documento PDF'**
+  String get docInstTipoPdf;
+
+  /// No description provided for @docInstTipoImagen.
+  ///
+  /// In es, this message translates to:
+  /// **'Imagen'**
+  String get docInstTipoImagen;
+
+  /// No description provided for @docInstTipoArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Archivo'**
+  String get docInstTipoArchivo;
+
+  /// No description provided for @docInstTamanoKb.
+  ///
+  /// In es, this message translates to:
+  /// **'{n} KB'**
+  String docInstTamanoKb(Object n);
+
+  /// No description provided for @docInstTamanoMb.
+  ///
+  /// In es, this message translates to:
+  /// **'{n} MB'**
+  String docInstTamanoMb(Object n);
+
+  /// No description provided for @docInstVerArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver archivo'**
+  String get docInstVerArchivo;
+
+  /// No description provided for @docInstDescargar.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargar'**
+  String get docInstDescargar;
+
+  /// No description provided for @docInstArchivoError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos abrir el archivo. Probá de nuevo en un rato.'**
+  String get docInstArchivoError;
+
+  /// No description provided for @docInstSinVistaPrevia.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay vista previa para este formato. Descargalo para verlo.'**
+  String get docInstSinVistaPrevia;
+
+  /// No description provided for @docInstAprobar.
+  ///
+  /// In es, this message translates to:
+  /// **'Aprobar'**
+  String get docInstAprobar;
+
+  /// No description provided for @docInstPedirCorreccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir corrección'**
+  String get docInstPedirCorreccion;
+
+  /// No description provided for @docInstAprobarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Aprobar el documento?'**
+  String get docInstAprobarTitulo;
+
+  /// No description provided for @docInstAprobarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Le avisaremos a la familia de {alumno}.'**
+  String docInstAprobarMensaje(Object alumno);
+
+  /// No description provided for @docInstAprobado.
+  ///
+  /// In es, this message translates to:
+  /// **'Documento aprobado.'**
+  String get docInstAprobado;
+
+  /// No description provided for @docInstCorreccionAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Contale a la familia qué tiene que corregir. Va a poder subir un archivo nuevo.'**
+  String get docInstCorreccionAyuda;
+
+  /// No description provided for @docInstMotivoLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo'**
+  String get docInstMotivoLabel;
+
+  /// No description provided for @docInstMotivoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: La foto está borrosa y no se lee el número.'**
+  String get docInstMotivoAyuda;
+
+  /// No description provided for @docInstMotivoRequerido.
+  ///
+  /// In es, this message translates to:
+  /// **'Contanos qué hay que corregir.'**
+  String get docInstMotivoRequerido;
+
+  /// No description provided for @docInstCorreccionEnviada.
+  ///
+  /// In es, this message translates to:
+  /// **'Le pedimos la corrección a la familia.'**
+  String get docInstCorreccionEnviada;
+
+  /// No description provided for @docInstCancelarPedido.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar pedido'**
+  String get docInstCancelarPedido;
+
+  /// No description provided for @docInstCancelarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cancelar este pedido?'**
+  String get docInstCancelarTitulo;
+
+  /// No description provided for @docInstCancelarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'La familia ya no va a tener que entregarlo. No se puede deshacer.'**
+  String get docInstCancelarMensaje;
+
+  /// No description provided for @docInstMantener.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantener'**
+  String get docInstMantener;
+
+  /// No description provided for @docInstPedidoCancelado.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedido cancelado.'**
+  String get docInstPedidoCancelado;
+
+  /// No description provided for @pdfGeneradoCon.
+  ///
+  /// In es, this message translates to:
+  /// **'Generado con ATENA · {fecha}'**
+  String pdfGeneradoCon(String fecha);
+
+  /// No description provided for @pdfPagina.
+  ///
+  /// In es, this message translates to:
+  /// **'Página {actual} de {total}'**
+  String pdfPagina(int actual, int total);
+
+  /// No description provided for @pdfNombre.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get pdfNombre;
+
+  /// No description provided for @pdfApellido.
+  ///
+  /// In es, this message translates to:
+  /// **'Apellido'**
+  String get pdfApellido;
+
+  /// No description provided for @pdfApellidoNombre.
+  ///
+  /// In es, this message translates to:
+  /// **'Apellido y nombre'**
+  String get pdfApellidoNombre;
+
+  /// No description provided for @pdfDni.
+  ///
+  /// In es, this message translates to:
+  /// **'DNI'**
+  String get pdfDni;
+
+  /// No description provided for @pdfDniValor.
+  ///
+  /// In es, this message translates to:
+  /// **'DNI {dni}'**
+  String pdfDniValor(String dni);
+
+  /// No description provided for @pdfFechaNacimiento.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de nacimiento'**
+  String get pdfFechaNacimiento;
+
+  /// No description provided for @pdfEdad.
+  ///
+  /// In es, this message translates to:
+  /// **'Edad'**
+  String get pdfEdad;
+
+  /// No description provided for @pdfEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Email'**
+  String get pdfEmail;
+
+  /// No description provided for @pdfTelefono.
+  ///
+  /// In es, this message translates to:
+  /// **'Teléfono'**
+  String get pdfTelefono;
+
+  /// No description provided for @pdfContacto.
+  ///
+  /// In es, this message translates to:
+  /// **'Contacto'**
+  String get pdfContacto;
+
+  /// No description provided for @pdfInstitucion.
+  ///
+  /// In es, this message translates to:
+  /// **'Institución'**
+  String get pdfInstitucion;
+
+  /// No description provided for @pdfOferta.
+  ///
+  /// In es, this message translates to:
+  /// **'Oferta'**
+  String get pdfOferta;
+
+  /// No description provided for @pdfCategoria.
+  ///
+  /// In es, this message translates to:
+  /// **'Categoría'**
+  String get pdfCategoria;
+
+  /// No description provided for @pdfTurno.
+  ///
+  /// In es, this message translates to:
+  /// **'Turno'**
+  String get pdfTurno;
+
+  /// No description provided for @pdfHorario.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario'**
+  String get pdfHorario;
+
+  /// No description provided for @pdfDias.
+  ///
+  /// In es, this message translates to:
+  /// **'Días'**
+  String get pdfDias;
+
+  /// No description provided for @pdfEdades.
+  ///
+  /// In es, this message translates to:
+  /// **'Edades'**
+  String get pdfEdades;
+
+  /// No description provided for @pdfEstado.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado'**
+  String get pdfEstado;
+
+  /// No description provided for @pdfFecha.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha'**
+  String get pdfFecha;
+
+  /// No description provided for @pdfNota.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota'**
+  String get pdfNota;
+
+  /// No description provided for @pdfFichaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Ficha del alumno'**
+  String get pdfFichaTitulo;
+
+  /// No description provided for @pdfDatosPersonales.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos personales'**
+  String get pdfDatosPersonales;
+
+  /// No description provided for @pdfSolicitudes.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes'**
+  String get pdfSolicitudes;
+
+  /// No description provided for @pdfSolicitudesCantidad.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Sin solicitudes} =1{1 solicitud} other{{n} solicitudes}}'**
+  String pdfSolicitudesCantidad(int n);
+
+  /// No description provided for @pdfSinSolicitudes.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay solicitudes registradas.'**
+  String get pdfSinSolicitudes;
+
+  /// No description provided for @pdfComprobanteTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprobante de solicitud'**
+  String get pdfComprobanteTitulo;
+
+  /// No description provided for @pdfCodigo.
+  ///
+  /// In es, this message translates to:
+  /// **'Código'**
+  String get pdfCodigo;
+
+  /// No description provided for @pdfEnviadaEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviada el'**
+  String get pdfEnviadaEl;
+
+  /// No description provided for @pdfEmitidoEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Emitido el'**
+  String get pdfEmitidoEl;
+
+  /// No description provided for @pdfEstadoActual.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado actual'**
+  String get pdfEstadoActual;
+
+  /// No description provided for @pdfVacanteSolicitada.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante solicitada'**
+  String get pdfVacanteSolicitada;
+
+  /// No description provided for @pdfAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumno'**
+  String get pdfAlumno;
+
+  /// No description provided for @pdfMensajeAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje del alumno'**
+  String get pdfMensajeAlumno;
+
+  /// No description provided for @pdfRespuestaInstitucion.
+  ///
+  /// In es, this message translates to:
+  /// **'Respuesta de la institución'**
+  String get pdfRespuestaInstitucion;
+
+  /// No description provided for @pdfHistorial.
+  ///
+  /// In es, this message translates to:
+  /// **'Historial'**
+  String get pdfHistorial;
+
+  /// No description provided for @pdfComprobanteAclaracion.
+  ///
+  /// In es, this message translates to:
+  /// **'Este comprobante refleja el estado de la solicitud al momento de su emisión.'**
+  String get pdfComprobanteAclaracion;
+
+  /// No description provided for @pdfEstadoDescPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución todavía no respondió esta solicitud.'**
+  String get pdfEstadoDescPendiente;
+
+  /// No description provided for @pdfEstadoDescConfirmada.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución confirmó la vacante.'**
+  String get pdfEstadoDescConfirmada;
+
+  /// No description provided for @pdfEstadoDescRechazada.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución no aceptó la solicitud.'**
+  String get pdfEstadoDescRechazada;
+
+  /// No description provided for @pdfEstadoDescCanceladaAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'La solicitud fue cancelada por el alumno o la familia.'**
+  String get pdfEstadoDescCanceladaAlumno;
+
+  /// No description provided for @pdfEstadoDescCanceladaInstitucion.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución dio de baja la vacante.'**
+  String get pdfEstadoDescCanceladaInstitucion;
+
+  /// No description provided for @pdfListadoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumnos confirmados'**
+  String get pdfListadoTitulo;
+
+  /// No description provided for @pdfTotal.
+  ///
+  /// In es, this message translates to:
+  /// **'Total'**
+  String get pdfTotal;
+
+  /// No description provided for @pdfAlumnosCantidad.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Sin alumnos} =1{1 alumno} other{{n} alumnos}}'**
+  String pdfAlumnosCantidad(int n);
+
+  /// No description provided for @pdfListadoVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay alumnos confirmados para mostrar.'**
+  String get pdfListadoVacio;
+
+  /// No description provided for @pdfCroquisTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Croquis del aula'**
+  String get pdfCroquisTitulo;
+
+  /// No description provided for @pdfFrenteAula.
+  ///
+  /// In es, this message translates to:
+  /// **'Frente del aula'**
+  String get pdfFrenteAula;
+
+  /// No description provided for @pdfLugares.
+  ///
+  /// In es, this message translates to:
+  /// **'Lugares'**
+  String get pdfLugares;
+
+  /// No description provided for @pdfOcupados.
+  ///
+  /// In es, this message translates to:
+  /// **'Ocupados'**
+  String get pdfOcupados;
+
+  /// No description provided for @pdfLibres.
+  ///
+  /// In es, this message translates to:
+  /// **'Libres'**
+  String get pdfLibres;
+
+  /// No description provided for @pdfLugarOcupado.
+  ///
+  /// In es, this message translates to:
+  /// **'Ocupado'**
+  String get pdfLugarOcupado;
+
+  /// No description provided for @pdfLugarLibre.
+  ///
+  /// In es, this message translates to:
+  /// **'Libre'**
+  String get pdfLugarLibre;
+
+  /// No description provided for @solInstTabPendientes.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendientes'**
+  String get solInstTabPendientes;
+
+  /// No description provided for @solInstTabConfirmadas.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmadas'**
+  String get solInstTabConfirmadas;
+
+  /// No description provided for @solInstTabNoAceptadas.
+  ///
+  /// In es, this message translates to:
+  /// **'No aceptadas'**
+  String get solInstTabNoAceptadas;
+
+  /// No description provided for @solInstTabCanceladas.
+  ///
+  /// In es, this message translates to:
+  /// **'Canceladas'**
+  String get solInstTabCanceladas;
+
+  /// No description provided for @solInstBuscarHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar por nombre o DNI'**
+  String get solInstBuscarHint;
+
+  /// No description provided for @solInstLimpiarBusqueda.
+  ///
+  /// In es, this message translates to:
+  /// **'Limpiar búsqueda'**
+  String get solInstLimpiarBusqueda;
+
+  /// No description provided for @solInstFiltrarVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'Filtrar por vacante'**
+  String get solInstFiltrarVacante;
+
+  /// No description provided for @solInstVacanteFiltro.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante'**
+  String get solInstVacanteFiltro;
+
+  /// No description provided for @solInstTodasLasVacantes.
+  ///
+  /// In es, this message translates to:
+  /// **'Todas las vacantes'**
+  String get solInstTodasLasVacantes;
+
+  /// No description provided for @solInstQuitarFiltro.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar filtro'**
+  String get solInstQuitarFiltro;
+
+  /// No description provided for @solInstOrdenLlegada.
+  ///
+  /// In es, this message translates to:
+  /// **'Por orden de llegada: las más antiguas primero.'**
+  String get solInstOrdenLlegada;
+
+  /// No description provided for @solInstDni.
+  ///
+  /// In es, this message translates to:
+  /// **'DNI {dni}'**
+  String solInstDni(Object dni);
+
+  /// No description provided for @solInstConMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'La familia dejó un mensaje'**
+  String get solInstConMensaje;
+
+  /// No description provided for @solInstConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar'**
+  String get solInstConfirmar;
+
+  /// No description provided for @solInstNoAceptar.
+  ///
+  /// In es, this message translates to:
+  /// **'No aceptar'**
+  String get solInstNoAceptar;
+
+  /// No description provided for @solInstConfirmarVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar vacante'**
+  String get solInstConfirmarVacante;
+
+  /// No description provided for @solInstDarDeBaja.
+  ///
+  /// In es, this message translates to:
+  /// **'Dar de baja'**
+  String get solInstDarDeBaja;
+
+  /// No description provided for @solInstPedirDocumento.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir documento'**
+  String get solInstPedirDocumento;
+
+  /// No description provided for @solInstDescargarComprobante.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargar comprobante'**
+  String get solInstDescargarComprobante;
+
+  /// No description provided for @solInstPdfError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos generar el PDF. Probá de nuevo en unos minutos.'**
+  String get solInstPdfError;
+
+  /// No description provided for @solInstArchivoComprobante.
+  ///
+  /// In es, this message translates to:
+  /// **'comprobante'**
+  String get solInstArchivoComprobante;
+
+  /// No description provided for @solInstVacioInicialTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no recibiste solicitudes'**
+  String get solInstVacioInicialTitulo;
+
+  /// No description provided for @solInstVacioInicialMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Las familias te envían solicitudes desde tu ficha pública en ATENA. Publicá tus vacantes y completá tu perfil público para que te encuentren más fácil.'**
+  String get solInstVacioInicialMsg;
+
+  /// No description provided for @solInstIrAVacantes.
+  ///
+  /// In es, this message translates to:
+  /// **'Ir a Vacantes'**
+  String get solInstIrAVacantes;
+
+  /// No description provided for @solInstVacioPendientesTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay solicitudes pendientes'**
+  String get solInstVacioPendientesTitulo;
+
+  /// No description provided for @solInstVacioPendientesMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Todo al día! Las nuevas solicitudes van a aparecer acá para que las revises.'**
+  String get solInstVacioPendientesMsg;
+
+  /// No description provided for @solInstVacioConfirmadasTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no confirmaste vacantes'**
+  String get solInstVacioConfirmadasTitulo;
+
+  /// No description provided for @solInstVacioConfirmadasMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando confirmes una solicitud, la vas a ver acá y el alumno va a aparecer en Alumnos.'**
+  String get solInstVacioConfirmadasMsg;
+
+  /// No description provided for @solInstVacioNoAceptadasTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay solicitudes no aceptadas'**
+  String get solInstVacioNoAceptadasTitulo;
+
+  /// No description provided for @solInstVacioNoAceptadasMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Acá vas a ver las solicitudes que no aceptaste, con el motivo que le diste a la familia.'**
+  String get solInstVacioNoAceptadasMsg;
+
+  /// No description provided for @solInstVacioCanceladasTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay solicitudes canceladas'**
+  String get solInstVacioCanceladasTitulo;
+
+  /// No description provided for @solInstVacioCanceladasMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Acá aparecen las solicitudes que cancelaron las familias y las bajas que diste.'**
+  String get solInstVacioCanceladasMsg;
+
+  /// No description provided for @solInstSinResultadosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin resultados'**
+  String get solInstSinResultadosTitulo;
+
+  /// No description provided for @solInstSinResultadosMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos solicitudes con esos filtros.'**
+  String get solInstSinResultadosMsg;
+
+  /// No description provided for @solInstLimpiarFiltros.
+  ///
+  /// In es, this message translates to:
+  /// **'Limpiar filtros'**
+  String get solInstLimpiarFiltros;
+
+  /// No description provided for @solInstRecibidaEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibida el {fecha} a las {hora}'**
+  String solInstRecibidaEl(Object fecha, Object hora);
+
+  /// No description provided for @solInstConfirmadaEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmada el {fecha} a las {hora}'**
+  String solInstConfirmadaEl(Object fecha, Object hora);
+
+  /// No description provided for @solInstRechazadaEl.
+  ///
+  /// In es, this message translates to:
+  /// **'No aceptada el {fecha} a las {hora}'**
+  String solInstRechazadaEl(Object fecha, Object hora);
+
+  /// No description provided for @solInstCanceladaEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelada por la familia el {fecha} a las {hora}'**
+  String solInstCanceladaEl(Object fecha, Object hora);
+
+  /// No description provided for @solInstBajaEl.
+  ///
+  /// In es, this message translates to:
+  /// **'Dada de baja el {fecha} a las {hora}'**
+  String solInstBajaEl(Object fecha, Object hora);
+
+  /// No description provided for @solInstSecContacto.
+  ///
+  /// In es, this message translates to:
+  /// **'Contacto'**
+  String get solInstSecContacto;
+
+  /// No description provided for @solInstSecVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante solicitada'**
+  String get solInstSecVacante;
+
+  /// No description provided for @solInstSecMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje de la familia'**
+  String get solInstSecMensaje;
+
+  /// No description provided for @solInstSecHistorial.
+  ///
+  /// In es, this message translates to:
+  /// **'Historial'**
+  String get solInstSecHistorial;
+
+  /// No description provided for @solInstSinContacto.
+  ///
+  /// In es, this message translates to:
+  /// **'La familia no dejó email ni teléfono.'**
+  String get solInstSinContacto;
+
+  /// No description provided for @solInstLlamar.
+  ///
+  /// In es, this message translates to:
+  /// **'Llamar'**
+  String get solInstLlamar;
+
+  /// No description provided for @solInstWhatsapp.
+  ///
+  /// In es, this message translates to:
+  /// **'WhatsApp'**
+  String get solInstWhatsapp;
+
+  /// No description provided for @solInstEscribirEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar email'**
+  String get solInstEscribirEmail;
+
+  /// No description provided for @solInstCopiar.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiar'**
+  String get solInstCopiar;
+
+  /// No description provided for @solInstCopiado.
+  ///
+  /// In es, this message translates to:
+  /// **'Copiado al portapapeles.'**
+  String get solInstCopiado;
+
+  /// No description provided for @solInstNoSePudoAbrir.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos abrir esa aplicación en este dispositivo. Podés copiar el dato y usarlo desde otro.'**
+  String get solInstNoSePudoAbrir;
+
+  /// No description provided for @solInstOcupacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Ocupación'**
+  String get solInstOcupacion;
+
+  /// No description provided for @solInstPendientesOferta.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 solicitud pendiente en esta vacante} other{{n} solicitudes pendientes en esta vacante}}'**
+  String solInstPendientesOferta(int n);
+
+  /// No description provided for @solInstVacanteNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta vacante ya no está publicada.'**
+  String get solInstVacanteNoDisponible;
+
+  /// No description provided for @solInstVacantePausada.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausada'**
+  String get solInstVacantePausada;
+
+  /// No description provided for @solInstVacanteCompleta.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa'**
+  String get solInstVacanteCompleta;
+
+  /// No description provided for @solInstSinCupoAviso.
+  ///
+  /// In es, this message translates to:
+  /// **'No quedan lugares libres en esta vacante. Para confirmar, ampliá el cupo en Vacantes.'**
+  String get solInstSinCupoAviso;
+
+  /// No description provided for @solInstEdadFueraDeRango.
+  ///
+  /// In es, this message translates to:
+  /// **'La edad del alumno ({edad}) está fuera del rango de la vacante ({rango}).'**
+  String solInstEdadFueraDeRango(Object edad, Object rango);
+
+  /// No description provided for @solInstHistRecibida.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud recibida'**
+  String get solInstHistRecibida;
+
+  /// No description provided for @solInstHistConfirmada.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante confirmada'**
+  String get solInstHistConfirmada;
+
+  /// No description provided for @solInstHistRechazada.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud no aceptada'**
+  String get solInstHistRechazada;
+
+  /// No description provided for @solInstHistCanceladaFamilia.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelada por la familia'**
+  String get solInstHistCanceladaFamilia;
+
+  /// No description provided for @solInstHistBaja.
+  ///
+  /// In es, this message translates to:
+  /// **'Baja de la vacante'**
+  String get solInstHistBaja;
+
+  /// No description provided for @solInstOkConfirmada.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmaste la vacante de {alumno}. Le avisamos a la familia.'**
+  String solInstOkConfirmada(Object alumno);
+
+  /// No description provided for @solInstOkRechazada.
+  ///
+  /// In es, this message translates to:
+  /// **'La solicitud de {alumno} no fue aceptada. Le avisamos a la familia.'**
+  String solInstOkRechazada(Object alumno);
+
+  /// No description provided for @solInstOkBaja.
+  ///
+  /// In es, this message translates to:
+  /// **'Diste de baja a {alumno}. Le avisamos a la familia.'**
+  String solInstOkBaja(Object alumno);
+
+  /// No description provided for @solInstOkDocumento.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedido enviado: {documento}. Le avisamos a la familia.'**
+  String solInstOkDocumento(Object documento);
+
+  /// No description provided for @solInstConfirmarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Confirmar la vacante?'**
+  String get solInstConfirmarTitulo;
+
+  /// No description provided for @solInstConfirmarMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Vas a confirmar a {alumno} en {oferta}. Le avisamos a la familia al instante.'**
+  String solInstConfirmarMsg(Object alumno, Object oferta);
+
+  /// No description provided for @solInstNotaFamiliaLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje para la familia (opcional)'**
+  String get solInstNotaFamiliaLabel;
+
+  /// No description provided for @solInstNotaConfirmarHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ejemplo: fecha de la entrevista o qué traer el primer día.'**
+  String get solInstNotaConfirmarHelper;
+
+  /// No description provided for @solInstRechazarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿No aceptar la solicitud?'**
+  String get solInstRechazarTitulo;
+
+  /// No description provided for @solInstRechazarMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Contale a la familia de {alumno} por qué no podés aceptar la solicitud. Va a recibir este mensaje.'**
+  String solInstRechazarMsg(Object alumno);
+
+  /// No description provided for @solInstMotivosFrecuentes.
+  ///
+  /// In es, this message translates to:
+  /// **'Motivos frecuentes'**
+  String get solInstMotivosFrecuentes;
+
+  /// No description provided for @solInstMotivoSinVacantes.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin vacantes'**
+  String get solInstMotivoSinVacantes;
+
+  /// No description provided for @solInstMotivoSinVacantesTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'No quedan vacantes disponibles en esta oferta.'**
+  String get solInstMotivoSinVacantesTexto;
+
+  /// No description provided for @solInstMotivoEdad.
+  ///
+  /// In es, this message translates to:
+  /// **'Edad fuera de rango'**
+  String get solInstMotivoEdad;
+
+  /// No description provided for @solInstMotivoEdadTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'La edad del alumno no corresponde al rango de esta oferta.'**
+  String get solInstMotivoEdadTexto;
+
+  /// No description provided for @solInstMotivoDocumentacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Documentación incompleta'**
+  String get solInstMotivoDocumentacion;
+
+  /// No description provided for @solInstMotivoDocumentacionTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'La documentación presentada está incompleta.'**
+  String get solInstMotivoDocumentacionTexto;
+
+  /// No description provided for @solInstMotivoOtro.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get solInstMotivoOtro;
+
+  /// No description provided for @solInstMotivoLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Motivo para la familia'**
+  String get solInstMotivoLabel;
+
+  /// No description provided for @solInstMotivoRequerido.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribí el motivo para la familia.'**
+  String get solInstMotivoRequerido;
+
+  /// No description provided for @solInstBajaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Dar de baja a {alumno}?'**
+  String solInstBajaTitulo(Object alumno);
+
+  /// No description provided for @solInstBajaMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Se libera su lugar en {oferta} y le avisamos a la familia. Esta acción no se puede deshacer.'**
+  String solInstBajaMsg(Object oferta);
+
+  /// No description provided for @solInstNotaBajaHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ejemplo: el motivo de la baja.'**
+  String get solInstNotaBajaHelper;
+
+  /// No description provided for @solInstSinCupoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No quedan vacantes'**
+  String get solInstSinCupoTitulo;
+
+  /// No description provided for @solInstSinCupoMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'{oferta} ya tiene todos sus lugares ocupados. Para confirmar esta solicitud, ampliá el cupo en Vacantes.'**
+  String solInstSinCupoMsg(Object oferta);
+
+  /// No description provided for @solInstDocPara.
+  ///
+  /// In es, this message translates to:
+  /// **'Para {alumno}'**
+  String solInstDocPara(Object alumno);
+
+  /// No description provided for @solInstDocAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'La familia recibe el aviso al instante y puede subir el archivo desde la app.'**
+  String get solInstDocAyuda;
+
+  /// No description provided for @solInstDocTipoLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué documento necesitás?'**
+  String get solInstDocTipoLabel;
+
+  /// No description provided for @solInstDocTipoRequerido.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí un documento.'**
+  String get solInstDocTipoRequerido;
+
+  /// No description provided for @solInstDocNombreLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del documento'**
+  String get solInstDocNombreLabel;
+
+  /// No description provided for @solInstDocNombreRequerido.
+  ///
+  /// In es, this message translates to:
+  /// **'Indicá qué documento necesitás.'**
+  String get solInstDocNombreRequerido;
+
+  /// No description provided for @solInstDocDetalleLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Indicaciones (opcional)'**
+  String get solInstDocDetalleLabel;
+
+  /// No description provided for @solInstDocDetalleHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ejemplo: fotocopia de ambos lados.'**
+  String get solInstDocDetalleHelper;
+
+  /// No description provided for @solInstDocFechaLimite.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha límite (opcional)'**
+  String get solInstDocFechaLimite;
+
+  /// No description provided for @solInstDocQuitarFecha.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar fecha'**
+  String get solInstDocQuitarFecha;
+
+  /// No description provided for @solInstDocEnviar.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar pedido'**
+  String get solInstDocEnviar;
+
+  /// No description provided for @alumInstSubtitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Sin alumnos confirmados} =1{1 alumno confirmado} other{{n} alumnos confirmados}}'**
+  String alumInstSubtitulo(int n);
+
+  /// No description provided for @alumInstExportarPdf.
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar listado (PDF)'**
+  String get alumInstExportarPdf;
+
+  /// No description provided for @alumInstExportarSeccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar listado de {oferta} (PDF)'**
+  String alumInstExportarSeccion(Object oferta);
+
+  /// No description provided for @alumInstCantidad.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 alumno} other{{n} alumnos}}'**
+  String alumInstCantidad(int n);
+
+  /// No description provided for @alumInstVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay alumnos confirmados'**
+  String get alumInstVacioTitulo;
+
+  /// No description provided for @alumInstVacioMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Acá aparecen los alumnos a medida que confirmás sus solicitudes, agrupados por vacante.'**
+  String get alumInstVacioMsg;
+
+  /// No description provided for @alumInstRevisarSolicitudes.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Revisar 1 solicitud pendiente} other{Revisar {n} solicitudes pendientes}}'**
+  String alumInstRevisarSolicitudes(int n);
+
+  /// No description provided for @alumInstSinResultadosMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos alumnos con ese nombre o DNI.'**
+  String get alumInstSinResultadosMsg;
+
+  /// No description provided for @alumInstArchivoListado.
+  ///
+  /// In es, this message translates to:
+  /// **'alumnos'**
+  String get alumInstArchivoListado;
+
+  /// No description provided for @notiCuentaEliminadaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Una familia eliminó su cuenta'**
+  String get notiCuentaEliminadaTitle;
+
+  /// No description provided for @notiCuentaEliminadaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'{alumno} ya no figura en {oferta}: su familia eliminó la cuenta y el lugar quedó libre.'**
+  String notiCuentaEliminadaBody(Object alumno, Object oferta);
+
+  /// No description provided for @notiInstitucionEliminadaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} dejó ATENA'**
+  String notiInstitucionEliminadaTitle(Object institucion);
+
+  /// No description provided for @notiInstitucionEliminadaBody.
+  ///
+  /// In es, this message translates to:
+  /// **'La solicitud de {alumno} para {oferta} quedó sin efecto porque la institución eliminó su cuenta.'**
+  String notiInstitucionEliminadaBody(Object alumno, Object oferta);
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar cuenta'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar la cuenta?'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountFamilyBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrarán la cuenta, los alumnos y sus solicitudes, documentos, notas y notificaciones. Las instituciones serán avisadas y se liberarán los lugares confirmados.'**
+  String get deleteAccountFamilyBody;
+
+  /// No description provided for @deleteAccountInstitutionBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrarán la institución, sus vacantes, eventos, avisos, croquis, pedidos de documentos y el perfil público. Las familias con solicitudes activas serán avisadas.'**
+  String get deleteAccountInstitutionBody;
+
+  /// No description provided for @deleteAccountIrreversible.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta acción no se puede deshacer.'**
+  String get deleteAccountIrreversible;
+
+  /// No description provided for @deleteAccountPasswordHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresá tu contraseña para confirmar.'**
+  String get deleteAccountPasswordHelper;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar definitivamente'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountDone.
+  ///
+  /// In es, this message translates to:
+  /// **'La cuenta fue eliminada.'**
+  String get deleteAccountDone;
+
+  /// No description provided for @deleteAccountWrongPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'La contraseña no es correcta.'**
+  String get deleteAccountWrongPassword;
+
+  /// No description provided for @perfInstTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil de la institución'**
+  String get perfInstTitulo;
+
+  /// No description provided for @perfInstTabDatos.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos'**
+  String get perfInstTabDatos;
+
+  /// No description provided for @perfInstTabPublico.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil público'**
+  String get perfInstTabPublico;
+
+  /// No description provided for @perfInstTabVista.
+  ///
+  /// In es, this message translates to:
+  /// **'Vista previa'**
+  String get perfInstTabVista;
+
+  /// No description provided for @perfInstErrorCarga.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar el perfil de la institución.'**
+  String get perfInstErrorCarga;
+
+  /// No description provided for @perfInstSecIdentidad.
+  ///
+  /// In es, this message translates to:
+  /// **'Identificación'**
+  String get perfInstSecIdentidad;
+
+  /// No description provided for @perfInstSecIdentidadAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Así aparece tu institución en ATENA y en el buscador de las familias.'**
+  String get perfInstSecIdentidadAyuda;
+
+  /// No description provided for @perfInstNombre.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de la institución'**
+  String get perfInstNombre;
+
+  /// No description provided for @perfInstNombreCorto.
+  ///
+  /// In es, this message translates to:
+  /// **'El nombre debe tener al menos 3 caracteres.'**
+  String get perfInstNombreCorto;
+
+  /// No description provided for @perfInstCuit.
+  ///
+  /// In es, this message translates to:
+  /// **'CUIT'**
+  String get perfInstCuit;
+
+  /// No description provided for @perfInstCuitAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'11 dígitos, sin guiones. Lo usamos para verificar tu identidad si olvidás la contraseña.'**
+  String get perfInstCuitAyuda;
+
+  /// No description provided for @perfInstTipo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo de institución'**
+  String get perfInstTipo;
+
+  /// No description provided for @perfInstModalidad.
+  ///
+  /// In es, this message translates to:
+  /// **'Modalidad'**
+  String get perfInstModalidad;
+
+  /// No description provided for @perfInstSecUbicacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Ubicación'**
+  String get perfInstSecUbicacion;
+
+  /// No description provided for @perfInstDireccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Dirección'**
+  String get perfInstDireccion;
+
+  /// No description provided for @perfInstCiudad.
+  ///
+  /// In es, this message translates to:
+  /// **'Ciudad'**
+  String get perfInstCiudad;
+
+  /// No description provided for @perfInstProvincia.
+  ///
+  /// In es, this message translates to:
+  /// **'Provincia'**
+  String get perfInstProvincia;
+
+  /// No description provided for @perfInstPais.
+  ///
+  /// In es, this message translates to:
+  /// **'País'**
+  String get perfInstPais;
+
+  /// No description provided for @perfInstSecAdmin.
+  ///
+  /// In es, this message translates to:
+  /// **'Contacto administrativo'**
+  String get perfInstSecAdmin;
+
+  /// No description provided for @perfInstSecAdminAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo usamos para comunicarnos con tu institución. No cambia el email con el que ingresás; los datos para las familias se cargan en Perfil público.'**
+  String get perfInstSecAdminAyuda;
+
+  /// No description provided for @perfInstEmailAdmin.
+  ///
+  /// In es, this message translates to:
+  /// **'Email de contacto'**
+  String get perfInstEmailAdmin;
+
+  /// No description provided for @perfInstTelefonoInvalido.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisá el número: debe tener entre 8 y 15 dígitos.'**
+  String get perfInstTelefonoInvalido;
+
+  /// No description provided for @perfInstCompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu perfil está completo al {pct}%'**
+  String perfInstCompleto(int pct);
+
+  /// No description provided for @perfInstCompletoListo.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Tu perfil está completo!'**
+  String get perfInstCompletoListo;
+
+  /// No description provided for @perfInstCompletoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Un perfil completo ayuda a las familias a conocerte y elegirte.'**
+  String get perfInstCompletoAyuda;
+
+  /// No description provided for @perfInstCompletoListoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Las familias ya pueden conocer todo lo que ofrecés.'**
+  String get perfInstCompletoListoAyuda;
+
+  /// No description provided for @perfInstPorcentaje.
+  ///
+  /// In es, this message translates to:
+  /// **'{pct}%'**
+  String perfInstPorcentaje(int pct);
+
+  /// No description provided for @perfInstConsejoLogo.
+  ///
+  /// In es, this message translates to:
+  /// **'Subí el logo de tu institución.'**
+  String get perfInstConsejoLogo;
+
+  /// No description provided for @perfInstConsejoDescripcion.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribí una descripción de al menos {min} caracteres.'**
+  String perfInstConsejoDescripcion(int min);
+
+  /// No description provided for @perfInstConsejoFotos.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Sumá 1 foto más de tus espacios.} other{Sumá {n} fotos más de tus espacios.}}'**
+  String perfInstConsejoFotos(int n);
+
+  /// No description provided for @perfInstConsejoAtencion.
+  ///
+  /// In es, this message translates to:
+  /// **'Indicá tu horario de atención.'**
+  String get perfInstConsejoAtencion;
+
+  /// No description provided for @perfInstConsejoClases.
+  ///
+  /// In es, this message translates to:
+  /// **'Contá en qué horario se dictan las clases.'**
+  String get perfInstConsejoClases;
+
+  /// No description provided for @perfInstConsejoTelefono.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregá un teléfono o WhatsApp para que las familias te contacten.'**
+  String get perfInstConsejoTelefono;
+
+  /// No description provided for @perfInstConsejoEmailWeb.
+  ///
+  /// In es, this message translates to:
+  /// **'Sumá un email o tu sitio web.'**
+  String get perfInstConsejoEmailWeb;
+
+  /// No description provided for @perfInstConsejoRedes.
+  ///
+  /// In es, this message translates to:
+  /// **'Vinculá al menos una red social.'**
+  String get perfInstConsejoRedes;
+
+  /// No description provided for @perfInstConsejoServicios.
+  ///
+  /// In es, this message translates to:
+  /// **'Contá qué servicios ofrecés.'**
+  String get perfInstConsejoServicios;
+
+  /// No description provided for @perfInstSecImagenes.
+  ///
+  /// In es, this message translates to:
+  /// **'Logo y fotos'**
+  String get perfInstSecImagenes;
+
+  /// No description provided for @perfInstLogo.
+  ///
+  /// In es, this message translates to:
+  /// **'Logo'**
+  String get perfInstLogo;
+
+  /// No description provided for @perfInstLogoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Imagen cuadrada en JPG o PNG, de hasta 1,5 MB. Se ve en el buscador y en tu ficha.'**
+  String get perfInstLogoAyuda;
+
+  /// No description provided for @perfInstLogoSubir.
+  ///
+  /// In es, this message translates to:
+  /// **'Subir logo'**
+  String get perfInstLogoSubir;
+
+  /// No description provided for @perfInstLogoCambiar.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar logo'**
+  String get perfInstLogoCambiar;
+
+  /// No description provided for @perfInstLogoQuitar.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar logo'**
+  String get perfInstLogoQuitar;
+
+  /// No description provided for @perfInstLogoQuitarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar el logo?'**
+  String get perfInstLogoQuitarTitulo;
+
+  /// No description provided for @perfInstLogoQuitarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Las familias van a ver las iniciales de tu institución en su lugar.'**
+  String get perfInstLogoQuitarMensaje;
+
+  /// No description provided for @perfInstLogoListo.
+  ///
+  /// In es, this message translates to:
+  /// **'Logo actualizado.'**
+  String get perfInstLogoListo;
+
+  /// No description provided for @perfInstLogoQuitado.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitamos el logo.'**
+  String get perfInstLogoQuitado;
+
+  /// No description provided for @perfInstFotos.
+  ///
+  /// In es, this message translates to:
+  /// **'Fotos'**
+  String get perfInstFotos;
+
+  /// No description provided for @perfInstFotosCantidad.
+  ///
+  /// In es, this message translates to:
+  /// **'{n} de {max}'**
+  String perfInstFotosCantidad(int n, int max);
+
+  /// No description provided for @perfInstFotosAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Mostrá tus espacios: aulas, patio, laboratorio, actividades. Hasta {max} fotos de 1,5 MB.'**
+  String perfInstFotosAyuda(int max);
+
+  /// No description provided for @perfInstFotoAgregar.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar foto'**
+  String get perfInstFotoAgregar;
+
+  /// No description provided for @perfInstFotoQuitar.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar foto'**
+  String get perfInstFotoQuitar;
+
+  /// No description provided for @perfInstFotoQuitarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar esta foto?'**
+  String get perfInstFotoQuitarTitulo;
+
+  /// No description provided for @perfInstFotoQuitarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'La foto se va a eliminar de tu perfil público.'**
+  String get perfInstFotoQuitarMensaje;
+
+  /// No description provided for @perfInstFotoAgregada.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto agregada.'**
+  String get perfInstFotoAgregada;
+
+  /// No description provided for @perfInstFotoQuitada.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto eliminada.'**
+  String get perfInstFotoQuitada;
+
+  /// No description provided for @perfInstFotoVer.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver foto {n}'**
+  String perfInstFotoVer(int n);
+
+  /// No description provided for @perfInstFotoNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto no disponible'**
+  String get perfInstFotoNoDisponible;
+
+  /// No description provided for @perfInstGaleriaError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos abrir tus imágenes. Revisá los permisos e intentá de nuevo.'**
+  String get perfInstGaleriaError;
+
+  /// No description provided for @perfInstSecSobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre la institución'**
+  String get perfInstSecSobre;
+
+  /// No description provided for @perfInstDescripcion.
+  ///
+  /// In es, this message translates to:
+  /// **'Descripción'**
+  String get perfInstDescripcion;
+
+  /// No description provided for @perfInstDescripcionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Contá tu propuesta educativa, tus valores y lo que hace única a tu institución.'**
+  String get perfInstDescripcionHint;
+
+  /// No description provided for @perfInstSecHorarios.
+  ///
+  /// In es, this message translates to:
+  /// **'Horarios'**
+  String get perfInstSecHorarios;
+
+  /// No description provided for @perfInstHorarioAtencion.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario de atención'**
+  String get perfInstHorarioAtencion;
+
+  /// No description provided for @perfInstHorarioAtencionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: lunes a viernes de 8 a 16 h'**
+  String get perfInstHorarioAtencionHint;
+
+  /// No description provided for @perfInstHorarioClases.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario de clases'**
+  String get perfInstHorarioClases;
+
+  /// No description provided for @perfInstHorarioClasesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: turno mañana de 7:30 a 12:30'**
+  String get perfInstHorarioClasesHint;
+
+  /// No description provided for @perfInstSecContacto.
+  ///
+  /// In es, this message translates to:
+  /// **'Contacto para familias'**
+  String get perfInstSecContacto;
+
+  /// No description provided for @perfInstSecContactoAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo ven las familias en tu ficha. Completá al menos un medio de contacto.'**
+  String get perfInstSecContactoAyuda;
+
+  /// No description provided for @perfInstWhatsapp.
+  ///
+  /// In es, this message translates to:
+  /// **'WhatsApp'**
+  String get perfInstWhatsapp;
+
+  /// No description provided for @perfInstWhatsappAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Incluí el código de área.'**
+  String get perfInstWhatsappAyuda;
+
+  /// No description provided for @perfInstEmailFamilias.
+  ///
+  /// In es, this message translates to:
+  /// **'Email para familias'**
+  String get perfInstEmailFamilias;
+
+  /// No description provided for @perfInstWeb.
+  ///
+  /// In es, this message translates to:
+  /// **'Sitio web'**
+  String get perfInstWeb;
+
+  /// No description provided for @perfInstWebHint.
+  ///
+  /// In es, this message translates to:
+  /// **'tuescuela.edu.ar'**
+  String get perfInstWebHint;
+
+  /// No description provided for @perfInstWebInvalida.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresá una dirección web válida.'**
+  String get perfInstWebInvalida;
+
+  /// No description provided for @perfInstSecRedes.
+  ///
+  /// In es, this message translates to:
+  /// **'Redes sociales'**
+  String get perfInstSecRedes;
+
+  /// No description provided for @perfInstSecRedesAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribí tu @usuario o pegá el enlace de tu página.'**
+  String get perfInstSecRedesAyuda;
+
+  /// No description provided for @perfInstInstagram.
+  ///
+  /// In es, this message translates to:
+  /// **'Instagram'**
+  String get perfInstInstagram;
+
+  /// No description provided for @perfInstFacebook.
+  ///
+  /// In es, this message translates to:
+  /// **'Facebook'**
+  String get perfInstFacebook;
+
+  /// No description provided for @perfInstYoutube.
+  ///
+  /// In es, this message translates to:
+  /// **'YouTube'**
+  String get perfInstYoutube;
+
+  /// No description provided for @perfInstRedInvalida.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresá un @usuario o un enlace válido.'**
+  String get perfInstRedInvalida;
+
+  /// No description provided for @perfInstSecServicios.
+  ///
+  /// In es, this message translates to:
+  /// **'Servicios'**
+  String get perfInstSecServicios;
+
+  /// No description provided for @perfInstSecServiciosAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Contá qué ofrecés además de las clases.'**
+  String get perfInstSecServiciosAyuda;
+
+  /// No description provided for @perfInstServicioAgregar.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar servicio'**
+  String get perfInstServicioAgregar;
+
+  /// No description provided for @perfInstServicioHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej.: huerta escolar'**
+  String get perfInstServicioHint;
+
+  /// No description provided for @perfInstServicioQuitar.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar {servicio}'**
+  String perfInstServicioQuitar(Object servicio);
+
+  /// No description provided for @perfInstServiciosSugeridos.
+  ///
+  /// In es, this message translates to:
+  /// **'Sugerencias'**
+  String get perfInstServiciosSugeridos;
+
+  /// No description provided for @perfInstServiciosMax.
+  ///
+  /// In es, this message translates to:
+  /// **'Podés cargar hasta {max} servicios.'**
+  String perfInstServiciosMax(int max);
+
+  /// No description provided for @perfInstServicioRepetido.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese servicio ya está en la lista.'**
+  String get perfInstServicioRepetido;
+
+  /// No description provided for @perfInstSrvComedor.
+  ///
+  /// In es, this message translates to:
+  /// **'Comedor'**
+  String get perfInstSrvComedor;
+
+  /// No description provided for @perfInstSrvTransporte.
+  ///
+  /// In es, this message translates to:
+  /// **'Transporte escolar'**
+  String get perfInstSrvTransporte;
+
+  /// No description provided for @perfInstSrvGabinete.
+  ///
+  /// In es, this message translates to:
+  /// **'Gabinete psicopedagógico'**
+  String get perfInstSrvGabinete;
+
+  /// No description provided for @perfInstSrvJornadaExtendida.
+  ///
+  /// In es, this message translates to:
+  /// **'Jornada extendida'**
+  String get perfInstSrvJornadaExtendida;
+
+  /// No description provided for @perfInstSrvBilingue.
+  ///
+  /// In es, this message translates to:
+  /// **'Educación bilingüe'**
+  String get perfInstSrvBilingue;
+
+  /// No description provided for @perfInstSrvDeportes.
+  ///
+  /// In es, this message translates to:
+  /// **'Deportes'**
+  String get perfInstSrvDeportes;
+
+  /// No description provided for @perfInstSrvBecas.
+  ///
+  /// In es, this message translates to:
+  /// **'Becas'**
+  String get perfInstSrvBecas;
+
+  /// No description provided for @perfInstSrvLaboratorio.
+  ///
+  /// In es, this message translates to:
+  /// **'Laboratorio'**
+  String get perfInstSrvLaboratorio;
+
+  /// No description provided for @perfInstSrvBiblioteca.
+  ///
+  /// In es, this message translates to:
+  /// **'Biblioteca'**
+  String get perfInstSrvBiblioteca;
+
+  /// No description provided for @perfInstSrvAccesibilidad.
+  ///
+  /// In es, this message translates to:
+  /// **'Accesibilidad'**
+  String get perfInstSrvAccesibilidad;
+
+  /// No description provided for @perfInstCambiosPendientes.
+  ///
+  /// In es, this message translates to:
+  /// **'Tenés cambios sin guardar'**
+  String get perfInstCambiosPendientes;
+
+  /// No description provided for @perfInstDescartar.
+  ///
+  /// In es, this message translates to:
+  /// **'Descartar'**
+  String get perfInstDescartar;
+
+  /// No description provided for @perfInstDescartarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Descartar los cambios?'**
+  String get perfInstDescartarTitulo;
+
+  /// No description provided for @perfInstDescartarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Vas a perder lo que modificaste desde la última vez que guardaste.'**
+  String get perfInstDescartarMensaje;
+
+  /// No description provided for @perfInstGuardado.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambios guardados.'**
+  String get perfInstGuardado;
+
+  /// No description provided for @perfInstRevisarCampos.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisá los campos marcados.'**
+  String get perfInstRevisarCampos;
+
+  /// No description provided for @perfInstSalirTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Salir sin guardar?'**
+  String get perfInstSalirTitulo;
+
+  /// No description provided for @perfInstSalirMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Tenés cambios sin guardar. Si salís ahora, se van a perder.'**
+  String get perfInstSalirMensaje;
+
+  /// No description provided for @perfInstSalir.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir sin guardar'**
+  String get perfInstSalir;
+
+  /// No description provided for @perfInstVistaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Así te ven las familias'**
+  String get perfInstVistaTitulo;
+
+  /// No description provided for @perfInstVistaAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Es la ficha que aparece cuando te encuentran en ATENA.'**
+  String get perfInstVistaAyuda;
+
+  /// No description provided for @perfInstVistaSinGuardar.
+  ///
+  /// In es, this message translates to:
+  /// **'Incluye cambios que todavía no guardaste.'**
+  String get perfInstVistaSinGuardar;
+
+  /// No description provided for @perfInstVistaCompletar.
+  ///
+  /// In es, this message translates to:
+  /// **'Completar perfil'**
+  String get perfInstVistaCompletar;
+
+  /// No description provided for @perfInstVistaSinDescripcion.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay una descripción.'**
+  String get perfInstVistaSinDescripcion;
+
+  /// No description provided for @perfInstVistaContacto.
+  ///
+  /// In es, this message translates to:
+  /// **'Contacto'**
+  String get perfInstVistaContacto;
+
+  /// No description provided for @perfInstVistaSinContacto.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay datos de contacto.'**
+  String get perfInstVistaSinContacto;
+
+  /// No description provided for @perfInstSinNombre.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu institución'**
+  String get perfInstSinNombre;
+
+  /// No description provided for @plnTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí tu plan'**
+  String get plnTitulo;
+
+  /// No description provided for @plnHeroTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Armá tu plan a medida'**
+  String get plnHeroTitulo;
+
+  /// No description provided for @plnHeroAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagás solo por los niveles y módulos que usás, y podés cambiarlos cuando quieras.'**
+  String get plnHeroAyuda;
+
+  /// No description provided for @plnPrueba.
+  ///
+  /// In es, this message translates to:
+  /// **'{dias} días de prueba gratis'**
+  String plnPrueba(int dias);
+
+  /// No description provided for @plnSinPagos.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin pagos por ahora'**
+  String get plnSinPagos;
+
+  /// No description provided for @plnFlexible.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambialo cuando quieras'**
+  String get plnFlexible;
+
+  /// No description provided for @plnNiveles.
+  ///
+  /// In es, this message translates to:
+  /// **'Niveles curriculares'**
+  String get plnNiveles;
+
+  /// No description provided for @plnNivelesAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Salas, grados y años de tu propuesta oficial · {precio} por nivel al mes'**
+  String plnNivelesAyuda(Object precio);
+
+  /// No description provided for @plnModulos.
+  ///
+  /// In es, this message translates to:
+  /// **'Módulos extracurriculares'**
+  String get plnModulos;
+
+  /// No description provided for @plnModulosAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Talleres y actividades fuera del horario escolar · {precio} por módulo al mes'**
+  String plnModulosAyuda(Object precio);
+
+  /// No description provided for @plnPorMes.
+  ///
+  /// In es, this message translates to:
+  /// **'{precio} / mes'**
+  String plnPorMes(Object precio);
+
+  /// No description provided for @plnUsd.
+  ///
+  /// In es, this message translates to:
+  /// **'USD {monto}'**
+  String plnUsd(int monto);
+
+  /// No description provided for @plnUsdDecimal.
+  ///
+  /// In es, this message translates to:
+  /// **'USD {monto}'**
+  String plnUsdDecimal(double monto);
+
+  /// No description provided for @plnBloqueDeporte.
+  ///
+  /// In es, this message translates to:
+  /// **'Fútbol, natación, gimnasia, artes marciales y más.'**
+  String get plnBloqueDeporte;
+
+  /// No description provided for @plnBloqueArte.
+  ///
+  /// In es, this message translates to:
+  /// **'Música, teatro, danza y artes visuales.'**
+  String get plnBloqueArte;
+
+  /// No description provided for @plnBloqueIdiomas.
+  ///
+  /// In es, this message translates to:
+  /// **'Idiomas, conversación y comunicación oral y escrita.'**
+  String get plnBloqueIdiomas;
+
+  /// No description provided for @plnBloqueCiencia.
+  ///
+  /// In es, this message translates to:
+  /// **'Robótica, programación y proyectos STEAM.'**
+  String get plnBloqueCiencia;
+
+  /// No description provided for @plnBloqueApoyo.
+  ///
+  /// In es, this message translates to:
+  /// **'Apoyo escolar, tutorías y preparación de exámenes.'**
+  String get plnBloqueApoyo;
+
+  /// No description provided for @plnBloqueBienestar.
+  ///
+  /// In es, this message translates to:
+  /// **'Bienestar, habilidades socioemocionales y orientación vocacional.'**
+  String get plnBloqueBienestar;
+
+  /// No description provided for @plnBloqueOtros.
+  ///
+  /// In es, this message translates to:
+  /// **'Propuestas que no entran en las otras categorías.'**
+  String get plnBloqueOtros;
+
+  /// No description provided for @plnVacantesActivas.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 vacante publicada} other{{n} vacantes publicadas}}'**
+  String plnVacantesActivas(int n);
+
+  /// No description provided for @plnSePausan.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Se va a pausar 1 vacante} other{Se van a pausar {n} vacantes}}'**
+  String plnSePausan(int n);
+
+  /// No description provided for @plnPromoTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Tenés un código promocional?'**
+  String get plnPromoTitulo;
+
+  /// No description provided for @plnPromoCampo.
+  ///
+  /// In es, this message translates to:
+  /// **'Código'**
+  String get plnPromoCampo;
+
+  /// No description provided for @plnPromoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresá tu código'**
+  String get plnPromoHint;
+
+  /// No description provided for @plnPromoAplicar.
+  ///
+  /// In es, this message translates to:
+  /// **'Aplicar'**
+  String get plnPromoAplicar;
+
+  /// No description provided for @plnPromoVacio.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresá un código.'**
+  String get plnPromoVacio;
+
+  /// No description provided for @plnPromoInvalido.
+  ///
+  /// In es, this message translates to:
+  /// **'Ese código no es válido. Revisalo e intentá de nuevo.'**
+  String get plnPromoInvalido;
+
+  /// No description provided for @plnPromoAgotado.
+  ///
+  /// In es, this message translates to:
+  /// **'Este código ya alcanzó su límite de usos.'**
+  String get plnPromoAgotado;
+
+  /// No description provided for @plnPromoValido.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Código aplicado! Tenés un {pct}% de descuento.'**
+  String plnPromoValido(int pct);
+
+  /// No description provided for @plnPromoActivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tenés un código promocional activo: {pct}% de descuento.'**
+  String plnPromoActivo(int pct);
+
+  /// No description provided for @plnPromoQuitar.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar código'**
+  String get plnPromoQuitar;
+
+  /// No description provided for @plnResumen.
+  ///
+  /// In es, this message translates to:
+  /// **'Resumen'**
+  String get plnResumen;
+
+  /// No description provided for @plnResumenNiveles.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 nivel curricular} other{{n} niveles curriculares}}'**
+  String plnResumenNiveles(int n);
+
+  /// No description provided for @plnResumenModulos.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 módulo extracurricular} other{{n} módulos extracurriculares}}'**
+  String plnResumenModulos(int n);
+
+  /// No description provided for @plnSubtotal.
+  ///
+  /// In es, this message translates to:
+  /// **'Subtotal'**
+  String get plnSubtotal;
+
+  /// No description provided for @plnDescuentoVolumen.
+  ///
+  /// In es, this message translates to:
+  /// **'Descuento por {min} o más ítems ({pct}%)'**
+  String plnDescuentoVolumen(int min, int pct);
+
+  /// No description provided for @plnDescuentoPromo.
+  ///
+  /// In es, this message translates to:
+  /// **'Código promocional ({pct}%)'**
+  String plnDescuentoPromo(int pct);
+
+  /// No description provided for @plnTotalMes.
+  ///
+  /// In es, this message translates to:
+  /// **'Total por mes'**
+  String get plnTotalMes;
+
+  /// No description provided for @plnFaltanItems.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Sumá 1 ítem más y obtené un {pct}% de descuento.} other{Sumá {n} ítems más y obtené un {pct}% de descuento.}}'**
+  String plnFaltanItems(int n, int pct);
+
+  /// No description provided for @plnElegiAlMenosUno.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí al menos un nivel o un módulo para armar tu plan.'**
+  String get plnElegiAlMenosUno;
+
+  /// No description provided for @plnElegiAlMenosUnoCorto.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí al menos un nivel o módulo'**
+  String get plnElegiAlMenosUnoCorto;
+
+  /// No description provided for @plnPruebaTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Durante la prueba no se cobra nada; te vamos a avisar antes de habilitar el pago.'**
+  String get plnPruebaTexto;
+
+  /// No description provided for @plnPruebaEmpieza.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu prueba gratis de {dias} días empieza cuando guardás los cambios.'**
+  String plnPruebaEmpieza(int dias);
+
+  /// No description provided for @plnPruebaTerminada.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu prueba terminó el {fecha}. Todavía no hay pagos habilitados: te vamos a avisar antes de cobrar.'**
+  String plnPruebaTerminada(Object fecha);
+
+  /// No description provided for @plnSinCobros.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay pagos habilitados en ATENA: no se te va a cobrar nada sin avisarte antes.'**
+  String get plnSinCobros;
+
+  /// No description provided for @plnGratisTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan sin costo'**
+  String get plnGratisTitulo;
+
+  /// No description provided for @plnGratisTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Con tu código promocional, el plan queda activo sin costo.'**
+  String get plnGratisTexto;
+
+  /// No description provided for @plnDiasRestantes.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =0{Hoy es el último día de prueba.} =1{Queda 1 día de prueba.} other{Quedan {n} días de prueba.}}'**
+  String plnDiasRestantes(int n);
+
+  /// No description provided for @plnCrear.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear institución'**
+  String get plnCrear;
+
+  /// No description provided for @plnCreando.
+  ///
+  /// In es, this message translates to:
+  /// **'Creando…'**
+  String get plnCreando;
+
+  /// No description provided for @plnGuardar.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar cambios'**
+  String get plnGuardar;
+
+  /// No description provided for @plnCreada.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Listo! Tu institución ya está en ATENA.'**
+  String get plnCreada;
+
+  /// No description provided for @plnGuardado.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan actualizado.'**
+  String get plnGuardado;
+
+  /// No description provided for @plnPausadas.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Plan actualizado. Pausamos 1 vacante.} other{Plan actualizado. Pausamos {n} vacantes.}}'**
+  String plnPausadas(int n);
+
+  /// No description provided for @plnCorregirDatos.
+  ///
+  /// In es, this message translates to:
+  /// **'Corregir mis datos'**
+  String get plnCorregirDatos;
+
+  /// No description provided for @plnPausarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Pausar vacantes publicadas?'**
+  String get plnPausarTitulo;
+
+  /// No description provided for @plnPausarMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitaste {categorias} de tu plan. {n, plural, =1{Vamos a pausar 1 vacante publicada para que las familias dejen de verla.} other{Vamos a pausar {n} vacantes publicadas para que las familias dejen de verlas.}} Podés reactivarlas cuando vuelvas a sumar la categoría.'**
+  String plnPausarMensaje(Object categorias, int n);
+
+  /// No description provided for @plnPausarAccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar y pausar'**
+  String get plnPausarAccion;
+
+  /// No description provided for @plnErrorCarga.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar tu plan.'**
+  String get plnErrorCarga;
+
+  /// No description provided for @plnTuPlan.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu plan'**
+  String get plnTuPlan;
+
+  /// No description provided for @plnPlanActual.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan actual: {precio} por mes'**
+  String plnPlanActual(Object precio);
+
+  /// No description provided for @explorarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Explorar instituciones'**
+  String get explorarTitulo;
+
+  /// No description provided for @explorarPara.
+  ///
+  /// In es, this message translates to:
+  /// **'Para {nombre}'**
+  String explorarPara(Object nombre);
+
+  /// No description provided for @explorarBuscarHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscá por nombre, ciudad o provincia'**
+  String get explorarBuscarHint;
+
+  /// No description provided for @explorarBorrarBusqueda.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar búsqueda'**
+  String get explorarBorrarBusqueda;
+
+  /// No description provided for @explorarFiltros.
+  ///
+  /// In es, this message translates to:
+  /// **'Filtros'**
+  String get explorarFiltros;
+
+  /// No description provided for @explorarFiltroNivel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel'**
+  String get explorarFiltroNivel;
+
+  /// No description provided for @explorarFiltroActividad.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividades'**
+  String get explorarFiltroActividad;
+
+  /// No description provided for @explorarFiltroModalidad.
+  ///
+  /// In es, this message translates to:
+  /// **'Modalidad'**
+  String get explorarFiltroModalidad;
+
+  /// No description provided for @explorarCualquierNivel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cualquier nivel'**
+  String get explorarCualquierNivel;
+
+  /// No description provided for @explorarCualquierActividad.
+  ///
+  /// In es, this message translates to:
+  /// **'Cualquier actividad'**
+  String get explorarCualquierActividad;
+
+  /// No description provided for @explorarCualquierModalidad.
+  ///
+  /// In es, this message translates to:
+  /// **'Cualquier modalidad'**
+  String get explorarCualquierModalidad;
+
+  /// No description provided for @explorarConLugarPara.
+  ///
+  /// In es, this message translates to:
+  /// **'Con vacantes para {nombre}'**
+  String explorarConLugarPara(Object nombre);
+
+  /// No description provided for @explorarConLugarAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo instituciones con lugar disponible para la edad de {nombre} ({edad}).'**
+  String explorarConLugarAyuda(Object nombre, Object edad);
+
+  /// No description provided for @explorarLimpiarFiltros.
+  ///
+  /// In es, this message translates to:
+  /// **'Limpiar filtros'**
+  String get explorarLimpiarFiltros;
+
+  /// No description provided for @explorarResultados.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 institución} other{{n} instituciones}}'**
+  String explorarResultados(int n);
+
+  /// No description provided for @explorarVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay instituciones publicadas'**
+  String get explorarVacioTitulo;
+
+  /// No description provided for @explorarVacioMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Las instituciones aparecen acá a medida que se registran en ATENA. Volvé a mirar pronto.'**
+  String get explorarVacioMensaje;
+
+  /// No description provided for @explorarSinResultadosTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos instituciones'**
+  String get explorarSinResultadosTitulo;
+
+  /// No description provided for @explorarSinResultadosMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Probá con otras palabras o quitá algún filtro para ver más opciones.'**
+  String get explorarSinResultadosMensaje;
+
+  /// No description provided for @explorarVerInstitucion.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver institución'**
+  String get explorarVerInstitucion;
+
+  /// No description provided for @explorarFotoDe.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto {n} de {total}'**
+  String explorarFotoDe(int n, int total);
+
+  /// No description provided for @explorarVerFotos.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver fotos en pantalla completa'**
+  String get explorarVerFotos;
+
+  /// No description provided for @explorarFotoAnterior.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto anterior'**
+  String get explorarFotoAnterior;
+
+  /// No description provided for @explorarFotoSiguiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto siguiente'**
+  String get explorarFotoSiguiente;
+
+  /// No description provided for @explorarSobre.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre la institución'**
+  String get explorarSobre;
+
+  /// No description provided for @explorarLeerMas.
+  ///
+  /// In es, this message translates to:
+  /// **'Leer más'**
+  String get explorarLeerMas;
+
+  /// No description provided for @explorarLeerMenos.
+  ///
+  /// In es, this message translates to:
+  /// **'Leer menos'**
+  String get explorarLeerMenos;
+
+  /// No description provided for @explorarHorarios.
+  ///
+  /// In es, this message translates to:
+  /// **'Horarios'**
+  String get explorarHorarios;
+
+  /// No description provided for @explorarHorarioAtencion.
+  ///
+  /// In es, this message translates to:
+  /// **'Atención al público'**
+  String get explorarHorarioAtencion;
+
+  /// No description provided for @explorarHorarioClases.
+  ///
+  /// In es, this message translates to:
+  /// **'Clases'**
+  String get explorarHorarioClases;
+
+  /// No description provided for @explorarServicios.
+  ///
+  /// In es, this message translates to:
+  /// **'Servicios'**
+  String get explorarServicios;
+
+  /// No description provided for @explorarContacto.
+  ///
+  /// In es, this message translates to:
+  /// **'Contacto'**
+  String get explorarContacto;
+
+  /// No description provided for @explorarLlamar.
+  ///
+  /// In es, this message translates to:
+  /// **'Llamar'**
+  String get explorarLlamar;
+
+  /// No description provided for @explorarWhatsapp.
+  ///
+  /// In es, this message translates to:
+  /// **'WhatsApp'**
+  String get explorarWhatsapp;
+
+  /// No description provided for @explorarSitioWeb.
+  ///
+  /// In es, this message translates to:
+  /// **'Sitio web'**
+  String get explorarSitioWeb;
+
+  /// No description provided for @explorarInstagram.
+  ///
+  /// In es, this message translates to:
+  /// **'Instagram'**
+  String get explorarInstagram;
+
+  /// No description provided for @explorarFacebook.
+  ///
+  /// In es, this message translates to:
+  /// **'Facebook'**
+  String get explorarFacebook;
+
+  /// No description provided for @explorarYoutube.
+  ///
+  /// In es, this message translates to:
+  /// **'YouTube'**
+  String get explorarYoutube;
+
+  /// No description provided for @explorarComoLlegar.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo llegar'**
+  String get explorarComoLlegar;
+
+  /// No description provided for @explorarNoSePudoAbrir.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos abrirlo desde este dispositivo. Probá de nuevo en un rato.'**
+  String get explorarNoSePudoAbrir;
+
+  /// No description provided for @explorarVacantes.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacantes'**
+  String get explorarVacantes;
+
+  /// No description provided for @explorarPropuestas.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{1 propuesta} other{{n} propuestas}}'**
+  String explorarPropuestas(int n);
+
+  /// No description provided for @explorarSinVacantesTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay vacantes publicadas'**
+  String get explorarSinVacantesTitulo;
+
+  /// No description provided for @explorarSinVacantesMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta institución aún no publicó cursos ni actividades. Podés contactarla para consultar.'**
+  String get explorarSinVacantesMensaje;
+
+  /// No description provided for @explorarPedirVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir vacante'**
+  String get explorarPedirVacante;
+
+  /// No description provided for @explorarVerSolicitud.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver solicitud'**
+  String get explorarVerSolicitud;
+
+  /// No description provided for @explorarCompleto.
+  ///
+  /// In es, this message translates to:
+  /// **'Completo'**
+  String get explorarCompleto;
+
+  /// No description provided for @explorarUltimasVacantes.
+  ///
+  /// In es, this message translates to:
+  /// **'Últimas vacantes'**
+  String get explorarUltimasVacantes;
+
+  /// No description provided for @explorarArancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Arancel: {valor}'**
+  String explorarArancel(Object valor);
+
+  /// No description provided for @explorarFueraDeEdad.
+  ///
+  /// In es, this message translates to:
+  /// **'No coincide con la edad de {nombre}'**
+  String explorarFueraDeEdad(Object nombre);
+
+  /// No description provided for @explorarOcupacion.
+  ///
+  /// In es, this message translates to:
+  /// **'Ocupación'**
+  String get explorarOcupacion;
+
+  /// No description provided for @explorarInstNoEncontradaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos esta institución'**
+  String get explorarInstNoEncontradaTitulo;
+
+  /// No description provided for @explorarInstNoEncontradaMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Puede que haya dejado de publicar su perfil en ATENA.'**
+  String get explorarInstNoEncontradaMensaje;
+
+  /// No description provided for @solAlPedirTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir vacante'**
+  String get solAlPedirTitulo;
+
+  /// No description provided for @solAlAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'Alumno'**
+  String get solAlAlumno;
+
+  /// No description provided for @solAlFueraDeEdadTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'La edad no coincide'**
+  String get solAlFueraDeEdadTitulo;
+
+  /// No description provided for @solAlFueraDeEdadMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'{nombre} tiene {edad} y esta vacante es para otra edad. Podés enviar la solicitud igual: la institución va a decidir.'**
+  String solAlFueraDeEdadMensaje(Object nombre, Object edad);
+
+  /// No description provided for @solAlMensajeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje para la institución (opcional)'**
+  String get solAlMensajeLabel;
+
+  /// No description provided for @solAlMensajeAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Contales algo del alumno o hacé una consulta.'**
+  String get solAlMensajeAyuda;
+
+  /// No description provided for @solAlComoSigue.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución revisa tu pedido y te avisamos por notificación apenas responda.'**
+  String get solAlComoSigue;
+
+  /// No description provided for @solAlEnviar.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar solicitud'**
+  String get solAlEnviar;
+
+  /// No description provided for @solAlEnviadaOk.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Solicitud enviada! Te avisamos cuando la institución responda.'**
+  String get solAlEnviadaOk;
+
+  /// No description provided for @solAlTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis solicitudes'**
+  String get solAlTitulo;
+
+  /// No description provided for @solAlTabActivas.
+  ///
+  /// In es, this message translates to:
+  /// **'Activas'**
+  String get solAlTabActivas;
+
+  /// No description provided for @solAlTabHistorial.
+  ///
+  /// In es, this message translates to:
+  /// **'Historial'**
+  String get solAlTabHistorial;
+
+  /// No description provided for @solAlActivasVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No tenés solicitudes activas'**
+  String get solAlActivasVacioTitulo;
+
+  /// No description provided for @solAlActivasVacioMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando pidas una vacante, vas a poder seguir cada paso desde acá.'**
+  String get solAlActivasVacioMensaje;
+
+  /// No description provided for @solAlHistorialVacioTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu historial está vacío'**
+  String get solAlHistorialVacioTitulo;
+
+  /// No description provided for @solAlHistorialVacioMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Acá vas a ver las solicitudes que ya se cerraron: no aceptadas, canceladas o dadas de baja.'**
+  String get solAlHistorialVacioMensaje;
+
+  /// No description provided for @solAlRespuestaDe.
+  ///
+  /// In es, this message translates to:
+  /// **'Respuesta de {institucion}'**
+  String solAlRespuestaDe(Object institucion);
+
+  /// No description provided for @solAlDetalleTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle de la solicitud'**
+  String get solAlDetalleTitulo;
+
+  /// No description provided for @solAlNoEncontradaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos esta solicitud'**
+  String get solAlNoEncontradaTitulo;
+
+  /// No description provided for @solAlNoEncontradaMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Puede que se haya eliminado o que corresponda a otro alumno.'**
+  String get solAlNoEncontradaMensaje;
+
+  /// No description provided for @solAlEstadoPendienteTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu solicitud está en revisión'**
+  String get solAlEstadoPendienteTitulo;
+
+  /// No description provided for @solAlEstadoPendienteMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} la está revisando. Te vamos a avisar por notificación apenas responda.'**
+  String solAlEstadoPendienteMensaje(Object institucion);
+
+  /// No description provided for @solAlEstadoConfirmadaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Tenés la vacante!'**
+  String get solAlEstadoConfirmadaTitulo;
+
+  /// No description provided for @solAlEstadoConfirmadaMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} confirmó tu lugar. Próximos pasos: revisá Documentos por si te piden papeles y seguí las fechas importantes en el Calendario.'**
+  String solAlEstadoConfirmadaMensaje(Object institucion);
+
+  /// No description provided for @solAlEstadoRechazadaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta vez no fue posible'**
+  String get solAlEstadoRechazadaTitulo;
+
+  /// No description provided for @solAlEstadoRechazadaMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} no pudo aceptar la solicitud. No te desanimes: hay otras instituciones con vacantes disponibles.'**
+  String solAlEstadoRechazadaMensaje(Object institucion);
+
+  /// No description provided for @solAlEstadoCanceladaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelaste esta solicitud'**
+  String get solAlEstadoCanceladaTitulo;
+
+  /// No description provided for @solAlEstadoCanceladaMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Si cambiás de opinión, podés volver a pedir la vacante mientras haya lugar.'**
+  String get solAlEstadoCanceladaMensaje;
+
+  /// No description provided for @solAlEstadoBajaTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'La institución dio de baja la vacante'**
+  String get solAlEstadoBajaTitulo;
+
+  /// No description provided for @solAlEstadoBajaMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} dio de baja esta vacante. Si tenés dudas, comunicate con la institución.'**
+  String solAlEstadoBajaMensaje(Object institucion);
+
+  /// No description provided for @solAlLaVacante.
+  ///
+  /// In es, this message translates to:
+  /// **'La vacante'**
+  String get solAlLaVacante;
+
+  /// No description provided for @solAlTurnoHorario.
+  ///
+  /// In es, this message translates to:
+  /// **'Turno y horario'**
+  String get solAlTurnoHorario;
+
+  /// No description provided for @solAlDias.
+  ///
+  /// In es, this message translates to:
+  /// **'Días'**
+  String get solAlDias;
+
+  /// No description provided for @solAlEdad.
+  ///
+  /// In es, this message translates to:
+  /// **'Edad'**
+  String get solAlEdad;
+
+  /// No description provided for @solAlEdadAlumno.
+  ///
+  /// In es, this message translates to:
+  /// **'{nombre} tiene {edad}'**
+  String solAlEdadAlumno(Object nombre, Object edad);
+
+  /// No description provided for @solAlArancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Arancel'**
+  String get solAlArancel;
+
+  /// No description provided for @solAlTuMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu mensaje'**
+  String get solAlTuMensaje;
+
+  /// No description provided for @solAlSeguimiento.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguimiento'**
+  String get solAlSeguimiento;
+
+  /// No description provided for @solAlHitoEnviada.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud enviada'**
+  String get solAlHitoEnviada;
+
+  /// No description provided for @solAlHitoConfirmada.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacante confirmada'**
+  String get solAlHitoConfirmada;
+
+  /// No description provided for @solAlHitoRechazada.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitud no aceptada'**
+  String get solAlHitoRechazada;
+
+  /// No description provided for @solAlHitoCancelada.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelaste la solicitud'**
+  String get solAlHitoCancelada;
+
+  /// No description provided for @solAlHitoBaja.
+  ///
+  /// In es, this message translates to:
+  /// **'Baja de la vacante'**
+  String get solAlHitoBaja;
+
+  /// No description provided for @solAlCancelar.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar solicitud'**
+  String get solAlCancelar;
+
+  /// No description provided for @solAlCancelarTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cancelar esta solicitud?'**
+  String get solAlCancelarTitulo;
+
+  /// No description provided for @solAlCancelarMsgPendiente.
+  ///
+  /// In es, this message translates to:
+  /// **'Vas a retirar tu pedido para {oferta} en {institucion}. Si cambiás de opinión, podés volver a pedirla mientras haya lugar.'**
+  String solAlCancelarMsgPendiente(Object oferta, Object institucion);
+
+  /// No description provided for @solAlCancelarMsgConfirmada.
+  ///
+  /// In es, this message translates to:
+  /// **'Vas a liberar tu vacante confirmada en {oferta} ({institucion}) y otra familia podrá ocupar ese lugar.'**
+  String solAlCancelarMsgConfirmada(Object oferta, Object institucion);
+
+  /// No description provided for @solAlCancelarConfirmar.
+  ///
+  /// In es, this message translates to:
+  /// **'Sí, cancelar'**
+  String get solAlCancelarConfirmar;
+
+  /// No description provided for @solAlMantener.
+  ///
+  /// In es, this message translates to:
+  /// **'No, mantenerla'**
+  String get solAlMantener;
+
+  /// No description provided for @solAlCanceladaOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelaste la solicitud.'**
+  String get solAlCanceladaOk;
+
+  /// No description provided for @solAlComprobante.
+  ///
+  /// In es, this message translates to:
+  /// **'Descargar comprobante'**
+  String get solAlComprobante;
+
+  /// No description provided for @solAlComprobanteError.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos generar el comprobante. Probá de nuevo en unos minutos.'**
+  String get solAlComprobanteError;
+
+  /// No description provided for @comInstAvisosEnviadosAyuda.
+  ///
+  /// In es, this message translates to:
+  /// **'Llegan como notificación a las familias de los alumnos confirmados.'**
+  String get comInstAvisosEnviadosAyuda;
+
+  /// No description provided for @comInstEventoNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Este evento ya no está disponible'**
+  String get comInstEventoNoDisponible;
+
+  /// No description provided for @comInstEventoNoDisponibleMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Puede que se haya eliminado. Volvé al calendario para ver los eventos vigentes.'**
+  String get comInstEventoNoDisponibleMensaje;
+
+  /// No description provided for @docInstErrorTipo.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegí qué documento necesitás.'**
+  String get docInstErrorTipo;
+
+  /// No description provided for @docInstPedidoNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Este pedido ya no está disponible'**
+  String get docInstPedidoNoDisponible;
+
+  /// No description provided for @docInstPedidoNoDisponibleMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Puede que la familia haya eliminado su cuenta o que el pedido se haya borrado.'**
+  String get docInstPedidoNoDisponibleMensaje;
+
+  /// No description provided for @solInstYaNoExisteTitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta solicitud ya no existe'**
+  String get solInstYaNoExisteTitulo;
+
+  /// No description provided for @solInstYaNoExisteMsg.
+  ///
+  /// In es, this message translates to:
+  /// **'Es posible que la familia haya eliminado su cuenta. Si tenía un lugar confirmado, ya quedó libre.'**
+  String get solInstYaNoExisteMsg;
+
+  /// No description provided for @solInstYaNoExiste.
+  ///
+  /// In es, this message translates to:
+  /// **'Esa solicitud ya no existe. Es posible que la familia haya eliminado su cuenta.'**
+  String get solInstYaNoExiste;
+
+  /// No description provided for @solAlLaInstitucion.
+  ///
+  /// In es, this message translates to:
+  /// **'la institución'**
+  String get solAlLaInstitucion;
+
+  /// No description provided for @solAlInstNoDisponible.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya no está en ATENA'**
+  String get solAlInstNoDisponible;
+
+  /// No description provided for @solAlEstadoBajaSinInstMensaje.
+  ///
+  /// In es, this message translates to:
+  /// **'{institucion} ya no forma parte de ATENA, por eso esta vacante se dio de baja. Podés buscar otras instituciones con lugar.'**
+  String solAlEstadoBajaSinInstMensaje(Object institucion);
+
+  /// No description provided for @plnVerResumen.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver resumen'**
+  String get plnVerResumen;
+
+  /// No description provided for @perfInstConsejoFotosPrimeras.
+  ///
+  /// In es, this message translates to:
+  /// **'Subí al menos {n} fotos de tus espacios.'**
+  String perfInstConsejoFotosPrimeras(int n);
+
+  /// No description provided for @homeStatActiveRequestsN.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Solicitud activa} other{Solicitudes activas}}'**
+  String homeStatActiveRequestsN(int n);
+
+  /// No description provided for @homeStatUpcomingEventsN.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Próximo evento} other{Próximos eventos}}'**
+  String homeStatUpcomingEventsN(int n);
+
+  /// No description provided for @homeStatPendingDocsN.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Documento por entregar} other{Documentos por entregar}}'**
+  String homeStatPendingDocsN(int n);
+
+  /// No description provided for @instStatPendingN.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Solicitud pendiente} other{Solicitudes pendientes}}'**
+  String instStatPendingN(int n);
+
+  /// No description provided for @instStatStudentsN.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Alumno confirmado} other{Alumnos confirmados}}'**
+  String instStatStudentsN(int n);
+
+  /// No description provided for @instStatFreeSpotsN.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Vacante libre} other{Vacantes libres}}'**
+  String instStatFreeSpotsN(int n);
+
+  /// No description provided for @instStatOffersN.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, =1{Oferta activa} other{Ofertas activas}}'**
+  String instStatOffersN(int n);
 }
 
 class _AppLocalizationsDelegate

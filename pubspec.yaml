@@ -1,5 +1,5 @@
 name: atena_app
-description: "A new Flutter project."
+description: "ATENA: vacantes y trámites escolares entre familias e instituciones educativas."
 publish_to: "none"
 version: 1.0.0+1
 
@@ -12,18 +12,18 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
+  intl: any
 
+  # Fuente de íconos que usan los controles de estilo iOS del framework.
   cupertino_icons: ^1.0.8
-  shared_preferences: ^2.2.2
-  url_launcher: ^6.3.0
-  pdf: ^3.11.0
-  printing: ^5.12.0
-  image_picker: ^1.0.7
-  flutter_image_compress: ^2.1.0
-  path_provider: ^2.1.0
-  share_plus: ^7.0.0
-  geolocator: ^13.0.1
-  file_picker: ^8.1.6
+  crypto: ^3.0.6
+  shared_preferences: ^2.5.5
+  url_launcher: ^6.3.3
+  pdf: ^3.13.1
+  printing: ^5.15.1
+  image_picker: ^1.2.3
+  share_plus: ^13.3.1
+  file_picker: ^13.1.0
 
 dev_dependencies:
   flutter_test:
@@ -34,19 +34,25 @@ flutter:
   uses-material-design: true
   generate: true
 
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
+    - family: Cinzel
+      fonts:
+        - asset: assets/fonts/Cinzel-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cinzel-Bold.ttf
+          weight: 700
+
   assets:
-    # ─────────────────────────────────────────────
-    # ATENA – VISUAL ROOT (carpetas)
-    # Incluye todas las subcarpetas de assets/visual/
-    # ─────────────────────────────────────────────
-    - assets/visual/backgrounds/
-    - assets/visual/icons/
-    - assets/visual/icons/app/
-    - assets/visual/illustrations/
-    - assets/visual/logos/
-    - assets/visual/overlays/
-    - assets/visual/panels/
-    - assets/visual/referencias/
-    - assets/visual/splash/
-    - assets/visual/states/
-    - assets/visual/ui/
+    - assets/brand/

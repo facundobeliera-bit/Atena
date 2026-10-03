@@ -426,7 +426,7 @@ class Cuenta {
   /// Email principal de la cuenta.
   final String email;
 
-  /// Hash/clave (prototipo); backend reemplaza.
+  /// Hash de la contraseña (ver PasswordHasher).
   final String passwordHash;
 
   /// Perfiles vinculados a esta cuenta (ids).

@@ -1,22 +1,21 @@
 // lib/screens/auth/alumno_registro_page.dart
 //
-// ATENA – AUTH / ALUMNO REGISTRO (CANÓNICO)
-//
-// ✅ FIX DEFINITIVO:
-// - NO se pasa NUNCA DateTime? a ningún servicio
-// - fechaNacimiento queda sellado como DateTime ANTES de cualquier await
-//
-// Nota: strings hardcode mientras cerramos flujo; i18n después.
+// ATENA – Registro de familias: crea la cuenta y el primer perfil de alumno.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import '../../services/cuenta_service.dart';
-import '../cuentas/cuenta_home_page.dart';
+import '../../l10n/gen/app_localizations.dart';
+import '../../routes/atena_nav.dart';
+import '../../services/auth_service.dart';
+import '../../ui/atena_ui.dart';
+import 'widgets/auth_shell.dart';
 
 class AlumnoRegistroPage extends StatefulWidget {
   final String? deeplink;
+  final String? initialEmail;
 
-  const AlumnoRegistroPage({super.key, this.deeplink});
+  const AlumnoRegistroPage({super.key, this.deeplink, this.initialEmail});
 
   @override
   State<AlumnoRegistroPage> createState() => _AlumnoRegistroPageState();
@@ -25,389 +24,261 @@ class AlumnoRegistroPage extends StatefulWidget {
 class _AlumnoRegistroPageState extends State<AlumnoRegistroPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // PERFIL
-  final _nombreC = TextEditingController();
-  final _apellidoC = TextEditingController();
-  final _dniC = TextEditingController();
-  final _telefonoC = TextEditingController();
-  final _fechaNacC = TextEditingController();
-  DateTime? _fechaNac; // ← solo UI
+  final _nombreCtrl = TextEditingController();
+  final _apellidoCtrl = TextEditingController();
+  final _dniCtrl = TextEditingController();
+  final _telefonoCtrl = TextEditingController();
+  final _fechaCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  final _pass2Ctrl = TextEditingController();
 
-  // CUENTA
-  final _emailC = TextEditingController();
-  final _passC = TextEditingController();
-
-  bool _recordarme = true;
-  bool _cargando = false;
-
-  bool _verPassword = false;
-
+  DateTime? _fechaNac;
+  bool _remember = true;
+  bool _loading = false;
   String? _error;
 
   @override
+  void initState() {
+    super.initState();
+    _emailCtrl.text = (widget.initialEmail ?? '').trim();
+  }
+
+  @override
   void dispose() {
-    _nombreC.dispose();
-    _apellidoC.dispose();
-    _dniC.dispose();
-    _telefonoC.dispose();
-    _fechaNacC.dispose();
-    _emailC.dispose();
-    _passC.dispose();
+    for (final c in [
+      _nombreCtrl,
+      _apellidoCtrl,
+      _dniCtrl,
+      _telefonoCtrl,
+      _fechaCtrl,
+      _emailCtrl,
+      _passCtrl,
+      _pass2Ctrl,
+    ]) {
+      c.dispose();
+    }
     super.dispose();
   }
 
-  void _snack(String msg) {
-    if (!mounted) return;
-    final clean = msg.trim();
-    if (clean.isEmpty) return;
-    final m = ScaffoldMessenger.maybeOf(context);
-    if (m == null) return;
-    m.hideCurrentSnackBar();
-    m.showSnackBar(SnackBar(content: Text(clean)));
-  }
-
-  String _dniDigits(String v) => v.replaceAll(RegExp(r'[^0-9]'), '').trim();
-
-  bool _looksLikeEmail(String v) {
-    final t = v.trim().toLowerCase();
-    if (t.isEmpty) return false;
-    final at = t.indexOf('@');
-    final dot = t.lastIndexOf('.');
-    return at > 0 && dot > at + 1 && dot < t.length - 1;
-  }
-
-  bool _looksLikeDni(String v) => RegExp(r'^\d{7,9}$').hasMatch(_dniDigits(v));
-
-  String _dateKey(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-'
-      '${d.month.toString().padLeft(2, '0')}-'
-      '${d.day.toString().padLeft(2, '0')}';
-
-  Future<void> _pickFechaNacimiento() async {
-    if (_cargando) return;
-
+  Future<void> _pickFecha() async {
+    if (_loading) return;
     final now = DateTime.now();
-    final initial = _fechaNac ?? DateTime(now.year - 12);
-
-    DateTime? picked;
-    try {
-      picked = await showDatePicker(
-        context: context,
-        initialDate: initial,
-        firstDate: DateTime(1900),
-        lastDate: now,
-      );
-    } catch (_) {
-      picked = null;
-    }
-
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _fechaNac ?? DateTime(now.year - 10, now.month, now.day),
+      firstDate: DateTime(1920),
+      lastDate: now,
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+    );
     if (!mounted || picked == null) return;
-
-    // ✅ SELLADO para evitar DateTime? en _dateKey(...)
-    final DateTime p = picked;
-
     setState(() {
-      _fechaNac = p;
-      _fechaNacC.text = _dateKey(p);
-      _error = null;
+      _fechaNac = picked;
+      _fechaCtrl.text = MaterialLocalizations.of(
+        context,
+      ).formatCompactDate(picked);
     });
   }
 
-  Future<void> _registrar() async {
-    if (_cargando) return;
+  Future<void> _submit() async {
+    if (_loading) return;
+    FocusScope.of(context).unfocus();
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final fecha = _fechaNac;
+    if (fecha == null) return;
 
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) return;
-
-    // 🔒 SELLADO DEFINITIVO (ANTES DE ANY await)
-    if (_fechaNac == null) {
-      if (mounted) {
-        setState(() => _error = 'Seleccioná la fecha de nacimiento.');
-      }
-      _snack('Seleccioná la fecha de nacimiento.');
-      return;
-    }
-    final DateTime fechaNacimiento = _fechaNac!;
-
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    final nav = Navigator.of(context);
-
-    if (!mounted) return;
+    final t = AppLocalizations.of(context);
     setState(() {
-      _cargando = true;
+      _loading = true;
       _error = null;
     });
 
     try {
-      final email = _emailC.text.trim().toLowerCase();
-      final pass = _passC.text; // no trim
-
-      final cuenta = await CuentaService.registrarCuenta(
-        email: email,
-        password: pass,
-        recordarme: _recordarme,
+      final res = await AuthService.registrarFamilia(
+        email: _emailCtrl.text,
+        password: _passCtrl.text,
+        remember: _remember,
+        nombre: _nombreCtrl.text,
+        apellido: _apellidoCtrl.text,
+        dni: _dniCtrl.text,
+        fechaNacimiento: fecha,
+        telefono: _telefonoCtrl.text,
       );
-
-      final perfil = await CuentaService.crearPerfilAlumno(
-        cuentaId: cuenta.id,
-        documento: _dniDigits(_dniC.text),
-        nombre: _nombreC.text.trim(),
-        apellido: _apellidoC.text.trim(),
-        fechaNacimiento: fechaNacimiento, // ✅ DateTime puro
-        email: email,
-        telefono: _telefonoC.text.trim(),
-      );
-
-      await CuentaService.setUltimoPerfil(cuenta.id, 'A|${perfil.id}');
-
+      TextInput.finishAutofillContext();
       if (!mounted) return;
-
-      nav.pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => CuentaHomePage(
-            cuentaId: cuenta.id,
-            initialDeeplink: widget.deeplink,
-          ),
-        ),
+      await AtenaNav.toFamilia(
+        context,
+        res.cuenta.id,
+        deeplink: widget.deeplink,
       );
     } catch (e) {
-      final msg = e.toString().replaceFirst('Exception: ', '').trim();
-      final clean = msg.isEmpty ? 'Error al registrar.' : msg;
-
-      if (mounted) {
-        setState(() => _error = clean);
-      }
-
-      if (messenger != null) {
-        final s = clean.trim();
-        if (s.isNotEmpty) {
-          messenger.hideCurrentSnackBar();
-          messenger.showSnackBar(SnackBar(content: Text(s)));
-        }
-      }
+      if (!mounted) return;
+      setState(() => _error = authErrorText(t, e));
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context);
+    final error = (_error ?? '').trim();
+    const gap = SizedBox(height: 14);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Registro Alumno')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  children: [
-                    if ((_error ?? '').trim().isNotEmpty) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: cs.errorContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          (_error ?? '').trim(),
-                          style: TextStyle(
-                            color: cs.onErrorContainer,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    const Text(
-                      'Datos del perfil',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
+    return AuthShell(
+      role: AtenaRole.alumno,
+      icon: Icons.person_add_alt_1_rounded,
+      title: t.authFamiliaRegisterTitle,
+      subtitle: t.authFamiliaRegisterSubtitle,
+      maxWidth: 560,
+      footer: AuthFooterLink(
+        question: t.authHaveAccount,
+        action: t.commonSignIn,
+        onPressed: _loading ? null : () => Navigator.of(context).maybePop(),
+      ),
+      child: AutofillGroup(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AuthFormSection(
+                title: t.authStudentSection,
+                help: t.authStudentSectionHelp,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _nombreCtrl,
+                      enabled: !_loading,
+                      textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.givenName],
+                      decoration: InputDecoration(labelText: t.commonNameLabel),
+                      validator: (v) => AuthValidators.required(t, v),
                     ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _nombreC,
-                      enabled: !_cargando,
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      validator: (v) {
-                        final s = (v ?? '').trim();
-                        if (s.isEmpty) return 'Ingresá tu nombre.';
-                        if (s.length < 2) return 'Nombre demasiado corto.';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _apellidoC,
-                      enabled: !_cargando,
-                      decoration: const InputDecoration(
-                        labelText: 'Apellido',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      validator: (v) {
-                        final s = (v ?? '').trim();
-                        if (s.isEmpty) return 'Ingresá tu apellido.';
-                        if (s.length < 2) return 'Apellido demasiado corto.';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _dniC,
-                      enabled: !_cargando,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'DNI (7 a 9 dígitos)',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      validator: (v) {
-                        final s = (v ?? '').trim();
-                        if (s.isEmpty) return 'Ingresá tu DNI.';
-                        if (!_looksLikeDni(s)) return 'DNI inválido.';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _telefonoC,
-                      enabled: !_cargando,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Teléfono',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      validator: (v) {
-                        final s = (v ?? '').trim();
-                        if (s.isEmpty) return 'Ingresá un teléfono.';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _fechaNacC,
-                      enabled: !_cargando,
-                      readOnly: true,
-                      onTap: _pickFechaNacimiento,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _apellidoCtrl,
+                      enabled: !_loading,
+                      textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.familyName],
                       decoration: InputDecoration(
-                        labelText: 'Fecha de nacimiento',
-                        border: const OutlineInputBorder(),
-                        isDense: true,
-                        suffixIcon: IconButton(
-                          onPressed: _cargando ? null : _pickFechaNacimiento,
-                          icon: const Icon(Icons.calendar_month),
-                        ),
+                        labelText: t.commonLastNameLabel,
                       ),
-                      validator: (_) => _fechaNac == null
-                          ? 'Seleccioná tu fecha de nacimiento.'
-                          : null,
+                      validator: (v) => AuthValidators.required(t, v),
                     ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Datos de la cuenta',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _emailC,
-                      enabled: !_cargando,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      validator: (v) {
-                        final s = (v ?? '').trim();
-                        if (s.isEmpty) return 'Ingresá tu email.';
-                        if (!_looksLikeEmail(s)) return 'Email inválido.';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _passC,
-                      enabled: !_cargando,
-                      obscureText: !_verPassword,
-                      decoration: InputDecoration(
-                        labelText: 'Contraseña (mínimo 4)',
-                        border: const OutlineInputBorder(),
-                        isDense: true,
-                        suffixIcon: IconButton(
-                          onPressed: _cargando
-                              ? null
-                              : () => setState(
-                                  () => _verPassword = !_verPassword,
-                                ),
-                          icon: Icon(
-                            _verPassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                        ),
-                      ),
-                      validator: (v) {
-                        final s = (v ?? '');
-                        if (s.trim().isEmpty) return 'Ingresá una contraseña.';
-                        if (s.length < 4) return 'Mínimo 4 caracteres.';
-                        return null;
-                      },
-                      onFieldSubmitted: (_) => _registrar(),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _recordarme,
-                          onChanged: _cargando
-                              ? null
-                              : (v) => setState(() => _recordarme = v ?? true),
-                        ),
-                        const Expanded(child: Text('Recordarme')),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        onPressed: _cargando ? null : _registrar,
-                        icon: _cargando
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.person_add),
-                        label: Text(
-                          _cargando ? 'Creando...' : 'Crear cuenta y perfil',
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                ],
+              ),
+              gap,
+              TextFormField(
+                controller: _dniCtrl,
+                enabled: !_loading,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.next,
+                inputFormatters: [digitsOnly],
+                decoration: InputDecoration(
+                  labelText: t.authDniLabel,
+                  helperText: t.authDniHelper,
+                  prefixIcon: const Icon(Icons.badge_outlined),
+                ),
+                validator: (v) => AuthValidators.dni(t, v),
+              ),
+              gap,
+              TextFormField(
+                controller: _fechaCtrl,
+                enabled: !_loading,
+                readOnly: true,
+                enableInteractiveSelection: false,
+                onTap: _pickFecha,
+                decoration: InputDecoration(
+                  labelText: t.authBirthDate,
+                  prefixIcon: const Icon(Icons.cake_outlined),
+                  suffixIcon: const Icon(Icons.calendar_month_rounded),
+                ),
+                validator: (_) =>
+                    _fechaNac == null ? t.authBirthDateRequired : null,
+              ),
+              gap,
+              TextFormField(
+                controller: _telefonoCtrl,
+                enabled: !_loading,
+                keyboardType: TextInputType.phone,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.telephoneNumber],
+                decoration: InputDecoration(
+                  labelText: t.commonPhoneOptionalLabel,
+                  prefixIcon: const Icon(Icons.phone_outlined),
                 ),
               ),
-            ),
+              const SizedBox(height: 24),
+              AuthFormSection(title: t.authAccessSection),
+              TextFormField(
+                controller: _emailCtrl,
+                enabled: !_loading,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                autocorrect: false,
+                autofillHints: const [AutofillHints.email],
+                decoration: InputDecoration(
+                  labelText: t.commonEmail,
+                  prefixIcon: const Icon(Icons.alternate_email_rounded),
+                ),
+                validator: (v) => AuthValidators.email(t, v),
+              ),
+              gap,
+              AuthPasswordField(
+                controller: _passCtrl,
+                enabled: !_loading,
+                isNew: true,
+                label: t.commonPassword,
+                helperText: t.authPasswordHelper,
+                textInputAction: TextInputAction.next,
+                validator: (v) => AuthValidators.newPassword(t, v),
+              ),
+              gap,
+              AuthPasswordField(
+                controller: _pass2Ctrl,
+                enabled: !_loading,
+                isNew: true,
+                label: t.authPasswordConfirm,
+                validator: (v) {
+                  if ((v ?? '').isEmpty) return t.commonPasswordRequired;
+                  if (v != _passCtrl.text) return t.commonPasswordsDontMatch;
+                  return null;
+                },
+                onSubmitted: (_) => _submit(),
+              ),
+              const SizedBox(height: 6),
+              CheckboxListTile(
+                value: _remember,
+                onChanged: _loading
+                    ? null
+                    : (v) => setState(() => _remember = v ?? true),
+                title: Text(t.commonRememberMe),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
+              if (error.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                AtenaBanner(tone: AtenaBannerTone.error, message: error),
+              ],
+              const SizedBox(height: 16),
+              AuthSubmitButton(
+                label: t.commonCreateAccount,
+                loadingLabel: t.commonCreating,
+                loading: _loading,
+                onPressed: _submit,
+                icon: Icons.arrow_forward_rounded,
+              ),
+            ],
           ),
         ),
       ),

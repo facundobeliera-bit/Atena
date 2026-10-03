@@ -1,67 +1,28 @@
-// ─────────────────────────────────────────────
-// ATENA – CUENTA SERVICE (OWNER + PERFILES + EMANCIPACIÓN)
-// Archivo: lib/services/cuenta_service.dart
-// ─────────────────────────────────────────────
+// lib/services/cuenta_service.dart
 //
-// ✅ FIX BLOQUEANTE (FASE 2 - enero 2026):
-// - Unifica prototipo institucional: si es el PRIMER perfil institución de una cuenta,
-//   se fuerza perfilId == cuentaId para alinear con el flujo prototipo:
-//   institucionId == cuentaId y perfilId institución == institucionId.
-// - Si ya hay perfiles institución o hay colisión, se crea un P_* como antes.
-// - Mantiene regla canónica: institucionId == perfil.id.
+// Cuentas y perfiles (almacenamiento local).
 //
-// ✅ FIX CANÓNICO (AHORA):
-// - “Último perfil” se guarda con tags anti-cruce:
-//   A|<perfilId> / I|<perfilId> (backward compatible con legacy).
+// - Una cuenta (email + contraseña con hash PBKDF2) agrupa perfiles de alumno
+//   (familias) o de institución (cuenta contenedora de una institución).
+// - Índices: email → cuenta y DNI → perfil de alumno.
+// - Sesión de cuenta, con marca de "temporal" cuando el usuario no eligió
+//   "Recordarme" (AuthService la descarta al arrancar la app).
+// - "Último perfil usado" por cuenta, etiquetado por rol (`A|id` / `I|id`).
 //
-// ✅ FIX (feb 2026 · recordarme / sesión):
-// - setSesionCuentaId NO puede borrar la sesión cuando recordarme=false,
-//   porque la UI canónica (InstitucionMenuPage / gateways) validan sesión activa.
-// - Solución: siempre guardar sesion_cuenta y marcarla como temporal si recordarme=false.
-//   Se puede limpiar en logout o en boot (ver clearSesionTemporalIfNeeded).
+// Tolerancia con datos de versiones anteriores:
+// - Las claves se leen primero en su forma actual (id sin espacios) y, si no
+//   están, en la forma anterior; al leerlas se vuelven a guardar en la actual.
+// - Las contraseñas guardadas con el formato anterior se migran al ingresar.
+// - Si un perfil quedó en la lista del rol equivocado, se corrige al listar.
 //
-// ✅ FIX (feb 2026 · robustez E2E):
-// - getSesionCuentaId normaliza el id (trim + colapsa whitespace interno),
-//   para evitar mismatches con SessionService (que normaliza ids como key estable).
-// - setUltimoPerfilInst ahora “taggea” automáticamente si le pasan un perfilId sin tag,
-//   evitando cruces Alumno/Institución aunque el caller use el método legacy.
-//
-// ✅ NUEVO (feb 2026 · compat keys):
-// - Keys de storage (cuenta/perfiles/último perfil) usan _normIdKey para alinear con sesión.
-// - Backward compatible: se lee key canónica y si no está, se intenta legacy (trim).
-// - Write dual: se guarda en key canónica y en legacy si difiere (migración suave).
-//
-// ✅ FIX CRN (feb 2026 · cierre flujo 1):
-// - Unifica criterio: _normIdKey colapsa whitespace a nada (como SessionService),
-//   pero además provee _normIdValue (trim + colapsa a 1 espacio) para valores “humanos”.
-// - Corrige bug silencioso: en emanciparPerfilAlumno se comparaba último perfil "pelado"
-//   contra pid; ahora compara contra variantes (tagged/untagged) para limpiar correctamente.
-// - Hardening: ownerAccountId en PerfilInstitucion se guarda SIEMPRE (canónico),
-//   evita null y reduce ramas en resolvers.
-// - Hardening: limpiar sesión temporal no debe borrar si recordarme=true (ya lo respeta).
-//
-// ✅ HARDENING (feb 2026 · keys estables):
-// - _kAlumnoMigracionesLog usa _normIdKey (antes trim-only), con lectura legacy best-effort.
-//
-// ✅ FIX (feb 2026 · anti-hang prefs):
-// - Usa StorageService (timeouts + fallback in-memory) en vez de SharedPreferences directo,
-//   para evitar “await infinito” en web/prefs y loaders colgados.
-//
-// ✅ HARDENING NUEVO (feb 2026 · NO MEZCLAR ROLES):
-// - listarPerfilesAlumno / listarPerfilesInstitucion validan `tipo`.
-// - Si un ID quedó en la lista equivocada (o legacy guardó en key cruzada):
-//     * intenta leer en la key del otro rol,
-//     * y hace auto-repair: mueve el ID a la lista correcta y guarda Cuenta.
-// - Resultado: la UI NO muestra perfiles cruzados aunque el storage esté sucio.
-//
-// Nota:
-// - HashPass sigue siendo prototipo (base64), NO apto producción.
-// - Fuente única de verdad: ../models/cuentas/cuenta.dart
+// Modelos: ../models/cuentas/cuenta.dart
 
 import 'dart:convert';
 import 'dart:math';
 
 import '../models/cuentas/cuenta.dart';
+import 'auth_errors.dart';
+import 'password_hasher.dart';
 import 'storage_service.dart';
 
 class CuentaService {
@@ -143,15 +104,6 @@ class CuentaService {
     return t.startsWith(_lpAlumno) || t.startsWith(_lpInstitucion);
   }
 
-  static String _stripUltimoPerfilTag(String v) {
-    final t = v.trim();
-    if (t.startsWith(_lpAlumno)) return t.substring(_lpAlumno.length).trim();
-    if (t.startsWith(_lpInstitucion)) {
-      return t.substring(_lpInstitucion.length).trim();
-    }
-    return t;
-  }
-
   static Future<void> setUltimoPerfil(String cuentaId, String perfilId) async {
     return instance.setUltimoPerfilInst(cuentaId, perfilId);
   }
@@ -231,19 +183,6 @@ class CuentaService {
     return null;
   }
 
-  static Future<void> clearUltimoPerfil(String cuentaId) async {
-    return instance.clearUltimoPerfilInst(cuentaId);
-  }
-
-  Future<void> clearUltimoPerfilInst(String cuentaId) async {
-    final cRaw = cuentaId.trim();
-    if (cRaw.isEmpty) return;
-
-    final storage = StorageService.instance;
-    await storage.remove(_kUltimoPerfilByCuenta(cRaw));
-    await storage.remove(_kUltimoPerfilByCuentaLegacyTrim(cRaw));
-  }
-
   // =====================================================
   // IDS
   // =====================================================
@@ -256,7 +195,6 @@ class CuentaService {
 
   static String _newCuentaId() => _newId('C');
   static String _newPerfilId() => _newId('P');
-  static String _newNotifId(String prefix) => _newId(prefix);
 
   // =====================================================
   // VALIDACIONES
@@ -273,7 +211,9 @@ class CuentaService {
     return true;
   }
 
-  static bool _passValida(String pass) => pass.trim().length >= 4;
+  /// Contraseñas nuevas (registro / cambio).
+  static bool _passValida(String pass) =>
+      pass.length >= PasswordHasher.minLength && pass.trim().isNotEmpty;
 
   static bool _dniValido(String doc) {
     final d = _normDni(doc);
@@ -281,9 +221,7 @@ class CuentaService {
     return RegExp(r'^\d{7,9}$').hasMatch(d);
   }
 
-  // Hash simple (prototipo): NO apto producción
-  static String _hashPass(String pass) =>
-      base64Encode(utf8.encode(pass.trim()));
+  static String _hashPass(String pass) => PasswordHasher.hash(pass);
 
   // =====================================================
   // SESIÓN
@@ -376,10 +314,14 @@ class CuentaService {
   /// Si la sesión está marcada como temporal, la limpiamos.
   /// Esto sirve si querés que "Recordarme" OFF no sobreviva reinicios.
   static Future<void> clearSesionTemporalIfNeeded() async {
-    final storage = StorageService.instance;
-    final isTemp = await storage.getBool(_kSesionCuentaTemp) ?? false;
-    if (!isTemp) return;
+    if (!await isSesionTemporal()) return;
     await _clearSesionCuenta();
+  }
+
+  /// true si la sesión actual se inició con "Recordarme" desactivado.
+  static Future<bool> isSesionTemporal() async {
+    final storage = StorageService.instance;
+    return await storage.getBool(_kSesionCuentaTemp) ?? false;
   }
 
   // =====================================================
@@ -442,15 +384,17 @@ class CuentaService {
     required String nuevoPassword,
   }) async {
     final id = _normIdKey(cuentaId);
-    final pass = nuevoPassword.trim();
+    final pass = nuevoPassword;
 
-    if (id.isEmpty) throw Exception('Cuenta inválida.');
+    if (id.isEmpty) throw const AuthException(AuthErrorCode.invalidAccount);
     if (!_passValida(pass)) {
-      throw Exception('La contraseña debe tener al menos 4 caracteres.');
+      throw const AuthException(AuthErrorCode.weakPassword);
     }
 
     final cuenta = await getCuentaById(id);
-    if (cuenta == null) throw Exception('Cuenta inexistente.');
+    if (cuenta == null) {
+      throw const AuthException(AuthErrorCode.accountNotFound);
+    }
 
     final updated = Cuenta(
       id: cuenta.id.trim(),
@@ -526,16 +470,16 @@ class CuentaService {
     bool recordarme = true,
   }) async {
     final e = _normEmail(email);
-    if (!_emailValido(e)) throw Exception('Email inválido.');
+    if (!_emailValido(e)) throw const AuthException(AuthErrorCode.invalidEmail);
     if (!_passValida(password)) {
-      throw Exception('La contraseña debe tener al menos 4 caracteres.');
+      throw const AuthException(AuthErrorCode.weakPassword);
     }
 
     final storage = StorageService.instance;
     final existenteId = (await storage.getString(_kCuentaIdByEmail(e)) ?? '')
         .trim();
     if (existenteId.isNotEmpty) {
-      throw Exception('Ya existe una cuenta con ese email.');
+      throw const AuthException(AuthErrorCode.emailInUse);
     }
 
     final cuenta = Cuenta(
@@ -561,15 +505,31 @@ class CuentaService {
     bool recordarme = true,
   }) async {
     final e = _normEmail(email);
-    if (!_emailValido(e)) throw Exception('Email inválido.');
-    if (!_passValida(password)) throw Exception('Contraseña inválida.');
-
-    final cuenta = await getCuentaByEmail(e);
-    if (cuenta == null) throw Exception('No existe una cuenta con ese email.');
-
-    if (cuenta.passwordHash != _hashPass(password)) {
-      throw Exception('Email o contraseña incorrectos.');
+    if (!_emailValido(e)) throw const AuthException(AuthErrorCode.invalidEmail);
+    if (password.isEmpty) {
+      throw const AuthException(AuthErrorCode.wrongCredentials);
     }
+
+    final found = await getCuentaByEmail(e);
+    // Mismo mensaje para email inexistente y contraseña errónea
+    // (no revela qué emails están registrados).
+    if (found == null || !PasswordHasher.verify(password, found.passwordHash)) {
+      throw const AuthException(AuthErrorCode.wrongCredentials);
+    }
+
+    // Migración transparente de hashes viejos.
+    final cuenta = PasswordHasher.needsRehash(found.passwordHash)
+        ? Cuenta(
+            id: found.id,
+            email: found.email,
+            passwordHash: _hashPass(password),
+            perfilesAlumnoIds: found.perfilesAlumnoIds,
+            perfilesInstitucionIds: found.perfilesInstitucionIds,
+            recordarme: found.recordarme,
+            creadaEl: found.creadaEl,
+            ultimaSesion: found.ultimaSesion,
+          )
+        : found;
 
     cuenta.ultimaSesion = DateTime.now();
     cuenta.recordarme = recordarme;
@@ -578,6 +538,46 @@ class CuentaService {
     await setSesionCuentaId(cuenta.id, recordarme: recordarme);
 
     return cuenta;
+  }
+
+  /// true si la contraseña corresponde a la cuenta (para confirmar acciones).
+  static Future<bool> verificarPassword(
+    String cuentaId,
+    String password,
+  ) async {
+    if (password.isEmpty) return false;
+    final cuenta = await getCuentaById(cuentaId);
+    return cuenta != null &&
+        PasswordHasher.verify(password, cuenta.passwordHash);
+  }
+
+  /// Restablece la contraseña verificando la identidad con el DNI de un
+  /// perfil de alumno de la cuenta (no hay envío de emails en esta versión).
+  static Future<void> restablecerPasswordVerificado({
+    required String email,
+    required String dni,
+    required String nuevoPassword,
+  }) async {
+    final e = _normEmail(email);
+    if (!_emailValido(e)) throw const AuthException(AuthErrorCode.invalidEmail);
+    if (!_passValida(nuevoPassword)) {
+      throw const AuthException(AuthErrorCode.weakPassword);
+    }
+
+    final cuenta = await getCuentaByEmail(e);
+    final doc = _normDni(dni);
+    if (cuenta == null || doc.isEmpty) {
+      throw const AuthException(AuthErrorCode.identityMismatch);
+    }
+
+    final perfiles = await listarPerfilesAlumno(cuenta.id);
+    final coincide = perfiles.any((p) => _normDni(p.documento) == doc);
+    if (!coincide) throw const AuthException(AuthErrorCode.identityMismatch);
+
+    await actualizarPasswordCuenta(
+      cuentaId: cuenta.id,
+      nuevoPassword: nuevoPassword,
+    );
   }
 
   // =====================================================
@@ -828,20 +828,25 @@ class CuentaService {
     String? telefono,
   }) async {
     final cId = _normIdKey(cuentaId);
-    if (cId.isEmpty) throw Exception('Cuenta inválida.');
+    if (cId.isEmpty) throw const AuthException(AuthErrorCode.invalidAccount);
 
     final cuenta = await getCuentaById(cId);
-    if (cuenta == null) throw Exception('Cuenta inexistente.');
+    if (cuenta == null) {
+      throw const AuthException(AuthErrorCode.accountNotFound);
+    }
 
     final doc = _normDni(documento);
     if (!_dniValido(doc)) {
-      throw Exception('Documento inválido (7 a 9 dígitos).');
+      throw const AuthException(AuthErrorCode.invalidDni);
+    }
+    if (nombre.trim().isEmpty || apellido.trim().isEmpty) {
+      throw const AuthException(AuthErrorCode.invalidName);
     }
 
     final perfiles = await listarPerfilesAlumno(cId);
     final ya = perfiles.any((p) => _normDni(p.documento) == doc);
     if (ya) {
-      throw Exception('Ya existe un perfil con ese documento en esta cuenta.');
+      throw const AuthException(AuthErrorCode.duplicateDni);
     }
 
     final perfil = PerfilAlumno(
@@ -981,232 +986,6 @@ class CuentaService {
   }
 
   // =====================================================
-  // EMANCIPACIÓN (CANÓNICA)
-  // =====================================================
-
-  static Future<void> emanciparPerfilAlumno({
-    required String perfilId,
-    required String cuentaDestinoId,
-  }) async {
-    final pid = _normIdKey(perfilId);
-    final destId = _normIdKey(cuentaDestinoId);
-    if (pid.isEmpty || destId.isEmpty) {
-      throw Exception('Parámetros inválidos para emancipación.');
-    }
-
-    final perfil = await getPerfilAlumnoById(pid);
-    if (perfil == null) throw Exception('Perfil inexistente.');
-
-    final destino = await getCuentaById(destId);
-    if (destino == null) throw Exception('Cuenta destino inexistente.');
-
-    final ownerActual = _normIdKey(
-      ((perfil.ownerAccountId ?? '').trim().isNotEmpty
-          ? (perfil.ownerAccountId ?? '').trim()
-          : perfil.cuentaId.trim()),
-    );
-
-    if (ownerActual.isEmpty) {
-      throw Exception('No se pudo resolver el owner actual del perfil.');
-    }
-
-    if (ownerActual == destId) {
-      final actualizadoSame = PerfilAlumno(
-        id: _normIdKey(perfil.id),
-        cuentaId: destId,
-        ownerAccountId: destId,
-        documento: perfil.documento,
-        nombre: perfil.nombre,
-        apellido: perfil.apellido,
-        fechaNacimiento: perfil.fechaNacimiento,
-        email: perfil.email,
-        telefono: perfil.telefono,
-        emancipado: true,
-        fechaEmancipacion: perfil.fechaEmancipacion ?? DateTime.now(),
-        prefs: perfil.prefs,
-      );
-      await _savePerfilAlumno(actualizadoSame);
-
-      final idsDest = destino.perfilesAlumnoIds.map(_normIdKey).toList();
-      final pidTrim = _normIdKey(actualizadoSame.id);
-      if (!idsDest.contains(pidTrim)) {
-        destino.perfilesAlumnoIds = List<String>.from(idsDest)..add(pidTrim);
-        await _saveCuenta(destino);
-      }
-
-      // ✅ FIX: guardar con tag anti-cruce
-      try {
-        await instance.setUltimoPerfilInst(
-          destId,
-          _encodeUltimoAlumno(pidTrim),
-        );
-      } catch (_) {}
-
-      return;
-    }
-
-    final origen = await getCuentaById(ownerActual);
-    if (origen == null) {
-      throw Exception('Cuenta owner actual inexistente.');
-    }
-
-    final idsOrigen = origen.perfilesAlumnoIds.map(_normIdKey).toList();
-    final estabaEnOrigen = idsOrigen.contains(pid);
-
-    final actualizado = PerfilAlumno(
-      id: _normIdKey(perfil.id),
-      cuentaId: destId,
-      ownerAccountId: destId,
-      documento: perfil.documento,
-      nombre: perfil.nombre,
-      apellido: perfil.apellido,
-      fechaNacimiento: perfil.fechaNacimiento,
-      email: perfil.email,
-      telefono: perfil.telefono,
-      emancipado: true,
-      fechaEmancipacion: DateTime.now(),
-      prefs: perfil.prefs,
-    );
-
-    await _savePerfilAlumno(actualizado);
-
-    if (estabaEnOrigen) {
-      origen.perfilesAlumnoIds = List<String>.from(idsOrigen)
-        ..removeWhere((x) => _normIdKey(x) == pid);
-      await _saveCuenta(origen);
-
-      // ✅ FIX CRN: limpiar “último perfil” aunque esté taggeado
-      try {
-        final lastRaw = (await instance.getUltimoPerfilInst(origen.id)) ?? '';
-        final last = lastRaw.trim();
-
-        final lastPidKey = _normIdKey(_stripUltimoPerfilTag(last));
-        final pidKey = _normIdKey(pid);
-
-        final lastPidTaggedA = _normIdKey(
-          _stripUltimoPerfilTag(_encodeUltimoAlumno(pid)),
-        );
-        final lastPidTaggedI = _normIdKey(
-          _stripUltimoPerfilTag(_encodeUltimoInstitucion(pid)),
-        );
-
-        final shouldClear =
-            (lastPidKey.isNotEmpty && lastPidKey == pidKey) ||
-            (lastPidTaggedA.isNotEmpty && lastPidTaggedA == pidKey) ||
-            (lastPidTaggedI.isNotEmpty && lastPidTaggedI == pidKey);
-
-        if (shouldClear) {
-          await instance.clearUltimoPerfilInst(origen.id);
-        }
-      } catch (_) {}
-    }
-
-    final idsDestino = destino.perfilesAlumnoIds.map(_normIdKey).toList();
-    if (!idsDestino.contains(pid)) {
-      destino.perfilesAlumnoIds = List<String>.from(idsDestino)..add(pid);
-      await _saveCuenta(destino);
-    }
-
-    // ✅ FIX: guardar con tag anti-cruce
-    try {
-      await instance.setUltimoPerfilInst(destId, _encodeUltimoAlumno(pid));
-    } catch (_) {}
-  }
-
-  // =====================================================
-  // MIGRACIÓN ENTRE INSTITUCIONES (CANÓNICA · BASE)
-  // =====================================================
-
-  // ✅ Key canónica + legacy (trim-only) para lectura vieja.
-  static String _kAlumnoMigracionesLog(String perfilAlumnoId) =>
-      'alumno_migraciones_${_normIdKey(perfilAlumnoId)}';
-  static String _kAlumnoMigracionesLogLegacyTrim(String perfilAlumnoId) =>
-      'alumno_migraciones_${perfilAlumnoId.trim()}';
-
-  static Future<void> migrarAlumnoEntreInstituciones({
-    required String perfilAlumnoId,
-    required String institucionOrigenPerfilId,
-    required String institucionDestinoPerfilId,
-    String? motivo,
-  }) async {
-    final aId = _normIdKey(perfilAlumnoId);
-    final oId = _normIdKey(institucionOrigenPerfilId);
-    final dId = _normIdKey(institucionDestinoPerfilId);
-
-    if (aId.isEmpty || oId.isEmpty || dId.isEmpty) {
-      throw Exception('Parámetros inválidos para migración.');
-    }
-    if (oId == dId) return;
-
-    final alumno = await getPerfilAlumnoById(aId);
-    if (alumno == null) throw Exception('Perfil alumno inexistente.');
-
-    final instO = await getPerfilInstitucionById(oId);
-    if (instO == null) throw Exception('Institución origen inexistente.');
-
-    final instD = await getPerfilInstitucionById(dId);
-    if (instD == null) throw Exception('Institución destino inexistente.');
-
-    final origenCanon = _normIdKey(instO.id);
-    final destinoCanon = _normIdKey(instD.id);
-
-    final storage = StorageService.instance;
-
-    Map<String, dynamic> payload;
-    final key = _kAlumnoMigracionesLog(aId);
-    final keyLegacy = _kAlumnoMigracionesLogLegacyTrim(perfilAlumnoId);
-
-    String? raw = await storage.getString(key);
-    if ((raw == null || raw.trim().isEmpty) && keyLegacy != key) {
-      raw = await storage.getString(keyLegacy);
-    }
-
-    try {
-      if (raw == null || raw.trim().isEmpty) {
-        payload = <String, dynamic>{'v': 1, 'items': <dynamic>[]};
-      } else {
-        final decoded = jsonDecode(raw);
-        if (decoded is Map<String, dynamic>) {
-          payload = decoded;
-        } else if (decoded is Map) {
-          payload = Map<String, dynamic>.from(decoded);
-        } else {
-          payload = <String, dynamic>{'v': 1, 'items': <dynamic>[]};
-        }
-      }
-    } catch (_) {
-      payload = <String, dynamic>{'v': 1, 'items': <dynamic>[]};
-    }
-
-    final itemsAny = payload['items'];
-    final items = (itemsAny is List) ? itemsAny : <dynamic>[];
-
-    final entry = <String, dynamic>{
-      'ts': DateTime.now().toIso8601String(),
-      'from': origenCanon,
-      'to': destinoCanon,
-      'motivo': (motivo ?? '').trim(),
-      'alumnoPerfilId': aId,
-      'ownerAccountId': _normIdKey(
-        ((alumno.ownerAccountId ?? '').trim().isNotEmpty
-            ? (alumno.ownerAccountId ?? '').trim()
-            : alumno.cuentaId.trim()),
-      ),
-    };
-
-    items.add(entry);
-    payload['items'] = items;
-
-    final out = jsonEncode(payload);
-
-    // ✅ Write canónico + legacy si difiere (migración suave)
-    await storage.setString(key, out);
-    if (keyLegacy != key) {
-      await storage.setString(keyLegacy, out);
-    }
-  }
-
-  // =====================================================
   // PERFILES INSTITUCIÓN
   // =====================================================
 
@@ -1302,7 +1081,7 @@ class CuentaService {
       throw Exception('Email de contacto inválido.');
     }
 
-    // ✅ FIX BLOQUEANTE (prototipo)
+    // El primer perfil de institución comparte id con la cuenta contenedora.
     String pid;
     final idsExistentes = cuenta.perfilesInstitucionIds
         .map(_normIdKey)
@@ -1442,37 +1221,4 @@ class CuentaService {
   ) async {
     await _savePerfilInstitucion(perfil);
   }
-
-  // =====================================================
-  // DEBUG (diagnóstico E2E)
-  // =====================================================
-
-  static Future<Map<String, dynamic>> debugSnapshot() async {
-    final storage = StorageService.instance;
-
-    final sesRaw = (await storage.getString(_kSesionCuenta) ?? '').trim();
-    final sesTemp = await storage.getBool(_kSesionCuentaTemp);
-
-    return <String, dynamic>{
-      'sesion_cuenta_raw': sesRaw,
-      'sesion_cuenta_id': await getSesionCuentaId(),
-      'sesion_cuenta_temp': sesTemp,
-    };
-  }
-
-  static Future<void> debugPrintSnapshot(String tag) async {
-    try {
-      final snap = await debugSnapshot();
-      // ignore: avoid_print
-      print('[ATENA][CUENTA][$tag] $snap');
-    } catch (_) {
-      // NO-OP
-    }
-  }
-
-  // =====================================================
-  // UTIL
-  // =====================================================
-
-  static String newNotificationId() => _newNotifId('N');
 }

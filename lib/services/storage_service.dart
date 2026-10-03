@@ -204,6 +204,19 @@ class StorageService {
     }
   }
 
+  /// Valor guardado sin conversión (texto, número, booleano o lista).
+  Future<Object?> getRaw(String key) async {
+    final k = _k(key);
+    if (k.isEmpty) return null;
+    try {
+      final prefs = await _getPrefsSafe().timeout(_kOpTimeout);
+      if (prefs == null) return _mem[k];
+      return prefs.get(k);
+    } catch (_) {
+      return _mem[k];
+    }
+  }
+
   // -----------------------------
   // String
   // -----------------------------
@@ -246,6 +259,22 @@ class StorageService {
     } catch (e, st) {
       _logAnd('setString($k)', false, e, st);
       return true; // ✅ RAM ok
+    }
+  }
+
+  /// Igual que [setString] pero informa fallas reales de persistencia
+  /// (por ejemplo, espacio agotado). Se usa para archivos.
+  Future<bool> setStringStrict(String key, String value) async {
+    final k = _k(key);
+    if (k.isEmpty) return false;
+    try {
+      final prefs = await _getPrefsSafe().timeout(_kOpTimeout);
+      if (prefs == null) return false;
+      final ok = await prefs.setString(k, value).timeout(_kOpTimeout);
+      if (ok) _mem[k] = value;
+      return ok;
+    } catch (e, st) {
+      return _logAnd('setStringStrict($k)', false, e, st);
     }
   }
 
@@ -319,7 +348,7 @@ class StorageService {
       final sanitized = _sanitizeJsonValue(value);
       if (sanitized is! Map) return false;
       // setString ya es best-effort en RAM
-      return setString(k, jsonEncode(sanitized));
+      return await setString(k, jsonEncode(sanitized));
     } catch (_) {
       return false;
     }

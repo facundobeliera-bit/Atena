@@ -1,1708 +1,2442 @@
 {
   "@@locale": "en",
-
   "appTitle": "ATENA",
-
-  "alumnos": "Students",
   "instituciones": "Institutions",
-  "institution": "Institution",
-
-  "perfiles": "Profiles",
-  "crearPerfil": "Create profile",
-  "crearPerfilTitulo": "Create a new profile",
-
-  "tipoAlumno": "Student",
-  "tipoInstitucion": "Institution",
-
-  "actualizar": "Refresh",
-  "refresh": "Refresh",
-  "update": "Update",
-
-  "guardar": "Save",
-  "save": "Save",
-
-  "editar": "Edit",
-  "edit": "Edit",
-
-  "eliminar": "Delete",
-  "delete": "Delete",
-
-  "cancelar": "Cancel",
-  "cancel": "Cancel",
-
-  "continuar": "Continue",
-  "continuarUltimoPerfil": "Continue with the last profile",
-
-  "accept": "Accept",
-  "confirm": "Confirm",
-  "reject": "Reject",
-  "apply": "Apply",
-  "clear": "Clear",
   "retry": "Retry",
-  "back": "Back",
-  "open": "Open",
-  "send": "Send",
-
-  "cuentaLabel": "Account",
-
-  "accountLabel": "Account: {ownerId}",
-  "@accountLabel": {
-    "placeholders": {
-      "ownerId": {}
-    }
-  },
-
-  "signIn": "Sign in",
-  "signOut": "Sign out",
-  "signInOrRegister": "Sign in or register",
-  "accessInstitutionAccount": "Access institution account",
-  "signInToEnableInstitutionFeatures": "Sign in to enable institution features",
-
-  "errorGenerico": "Error.",
-  "invalidSessionForThisAccount": "Invalid session for this account.",
-  "cannotLoadInstitutionTryAgain": "Could not load the institution. Please try again.",
-
-  "noPerfilesTodavia": "No profiles yet.\nCreate one to get started.",
-  "noPerfilesAlumnoTodavia": "No student profiles yet.",
-  "accionAlumnoSinPerfil": "An action for Students was received, but this account has no Student profiles.",
-
-  "opcionNoDisponibleBuild": "This option is not available in this build yet.",
-
-  "ingresarCrearCuenta": "Sign in / Create account",
-  "accesoAlumnos": "Student access",
-  "ingresaCuentaEligePerfil": "Sign in with your account and choose a profile.",
-
-  "saving": "Saving…",
-  "registering": "Registering…",
-
-  "newLabel": "New",
-
-  "modoOscuro": "Dark mode",
-  "idioma": "Language",
-  "sistema": "System",
-  "espanol": "Spanish",
-  "ingles": "English",
-  "portugues": "Portuguese",
-
-  "landingTitle": "ATENA",
-  "landingIngresar": "Sign in",
-  "landingStudents": "Students",
-  "landingInstitutions": "Institutions",
-  "landingHeadingStudents": "students",
-  "landingHeadingInstitutions": "institutions",
-  "landingThemeSystem": "Theme: System",
-  "landingThemeLight": "Theme: Light",
-  "landingThemeDark": "Theme: Dark",
-  "landingLanguageTooltip": "Language",
-  "landingLanguageSystem": "System",
-  "landingLanguageEs": "Spanish",
-  "landingLanguageEn": "English",
-  "landingLanguagePt": "Portuguese",
-
-  "landingMissingAsset": "MISSING ASSET:\n{path}",
-  "@landingMissingAsset": {
-    "placeholders": {
-      "path": {}
-    }
-  },
-
-  "vacancyManagement": "Vacancies",
-  "vacancyManagementTitle": "Vacancy management – {institucion}",
-  "@vacancyManagementTitle": {
-    "placeholders": {
-      "institucion": {}
-    }
-  },
-
-  "recalculateOccupiedTooltip": "Recalculate occupied (confirmed)",
-  "summaryLabel": "Summary",
-
-  "totalCapacityValue": "Total capacity: {valor}",
-  "@totalCapacityValue": {
-    "placeholders": {
-      "valor": {}
-    }
-  },
-
-  "occupiedValue": "Occupied: {valor}",
-  "@occupiedValue": {
-    "placeholders": {
-      "valor": {}
-    }
-  },
-
-  "availableEstimatedValue": "Available (estimated): {valor}",
-  "@availableEstimatedValue": {
-    "placeholders": {
-      "valor": {}
-    }
-  },
-
-  "noGroupsLoaded": "No groups/capacities loaded.",
-
-  "vacancyGroupSubtitle": "{actividad} · Capacity {total} · Occupied {ocupados} · Avail {disponibles}",
-  "@vacancyGroupSubtitle": {
-    "placeholders": {
-      "actividad": {},
-      "total": {},
-      "ocupados": {},
-      "disponibles": {}
-    }
-  },
-
-  "newGroupTitle": "New group/capacity",
-  "editGroupTitle": "Edit group/capacity",
-
-  "available": "Available",
-  "availableShort": "Avail",
-  "availableLabel": "Available",
-  "fullLabel": "Full",
-
   "curricular": "Curricular",
-  "curricularLabel": "Curricular",
-  "curricularPlural": "Curricular",
-
   "extracurricular": "Extracurricular",
-  "extracurricularLabel": "Extracurricular",
-  "extracurricularPlural": "Extracurricular",
-
-  "basic": "Basic",
-  "standard": "Standard",
-  "premium": "Premium",
-
-  "summary": "Summary",
-  "plan": "Plan",
   "code": "Code",
-
-  "invalidInstitutionId": "Invalid institution ID.",
-  "institucionInvalidGeneric": "Invalid institution.",
-  "institutionGeneric": "Institution",
-  "institutionNotLoadedYet": "The institution is not loaded yet.",
-  "noActiveSessionGoBackToLogin": "No active session. Go back to login.",
-
-  "institutionsTitle": "Institutions",
-  "backToHome": "Back to home",
-
-  "institutionAccess": "Institution access",
-
-  "institutionProfileIdLabel": "Profile ID: {perfilId}",
-  "@institutionProfileIdLabel": {
-    "placeholders": {
-      "perfilId": {}
-    }
-  },
-
-  "planPlaceholder": "Plan management",
-  "profilePlaceholder": "Institution profile",
-
-  "planUpper": "PLAN",
-  "profileUpper": "PROFILE",
-  "administrationUpper": "ADMINISTRATION",
-
-  "planCardSubtitle": "Manage plan and modules",
-  "profileCardSubtitle": "Institution details and presentation",
-  "administrationCardSubtitle": "Institution operations",
-
-  "planAndStatusLine": "Plan: {plan} · Status: {estado}",
-  "@planAndStatusLine": {
-    "placeholders": {
-      "plan": {},
-      "estado": {}
-    }
-  },
-
-  "workProfilesUpToPremium": "Up to 10 work profiles",
-  "workProfilesUpToStandard": "Up to 3 work profiles",
-
-  "moduleLabelGeneric": "Module",
-
-  "invalidModuleKeyShowingAll": "Invalid filter ({key}). Showing all modules.",
-  "@invalidModuleKeyShowingAll": {
-    "placeholders": {
-      "key": {}
-    }
-  },
-
-  "loadErrorWithDetails": "Error loading: {error}",
-  "@loadErrorWithDetails": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "confirmRequestTitle": "Confirm request",
-  "rejectRequestTitle": "Reject request",
-  "updateRequestTitle": "Update request",
-
-  "confirmRequestBody": "Do you want to confirm this request?",
-  "rejectRequestBody": "Do you want to reject this request?",
-  "updateRequestBody": "Do you want to update this request?",
-
-  "activityWithName": "Activity: {nombre}",
-  "@activityWithName": {
-    "placeholders": {
-      "nombre": {}
-    }
-  },
-
-  "activityWithValue": "Activity: {value}",
-  "@activityWithValue": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-
-  "rejectionReasonOptionalLabel": "Reason (optional)",
-  "noteToStudentOptionalLabel": "Note to the student (optional)",
-
-  "requestStatusPending": "Pending",
-  "requestStatusConfirmed": "Confirmed",
-  "requestStatusRejected": "Rejected",
-  "requestStatusCancelledByStudent": "Cancelled by student",
-  "requestStatusCancelledByInstitution": "Cancelled by institution",
-
-  "requestConfirmed": "Request confirmed.",
-  "requestRejected": "Request rejected.",
-  "requestUpdated": "Request updated.",
-
-  "requestIsNoLongerPending": "This request is no longer pending.",
-
-  "noRequestsInSection": "There are no requests in this section.",
-  "noPendingRequests": "There are no pending requests.",
-
-  "actionErrorWithDetails": "Could not complete the action: {error}",
-  "@actionErrorWithDetails": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "cannotOpenDocumentsMissingOwnerOrProfile": "Cannot open documents without a valid session.",
-
-  "requestsTitleWithInstitution": "Requests – {institucion} · {subtitle}",
-  "@requestsTitleWithInstitution": {
-    "placeholders": {
-      "institucion": {},
-      "subtitle": {}
-    }
-  },
-
-  "pendingWithCount": "Pending ({count})",
-  "@pendingWithCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "confirmedWithCount": "Confirmed ({count})",
-  "@confirmedWithCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "rejectedWithCount": "Rejected ({count})",
-  "@rejectedWithCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "cancelledWithCount": "Cancelled ({count})",
-  "@cancelledWithCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "invalidModuleFilterBanner": "Invalid module filter ({key})",
-  "@invalidModuleFilterBanner": {
-    "placeholders": {
-      "key": {}
-    }
-  },
-
-  "filteringByModuleBanner": "Filtering by module: {module} ({key})",
-  "@filteringByModuleBanner": {
-    "placeholders": {
-      "module": {},
-      "key": {}
-    }
-  },
-
-  "studentDocumentLine": "Document: {doc}",
-  "@studentDocumentLine": {
-    "placeholders": {
-      "doc": {}
-    }
-  },
-
-  "typeLine": "Type: {tipo}",
-  "@typeLine": {
-    "placeholders": {
-      "tipo": {}
-    }
-  },
-
-  "moduleLine": "Module: {module}",
-  "@moduleLine": {
-    "placeholders": {
-      "module": {}
-    }
-  },
-
-  "groupOrClassLine": "Class/Group: {valor}",
-  "@groupOrClassLine": {
-    "placeholders": {
-      "valor": {}
-    }
-  },
-
-  "shiftLine": "Shift: {valor}",
-  "@shiftLine": {
-    "placeholders": {
-      "valor": {}
-    }
-  },
-
-  "statusLine": "Status: {estado}",
-  "@statusLine": {
-    "placeholders": {
-      "estado": {}
-    }
-  },
-
-  "requestOrViewDocumentsCta": "Request or view documents",
-  "documentsMissingOwnerOrProfileDisabledCta": "Documents not available",
-
-  "notificationsTitle": "Notifications",
-
-  "notificationsTitleWithNewCount": "Notifications ({count} new)",
-  "@notificationsTitleWithNewCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "notificationsDeleted": "Notifications deleted.",
-
-  "loadNotificationsError": "Error loading notifications: {error}",
-  "@loadNotificationsError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "updateNotificationError": "Error updating notification: {error}",
-  "@updateNotificationError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "deleteNotificationError": "Error deleting notification: {error}",
-  "@deleteNotificationError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "markAllReadError": "Could not mark all as read",
-  "deleteAll": "Delete all",
-  "deleteAllNotificationsError": "Could not delete all notifications",
-
-  "sessionInvalidTitle": "Invalid session",
-  "sessionInvalidPleaseLogin": "Invalid session. Please sign in.",
-
-  "notificationsNeedOwnerSubtitle": "An active session is required to view notifications.",
-
-  "noNotificationsTitle": "No notifications",
-  "noNotificationsSubtitle": "There are no notifications available.",
-
-  "deleteNotificationTitle": "Delete notification",
-  "deleteNotificationBody": "Do you want to delete this notification?",
-
-  "deleteAllNotificationsTitle": "Delete all",
-  "deleteAllNotificationsBody": "Do you want to delete all notifications?",
-  "deleteAllNotificationsTooltip": "Delete all",
-
-  "markAsRead": "Mark as read",
-  "markAsUnread": "Mark as unread",
-  "markAllAsReadTooltip": "Mark all as read",
-
-  "institucionActividadCurricularGeneral": "Curricular activity",
-  "institucionActividadExtracurricularGeneral": "Extracurricular activity",
-  "institucionActividadExtracurricular": "Extracurricular",
-
-  "institucionWorkProfileFallback": "Work profile",
-
-  "institucionChangeActivityTitle": "Change activity",
-  "institucionChangeActivityBody": "Select the activity you want to manage",
-
-  "institucionWorkProfileNameTitle": "Profile name",
   "name": "Name",
-  "institucionWorkProfileNameHint": "e.g., Admin, Principal",
-
-  "institucionAreaChip": "{area} · {who}",
-  "@institucionAreaChip": {
-    "placeholders": {
-      "area": {},
-      "who": {}
-    }
-  },
-
-  "institucionAreaChipWithTtl": "{area} · {who} · {ttl}",
-  "@institucionAreaChipWithTtl": {
-    "placeholders": {
-      "area": {},
-      "who": {},
-      "ttl": {}
-    }
-  },
-
-  "institucionAreasFree": "Free areas",
-
-  "planFallbackNoStructured": "Plan without detailed structure",
-
-  "idNoSession": "No session",
-
-  "idWithValue": "ID: {value}",
-  "@idWithValue": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-
-  "institucionPlanAndProfilesPerActivity": "Plan: {plan} · Profiles: {max} per activity",
-  "@institucionPlanAndProfilesPerActivity": {
-    "placeholders": {
-      "plan": {},
-      "max": {}
-    }
-  },
-
-  "institucionFirstSelectActivityBody": "Select an activity first",
-  "institucionWorkProfilesAreInternalNote": "Work profiles are for internal use",
-  "institucionNoActivitiesYet": "No activities configured yet",
-
-  "institucionManageCurricularActivity": "Manage curricular activity",
-  "institucionManageExtracurricularModule": "Manage extracurricular module",
-
-  "institucionPlanAndAvailableProfiles": "Plan: {plan} · Available profiles: {max}",
-  "@institucionPlanAndAvailableProfiles": {
-    "placeholders": {
-      "plan": {},
-      "max": {}
-    }
-  },
-
-  "institucionConcurrentProfilesRule": "Concurrent profiles according to plan",
-
-  "institucionWorkProfilesTitle": "Work profiles",
-  "institucionWorkProfilesDescription": "Select a profile to manage this activity.",
-
-  "institucionProfileWorkingSubtitle": "{area} · {who} · {ttl}",
-  "@institucionProfileWorkingSubtitle": {
-    "placeholders": {
-      "area": {},
-      "who": {},
-      "ttl": {}
-    }
-  },
-
-  "institucionWorkProfilesRenameTip": "You can rename this profile",
-
-  "institucionSelectActivityTitle": "Select activity",
-  "institucionSelectWorkProfileTitle": "Select work profile",
-  "institucionChangeActivityTooltip": "Change activity",
-
-  "institucionPlanTitle": "Institution plan",
-  "institucionPlanHeader": "Choose your plan",
-
-  "institucionPlanChooseYourPlanTitle": "Choose your plan",
-  "institucionPlanChooseYourPlanSubtitle": "Select the plan that fits best",
-
-  "institucionPlanNoModulesSelected": "No modules selected.",
-  "institucionPlanInvalidInstitutionId": "Invalid institution.",
-  "institucionPlanPickAtLeastOneModule": "Pick at least one module.",
-  "institucionPlanChooseStandardOrPremium": "Choose Standard or Premium.",
-  "institucionPlanChooseBasicOrPremium": "Choose Basic or Premium.",
-
-  "institucionPlanPromoCleared": "Promo code cleared",
-  "institucionPlanPromoSoldOut": "Promo code sold out",
-  "institucionPlanPromoReservedAlready": "Code already reserved",
-  "institucionPlanPromoReserved": "Code reserved",
-  "institucionPlanPromoInvalid": "Invalid promo code",
-
-  "institucionPlanPromoApplied": "Promo applied: {code}",
-  "@institucionPlanPromoApplied": {
-    "placeholders": {
-      "code": {}
-    }
-  },
-
   "invalidEmail": "Invalid email",
-  "invalidPassword": "Invalid password",
-
-  "institucionPlanCodeRequiredForFreeActivation": "A code is required to activate the free plan",
-
-  "argentina": "Argentina",
-
-  "emailAlreadyRegisteredLogin": "Email already registered. Please sign in.",
-
-  "institucionPlanTierLabel": "Plan {tier} ({price})",
-  "@institucionPlanTierLabel": {
-    "placeholders": {
-      "tier": {},
-      "price": {}
-    }
-  },
-
-  "usdToArsTitle": "USD → ARS conversion",
-  "usdToArsSubtitleBestEffort": "Reference estimate",
-  "usdToArsUnavailable": "Conversion unavailable",
-
-  "usdToArsValue": "USD → ARS: {value}",
-  "@usdToArsValue": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-
-  "usdToArsManualLabel": "Manual rate",
-  "usdToArsUsingManual": "Using manual rate",
-
-  "updatedAt": "Updated at {date}",
-  "@updatedAt": {
-    "placeholders": {
-      "date": {}
-    }
-  },
-
-  "promoCodeTitle": "Promo code",
-  "promoCodeOptionalSubtitle": "Optional",
-
-  "promoCodeLabel": "Code",
-  "promoCodeHint": "Enter the code",
-
-  "iHavePromoCode": "I have a code",
-
-  "promoAppliedLine": "Promo applied: {code} · {label}",
-  "@promoAppliedLine": {
-    "placeholders": {
-      "code": {},
-      "label": {}
-    }
-  },
-
-  "subtotalUsd": "Subtotal (USD)",
-  "promoDiscountUsd": "Promo discount (USD)",
-  "totalUsd": "Total (USD)",
-  "totalArs": "Total (ARS)",
-
-  "institucionPlanSummarySubtitle": "Plan summary",
-
-  "notAvailable": "Not available",
-
-  "calcDetailsTitle": "Calculation details",
-  "calcDetailsSubtitle": "Pricing breakdown",
-
-  "institucionPlanNoteNoPaymentsYet": "Payments are not enabled at this stage",
-
-  "institucionGenericName": "Institution",
-  "countryArgentina": "Argentina",
-
-  "institucionTitle": "Institution",
-
-  "actionRetry": "Retry",
-  "actionBackHome": "Back to home",
-  "actionLogout": "Sign out",
-  "actionRefresh": "Refresh",
-  "actionExit": "Exit",
-  "actionLoad": "Load",
-  "actionSave": "Save",
-  "actionSaving": "Saving…",
-  "statusSaving": "Saving…",
-  "actionDelete": "Delete",
-  "actionEdit": "Edit",
-  "actionCancel": "Cancel",
-  "actionRequest": "Request",
-  "actionList": "List",
-  "actionIncrease": "Increase",
-  "actionDecrease": "Decrease",
-
-  "actionEmit": "Emit",
-  "actionSelectAll": "Select all",
-  "actionSelectNone": "Select none",
-
-  "valueEmpty": "Empty",
-  "valueNone": "None",
-  "labelNotProvided": "Not provided",
-
-  "validationTooShort": "Too short",
-  "validationCannotBeNegative": "Cannot be negative",
-
-  "institucionAreaErrorLoadFailed": "Could not load the operations area.",
-  "institucionAreaSnackNoInstitucion": "No institution loaded.",
-  "institucionAreaDefaultWorkProfileName": "Work profile",
-  "institucionAreaSnackAreaInUse": "This area is in use by another profile.",
-  "institucionAreaDefaultActivityLabel": "Activity",
-
-  "institucionAreaTitle": "Operations area",
-
-  "institucionAreaIdLine": "ID: {id}",
-  "@institucionAreaIdLine": {
-    "placeholders": {
-      "id": {}
-    }
-  },
-
-  "institucionAreaLocationLine": "Location: {location}",
-  "@institucionAreaLocationLine": {
-    "placeholders": {
-      "location": {}
-    }
-  },
-
-  "institucionAreaActivityLine": "Activity: {activity}",
-  "@institucionAreaActivityLine": {
-    "placeholders": {
-      "activity": {}
-    }
-  },
-
-  "institucionAreaWorkProfileLine": "Profile: {profile}",
-  "@institucionAreaWorkProfileLine": {
-    "placeholders": {
-      "profile": {}
-    }
-  },
-
-  "institucionAreaAccessLine": "Access: curricular {curricularOk} · extracurricular {extraOk}",
-  "@institucionAreaAccessLine": {
-    "placeholders": {
-      "curricularOk": {},
-      "extraOk": {}
-    }
-  },
-
-  "institucionAreaCardNotificationsTitle": "Notifications",
-  "institucionAreaCardNotificationsSubtitle": "View institution notifications",
-  "institucionAreaSemanticsOpenNotifications": "Open notifications",
-
-  "institucionAreaCardSolicitudesTitle": "Requests",
-  "institucionAreaCardSolicitudesSubtitle": "Manage student requests",
-  "institucionAreaSemanticsOpenSolicitudes": "Open requests",
-
-  "institucionAreaCardVacantesTitle": "Vacancies",
-  "institucionAreaCardVacantesSubtitle": "Manage groups and capacities",
-  "institucionAreaSemanticsOpenVacantes": "Open vacancies",
-
-  "institucionAreaCardVacantesLockedSubtitle": "Not available for this plan",
-  "institucionAreaSemanticsVacantesLocked": "Vacancies not available",
-
-  "institucionAreaCardDocumentacionTitle": "Documentation",
-  "institucionAreaCardDocumentacionSubtitle": "Request and review documents",
-  "institucionAreaSemanticsOpenDocumentacion": "Open documentation",
-
-  "institucionAreaCardExtraHubTitle": "Extracurricular",
-  "institucionAreaCardExtraHubSubtitle": "Manage extracurricular modules",
-  "institucionAreaSemanticsOpenExtraHub": "Open extracurricular",
-
-  "institucionAreaCardExtraHubLockedSubtitle": "Not available for this plan",
-  "institucionAreaSemanticsExtraHubLocked": "Extracurricular not available",
-
-  "institucionAreaCardCroquisTitle": "Layout",
-  "institucionAreaCardCroquisSubtitle": "Manage classroom layout",
-  "institucionAreaSemanticsOpenCroquis": "Open layout",
-
-  "institucionAreaCardCroquisLockedSubtitle": "Not available for this plan",
-  "institucionAreaSemanticsCroquisLocked": "Layout not available",
-
-  "turnoMorning": "Morning",
-
-  "croquisTitle": "Classroom layout",
-
-  "croquisSnackInvalidInstitution": "Invalid institution.",
-  "croquisSnackEnterAulaBeforeSave": "Enter a classroom name before saving.",
-  "croquisSnackSaved": "Layout saved.",
-
-  "croquisSnackSaveError": "Error saving: {error}",
-  "@croquisSnackSaveError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "croquisDialogClearTitle": "Clear grid",
-  "croquisDialogClearBody": "Do you want to clear the entire grid?",
-
-  "croquisDialogCellTitle": "Cell",
-
-  "croquisFieldNameLabel": "Name",
-
-  "croquisDialogNewGroupTitle": "New group",
-
-  "croquisFieldGroupTitleLabel": "Group name",
-  "croquisFieldGroupColorLabel": "Group color",
-  "croquisFieldGroupColorHint": "Pick a color",
-
-  "croquisFieldRowLabel": "Row",
-  "croquisFieldColLabel": "Column",
-
-  "croquisFieldHeightLabel": "Height",
-  "croquisFieldWidthLabel": "Width",
-
-  "croquisDialogDeleteGroupTitle": "Delete group",
-  "croquisDialogDeleteGroupBody": "Do you want to delete this group?",
-
-  "croquisDialogUnsavedTitle": "Unsaved changes",
-  "croquisDialogUnsavedBody": "You have unsaved changes. Leave anyway?",
-
-  "croquisErrorInit": "Error initializing the layout.",
-
-  "croquisSectionAulaTurno": "Classroom and shift",
-
-  "croquisFieldAulaLabel": "Classroom",
-  "croquisFieldAulaHint": "e.g., Room 1 / 3B",
-
-  "croquisFieldTurnoLabel": "Shift",
-
-  "croquisActionClearGrid": "Clear grid",
-  "croquisActionAddGroup": "Add group",
-
-  "croquisTipTapCellAutosave": "Tap a cell to edit. It autosaves.",
-
-  "croquisSectionGrid": "Grid",
-
-  "croquisGridSizeLine": "Size: {rows}×{cols}",
-  "@croquisGridSizeLine": {
-    "placeholders": {
-      "rows": {},
-      "cols": {}
-    }
-  },
-
-  "croquisSectionGroups": "Groups",
-
-  "croquisGroupsEmpty": "No groups created.",
-  "croquisGroupFallbackTitle": "Group",
-
-  "croquisGroupSubtitle": "Members: {count}",
-  "@croquisGroupSubtitle": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "institucionDocsWarnPerfilButNoOwner": "Profile present, but owner missing. Limited view.",
-  "institucionDocsWarnOwnerButNoPerfil": "Owner present, but profile missing. Limited view.",
-
-  "institucionDocsErrorInvalidInstitutionId": "Invalid institution ID.",
-  "institucionDocsSnackInvalidInstitutionEmptyId": "Empty institution ID.",
-
-  "institucionDocsSnackNeedOwnerAndPerfil": "Owner and profile are required for this action.",
-  "institucionDocsSnackNoDocTypes": "No document types available.",
-  "institucionDocsSnackSolicitudCreated": "Request created.",
-
-  "institucionDocsSnackNeedOwnerAndPerfilToUpload": "Owner and profile are required to simulate upload.",
-  "institucionDocsSnackMissingRef": "Missing file reference.",
-  "institucionDocsSnackTempDocSaved": "Temporary document saved.",
-
-  "institucionDocsSnackNeedPerfilToCleanup": "Profile is required to cleanup expired.",
-  "institucionDocsSnackNoExpiredToRemove": "No expired items to remove.",
-
-  "institucionDocsSnackExpiredRemoved": "Removed {count} expired.",
-  "@institucionDocsSnackExpiredRemoved": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "institucionDocsDialogDeleteTitle": "Delete",
-
-  "institucionDocsDialogDeleteBody": "Delete this item: {name}?",
-  "@institucionDocsDialogDeleteBody": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-
-  "institucionDocsSnackExpiredUseCleanup": "Expired. Use cleanup expired.",
-  "institucionDocsSnackDeleted": "Deleted.",
-
-  "institucionDocsSnackCannotOpenMissingIds": "Cannot open: missing IDs.",
-  "institucionDocsSnackDeeplinkTooLong": "Deeplink too long.",
-  "institucionDocsSnackRouteNotRegistered": "Route not registered.",
-
-  "estadoSolicitudPendiente": "Pending",
-  "estadoSolicitudCumplida": "Completed",
-  "estadoSolicitudCancelada": "Cancelled",
-
-  "estadoDocumentoExpirado": "Expired",
-  "estadoDocumentoActivo": "Active",
-
-  "institucionDocsTooltipOpenAlumno": "Open student",
-  "institucionDocsTooltipExpiredUseCleanup": "Expired (use cleanup)",
-
-  "institucionDocsViewAllInstitution": "View all (institution)",
-  "institucionDocsViewFilteredOwnerPerfil": "Filtered (owner+profile)",
-  "institucionDocsViewFilteredPerfil": "Filtered (profile)",
-  "institucionDocsViewFilteredOwner": "Filtered (owner)",
-
-  "institucionDocsInstitutionIdLine": "Institution: {id}",
-  "@institucionDocsInstitutionIdLine": {
-    "placeholders": {
-      "id": {}
-    }
-  },
-
-  "institucionDocsInstitutionOwnerLine": "Owner: {owner}",
-  "@institucionDocsInstitutionOwnerLine": {
-    "placeholders": {
-      "owner": {}
-    }
-  },
-
-  "institucionDocsFieldOwnerAlumnoLabel": "Student owner",
-  "institucionDocsFieldPerfilAlumnoLabel": "Student profile",
-  "institucionDocsFieldTipoDocumentoLabel": "Document type",
-  "institucionDocsFieldMensajeOpcionalLabel": "Message (optional)",
-  "institucionDocsFieldRefLabel": "Reference",
-  "institucionDocsFieldTtlDaysLabel": "TTL (days)",
-
-  "institucionDocsActionSimulateUpload": "Simulate upload",
-  "institucionDocsActionCleanupExpired": "Cleanup expired",
-
-  "institucionDocsEmptySolicitudes": "No requests.",
-  "institucionDocsEmptyDocumentos": "No documents.",
-
-  "institucionDocsSolicitudTipoLine": "Type: {tipo}",
-  "@institucionDocsSolicitudTipoLine": {
-    "placeholders": {
-      "tipo": {}
-    }
-  },
-
-  "institucionDocsSolicitudSubtitle": "{estado} · {fecha}",
-  "@institucionDocsSolicitudSubtitle": {
-    "placeholders": {
-      "estado": {},
-      "fecha": {}
-    }
-  },
-
-  "institucionDocsDocumentoTipoLine": "Type: {tipo}",
-  "@institucionDocsDocumentoTipoLine": {
-    "placeholders": {
-      "tipo": {}
-    }
-  },
-
-  "institucionDocsDocumentoSubtitle": "{estado} · {vence}",
-  "@institucionDocsDocumentoSubtitle": {
-    "placeholders": {
-      "estado": {},
-      "vence": {}
-    }
-  },
-
-  "institucionDocsAppBarTitle": "{institucion} – Documentation",
-  "@institucionDocsAppBarTitle": {
-    "placeholders": {
-      "institucion": {}
-    }
-  },
-
-  "tabSolicitudes": "Requests",
-  "tabDocumentos": "Documents",
-
-  "institucionExtracGrupoGuiaBloqueTitle": "Block guide",
-
-  "institucionExtracGrupoInvalidInstitutionId": "Invalid institution.",
-
-  "institucionExtracGrupoWarnModuleKeyMismatch": "moduleKey does not match expected: {expected}",
-  "@institucionExtracGrupoWarnModuleKeyMismatch": {
-    "placeholders": {
-      "expected": {}
-    }
-  },
-
-  "institucionExtracGrupoWarnModuleKeyNotCanonical": "moduleKey is not canonical: {value}",
-  "@institucionExtracGrupoWarnModuleKeyNotCanonical": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-
-  "institucionExtracGrupoSaveFailed": "Could not save: {error}",
-  "@institucionExtracGrupoSaveFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "institucionExtracGrupoEditTitle": "Edit group",
-  "institucionExtracGrupoCreateTitle": "Create group",
-
-  "institucionExtracGrupoHeaderBloqueLine": "Block: {bloque} · moduleKey: {moduleKey}",
-  "@institucionExtracGrupoHeaderBloqueLine": {
-    "placeholders": {
-      "bloque": {},
-      "moduleKey": {}
-    }
-  },
-
-  "institucionExtracGrupoHeaderNotePrototype": "Prototype (no backend)",
-
-  "institucionExtracGrupoWarnKeyMismatch": "Key does not match expected: {expected}",
-  "@institucionExtracGrupoWarnKeyMismatch": {
-    "placeholders": {
-      "expected": {}
-    }
-  },
-
-  "institucionExtracGrupoWarnKeyNotCanonical": "Non-canonical key: {value}",
-  "@institucionExtracGrupoWarnKeyNotCanonical": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-
-  "institucionExtracGrupoFieldActividadLabel": "Activity",
-  "institucionExtracGrupoFieldActividadHint": "e.g., Soccer",
-  "institucionExtracGrupoValActividadRequired": "Activity is required",
-
-  "institucionExtracGrupoFieldGrupoLabel": "Group",
-  "institucionExtracGrupoFieldGrupoHint": "e.g., Group A",
-  "institucionExtracGrupoValGrupoRequired": "Group is required",
-
-  "institucionExtracGrupoFieldTurnoOptionalLabel": "Shift (optional)",
-  "institucionExtracGrupoFieldTurnoOptionalHint": "e.g., Morning",
-
-  "institucionExtracGrupoFieldAulaOptionalLabel": "Room (optional)",
-  "institucionExtracGrupoFieldAulaOptionalHint": "e.g., Gym",
-
-  "institucionExtracGrupoFieldCupoMaxLabel": "Max capacity",
-  "institucionExtracGrupoFieldCupoMaxHint": "e.g., 25",
-
-  "institucionExtracGrupoFieldCupoOcupadoLabel": "Occupied",
-  "institucionExtracGrupoValOccExceedsMax": "Occupied cannot exceed max",
-
-  "institucionExtracGrupoFieldActivoTitle": "Active",
-  "institucionExtracGrupoFieldActivoSubtitle": "Allows requests",
-
-  "institucionExtracBaseErrInvalidInstId": "Invalid institution.",
-  "institucionExtracBaseErrInvalidModuleKeySnake": "Invalid moduleKey (snake_case).",
-
-  "institucionExtracBaseErrModuleKeyMismatch": "moduleKey does not match expected: {expected}",
-  "@institucionExtracBaseErrModuleKeyMismatch": {
-    "placeholders": {
-      "expected": {}
-    }
-  },
-
-  "institucionExtracBaseErrModuleKeyNotCanonical": "Non-canonical moduleKey: {value}",
-  "@institucionExtracBaseErrModuleKeyNotCanonical": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-
-  "institucionExtracBaseCuposNotManaged": "Capacities not managed",
-
-  "institucionExtracBaseCuposManaged": "Available: {disp} of {max}",
-  "@institucionExtracBaseCuposManaged": {
-    "placeholders": {
-      "disp": {},
-      "max": {}
-    }
-  },
-
-  "institucionExtracBaseInvalidDataGeneric": "Invalid data.",
-  "institucionExtracBaseInvalidDataForCupos": "Invalid data for capacities.",
-  "institucionExtracBaseCuposRequireMax": "Max capacity is required.",
-
-  "institucionExtracBaseCuposDialogTitle": "Edit capacities",
-
-  "institucionExtracBaseCuposDialogActividad": "Activity: {actividad}",
-  "@institucionExtracBaseCuposDialogActividad": {
-    "placeholders": {
-      "actividad": {}
-    }
-  },
-
-  "institucionExtracBaseCuposDialogGrupo": "Group: {grupo}",
-  "@institucionExtracBaseCuposDialogGrupo": {
-    "placeholders": {
-      "grupo": {}
-    }
-  },
-
-  "institucionExtracBaseCuposDialogMax": "Max: {max}",
-  "@institucionExtracBaseCuposDialogMax": {
-    "placeholders": {
-      "max": {}
-    }
-  },
-
-  "institucionExtracBaseCuposDialogOcupado": "Occupied: {ocupado}",
-  "@institucionExtracBaseCuposDialogOcupado": {
-    "placeholders": {
-      "ocupado": {}
-    }
-  },
-
-  "institucionExtracBaseCuposDialogDisponibles": "Available: {disp}",
-  "@institucionExtracBaseCuposDialogDisponibles": {
-    "placeholders": {
-      "disp": {}
-    }
-  },
-
-  "institucionExtracBaseCuposUpdated": "Capacities updated.",
-
-  "institucionExtracBaseCuposSaveFailed": "Could not save capacities: {error}",
-  "@institucionExtracBaseCuposSaveFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "institucionExtracBaseInvalidDataForDelete": "Cannot delete: invalid data.",
-
-  "institucionExtracBaseDeleteDialogTitle": "Delete group",
-
-  "institucionExtracBaseDeleteDialogBody": "Delete {actividad} ({grupo})?",
-  "@institucionExtracBaseDeleteDialogBody": {
-    "placeholders": {
-      "actividad": {},
-      "grupo": {}
-    }
-  },
-
-  "institucionExtracBaseDeletedOk": "Deleted.",
-
-  "institucionExtracBaseDeleteFailed": "Could not delete: {error}",
-  "@institucionExtracBaseDeleteFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "institucionExtracBaseAppBarTitle": "{module}",
-  "@institucionExtracBaseAppBarTitle": {
-    "placeholders": {
-      "module": {}
-    }
-  },
-
-  "institucionExtracBaseChipModuleKey": "moduleKey: {key}",
-  "@institucionExtracBaseChipModuleKey": {
-    "placeholders": {
-      "key": {}
-    }
-  },
-
-  "institucionExtracBaseChipInstId": "Institution: {id}",
-  "@institucionExtracBaseChipInstId": {
-    "placeholders": {
-      "id": {}
-    }
-  },
-
-  "institucionExtracBaseHeaderNote": "Module management (prototype)",
-
-  "institucionExtracBaseQuickGuideTitle": "Quick guide",
-  "institucionExtracBaseQuickGuideEmpty": "No guide available.",
-  "institucionExtracBaseQuickGuideFootnote": "Texts may change.",
-
-  "institucionExtracBaseGroupsTitle": "Groups",
-
-  "institucionExtracBaseInvalidDataToList": "Cannot list: invalid data.",
-  "institucionExtracBaseLoadFailed": "Could not load.",
-  "institucionExtracBaseNoGroupsYet": "No groups yet.",
-
-  "institucionExtracBaseWithCupos": "With capacities",
-  "institucionExtracBaseNoCupos": "No capacities",
-
-  "institucionExtracBaseGroupLine": "Group: {group}",
-  "@institucionExtracBaseGroupLine": {
-    "placeholders": {
-      "group": {}
-    }
-  },
-
-  "institucionExtracBaseTurnoLine": "Shift: {turno}",
-  "@institucionExtracBaseTurnoLine": {
-    "placeholders": {
-      "turno": {}
-    }
-  },
-
-  "institucionExtracBaseAulaLine": "Room: {aula}",
-  "@institucionExtracBaseAulaLine": {
-    "placeholders": {
-      "aula": {}
-    }
-  },
-
-  "institucionExtracBaseActionCupos": "Capacities",
-
-  "institucionExtracBaseCreateGroupTitle": "Create group",
-  "institucionExtracBaseCreateGroupSubtitle": "Add a new group",
-
-  "institucionExtracBaseRulesTitle": "Rules",
-  "institucionExtracBaseRulesSubtitle": "Pending",
-
-  "institucionExtracBaseRulesPendingToast": "Pending rules: {value}",
-  "@institucionExtracBaseRulesPendingToast": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-
-  "institucionExtracBaseSolicitudesTitle": "Requests",
-
-  "institucionExtracBaseSolicitudesSubtitle": "View requests for module: {moduleKey}",
-  "@institucionExtracBaseSolicitudesSubtitle": {
-    "placeholders": {
-      "moduleKey": {}
-    }
-  },
-
-  "institucionExtracBaseEmitirFichaDefaultTitle": "Card",
-  "institucionExtracBaseEmitirFichaSubtitle": "Emit card as notification",
   "institucionExtracBaseEmitirFichaSentOk": "Card emitted.",
-  "institucionExtracBaseEmitirFichaFailed": "Could not emit the card: {error}",
-  "@institucionExtracBaseEmitirFichaFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "institucionExtracHubTitle": "Extracurricular",
-
-  "institucionExtracHubHeaderInstOk": "Institution: {instIdCanon}",
-  "@institucionExtracHubHeaderInstOk": {
-    "placeholders": {
-      "instIdCanon": {}
-    }
-  },
-
-  "institucionExtracHubHeaderInstInvalid": "Invalid institution.",
-
-  "institucionExtracHubIntro": "Select a module to manage.",
-  "institucionExtracHubInvalidInstIdHelp": "Go back and retry with a valid institution.",
-
-  "institucionExtracHubTileSubtitle": "{descripcion} · moduleKey: {moduleKey}",
-  "@institucionExtracHubTileSubtitle": {
-    "placeholders": {
-      "descripcion": {},
-      "moduleKey": {}
-    }
-  },
-
-  "institucionExtracHubToastInvalidInstId": "Invalid institution.",
-
-  "institucionExtracHubToastInvalidModuleKey": "Cannot open module: {bloque}",
-  "@institucionExtracHubToastInvalidModuleKey": {
-    "placeholders": {
-      "bloque": {}
-    }
-  },
-
-  "errorLoadingGroups": "Error loading groups: {error}",
-  "@errorLoadingGroups": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "errorSaving": "Error saving: {error}",
-  "@errorSaving": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "occupiedRecalculatedOk": "Occupied recalculated.",
-
-  "errorRecalculating": "Error recalculating: {error}",
-  "@errorRecalculating": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "groupNameLabel": "Group name",
-  "activityLabelShort": "Activity",
-  "maxCapacityLabel": "Max capacity",
-
-  "completeRequiredFields": "Complete required fields.",
-
   "commonRefresh": "Refresh",
   "commonCancel": "Cancel",
   "commonDelete": "Delete",
-  "commonNo": "No",
-  "commonNone": "None",
-  "commonProfile": "Profile",
-  "commonModule": "Module",
-
-  "commonPending": "Pending",
-  "commonCompleted": "Completed",
-  "commonCancelled": "Cancelled",
-  "commonConfirmed": "Confirmed",
-  "commonRejected": "Rejected",
-  "commonExpired": "Expired",
-  "commonActive": "Active",
-
-  "commonCurricular": "Curricular",
-  "commonExtracurricular": "Extracurricular",
   "commonInstitution": "Institution",
-
-  "commonType": "Type",
-  "commonClassGroup": "Class/Group",
-  "commonShift": "Shift",
-  "commonStatus": "Status",
-
   "commonGenerating": "Generating…",
-
-  "commonErrorWithDetails": "Error: {error}",
-  "@commonErrorWithDetails": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "alumnoDocumentosTitle": "Documents",
-  "alumnoDocumentosInvalidOwner": "Invalid owner.",
-  "alumnoDocumentosInvalidPerfil": "Invalid profile.",
-
-  "alumnoDocumentosOwnerMismatchAutoscrollIgnored": "The deeplink belongs to a different account. Autoscroll ignored.",
-  "alumnoDocumentosDeeplinkSolicitudNotFound": "Deeplink request not found.",
-  "alumnoDocumentosDeeplinkDocumentoNotFound": "Deeplink document not found.",
-
-  "alumnoDocumentosEmptySolicitudes": "No requests.",
-  "alumnoDocumentosEmptyDocumentos": "No documents.",
-
-  "alumnoDocumentosFieldMensaje": "Message",
-  "alumnoDocumentosFieldTipo": "Type",
-  "alumnoDocumentosFieldId": "ID",
-  "alumnoDocumentosFieldEstado": "Status",
-  "alumnoDocumentosFieldInstitucion": "Institution",
-  "alumnoDocumentosFieldCreada": "Created",
-  "alumnoDocumentosFieldOwner": "Owner",
-  "alumnoDocumentosFieldPerfil": "Profile",
-  "alumnoDocumentosFieldSubido": "Uploaded",
-  "alumnoDocumentosFieldExpira": "Expires",
-
-  "alumnoDocumentosExpiredWillBeDeletedOnClean": "will be deleted when cleaning expired",
-
-  "alumnoDocumentosFieldSolicitud": "Request",
-  "alumnoDocumentosFieldRef": "Reference",
-
-  "alumnoDocumentosNoExpiredToClean": "No expired items to clean.",
-
-  "alumnoDocumentosExpiredCleanedCount": "Cleaned {count} expired.",
-  "@alumnoDocumentosExpiredCleanedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "alumnoDocumentosDocExpiredUseClean": "This document is expired. Use “Clean expired”.",
-  "alumnoDocumentosExpiredTooltip": "Expired (use cleanup)",
-
-  "alumnoDocumentosDeleteDocTitle": "Delete document",
-
-  "alumnoDocumentosDeleteDocBody": "Delete document {id}?",
-  "@alumnoDocumentosDeleteDocBody": {
-    "placeholders": {
-      "id": {}
-    }
-  },
-
-  "alumnoDocumentosDocDeleted": "Document deleted.",
-  "alumnoDocumentosCleanExpired": "Clean expired",
-
-  "alumnoDocumentosTabSolicitudes": "Requests",
-  "alumnoDocumentosTabDocumentos": "Documents",
-
-  "alumnoMisSolicitudesTitleOwner": "My requests",
-
-  "alumnoMisSolicitudesTitlePerfil": "Requests – {perfil}",
-  "@alumnoMisSolicitudesTitlePerfil": {
-    "placeholders": {
-      "perfil": {}
-    }
-  },
-
-  "alumnoMisSolicitudesInvalidOwner": "Invalid owner.",
-  "alumnoMisSolicitudesInvalidPerfil": "Invalid profile.",
-
-  "alumnoMisSolicitudesLoadError": "Error loading: {error}",
-  "@alumnoMisSolicitudesLoadError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "alumnoMisSolicitudesStatusCancelledYou": "Cancelled by you",
-  "alumnoMisSolicitudesStatusCancelledInstitution": "Cancelled by institution",
-
-  "alumnoMisSolicitudesNotPending": "This request is no longer pending.",
-
-  "alumnoMisSolicitudesCancelTitle": "Cancel request",
-  "alumnoMisSolicitudesCancelBody": "Do you want to cancel this request?",
-  "alumnoMisSolicitudesCancelCta": "Cancel",
-
-  "alumnoMisSolicitudesCancelledOk": "Request cancelled.",
-
-  "alumnoMisSolicitudesCancelError": "Could not cancel: {error}",
-  "@alumnoMisSolicitudesCancelError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "alumnoMisSolicitudesDeleteTitle": "Delete request",
-  "alumnoMisSolicitudesDeleteBody": "Do you want to delete this request? (pending curricular only)",
-  "alumnoMisSolicitudesDeletedOk": "Request deleted.",
-
-  "alumnoMisSolicitudesCanonicalContextMissing": "Missing canonical context (owner/profile) to generate the PDF.",
-
-  "alumnoMisSolicitudesPdfGenerated": "PDF generated: {path}",
-  "@alumnoMisSolicitudesPdfGenerated": {
-    "placeholders": {
-      "path": {}
-    }
-  },
-
-  "alumnoMisSolicitudesPdfError": "Could not generate PDF: {error}",
-  "@alumnoMisSolicitudesPdfError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "alumnoMisSolicitudesDownloadPdf": "Download PDF",
-
-  "alumnoMisSolicitudesTabPendingCount": "Pending ({count})",
-  "@alumnoMisSolicitudesTabPendingCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "alumnoMisSolicitudesTabConfirmedCount": "Confirmed ({count})",
-  "@alumnoMisSolicitudesTabConfirmedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "alumnoMisSolicitudesTabRejectedCount": "Rejected ({count})",
-  "@alumnoMisSolicitudesTabRejectedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "alumnoMisSolicitudesTabCancelledCount": "Cancelled ({count})",
-  "@alumnoMisSolicitudesTabCancelledCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-
-  "alumnoMisSolicitudesEmptySection": "There are no requests in this section.",
-  "alumnoMisSolicitudesEmptyPending": "You have no pending requests.",
-
   "commonEmail": "Email",
   "commonEmailRequired": "Enter your email.",
-  "commonEmailInvalid": "Invalid email.",
-
   "commonPassword": "Password",
   "commonNewPassword": "New password",
-  "commonConfirmPassword": "Confirm password",
   "commonPasswordsDontMatch": "Passwords don't match.",
-
   "commonShowPassword": "Show password",
   "commonHidePassword": "Hide password",
-
   "commonRememberMe": "Remember me",
-
   "commonSignIn": "Sign in",
   "commonSigningIn": "Signing in…",
-
-  "commonRegister": "Register",
-  "commonPasswordMinLength4": "Password must be at least 4 characters.",
   "commonCreateAccount": "Create account",
   "commonCreating": "Creating…",
-
-  "commonFeatureUnavailablePrototype": "This feature is not available in this prototype.",
-
-  "alumnoLoginAppBar": "Student access",
-  "alumnoLoginTitle": "Sign in",
-  "alumnoLoginForgotPassword": "Forgot password",
-  "alumnoLoginRegistroNoDisponible": "Registration not available.",
-
-  "alumnoRegistroAppBar": "Create account",
-  "alumnoRegistroTitle": "Create account",
-  "alumnoRegistroPasswordRequired": "Enter a password.",
-
-  "alumnoForgotPasswordTitle": "Reset password",
-  "alumnoForgotPasswordIntro": "Enter your email and choose a new password.",
-  "alumnoForgotPasswordEmailLabel": "Email",
-  "alumnoForgotPasswordNewPasswordLabel": "New password",
-  "alumnoForgotPasswordConfirmPasswordLabel": "Confirm password",
-  "alumnoForgotPasswordShowPassword": "Show password",
-  "alumnoForgotPasswordHidePassword": "Hide password",
-
-  "alumnoForgotPasswordEnterEmailError": "Enter your email.",
-  "alumnoForgotPasswordInvalidEmailError": "Invalid email.",
-  "alumnoForgotPasswordEnterPasswordError": "Enter a password.",
-  "alumnoForgotPasswordPasswordTooShortError": "Password is too short.",
-  "alumnoForgotPasswordPasswordsDontMatchError": "Passwords don't match.",
-
-  "alumnoForgotPasswordAccountNotFound": "No account found for that email.",
-  "alumnoForgotPasswordPasswordUpdatedPrototype": "Password updated (prototype).",
-
-  "institucionForgotPasswordTitle": "Reset password",
-  "institucionForgotPasswordIntro": "Enter the institution email and choose a new password.",
-  "institucionForgotPasswordEnterEmailError": "Enter the email.",
-  "institucionForgotPasswordInvalidEmailError": "Invalid email.",
-  "institucionForgotPasswordEnterPasswordError": "Enter a password.",
-  "institucionForgotPasswordPasswordTooShortError": "Password is too short.",
-  "institucionForgotPasswordPasswordsDontMatchError": "Passwords don't match.",
-  "institucionForgotPasswordAccountNotFound": "No institution found for that email.",
-  "institucionForgotPasswordPasswordUpdatedPrototype": "Password updated (prototype).",
-
-  "invalidOwner": "Invalid owner.",
-
-  "noNotifications": "No notifications.",
-  "onlyUnread": "Only unread",
-  "showAll": "Show all",
-
-  "allProfiles": "All profiles",
-  "filterByProfile": "Filter by profile",
-  "clearPerfilFilter": "Clear profile filter",
-
-  "noResultsForFilter": "No results for that filter.",
-
-  "notificationDeleted": "Notification deleted.",
-  "notificationNoDestination": "This notification has no destination.",
-
-  "invalidDeeplink": "Invalid deeplink.",
-  "deeplinkOwnerMismatch": "This deeplink belongs to a different account.",
-  "missingPerfilIdForOpen": "Missing perfilId to open this destination.",
-
-  "deeplinkNotSupported": "Deeplink not supported: {path}",
-  "@deeplinkNotSupported": {
-    "placeholders": {
-      "path": {}
-    }
-  },
-
-  "notificationPerfilLine": "Profile: {perfil}",
-  "@notificationPerfilLine": {
-    "placeholders": {
-      "perfil": {}
-    }
-  },
-
-  "institucionAreaErrorEmptyId": "Empty institution ID.",
-
-  "alumnoGrupoExtraInvalidInstitution": "Invalid institution.",
-  "alumnoGrupoExtraMissingOwnerPerfil": "Missing session context (owner/profile).",
-
-  "alumnoGrupoExtraTitle": "Extracurricular groups",
-  "alumnoGrupoExtraLoadErrorTitle": "Could not load",
-
-  "alumnoGrupoExtraSearchHint": "Search activity or institution…",
-
-  "alumnoGrupoExtraBlockOptionalLabel": "Block (optional)",
-  "alumnoGrupoExtraEmptyFiltered": "No groups found for that filter.",
-
-  "alumnoGrupoExtraCupoUnmanaged": "Capacities not managed",
-
-  "alumnoGrupoExtraOpenSolicitudError": "Could not open Requests: {error}",
-  "@alumnoGrupoExtraOpenSolicitudError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-
-  "alumnoGrupoExtraCupoManaged": "Available: {disp} of {max}",
-  "@alumnoGrupoExtraCupoManaged": {
-    "placeholders": {
-      "disp": {},
-      "max": {}
-    }
-  },
-
-  "alumnoGrupoExtraSemanticsItem": "{actividad} · {institucion} · {cupo}",
-  "@alumnoGrupoExtraSemanticsItem": {
-    "placeholders": {
-      "actividad": {},
-      "institucion": {},
-      "cupo": {}
-    }
-  },
-
-  "commonNotificationsTooltip": "View notifications",
-  "commonBackToProfiles": "Back to profiles",
-  "commonEmailLabel": "Email",
-  "commonPhoneLabel": "Phone",
-  "commonChangePhoto": "Change photo",
-  "commonDeletePhoto": "Delete photo",
-  "commonCalendar": "Calendar",
-  "commonDocumentsPdf": "Documents (PDF)",
-  "commonStudentPdfSub": "Student record",
-  "commonNotifications": "Notifications",
-  "commonSearchHint": "Search…",
   "commonLogout": "Sign out",
-  "commonPendingConnect": "Pending connection",
-  "commonPasteRealScreenHint": "Paste this screen into a real device",
-  "commonSelectDate": "Select date",
-  "commonInvalidSessionAccountId": "Invalid session (accountId)",
   "commonNameLabel": "Name",
-  "commonEnterName": "Enter the name",
   "commonLastNameLabel": "Last name",
-  "commonEnterLastName": "Enter the last name",
   "commonEmailOptionalLabel": "Email (optional)",
-  "commonInvalidEmail": "Invalid email",
   "commonPhoneOptionalLabel": "Phone (optional)",
-  "commonSaveProfile": "Save profile",
-  "commonAll": "All",
-  "commonLoadMore": "Load more",
-  "commonEndOfResults": "End of results",
-  "commonOwnerInvalid": "Invalid owner",
-  "commonPerfilInvalid": "Invalid profile",
-  "commonDeleteTitle": "Delete",
-  "commonEvent": "Event",
-  "commonPersonal": "Personal",
   "commonDate": "Date",
-  "commonSpecialEvent": "Special event",
-  "commonId": "ID",
-  "commonMandatory": "Required",
-  "commonDetail": "Detail",
-  "commonAttendance": "Attendance",
-  "commonAttendancePending": "Pending",
-  "commonAttendanceYes": "Attending",
-  "commonAttendanceMaybe": "Maybe",
-  "commonAttendanceNo": "Not attending",
-  "commonPolicy": "Policy",
-  "commonMaybe": "Maybe",
-  "commonDecline": "Decline",
   "commonPrevMonth": "Previous month",
   "commonNextMonth": "Next month",
-  "commonEvents": "Events",
-  "commonAlarm": "Alarm",
-  "commonNoTime": "No time",
-  "commonNew": "New",
   "commonTitle": "Title",
-  "commonNoteOptional": "Note (optional)",
-  "commonTime": "Time",
-  "commonChoose": "Choose",
   "commonView": "View",
-  "commonShare": "Share",
-  "commonGroup": "Group",
-  "commonInstitutionUnavailable": "Institution unavailable",
-  "commonRequestCreated": "Request created",
-  "commonSend": "Send",
   "commonSending": "Sending…",
-  "commonRequestSentOk": "Request sent successfully",
-  "commonError": "Error",
-  "commonCreate": "Create",
   "commonFieldRequired": "Required field",
   "commonTooShort": "Too short",
   "commonPhone": "Phone",
   "commonPhoneInvalid": "Invalid phone",
-  "commonRemove": "Remove",
-  "commonAdd": "Add",
   "commonContinuing": "Continuing…",
-  "commonContinue": "Continue",
   "commonContinueToPlan": "Continue to plan",
   "commonPasswordRequired": "Password required",
-  "commonForgotPassword": "Forgot password",
-  "commonLoggingIn": "Signing in…",
-  "commonLogin": "Sign in",
-  "commonDash": "—",
-
   "commonBack": "Back",
   "commonSave": "Save",
   "commonSaving": "Saving…",
-  "commonGenericError": "Error.",
-
-  "commonScheduleLabel": "Schedule: {value}",
-  "@commonScheduleLabel": {
+  "uiSomethingWentWrong": "Something went wrong",
+  "landingTagline": "Connected education",
+  "landingHeadline": "Students and institutions, in one place.",
+  "landingSubtitle": "Enrollments, openings, documents and calendar — no paperwork, no back-and-forth.",
+  "landingStudentTitle": "I'm a student or family",
+  "landingStudentSubtitle": "Find institutions, request a spot and track every step.",
+  "landingInstitutionTitle": "I'm an institution",
+  "landingInstitutionSubtitle": "Manage openings, requests, groups and communications.",
+  "landingChooseHowToEnter": "How would you like to sign in?",
+  "landingChooseHowToEnterSubtitle": "Choose your profile to continue.",
+  "landingBulletRequests": "Online enrollment requests",
+  "landingBulletDocuments": "Records and documents as PDF",
+  "landingBulletCalendar": "Calendar and instant notices",
+  "landingFooter": "© {year} ATENA · Education platform",
+  "@landingFooter": {
     "placeholders": {
-      "value": {}
+      "year": {}
     }
   },
-
-  "commonAgeLabel": "Age: {value}",
-  "@commonAgeLabel": {
+  "prefsTitle": "Preferences",
+  "prefsTheme": "Appearance",
+  "prefsThemeSystem": "Automatic",
+  "prefsThemeLight": "Light",
+  "prefsThemeDark": "Dark",
+  "prefsLanguage": "Language",
+  "prefsLanguageSystem": "Automatic (device language)",
+  "authFamiliaLoginTitle": "Sign in to your account",
+  "authFamiliaLoginSubtitle": "Students and families",
+  "authInstitucionLoginTitle": "Institution sign in",
+  "authInstitucionLoginSubtitle": "Manage openings, requests and communications.",
+  "authForgotPassword": "Forgot your password?",
+  "authNoAccount": "Don't have an account yet?",
+  "authNoInstitution": "Is your institution not on ATENA yet?",
+  "authRegisterInstitution": "Register institution",
+  "authHaveAccount": "Already have an account?",
+  "authFamiliaRegisterTitle": "Create your account",
+  "authFamiliaRegisterSubtitle": "In two minutes you'll be able to find institutions and request a spot.",
+  "authStudentSection": "Student details",
+  "authStudentSectionHelp": "If you're a parent or guardian, enter the student's details. You can add more students to the same account later.",
+  "authAccessSection": "Sign-in details",
+  "authBirthDate": "Date of birth",
+  "authBirthDateRequired": "Choose the date of birth.",
+  "authDniLabel": "ID number (DNI)",
+  "authDniHelper": "Numbers only, no dots.",
+  "authPasswordHelper": "At least 8 characters.",
+  "authPasswordConfirm": "Repeat the password",
+  "authResetTitle": "Reset password",
+  "authResetFamiliaSubtitle": "Confirm your identity with the ID number of a student in the account and choose a new password.",
+  "authResetInstitucionSubtitle": "Confirm your identity with the registered CUIT and choose a new password.",
+  "authResetDniLabel": "ID number of a student in the account",
+  "authCuitHelper": "11 digits, no dashes.",
+  "authResetCta": "Save new password",
+  "authResetDone": "Done. You can now sign in with your new password.",
+  "authInstRegisterTitle": "Register your institution",
+  "authInstRegisterSubtitle": "Fill in the details and choose your plan's modules in the next step.",
+  "authStepOf": "Step {step} of {total}",
+  "@authStepOf": {
     "placeholders": {
-      "value": {}
+      "step": {},
+      "total": {}
     }
   },
-
-  "commonSlotsLabel": "Slots: {value}",
-  "@commonSlotsLabel": {
+  "authErrInvalidEmail": "The email is not valid.",
+  "authErrWeakPassword": "The password must be at least 8 characters long.",
+  "authErrEmailInUse": "An account with that email already exists.",
+  "authErrAccountNotFound": "We couldn't find an account with those details.",
+  "authErrWrongCredentials": "Incorrect email or password.",
+  "authErrInvalidDni": "The ID number must have 7 to 9 digits.",
+  "authErrDuplicateDni": "There's already a student with that ID number in your account.",
+  "authErrIdentityMismatch": "The details don't match the account.",
+  "authErrInvalidName": "Enter first and last name.",
+  "authErrInvalidAccount": "The session is not valid. Please sign in again.",
+  "lblNivelJardin": "Early childhood",
+  "lblNivelPrimaria": "Primary",
+  "lblNivelSecundaria": "Secondary",
+  "lblNivelTecnica": "Technical",
+  "lblNivelTerciario": "Higher education",
+  "lblBloqueDeporte": "Sports & movement",
+  "lblBloqueArte": "Arts & expression",
+  "lblBloqueIdiomas": "Languages & communication",
+  "lblBloqueCiencia": "Science, technology & robotics",
+  "lblBloqueApoyo": "Academic support",
+  "lblBloqueBienestar": "Personal growth & wellbeing",
+  "lblBloqueOtros": "Other activities",
+  "lblTurnoManana": "Morning",
+  "lblTurnoTarde": "Afternoon",
+  "lblTurnoNoche": "Evening",
+  "lblTurnoCompleto": "Full day",
+  "lblModalidadPresencial": "In person",
+  "lblModalidadRemoto": "Online",
+  "lblModalidadHibrido": "Hybrid",
+  "lblTipoInstJardin": "Kindergarten",
+  "lblTipoInstPrimaria": "Primary school",
+  "lblTipoInstSecundaria": "Secondary school",
+  "lblTipoInstTecnica": "Technical school",
+  "lblTipoInstTerciario": "College",
+  "lblTipoInstTaller": "Workshop or academy",
+  "lblTipoInstClub": "Club",
+  "lblTipoInstOtra": "Other institution",
+  "lblCurricular": "Curricular",
+  "lblExtracurricular": "Extracurricular",
+  "lblEstadoPendiente": "Pending",
+  "lblEstadoConfirmada": "Confirmed",
+  "lblEstadoRechazada": "Declined",
+  "lblEstadoCanceladaAlumno": "Cancelled",
+  "lblEstadoCanceladaInstitucion": "Withdrawn",
+  "lblDocDni": "Student ID (DNI)",
+  "lblDocDniResponsable": "Guardian ID (DNI)",
+  "lblDocPartida": "Birth certificate",
+  "lblDocCertMedico": "Medical certificate",
+  "lblDocVacunas": "Vaccination record",
+  "lblDocBoletin": "Report card",
+  "lblDocPase": "Transfer certificate",
+  "lblDocFoto": "ID photo",
+  "lblDocDomicilio": "Proof of address",
+  "lblDocOtro": "Other document",
+  "lblDocEstadoPendiente": "To submit",
+  "lblDocEstadoEntregado": "Under review",
+  "lblDocEstadoAprobado": "Approved",
+  "lblDocEstadoRechazado": "Needs changes",
+  "lblDocEstadoCancelado": "Cancelled",
+  "lblDocVencido": "Overdue",
+  "lblEvGeneral": "Event",
+  "lblEvReunion": "Meeting",
+  "lblEvExamen": "Exam",
+  "lblEvActo": "School ceremony",
+  "lblEvSalida": "Field trip",
+  "lblEvInicioClases": "First day of classes",
+  "lblEvFinClases": "Last day of classes",
+  "lblEvVacaciones": "Holidays",
+  "lblEvFeriado": "Public holiday",
+  "lblAsisSi": "I'll attend",
+  "lblAsisTalVez": "Maybe",
+  "lblAsisNo": "I won't attend",
+  "lblEdadAnios": "{n, plural, =1{1 year old} other{{n} years old}}",
+  "@lblEdadAnios": {
     "placeholders": {
-      "value": {}
+      "n": {
+        "type": "int"
+      }
     }
   },
-
-  "commonProfileLabel": "Profile: {value}",
-  "@commonProfileLabel": {
+  "lblRangoEdad": "Ages {min} to {max}",
+  "@lblRangoEdad": {
     "placeholders": {
-      "value": {}
+      "min": {},
+      "max": {}
     }
   },
-
-  "commonInstitutionLabel": "Institution: {value}",
-  "@commonInstitutionLabel": {
+  "lblEdadDesde": "Ages {min}+",
+  "@lblEdadDesde": {
     "placeholders": {
-      "value": {}
+      "min": {}
     }
   },
-
-  "commonActivityLabel": "Activity: {value}",
-  "@commonActivityLabel": {
+  "lblEdadHasta": "Up to age {max}",
+  "@lblEdadHasta": {
     "placeholders": {
-      "value": {}
+      "max": {}
     }
   },
-
-  "commonTypeLabel": "Type: {value}",
-  "@commonTypeLabel": {
+  "lblCupos": "{n, plural, =0{No openings} =1{1 opening} other{{n} openings}}",
+  "@lblCupos": {
     "placeholders": {
-      "value": {}
+      "n": {
+        "type": "int"
+      }
     }
   },
-
-  "commonModuleKeyLabel": "moduleKey: {value}",
-  "@commonModuleKeyLabel": {
+  "lblCuposDeTotal": "{libres} of {total} available",
+  "@lblCuposDeTotal": {
     "placeholders": {
-      "value": {}
+      "libres": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
-
-  "commonAulaGrupoLabel": "Room / Group: {value}",
-  "@commonAulaGrupoLabel": {
+  "notiBienvenidaTitle": "Welcome to ATENA!",
+  "notiBienvenidaBody": "You can now find institutions and request a spot.",
+  "notiSolicitudEnviadaTitle": "Request sent",
+  "notiSolicitudEnviadaBody": "{alumno} · {oferta} at {institucion}. We'll let you know when they reply.",
+  "@notiSolicitudEnviadaBody": {
     "placeholders": {
-      "value": {}
+      "alumno": {},
+      "oferta": {},
+      "institucion": {}
     }
   },
-
-  "commonShiftOrScheduleLabel": "Shift or schedule: {value}",
-  "@commonShiftOrScheduleLabel": {
+  "notiSolicitudRecibidaTitle": "New request",
+  "notiSolicitudRecibidaBody": "{alumno} requested a spot in {oferta}.",
+  "@notiSolicitudRecibidaBody": {
     "placeholders": {
-      "value": {}
+      "alumno": {},
+      "oferta": {}
+    }
+  },
+  "notiSolicitudConfirmadaTitle": "Spot confirmed!",
+  "notiSolicitudConfirmadaBody": "{institucion} confirmed {alumno} in {oferta}.",
+  "@notiSolicitudConfirmadaBody": {
+    "placeholders": {
+      "institucion": {},
+      "alumno": {},
+      "oferta": {}
+    }
+  },
+  "notiSolicitudRechazadaTitle": "Request declined",
+  "notiSolicitudRechazadaBody": "{institucion} couldn't accept {alumno}'s request for {oferta}.",
+  "@notiSolicitudRechazadaBody": {
+    "placeholders": {
+      "institucion": {},
+      "alumno": {},
+      "oferta": {}
+    }
+  },
+  "notiSolicitudCanceladaTitle": "Request cancelled",
+  "notiSolicitudCanceladaBody": "{alumno} cancelled their request for {oferta}.",
+  "@notiSolicitudCanceladaBody": {
+    "placeholders": {
+      "alumno": {},
+      "oferta": {}
+    }
+  },
+  "notiSolicitudBajaTitle": "Spot withdrawn",
+  "notiSolicitudBajaBody": "{institucion} withdrew {alumno} from {oferta}.",
+  "@notiSolicitudBajaBody": {
+    "placeholders": {
+      "institucion": {},
+      "alumno": {},
+      "oferta": {}
+    }
+  },
+  "notiDocSolicitadoTitle": "A document was requested",
+  "notiDocSolicitadoBody": "{institucion} needs: {documento}.",
+  "@notiDocSolicitadoBody": {
+    "placeholders": {
+      "institucion": {},
+      "documento": {}
+    }
+  },
+  "notiDocEntregadoTitle": "Document received",
+  "notiDocEntregadoBody": "{alumno} submitted: {documento}.",
+  "@notiDocEntregadoBody": {
+    "placeholders": {
+      "alumno": {},
+      "documento": {}
+    }
+  },
+  "notiDocAprobadoTitle": "Document approved",
+  "notiDocAprobadoBody": "{institucion} approved: {documento}.",
+  "@notiDocAprobadoBody": {
+    "placeholders": {
+      "institucion": {},
+      "documento": {}
+    }
+  },
+  "notiDocRechazadoTitle": "Document needs changes",
+  "notiDocRechazadoBody": "{institucion} asked to fix: {documento}.",
+  "@notiDocRechazadoBody": {
+    "placeholders": {
+      "institucion": {},
+      "documento": {}
+    }
+  },
+  "notiEventoTitle": "New calendar event",
+  "notiEventoBody": "{institucion}: {evento}, on {fecha}.",
+  "@notiEventoBody": {
+    "placeholders": {
+      "institucion": {},
+      "evento": {},
+      "fecha": {}
+    }
+  },
+  "notiAvisoDe": "Notice from {institucion}",
+  "@notiAvisoDe": {
+    "placeholders": {
+      "institucion": {}
+    }
+  },
+  "notiNota": "Message: {nota}",
+  "@notiNota": {
+    "placeholders": {
+      "nota": {}
+    }
+  },
+  "errNoEncontrado": "We couldn't find it. It may have been deleted.",
+  "errNoAutorizado": "You don't have permission to do this.",
+  "errDatosInvalidos": "Please check the information you entered.",
+  "errOfertaInactiva": "This opening isn't taking requests right now.",
+  "errSinCupo": "There are no openings left.",
+  "errSolicitudDuplicada": "There's already an active request for this opening.",
+  "errEstadoInvalido": "This action is no longer available.",
+  "errOfertaConSolicitudes": "It can't be deleted because it has active requests. You can pause it instead.",
+  "errArchivoMuyGrande": "The file is too large.",
+  "errFormatoNoSoportado": "Unsupported format. Use a PDF or an image.",
+  "errSinEspacio": "There isn't enough storage space on this device.",
+  "uiJustNow": "Just now",
+  "uiMinutesAgo": "{n} min ago",
+  "@uiMinutesAgo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "uiHoursAgo": "{n} h ago",
+  "@uiHoursAgo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "uiYesterday": "Yesterday",
+  "uiToday": "Today",
+  "uiTomorrow": "Tomorrow",
+  "uiUndo": "Undo",
+  "uiMoreOptions": "More options",
+  "uiSeeAll": "See all",
+  "uiClose": "Close",
+  "uiLogoutConfirm": "Do you want to sign out?",
+  "notifTitle": "Notifications",
+  "notifMarkAllRead": "Mark all as read",
+  "notifDeleteAll": "Delete all",
+  "notifDeleteAllConfirm": "Delete all notifications?",
+  "notifEmptyTitle": "You're all caught up",
+  "notifEmptyBody": "Updates about requests, documents and events will show up here.",
+  "notifFilterAll": "All",
+  "notifFilterUnread": "Unread",
+  "notifDeleted": "Notification deleted",
+  "notifMarkRead": "Mark as read",
+  "notifMarkUnread": "Mark as unread",
+  "notifDelete": "Delete",
+  "notifUnreadCount": "{n, plural, =1{1 unread} other{{n} unread}}",
+  "@notifUnreadCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeHello": "Hi, {nombre}",
+  "@homeHello": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "homeStudentSubtitle": "What would you like to do today?",
+  "homeSwitchStudent": "Switch student",
+  "homeStatActiveRequests": "Active requests",
+  "homeStatUpcomingEvents": "Upcoming events",
+  "homeStatPendingDocs": "Documents to submit",
+  "homeActionExplore": "Explore institutions",
+  "homeActionExploreSub": "Search and request a spot",
+  "homeActionRequests": "My requests",
+  "homeActionRequestsSub": "Track every request",
+  "homeActionCalendar": "Calendar",
+  "homeActionCalendarSub": "Events and reminders",
+  "homeActionDocuments": "Documents",
+  "homeActionDocumentsSub": "What institutions ask you for",
+  "homeActionNotificationsSub": "News and notices",
+  "homeActionProfile": "Student record",
+  "homeActionProfileSub": "Personal details and PDF",
+  "homeRecentRequests": "Your requests",
+  "homeNoRequestsTitle": "You haven't requested a spot yet",
+  "homeNoRequestsBody": "Explore institutions and send your first request in a few steps.",
+  "homeNoEvents": "No upcoming events.",
+  "hubTitle": "Which student do you want to continue with?",
+  "hubSubtitle": "You can manage several students from the same account.",
+  "hubAddStudent": "Add student",
+  "hubAddStudentSub": "Add another child to your account",
+  "hubEmptyTitle": "Add your first student",
+  "hubEmptyBody": "Enter the student's details to start looking for institutions.",
+  "hubLastUsed": "Last used",
+  "hubAccountLine": "Account: {email}",
+  "@hubAccountLine": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "studentFormTitleNew": "New student",
+  "studentFormTitleEdit": "Edit details",
+  "studentFormSaved": "Details saved.",
+  "studentFormCreated": "Student added.",
+  "instHomeSubtitle": "Institution dashboard",
+  "instPlanTrialUntil": "Trial until {fecha}",
+  "@instPlanTrialUntil": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "instPlanTrialEnded": "Trial ended",
+  "instPlanActive": "Active plan",
+  "instPlanSuspended": "Plan suspended",
+  "instPlanNone": "No plan",
+  "instStatPending": "Pending requests",
+  "instStatStudents": "Confirmed students",
+  "instStatFreeSpots": "Available spots",
+  "instStatOffers": "Active offerings",
+  "instActionRequests": "Requests",
+  "instActionRequestsSub": "Review and answer spot requests",
+  "instActionOffers": "Openings",
+  "instActionOffersSub": "Courses, groups and capacity",
+  "instActionStudents": "Students",
+  "instActionStudentsSub": "Enrolled by course and group",
+  "instActionComms": "Communications",
+  "instActionCommsSub": "Calendar and notices",
+  "instActionDocs": "Documents",
+  "instActionDocsSub": "Request and review documents",
+  "instActionCroquis": "Seating plans",
+  "instActionCroquisSub": "Classroom layouts",
+  "instActionProfile": "Public profile",
+  "instActionProfileSub": "How families see you",
+  "instActionPlan": "Plan",
+  "instActionPlanSub": "Levels, modules and price",
+  "instGettingStarted": "Getting started",
+  "instGettingStartedSub": "Complete these steps to start receiving students.",
+  "instStepProfile": "Complete your public profile",
+  "instStepOffer": "Publish your first opening",
+  "instStepRequest": "Get your first request",
+  "instToReview": "To review",
+  "instNoPending": "No pending requests. All caught up!",
+  "instLoadError": "We couldn't load the institution's data.",
+  "instSignInAgain": "Sign in again",
+  "notifOlder": "Earlier",
+  "prefsAbout": "About ATENA",
+  "prefsVersion": "Version {version}",
+  "@prefsVersion": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "prefsPrivacyTitle": "Privacy and data",
+  "prefsPrivacyBody": "In this version, ATENA stores all information (accounts, students, requests, documents and photos) only on this device. Nothing is sent to servers or third parties. Passwords are stored protected with a secure hash. You can delete your account at any time from the “More options” menu on your home screen.",
+  "prefsDeleteData": "Delete all data on this device",
+  "prefsDeleteDataConfirmTitle": "Delete all data?",
+  "prefsDeleteDataConfirm": "All accounts, students, institutions, requests and documents stored on this device will be deleted. This can't be undone.",
+  "prefsDeleteDataCta": "Delete everything",
+  "prefsDeleteDataDone": "All data was deleted.",
+  "demoLink": "Try it with sample data",
+  "demoConfirmTitle": "Load sample data?",
+  "demoConfirmBody": "We'll create three sample institutions and a sample family on this device so you can explore ATENA. You can delete them anytime from Preferences.",
+  "demoConfirmCta": "Load sample",
+  "demoLoading": "Preparing sample data…",
+  "demoReadyTitle": "All set! You can now explore ATENA",
+  "demoReadyBody": "Use these sample accounts. The password for all of them is {password}.",
+  "@demoReadyBody": {
+    "placeholders": {
+      "password": {}
+    }
+  },
+  "demoFamilyLabel": "Family with two students",
+  "demoInstitutionsLabel": "Institutions",
+  "demoEnterFamily": "Sign in as the family",
+  "demoEnterInstitution": "Sign in as the school",
+  "demoAlreadyLoaded": "The sample data was already loaded.",
+  "calAlTitulo": "Calendar",
+  "calAlNuevaNota": "New note",
+  "calAlEditarNota": "Edit note",
+  "calAlEliminarNota": "Delete note",
+  "calAlEliminarNotaConfirm": "Delete this note?",
+  "calAlEliminarNotaMensaje": "“{titulo}” will be removed from your calendar.",
+  "@calAlEliminarNotaMensaje": {
+    "placeholders": {
+      "titulo": {
+        "type": "String"
+      }
+    }
+  },
+  "calAlNotaGuardada": "Note saved.",
+  "calAlNotaEliminada": "Note deleted.",
+  "calAlNotaTituloHint": "E.g. Bring the signed permission slip",
+  "calAlNotaHora": "Time (optional)",
+  "calAlNotaQuitarHora": "Clear time",
+  "calAlNotaDetalle": "Details (optional)",
+  "calAlNotaPersonal": "Personal note",
+  "calAlNotaAyuda": "Your notes are private: only you can see them.",
+  "calAlTodoElDia": "All day",
+  "calAlRango": "From {desde} to {hasta}",
+  "@calAlRango": {
+    "placeholders": {
+      "desde": {
+        "type": "String"
+      },
+      "hasta": {
+        "type": "String"
+      }
+    }
+  },
+  "calAlCuando": "When",
+  "calAlLugar": "Where",
+  "calAlAsistenciaTitulo": "Will you attend?",
+  "calAlAsistenciaAyuda": "The institution is asking you to confirm your attendance.",
+  "calAlAsistenciaPasado": "This event has already taken place.",
+  "calAlAsistenciaGuardada": "Response sent: {respuesta}.",
+  "@calAlAsistenciaGuardada": {
+    "placeholders": {
+      "respuesta": {
+        "type": "String"
+      }
+    }
+  },
+  "calAlResponder": "Please RSVP",
+  "calAlNadaEsteDia": "Nothing scheduled for this day.",
+  "calAlAgregarNota": "Add a note",
+  "calAlProximos": "Coming up",
+  "calAlVacioTitulo": "Your calendar is ready",
+  "calAlVacioMensaje": "This is where you'll see the events posted by the institutions where your spot is confirmed: meetings, ceremonies, field trips and more. You can also add your own notes and reminders.",
+  "calAlSinEventos": "Events from your institutions will appear here once a spot is confirmed.",
+  "calAlDiaItems": "{n, plural, =0{Nothing scheduled} =1{1 entry} other{{n} entries}}",
+  "@calAlDiaItems": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "calAlEventoNoDisponible": "This event is no longer available.",
+  "docAlTitulo": "Documents",
+  "docAlHeroPendientes": "{n, plural, =1{You have 1 document to submit} other{You have {n} documents to submit}}",
+  "@docAlHeroPendientes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "docAlHeroPendientesSub": "Upload them right here: take a photo or choose a file.",
+  "docAlHeroAlDia": "You're all set!",
+  "docAlHeroAlDiaSub": "We'll let you know if an institution asks for something new.",
+  "docAlSeccionEntregar": "To submit",
+  "docAlSeccionEntregarSub": "Upload them to complete the enrollment.",
+  "docAlSeccionRevision": "Under review",
+  "docAlSeccionRevisionSub": "The institution is reviewing them. We'll let you know when they reply.",
+  "docAlSeccionAprobados": "Approved",
+  "docAlSeccionHistorial": "History",
+  "docAlSeccionHistorialSub": "Requests cancelled by the institution",
+  "docAlNadaParaEntregar": "You have no documents to submit.",
+  "docAlVacioTitulo": "No pending documents",
+  "docAlVacioMensaje": "When an institution asks you for a document, such as an ID or a medical certificate, you'll see it here and can upload it in a couple of steps.",
+  "docAlSubirArchivo": "Upload file",
+  "docAlReemplazarArchivo": "Replace file",
+  "docAlVerArchivo": "View file",
+  "docAlSubiendo": "Uploading…",
+  "docAlEntregado": "Done! The document was sent to the institution.",
+  "docAlMotivo": "Reason",
+  "docAlRechazadoSinMotivo": "The institution asked you to upload it again.",
+  "docAlEntregarHasta": "Due by {fecha}",
+  "@docAlEntregarHasta": {
+    "placeholders": {
+      "fecha": {
+        "type": "String"
+      }
+    }
+  },
+  "docAlVencio": "Was due on {fecha}",
+  "@docAlVencio": {
+    "placeholders": {
+      "fecha": {
+        "type": "String"
+      }
+    }
+  },
+  "docAlVenceHoy": "Due today",
+  "docAlVenceManiana": "Due tomorrow",
+  "docAlPedidoEl": "Requested on {fecha}",
+  "@docAlPedidoEl": {
+    "placeholders": {
+      "fecha": {
+        "type": "String"
+      }
+    }
+  },
+  "docAlEntregadoEl": "Submitted on {fecha}",
+  "@docAlEntregadoEl": {
+    "placeholders": {
+      "fecha": {
+        "type": "String"
+      }
+    }
+  },
+  "docAlAprobadoEl": "Approved on {fecha}",
+  "@docAlAprobadoEl": {
+    "placeholders": {
+      "fecha": {
+        "type": "String"
+      }
+    }
+  },
+  "docAlCanceladoEl": "Cancelled on {fecha}",
+  "@docAlCanceladoEl": {
+    "placeholders": {
+      "fecha": {
+        "type": "String"
+      }
+    }
+  },
+  "docAlIndicaciones": "Instructions",
+  "docAlFechaPedido": "Request date",
+  "docAlFechaLimite": "Deadline",
+  "docAlArchivoEntregado": "Submitted file",
+  "docAlAyudaPendiente": "Upload the file so the institution can review it.",
+  "docAlAyudaVencido": "The deadline has passed. Please upload it as soon as possible.",
+  "docAlAyudaRevision": "The institution is reviewing it. If you uploaded the wrong file, you can replace it.",
+  "docAlAyudaAprobado": "The institution approved this document. There's nothing else to do.",
+  "docAlAyudaCancelado": "The institution cancelled this request. You no longer need to submit it.",
+  "docAlFuenteTitulo": "How would you like to upload it?",
+  "docAlFuenteArchivo": "Choose a file",
+  "docAlFuenteArchivoSub": "PDF or image (JPG, PNG, WEBP or HEIC), up to 3 MB",
+  "docAlFuenteCamara": "Take a photo",
+  "docAlFuenteCamaraSub": "Photograph the document with your camera",
+  "docAlFuenteGaleria": "Choose a photo",
+  "docAlFuenteGaleriaSub": "From the images saved on your device",
+  "docAlFuenteTip": "Tip: take the photo in good light and make sure the whole document is legible.",
+  "docAlErrorSeleccion": "We couldn't open the file or the camera. Check the permissions and try again.",
+  "docAlErrorArchivo": "We couldn't find the submitted file.",
+  "docAlErrorPdf": "We couldn't open the PDF. Please try again in a few minutes.",
+  "docAlSinVistaPrevia": "A preview isn't available for this image.",
+  "docAlNoDisponible": "This request is no longer available.",
+  "fichaAlTitulo": "Student record",
+  "fichaAlDni": "ID {dni}",
+  "@fichaAlDni": {
+    "placeholders": {
+      "dni": {
+        "type": "String"
+      }
+    }
+  },
+  "fichaAlAgregarFoto": "Add photo",
+  "fichaAlCambiarFoto": "Change photo",
+  "fichaAlFotoCamara": "Take a photo",
+  "fichaAlFotoGaleria": "Choose from gallery",
+  "fichaAlFotoArchivo": "Choose an image",
+  "fichaAlQuitarFoto": "Remove photo",
+  "fichaAlQuitarFotoConfirm": "Remove the photo?",
+  "fichaAlQuitarFotoMensaje": "The student's initials will be shown instead.",
+  "fichaAlFotoGuardada": "Photo updated.",
+  "fichaAlFotoEliminada": "Photo removed.",
+  "fichaAlFotoError": "We couldn't open the camera or the gallery. Check the permissions and try again.",
+  "fichaAlDatosPersonales": "Personal details",
+  "fichaAlEditarDatos": "Edit details",
+  "fichaAlInstituciones": "Institutions",
+  "fichaAlInstitucionesSub": "Where the student's spot is confirmed",
+  "fichaAlSinInstituciones": "No confirmed spots yet. When an institution confirms a request, you'll see it here.",
+  "fichaAlConfirmadaEl": "Confirmed on {fecha}",
+  "@fichaAlConfirmadaEl": {
+    "placeholders": {
+      "fecha": {
+        "type": "String"
+      }
+    }
+  },
+  "fichaAlPdf": "PDF record",
+  "fichaAlPdfSub": "To hand in to an institution or keep a copy",
+  "fichaAlDescargarPdf": "Download record as PDF",
+  "fichaAlDescargarPdfSub": "With personal details, photo and institutions",
+  "fichaAlImprimir": "Print",
+  "fichaAlImprimirSub": "Open the preview to print the record",
+  "fichaAlGenerando": "Generating PDF…",
+  "fichaAlPdfError": "We couldn't generate the PDF. Please try again in a few minutes.",
+  "ofertasNueva": "New opening",
+  "ofertasErrorCarga": "We couldn't load the openings.",
+  "ofertasSinPlanTitulo": "Your plan doesn't include any levels or activities yet",
+  "ofertasSinPlanMensaje": "To publish openings, enable curricular levels or extracurricular activities under Plan, in your institution dashboard.",
+  "ofertasVolverPanel": "Back to dashboard",
+  "ofertasTipoFueraDelPlan": "Your current plan doesn't include this type of opening. You can still edit, pause or delete the ones you've published.",
+  "ofertasFueraDelPlan": "Not in your plan",
+  "ofertasVacioCurricularTitulo": "You haven't published any curricular openings yet",
+  "ofertasVacioCurricularMensaje": "Create your grades, years or classes with their capacity so families can request a spot.",
+  "ofertasVacioExtraTitulo": "You haven't published any extracurricular activities yet",
+  "ofertasVacioExtraMensaje": "Add workshops, sports or languages with their capacity and schedule so families can sign up.",
+  "ofertasNOfertas": "{n, plural, =1{1 offering} other{{n} offerings}}",
+  "@ofertasNOfertas": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasNLibres": "{n, plural, =0{No spots left} =1{1 spot left} other{{n} spots left}}",
+  "@ofertasNLibres": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasAgregarEn": "Add opening in {categoria}",
+  "@ofertasAgregarEn": {
+    "placeholders": {
+      "categoria": {}
+    }
+  },
+  "ofertasActiva": "Active",
+  "ofertasPausada": "Paused",
+  "ofertasCompleta": "Full",
+  "ofertasConfirmados": "{n, plural, =0{None confirmed} =1{1 confirmed} other{{n} confirmed}}",
+  "@ofertasConfirmados": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasPendientes": "{n, plural, =1{1 pending} other{{n} pending}}",
+  "@ofertasPendientes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasOcupacion": "{confirmados} of {total} spots taken",
+  "@ofertasOcupacion": {
+    "placeholders": {
+      "confirmados": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasPausar": "Pause",
+  "ofertasReanudar": "Resume",
+  "ofertasDuplicar": "Duplicate",
+  "ofertasVerSolicitudes": "View requests",
+  "ofertasPausadaOk": "Opening paused: it won't receive new requests.",
+  "ofertasReanudadaOk": "Opening resumed: it's accepting requests again.",
+  "ofertasEliminarTitulo": "Delete “{nombre}”?",
+  "@ofertasEliminarTitulo": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "ofertasEliminarMensaje": "Families won't see it anymore. This can't be undone.",
+  "ofertasEliminadaOk": "Opening deleted.",
+  "ofertasFormEditar": "Edit opening",
+  "ofertasFormDuplicar": "Duplicate opening",
+  "ofertasFormCopiaAviso": "You're creating a copy of “{nombre}”. Change what you need (the group, for example) and save it.",
+  "@ofertasFormCopiaAviso": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "ofertasFormConfirmadosAviso": "{n, plural, =1{This opening has 1 confirmed student. Requests already sent keep the original details.} other{This opening has {n} confirmed students. Requests already sent keep the original details.}}",
+  "@ofertasFormConfirmadosAviso": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasSeccionTipo": "Opening type",
+  "ofertasTipoCurricularDesc": "Grades, years and classes",
+  "ofertasTipoExtraDesc": "Workshops, sports and activities",
+  "ofertasSeccionNivel": "Level",
+  "ofertasSeccionCategoria": "Category",
+  "ofertasElegiNivel": "Choose a level.",
+  "ofertasElegiCategoria": "Choose a category.",
+  "ofertasSeccionDatos": "Opening details",
+  "ofertasTituloCurricularLabel": "Grade, year or class",
+  "ofertasTituloExtraLabel": "Activity",
+  "ofertasSugerenciasAyuda": "Tap a suggestion or type your own.",
+  "ofertasSugSala": "Age {n} class",
+  "@ofertasSugSala": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasSugGrado": "Grade {n}",
+  "@ofertasSugGrado": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasSugAnio": "Year {n}",
+  "@ofertasSugAnio": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasEjemplosGeneral": "E.g., Soccer, English, Robotics",
+  "ofertasEjemplosDeporte": "E.g., Soccer, Volleyball, Swimming",
+  "ofertasEjemplosArte": "E.g., Drama, Choir, Painting",
+  "ofertasEjemplosIdiomas": "E.g., Beginner English, Portuguese, Public speaking",
+  "ofertasEjemplosCiencia": "E.g., Robotics, Coding, Science club",
+  "ofertasEjemplosApoyo": "E.g., Homework help, Study skills",
+  "ofertasEjemplosBienestar": "E.g., Yoga, Emotions workshop, Career guidance",
+  "ofertasEjemplosOtros": "E.g., Chess, Cooking, Gardening",
+  "ofertasGrupoLabel": "Section or group (optional)",
+  "ofertasGrupoHelper": "E.g., A, B, Saturday group",
+  "ofertasSeccionHorario": "Shift and schedule",
+  "ofertasTurnoLabel": "Shift",
+  "ofertasHoraDesde": "From",
+  "ofertasHoraHasta": "To",
+  "ofertasHorarioRango": "{desde} to {hasta}",
+  "@ofertasHorarioRango": {
+    "placeholders": {
+      "desde": {},
+      "hasta": {}
+    }
+  },
+  "ofertasHorarioInvalido": "The end time must be later than the start time.",
+  "ofertasHorarioIncompleto": "Fill in both times or leave both empty.",
+  "ofertasHorarioActual": "Current schedule: {horario}. Pick the times to replace it.",
+  "@ofertasHorarioActual": {
+    "placeholders": {
+      "horario": {}
+    }
+  },
+  "ofertasQuitarHorario": "Clear schedule",
+  "ofertasDiasLabel": "Days",
+  "ofertasDiaLun": "Mon",
+  "ofertasDiaMar": "Tue",
+  "ofertasDiaMie": "Wed",
+  "ofertasDiaJue": "Thu",
+  "ofertasDiaVie": "Fri",
+  "ofertasDiaSab": "Sat",
+  "ofertasDiaDom": "Sun",
+  "ofertasDiasRango": "{desde} to {hasta}",
+  "@ofertasDiasRango": {
+    "placeholders": {
+      "desde": {},
+      "hasta": {}
+    }
+  },
+  "ofertasDiasLista": "{lista} and {ultimo}",
+  "@ofertasDiasLista": {
+    "placeholders": {
+      "lista": {},
+      "ultimo": {}
+    }
+  },
+  "ofertasDiasTodos": "Every day",
+  "ofertasDiasActual": "Current days: {dias}. Select them to replace them.",
+  "@ofertasDiasActual": {
+    "placeholders": {
+      "dias": {}
+    }
+  },
+  "ofertasSeccionCupo": "Capacity and requirements",
+  "ofertasCupoLabel": "Total capacity",
+  "ofertasCupoHelper": "How many students can enroll.",
+  "ofertasCupoConfirmadosHelper": "{n, plural, =1{1 student is confirmed.} other{{n} students are confirmed.}}",
+  "@ofertasCupoConfirmadosHelper": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasCupoMinimo": "Capacity must be at least 1.",
+  "ofertasCupoMenorConfirmados": "{n, plural, =1{1 student is already confirmed: capacity can't be lower.} other{{n} students are already confirmed: capacity can't be lower.}}",
+  "@ofertasCupoMenorConfirmados": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ofertasRestarUno": "Decrease",
+  "ofertasSumarUno": "Increase",
+  "ofertasEdadMinLabel": "Minimum age",
+  "ofertasEdadMaxLabel": "Maximum age",
+  "ofertasAniosSufijo": "years",
+  "ofertasEdadHelper": "Optional: leave them empty if there's no age limit.",
+  "ofertasEdadRangoInvalido": "Must be equal to or greater than the minimum age.",
+  "ofertasArancelLabel": "Fee (optional)",
+  "ofertasArancelHelper": "E.g., $150 per month. Leave it empty if it's free.",
+  "ofertasDescripcionLabel": "Description (optional)",
+  "ofertasDescripcionHelper": "Tell families what's included, requirements or materials.",
+  "ofertasSeccionPublicacion": "Visibility",
+  "ofertasActivaLabel": "Accepting requests",
+  "ofertasActivaOn": "Active: families can request a spot.",
+  "ofertasActivaOff": "Paused: families can't request a spot for now.",
+  "ofertasCrear": "Create opening",
+  "ofertasCreadaOk": "Opening created.",
+  "ofertasGuardadaOk": "Changes saved.",
+  "ofertasDescartarTitulo": "Discard changes?",
+  "ofertasDescartarMensaje": "The changes you made won't be saved.",
+  "ofertasDescartar": "Discard",
+  "ofertasRevisaCampos": "Please check the highlighted fields.",
+  "crqNuevo": "New seating plan",
+  "crqErrorCarga": "We couldn't load the seating plans.",
+  "crqVacioTitulo": "You haven't created any seating plans yet",
+  "crqVacioMensaje": "Lay out the desks in each classroom and seat your students. You can export it as a PDF later.",
+  "crqFilasColumnas": "{filas} × {columnas} desks",
+  "@crqFilasColumnas": {
+    "placeholders": {
+      "filas": {
+        "type": "int"
+      },
+      "columnas": {
+        "type": "int"
+      }
+    }
+  },
+  "crqOcupados": "{ocupados} of {total} seats taken",
+  "@crqOcupados": {
+    "placeholders": {
+      "ocupados": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "crqSinVacante": "No linked opening",
+  "crqVacanteAsociada": "Linked opening",
+  "crqVacanteAsociadaHelper": "We'll suggest its confirmed students when you assign desks.",
+  "crqVacanteNoDisponible": "The linked opening no longer exists",
+  "crqCambiarVacante": "Change linked opening",
+  "crqAsociarVacante": "Link an opening",
+  "crqVacanteActualizada": "Linked opening updated.",
+  "crqNombreLabel": "Seating plan name",
+  "crqNombreHelper": "E.g., Grade 1 A, Room 3, Lab",
+  "crqFilas": "Rows",
+  "crqColumnas": "Columns",
+  "crqQuitarUno": "Remove one",
+  "crqAgregarUno": "Add one",
+  "crqCrear": "Create seating plan",
+  "crqVistaPrevia": "Preview",
+  "crqFrente": "Front of the classroom · Board",
+  "crqBanco": "Desk {n}",
+  "@crqBanco": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "crqBancoLibre": "Empty",
+  "crqAyuda": "Tap a desk to seat a student. Press and hold, then drag to move them.",
+  "crqAyudaScroll": "Swipe sideways to see the whole classroom.",
+  "crqOcupadoPor": "Taken by {nombre}",
+  "@crqOcupadoPor": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "crqBuscarAlumno": "Search student",
+  "crqAlumnosDeVacante": "Confirmed students in {oferta}",
+  "@crqAlumnosDeVacante": {
+    "placeholders": {
+      "oferta": {}
+    }
+  },
+  "crqAlumnosInstitucion": "Confirmed students at the institution",
+  "crqTodosSentados": "All confirmed students already have a desk.",
+  "crqSinConfirmados": "There are no confirmed students yet. You can type a name.",
+  "crqSinResultados": "No students match your search.",
+  "crqErrorAlumnos": "We couldn't load the confirmed students. You can type a name.",
+  "crqNombreLibre": "Or type a name",
+  "crqNombreLibreLabel": "Full name",
+  "crqAsignar": "Seat",
+  "crqDejarLibre": "Leave empty",
+  "crqMovidoDesde": "{nombre} moved from desk {desde} to desk {hasta}.",
+  "@crqMovidoDesde": {
+    "placeholders": {
+      "nombre": {},
+      "desde": {
+        "type": "int"
+      },
+      "hasta": {
+        "type": "int"
+      }
+    }
+  },
+  "crqGuardado": "Saved",
+  "crqSinGuardar": "Not saved",
+  "crqErrorGuardar": "We couldn't save the last change. Tap “Not saved” to try again.",
+  "crqRenombrar": "Rename",
+  "crqRenombrarTitulo": "Rename seating plan",
+  "crqTamanoCorto": "Size",
+  "crqTamanoTitulo": "Classroom size",
+  "crqTamanoAyuda": "Rows go from the board to the back; columns go from left to right.",
+  "crqTamanoPierde": "{n, plural, =1{1 student would end up outside the classroom and be removed from the plan.} other{{n} students would end up outside the classroom and be removed from the plan.}}",
+  "@crqTamanoPierde": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "crqTamanoConfirmarTitulo": "Make the classroom smaller?",
+  "crqAplicar": "Apply",
+  "crqVaciar": "Clear",
+  "crqVaciarTitulo": "Clear the seating plan?",
+  "crqVaciarMensaje": "{n, plural, =1{1 taken seat will be freed. The desk layout stays the same.} other{{n} taken seats will be freed. The desk layout stays the same.}}",
+  "@crqVaciarMensaje": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "crqVaciadoOk": "Seating plan cleared.",
+  "crqYaVacio": "The seating plan is already empty.",
+  "crqPdfCorto": "PDF",
+  "crqExportarPdf": "Export PDF",
+  "crqPdfError": "We couldn't generate the PDF. Please try again in a moment.",
+  "crqPdfArchivo": "seating_plan_{nombre}",
+  "@crqPdfArchivo": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "crqEliminarTitulo": "Delete “{nombre}”?",
+  "@crqEliminarTitulo": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "crqEliminarMensaje": "The desk layout will be deleted. This can't be undone.",
+  "crqEliminadoOk": "Seating plan deleted.",
+  "comInstTitle": "Communications",
+  "comInstTabCalendario": "Calendar",
+  "comInstTabAvisos": "Notices",
+  "comInstLoadError": "We couldn't load your communications.",
+  "comInstProximos": "Upcoming",
+  "comInstPasados": "Past",
+  "comInstNuevoEvento": "New event",
+  "comInstEditarEvento": "Edit event",
+  "comInstEliminarEvento": "Delete event",
+  "comInstTodoElDia": "All day",
+  "comInstRangoFechas": "From {desde} to {hasta}",
+  "@comInstRangoFechas": {
+    "placeholders": {
+      "desde": {},
+      "hasta": {}
+    }
+  },
+  "comInstParaTodos": "All students",
+  "comInstEnCurso": "Happening now",
+  "comInstOfertaEliminada": "Deleted class or group",
+  "comInstYMas": "{nombres} and {n} more",
+  "@comInstYMas": {
+    "placeholders": {
+      "nombres": {},
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstAsistiran": "{n, plural, =1{1 attending} other{{n} attending}}",
+  "@comInstAsistiran": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstTalVez": "{n, plural, =1{1 maybe} other{{n} maybe}}",
+  "@comInstTalVez": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstNoAsistiran": "{n, plural, =1{1 not attending} other{{n} not attending}}",
+  "@comInstNoAsistiran": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstSinRespuestas": "No replies yet",
+  "comInstSinProximosTitulo": "No upcoming events",
+  "comInstSinProximosMensaje": "Publish meetings, ceremonies, exams or holidays: they appear in each family's calendar and families get notified.",
+  "comInstSinPasadosTitulo": "No past events yet",
+  "comInstSinPasadosMensaje": "Events that have already taken place will appear here.",
+  "comInstSeccionTipo": "Event type",
+  "comInstSeccionTipoAyuda": "It helps families recognize it at a glance.",
+  "comInstSeccionDatos": "Event details",
+  "comInstCampoTitulo": "Title",
+  "comInstCampoTituloAyuda": "E.g.: 1st grade family meeting",
+  "comInstCampoDescripcion": "Description (optional)",
+  "comInstCampoDescripcionAyuda": "What families need to know: what to bring, how to get there, times.",
+  "comInstCampoLugar": "Place (optional)",
+  "comInstSeccionCuando": "When",
+  "comInstCampoFecha": "Date",
+  "comInstCampoFechaFin": "End date (optional)",
+  "comInstCampoFechaFinAyuda": "For events lasting several days, like holidays.",
+  "comInstQuitarFechaFin": "Remove end date",
+  "comInstErrorFecha": "Choose a date.",
+  "comInstErrorFechaFin": "It must be after the start date.",
+  "comInstTodoElDiaAyuda": "Turn it off to set a start time.",
+  "comInstCampoHora": "Start time",
+  "comInstErrorHora": "Choose a start time.",
+  "comInstSeccionDestinatarios": "Recipients",
+  "comInstSeccionDestinatariosAyuda": "Families of confirmed students receive it.",
+  "comInstDestOfertas": "Classes or groups",
+  "comInstDestElegirAyuda": "Choose one or more classes or groups.",
+  "comInstDestErrorVacio": "Choose at least one class or group.",
+  "comInstDestSinOfertas": "Once you publish openings, you'll be able to pick specific classes or groups.",
+  "comInstAlumnosConfirmados": "{n, plural, =0{No confirmed students} =1{1 confirmed student} other{{n} confirmed students}}",
+  "@comInstAlumnosConfirmados": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstPedirConfirmacion": "Ask families to RSVP",
+  "comInstPedirConfirmacionAyuda": "Families can reply whether they'll attend, and you'll see the replies here.",
+  "comInstSeAvisaraA": "{n, plural, =1{1 student will be notified} other{{n} students will be notified}}",
+  "@comInstSeAvisaraA": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstSeAvisaraAyuda": "They'll get a notification and the event will appear in their calendar.",
+  "comInstCalculando": "Counting recipients…",
+  "comInstSinDestinatariosEvento": "There are no confirmed students in this selection yet. Nobody will be notified now, but the event will appear in the calendar of anyone who joins later.",
+  "comInstEditarSinAviso": "Changes are saved without sending a new notification.",
+  "comInstPublicar": "Publish event",
+  "comInstPublicando": "Publishing…",
+  "comInstGuardarCambios": "Save changes",
+  "comInstEventoPublicado": "{n, plural, =0{Event published.} =1{Event published. We notified 1 student.} other{Event published. We notified {n} students.}}",
+  "@comInstEventoPublicado": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstEventoActualizado": "Changes saved.",
+  "comInstEventoEliminado": "Event deleted.",
+  "comInstEliminarEventoTitulo": "Delete this event?",
+  "comInstEliminarEventoMensaje": "It will be removed from families' calendars along with its replies. This can't be undone.",
+  "comInstDescartarTitulo": "Discard changes?",
+  "comInstDescartarMensaje": "What you've entered won't be saved.",
+  "comInstDescartar": "Discard",
+  "comInstSeguirEditando": "Keep editing",
+  "comInstDetalleTitulo": "Event details",
+  "comInstInfoFecha": "Date",
+  "comInstInfoHorario": "Time",
+  "comInstInfoLugar": "Place",
+  "comInstInfoAlcance": "Students reached",
+  "comInstInfoDescripcion": "Description",
+  "comInstPublicadoEl": "Published on {fecha}",
+  "@comInstPublicadoEl": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "comInstRespuestasTitulo": "Attendance replies",
+  "comInstRespuestasConteo": "{n, plural, =0{No replies yet} =1{1 reply} other{{n} replies}}",
+  "@comInstRespuestasConteo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstStatAsistiran": "Attending",
+  "comInstStatTalVez": "Maybe",
+  "comInstStatNoAsistiran": "Not attending",
+  "comInstStatSinResponder": "No reply yet",
+  "comInstSinRespuestasDetalle": "No one has replied yet. Replies will show up here as families respond.",
+  "comInstNoPideConfirmacion": "This event doesn't ask for an RSVP. You can turn it on by editing the event.",
+  "comInstNuevoAviso": "New notice",
+  "comInstNuevoAvisoAyuda": "It reaches the families of your confirmed students as a notification.",
+  "comInstAvisoCampoTituloAyuda": "E.g.: Change in pick-up time",
+  "comInstAvisoCampoMensaje": "Message",
+  "comInstLlegaraA": "{n, plural, =1{It will reach 1 student} other{It will reach {n} students}}",
+  "@comInstLlegaraA": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstSinDestinatariosAviso": "There are no confirmed students in this selection yet. Once you confirm requests, you'll be able to send them notices.",
+  "comInstEnviarAviso": "Send notice",
+  "comInstConfirmarEnvio": "{n, plural, =1{Send to 1 student?} other{Send to {n} students?}}",
+  "@comInstConfirmarEnvio": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstConfirmarEnvioMensaje": "Families get it as a notification. Once sent, it can't be edited or deleted.",
+  "comInstAvisoEnviado": "{n, plural, =1{Notice sent to 1 student.} other{Notice sent to {n} students.}}",
+  "@comInstAvisoEnviado": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstAvisosVacioTitulo": "You haven't sent any notices yet",
+  "comInstAvisosVacioMensaje": "Notices reach the families of confirmed students as notifications. Use them for reminders, schedule changes or news.",
+  "comInstAvisosEnviados": "Sent notices",
+  "comInstAvisoAlcance": "{n, plural, =0{Didn't reach any students} =1{Reached 1 student} other{Reached {n} students}}",
+  "@comInstAvisoAlcance": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "comInstEnviadoEl": "Sent on {fecha}",
+  "@comInstEnviadoEl": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "docInstTitle": "Documents",
+  "docInstTabRevisar": "To review",
+  "docInstTabPendientes": "Pending",
+  "docInstTabAprobados": "Approved",
+  "docInstTabCancelados": "Cancelled",
+  "docInstLoadError": "We couldn't load the documents.",
+  "docInstPedirDocumento": "Request document",
+  "docInstPedidoEl": "Requested on {fecha}",
+  "@docInstPedidoEl": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "docInstLimite": "Due: {fecha}",
+  "@docInstLimite": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "docInstEntregadoEl": "Submitted on {fecha}",
+  "@docInstEntregadoEl": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "docInstVacioRevisarTitulo": "Nothing to review",
+  "docInstVacioRevisarMensaje": "When a family uploads a document you requested, it will show up here.",
+  "docInstVacioPendientesTitulo": "No pending requests",
+  "docInstVacioPendientesMensaje": "Ask for IDs, birth certificates, medical forms and more. The family gets notified and uploads it from the app.",
+  "docInstVacioAprobadosTitulo": "No approved documents yet",
+  "docInstVacioAprobadosMensaje": "Documents you approve are kept here.",
+  "docInstVacioCanceladosTitulo": "No cancelled requests",
+  "docInstVacioCanceladosMensaje": "If you cancel a request you no longer need, it will show up here.",
+  "docInstPedirTitulo": "Request a document",
+  "docInstPedirAyuda": "We'll notify the family so they can upload it from the app.",
+  "docInstElegirAlumno": "Which student?",
+  "docInstBuscarAlumno": "Search by name or ID number",
+  "docInstLimpiarBusqueda": "Clear search",
+  "docInstSinResultados": "No students match your search.",
+  "docInstSinAlumnosTitulo": "You don't have any students yet",
+  "docInstSinAlumnosMensaje": "You can request documents from students with pending or confirmed requests. Once you receive your first request, you'll be able to do it from here.",
+  "docInstSolicitudPendiente": "Pending request",
+  "docInstCambiarAlumno": "Change",
+  "docInstQueDocumento": "Which document do you need?",
+  "docInstIndicacionesLabel": "Instructions (optional)",
+  "docInstIndicacionesAyuda": "E.g.: Copy of both sides",
+  "docInstNombreOtroLabel": "Document name",
+  "docInstNombreOtroAyuda": "E.g.: Field trip permission slip",
+  "docInstFechaLimiteLabel": "Due date (optional)",
+  "docInstQuitarFechaLimite": "Remove due date",
+  "docInstPedidoEnviado": "Request sent: {documento} · {alumno}",
+  "@docInstPedidoEnviado": {
+    "placeholders": {
+      "documento": {},
+      "alumno": {}
+    }
+  },
+  "docInstDetalleTitulo": "Document request",
+  "docInstAlumno": "Student",
+  "docInstFechaPedido": "Requested on",
+  "docInstFechaLimite": "Due date",
+  "docInstSinFechaLimite": "No due date",
+  "docInstIndicaciones": "Instructions",
+  "docInstEsperandoArchivo": "Waiting for the family to upload the file.",
+  "docInstRevisarAyuda": "Check the file, then approve it or request changes.",
+  "docInstMotivoCorreccion": "You requested changes",
+  "docInstAprobadoInfo": "Approved on {fecha}.",
+  "@docInstAprobadoInfo": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "docInstCanceladoInfo": "You cancelled this request on {fecha}.",
+  "@docInstCanceladoInfo": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "docInstArchivoEntregado": "Submitted file",
+  "docInstArchivoAnterior": "Last submitted file",
+  "docInstSubidoEl": "Uploaded on {fecha}",
+  "@docInstSubidoEl": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "docInstTipoPdf": "PDF document",
+  "docInstTipoImagen": "Image",
+  "docInstTipoArchivo": "File",
+  "docInstTamanoKb": "{n} KB",
+  "@docInstTamanoKb": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "docInstTamanoMb": "{n} MB",
+  "@docInstTamanoMb": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "docInstVerArchivo": "View file",
+  "docInstDescargar": "Download",
+  "docInstArchivoError": "We couldn't open the file. Please try again in a moment.",
+  "docInstSinVistaPrevia": "There's no preview for this format. Download it to view it.",
+  "docInstAprobar": "Approve",
+  "docInstPedirCorreccion": "Request changes",
+  "docInstAprobarTitulo": "Approve this document?",
+  "docInstAprobarMensaje": "We'll let {alumno}'s family know.",
+  "@docInstAprobarMensaje": {
+    "placeholders": {
+      "alumno": {}
+    }
+  },
+  "docInstAprobado": "Document approved.",
+  "docInstCorreccionAyuda": "Tell the family what needs to be fixed. They'll be able to upload a new file.",
+  "docInstMotivoLabel": "Reason",
+  "docInstMotivoAyuda": "E.g.: The photo is blurry and the number can't be read.",
+  "docInstMotivoRequerido": "Tell them what needs fixing.",
+  "docInstCorreccionEnviada": "We asked the family for changes.",
+  "docInstCancelarPedido": "Cancel request",
+  "docInstCancelarTitulo": "Cancel this request?",
+  "docInstCancelarMensaje": "The family won't need to submit it anymore. This can't be undone.",
+  "docInstMantener": "Keep it",
+  "docInstPedidoCancelado": "Request cancelled.",
+  "pdfGeneradoCon": "Generated with ATENA · {fecha}",
+  "@pdfGeneradoCon": {
+    "placeholders": {
+      "fecha": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfPagina": "Page {actual} of {total}",
+  "@pdfPagina": {
+    "placeholders": {
+      "actual": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pdfNombre": "First name",
+  "pdfApellido": "Last name",
+  "pdfApellidoNombre": "Last name, first name",
+  "pdfDni": "ID number",
+  "pdfDniValor": "ID {dni}",
+  "@pdfDniValor": {
+    "placeholders": {
+      "dni": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfFechaNacimiento": "Date of birth",
+  "pdfEdad": "Age",
+  "pdfEmail": "Email",
+  "pdfTelefono": "Phone",
+  "pdfContacto": "Contact",
+  "pdfInstitucion": "Institution",
+  "pdfOferta": "Offering",
+  "pdfCategoria": "Category",
+  "pdfTurno": "Shift",
+  "pdfHorario": "Schedule",
+  "pdfDias": "Days",
+  "pdfEdades": "Ages",
+  "pdfEstado": "Status",
+  "pdfFecha": "Date",
+  "pdfNota": "Note",
+  "pdfFichaTitulo": "Student record",
+  "pdfDatosPersonales": "Personal details",
+  "pdfSolicitudes": "Requests",
+  "pdfSolicitudesCantidad": "{n, plural, =0{No requests} =1{1 request} other{{n} requests}}",
+  "@pdfSolicitudesCantidad": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pdfSinSolicitudes": "There are no requests yet.",
+  "pdfComprobanteTitulo": "Request receipt",
+  "pdfCodigo": "Reference",
+  "pdfEnviadaEl": "Submitted on",
+  "pdfEmitidoEl": "Issued on",
+  "pdfEstadoActual": "Current status",
+  "pdfVacanteSolicitada": "Requested spot",
+  "pdfAlumno": "Student",
+  "pdfMensajeAlumno": "Message from the student",
+  "pdfRespuestaInstitucion": "Response from the institution",
+  "pdfHistorial": "History",
+  "pdfComprobanteAclaracion": "This receipt reflects the status of the request at the time it was issued.",
+  "pdfEstadoDescPendiente": "The institution hasn't responded to this request yet.",
+  "pdfEstadoDescConfirmada": "The institution confirmed the spot.",
+  "pdfEstadoDescRechazada": "The institution declined the request.",
+  "pdfEstadoDescCanceladaAlumno": "The request was cancelled by the student or their family.",
+  "pdfEstadoDescCanceladaInstitucion": "The institution withdrew the spot.",
+  "pdfListadoTitulo": "Confirmed students",
+  "pdfTotal": "Total",
+  "pdfAlumnosCantidad": "{n, plural, =0{No students} =1{1 student} other{{n} students}}",
+  "@pdfAlumnosCantidad": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pdfListadoVacio": "There are no confirmed students to show.",
+  "pdfCroquisTitulo": "Classroom seating chart",
+  "pdfFrenteAula": "Front of the classroom",
+  "pdfLugares": "Seats",
+  "pdfOcupados": "Occupied",
+  "pdfLibres": "Available",
+  "pdfLugarOcupado": "Occupied",
+  "pdfLugarLibre": "Available",
+  "solInstTabPendientes": "Pending",
+  "solInstTabConfirmadas": "Confirmed",
+  "solInstTabNoAceptadas": "Declined",
+  "solInstTabCanceladas": "Cancelled",
+  "solInstBuscarHint": "Search by name or ID number",
+  "solInstLimpiarBusqueda": "Clear search",
+  "solInstFiltrarVacante": "Filter by opening",
+  "solInstVacanteFiltro": "Opening",
+  "solInstTodasLasVacantes": "All openings",
+  "solInstQuitarFiltro": "Remove filter",
+  "solInstOrdenLlegada": "In order of arrival: oldest first.",
+  "solInstDni": "ID {dni}",
+  "@solInstDni": {
+    "placeholders": {
+      "dni": {}
+    }
+  },
+  "solInstConMensaje": "The family left a message",
+  "solInstConfirmar": "Confirm",
+  "solInstNoAceptar": "Decline",
+  "solInstConfirmarVacante": "Confirm spot",
+  "solInstDarDeBaja": "Withdraw student",
+  "solInstPedirDocumento": "Request a document",
+  "solInstDescargarComprobante": "Download receipt",
+  "solInstPdfError": "We couldn't create the PDF. Please try again in a few minutes.",
+  "solInstArchivoComprobante": "receipt",
+  "solInstVacioInicialTitulo": "No requests yet",
+  "solInstVacioInicialMsg": "Families send you requests from your public page on ATENA. Publish your openings and complete your public profile so they can find you more easily.",
+  "solInstIrAVacantes": "Go to Openings",
+  "solInstVacioPendientesTitulo": "No pending requests",
+  "solInstVacioPendientesMsg": "You're all caught up! New requests will show up here for you to review.",
+  "solInstVacioConfirmadasTitulo": "No confirmed spots yet",
+  "solInstVacioConfirmadasMsg": "When you confirm a request, it will show up here and the student will be listed in Students.",
+  "solInstVacioNoAceptadasTitulo": "No declined requests",
+  "solInstVacioNoAceptadasMsg": "Requests you decline will show up here, along with the reason you gave the family.",
+  "solInstVacioCanceladasTitulo": "No cancelled requests",
+  "solInstVacioCanceladasMsg": "Requests cancelled by families and students you withdrew will show up here.",
+  "solInstSinResultadosTitulo": "No results",
+  "solInstSinResultadosMsg": "No requests match these filters.",
+  "solInstLimpiarFiltros": "Clear filters",
+  "solInstRecibidaEl": "Received on {fecha} at {hora}",
+  "@solInstRecibidaEl": {
+    "placeholders": {
+      "fecha": {},
+      "hora": {}
+    }
+  },
+  "solInstConfirmadaEl": "Confirmed on {fecha} at {hora}",
+  "@solInstConfirmadaEl": {
+    "placeholders": {
+      "fecha": {},
+      "hora": {}
+    }
+  },
+  "solInstRechazadaEl": "Declined on {fecha} at {hora}",
+  "@solInstRechazadaEl": {
+    "placeholders": {
+      "fecha": {},
+      "hora": {}
+    }
+  },
+  "solInstCanceladaEl": "Cancelled by the family on {fecha} at {hora}",
+  "@solInstCanceladaEl": {
+    "placeholders": {
+      "fecha": {},
+      "hora": {}
+    }
+  },
+  "solInstBajaEl": "Withdrawn on {fecha} at {hora}",
+  "@solInstBajaEl": {
+    "placeholders": {
+      "fecha": {},
+      "hora": {}
+    }
+  },
+  "solInstSecContacto": "Contact",
+  "solInstSecVacante": "Requested opening",
+  "solInstSecMensaje": "Message from the family",
+  "solInstSecHistorial": "History",
+  "solInstSinContacto": "The family didn't leave an email or phone number.",
+  "solInstLlamar": "Call",
+  "solInstWhatsapp": "WhatsApp",
+  "solInstEscribirEmail": "Send email",
+  "solInstCopiar": "Copy",
+  "solInstCopiado": "Copied to clipboard.",
+  "solInstNoSePudoAbrir": "We couldn't open that app on this device. You can copy the details and use them elsewhere.",
+  "solInstOcupacion": "Occupancy",
+  "solInstPendientesOferta": "{n, plural, =1{1 pending request for this opening} other{{n} pending requests for this opening}}",
+  "@solInstPendientesOferta": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "solInstVacanteNoDisponible": "This opening is no longer published.",
+  "solInstVacantePausada": "Paused",
+  "solInstVacanteCompleta": "Full",
+  "solInstSinCupoAviso": "There are no spots left in this opening. To confirm, increase its capacity in Openings.",
+  "solInstEdadFueraDeRango": "The student's age ({edad}) is outside this opening's range ({rango}).",
+  "@solInstEdadFueraDeRango": {
+    "placeholders": {
+      "edad": {},
+      "rango": {}
+    }
+  },
+  "solInstHistRecibida": "Request received",
+  "solInstHistConfirmada": "Spot confirmed",
+  "solInstHistRechazada": "Request declined",
+  "solInstHistCanceladaFamilia": "Cancelled by the family",
+  "solInstHistBaja": "Spot withdrawn",
+  "solInstOkConfirmada": "{alumno}'s spot is confirmed. We let the family know.",
+  "@solInstOkConfirmada": {
+    "placeholders": {
+      "alumno": {}
+    }
+  },
+  "solInstOkRechazada": "{alumno}'s request was declined. We let the family know.",
+  "@solInstOkRechazada": {
+    "placeholders": {
+      "alumno": {}
+    }
+  },
+  "solInstOkBaja": "{alumno} was withdrawn. We let the family know.",
+  "@solInstOkBaja": {
+    "placeholders": {
+      "alumno": {}
+    }
+  },
+  "solInstOkDocumento": "Request sent: {documento}. We let the family know.",
+  "@solInstOkDocumento": {
+    "placeholders": {
+      "documento": {}
+    }
+  },
+  "solInstConfirmarTitulo": "Confirm this spot?",
+  "solInstConfirmarMsg": "You're confirming {alumno} for {oferta}. The family will be notified right away.",
+  "@solInstConfirmarMsg": {
+    "placeholders": {
+      "alumno": {},
+      "oferta": {}
+    }
+  },
+  "solInstNotaFamiliaLabel": "Message for the family (optional)",
+  "solInstNotaConfirmarHelper": "For example: interview date or what to bring on the first day.",
+  "solInstRechazarTitulo": "Decline this request?",
+  "solInstRechazarMsg": "Let {alumno}'s family know why you can't accept the request. They'll receive this message.",
+  "@solInstRechazarMsg": {
+    "placeholders": {
+      "alumno": {}
+    }
+  },
+  "solInstMotivosFrecuentes": "Common reasons",
+  "solInstMotivoSinVacantes": "No spots left",
+  "solInstMotivoSinVacantesTexto": "There are no spots left in this opening.",
+  "solInstMotivoEdad": "Age out of range",
+  "solInstMotivoEdadTexto": "The student's age doesn't match the age range for this opening.",
+  "solInstMotivoDocumentacion": "Incomplete documents",
+  "solInstMotivoDocumentacionTexto": "The documents submitted are incomplete.",
+  "solInstMotivoOtro": "Other",
+  "solInstMotivoLabel": "Reason for the family",
+  "solInstMotivoRequerido": "Please write a reason for the family.",
+  "solInstBajaTitulo": "Withdraw {alumno}?",
+  "@solInstBajaTitulo": {
+    "placeholders": {
+      "alumno": {}
+    }
+  },
+  "solInstBajaMsg": "Their spot in {oferta} will be freed and the family will be notified. This can't be undone.",
+  "@solInstBajaMsg": {
+    "placeholders": {
+      "oferta": {}
+    }
+  },
+  "solInstNotaBajaHelper": "For example: the reason for the withdrawal.",
+  "solInstSinCupoTitulo": "No spots left",
+  "solInstSinCupoMsg": "{oferta} is already full. To confirm this request, increase its capacity in Openings.",
+  "@solInstSinCupoMsg": {
+    "placeholders": {
+      "oferta": {}
+    }
+  },
+  "solInstDocPara": "For {alumno}",
+  "@solInstDocPara": {
+    "placeholders": {
+      "alumno": {}
+    }
+  },
+  "solInstDocAyuda": "The family is notified right away and can upload the file from the app.",
+  "solInstDocTipoLabel": "Which document do you need?",
+  "solInstDocTipoRequerido": "Choose a document.",
+  "solInstDocNombreLabel": "Document name",
+  "solInstDocNombreRequerido": "Tell the family which document you need.",
+  "solInstDocDetalleLabel": "Instructions (optional)",
+  "solInstDocDetalleHelper": "For example: a copy of both sides.",
+  "solInstDocFechaLimite": "Due date (optional)",
+  "solInstDocQuitarFecha": "Remove date",
+  "solInstDocEnviar": "Send request",
+  "alumInstSubtitulo": "{n, plural, =0{No confirmed students} =1{1 confirmed student} other{{n} confirmed students}}",
+  "@alumInstSubtitulo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "alumInstExportarPdf": "Export list (PDF)",
+  "alumInstExportarSeccion": "Export {oferta} list (PDF)",
+  "@alumInstExportarSeccion": {
+    "placeholders": {
+      "oferta": {}
+    }
+  },
+  "alumInstCantidad": "{n, plural, =1{1 student} other{{n} students}}",
+  "@alumInstCantidad": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "alumInstVacioTitulo": "No confirmed students yet",
+  "alumInstVacioMsg": "Students show up here, grouped by opening, as you confirm their requests.",
+  "alumInstRevisarSolicitudes": "{n, plural, =1{Review 1 pending request} other{Review {n} pending requests}}",
+  "@alumInstRevisarSolicitudes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "alumInstSinResultadosMsg": "No students match that name or ID number.",
+  "alumInstArchivoListado": "students",
+  "notiCuentaEliminadaTitle": "A family deleted their account",
+  "notiCuentaEliminadaBody": "{alumno} is no longer in {oferta}: their family deleted the account and the spot is free again.",
+  "@notiCuentaEliminadaBody": {
+    "placeholders": {
+      "alumno": {},
+      "oferta": {}
+    }
+  },
+  "notiInstitucionEliminadaTitle": "{institucion} left ATENA",
+  "@notiInstitucionEliminadaTitle": {
+    "placeholders": {
+      "institucion": {}
+    }
+  },
+  "notiInstitucionEliminadaBody": "{alumno}'s request for {oferta} was closed because the institution deleted its account.",
+  "@notiInstitucionEliminadaBody": {
+    "placeholders": {
+      "alumno": {},
+      "oferta": {}
+    }
+  },
+  "deleteAccount": "Delete account",
+  "deleteAccountTitle": "Delete the account?",
+  "deleteAccountFamilyBody": "The account, its students and their requests, documents, notes and notifications will be deleted. Institutions will be notified and confirmed spots will be released.",
+  "deleteAccountInstitutionBody": "The institution, its openings, events, announcements, seating plans, document requests and public profile will be deleted. Families with active requests will be notified.",
+  "deleteAccountIrreversible": "This action cannot be undone.",
+  "deleteAccountPasswordHelper": "Enter your password to confirm.",
+  "deleteAccountConfirm": "Delete permanently",
+  "deleteAccountDone": "The account was deleted.",
+  "deleteAccountWrongPassword": "The password is not correct.",
+  "perfInstTitulo": "Institution profile",
+  "perfInstTabDatos": "Details",
+  "perfInstTabPublico": "Public profile",
+  "perfInstTabVista": "Preview",
+  "perfInstErrorCarga": "We couldn't load the institution profile.",
+  "perfInstSecIdentidad": "Identification",
+  "perfInstSecIdentidadAyuda": "This is how your institution appears on ATENA and in the family search.",
+  "perfInstNombre": "Institution name",
+  "perfInstNombreCorto": "The name must be at least 3 characters long.",
+  "perfInstCuit": "Tax ID (CUIT)",
+  "perfInstCuitAyuda": "11 digits, no dashes. We use it to verify your identity if you forget your password.",
+  "perfInstTipo": "Type of institution",
+  "perfInstModalidad": "Learning format",
+  "perfInstSecUbicacion": "Location",
+  "perfInstDireccion": "Address",
+  "perfInstCiudad": "City",
+  "perfInstProvincia": "State or province",
+  "perfInstPais": "Country",
+  "perfInstSecAdmin": "Administrative contact",
+  "perfInstSecAdminAyuda": "We use it to get in touch with your institution. It doesn't change your sign-in email; contact details for families go in your Public profile.",
+  "perfInstEmailAdmin": "Contact email",
+  "perfInstTelefonoInvalido": "Check the number: it must have between 8 and 15 digits.",
+  "perfInstCompleto": "Your profile is {pct}% complete",
+  "@perfInstCompleto": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "perfInstCompletoListo": "Your profile is complete!",
+  "perfInstCompletoAyuda": "A complete profile helps families get to know you and choose you.",
+  "perfInstCompletoListoAyuda": "Families can now see everything you offer.",
+  "perfInstPorcentaje": "{pct}%",
+  "@perfInstPorcentaje": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "perfInstConsejoLogo": "Upload your institution's logo.",
+  "perfInstConsejoDescripcion": "Write a description of at least {min} characters.",
+  "@perfInstConsejoDescripcion": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "perfInstConsejoFotos": "{n, plural, =1{Add 1 more photo of your spaces.} other{Add {n} more photos of your spaces.}}",
+  "@perfInstConsejoFotos": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "perfInstConsejoAtencion": "Add your office hours.",
+  "perfInstConsejoClases": "Tell families when classes take place.",
+  "perfInstConsejoTelefono": "Add a phone or WhatsApp number so families can reach you.",
+  "perfInstConsejoEmailWeb": "Add an email address or your website.",
+  "perfInstConsejoRedes": "Link at least one social network.",
+  "perfInstConsejoServicios": "List the services you offer.",
+  "perfInstSecImagenes": "Logo and photos",
+  "perfInstLogo": "Logo",
+  "perfInstLogoAyuda": "Square JPG or PNG image, up to 1.5 MB. It shows in search results and on your page.",
+  "perfInstLogoSubir": "Upload logo",
+  "perfInstLogoCambiar": "Change logo",
+  "perfInstLogoQuitar": "Remove logo",
+  "perfInstLogoQuitarTitulo": "Remove the logo?",
+  "perfInstLogoQuitarMensaje": "Families will see your institution's initials instead.",
+  "perfInstLogoListo": "Logo updated.",
+  "perfInstLogoQuitado": "Logo removed.",
+  "perfInstFotos": "Photos",
+  "perfInstFotosCantidad": "{n} of {max}",
+  "@perfInstFotosCantidad": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "perfInstFotosAyuda": "Show your spaces: classrooms, playground, labs and activities. Up to {max} photos of 1.5 MB.",
+  "@perfInstFotosAyuda": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "perfInstFotoAgregar": "Add photo",
+  "perfInstFotoQuitar": "Remove photo",
+  "perfInstFotoQuitarTitulo": "Remove this photo?",
+  "perfInstFotoQuitarMensaje": "The photo will be deleted from your public profile.",
+  "perfInstFotoAgregada": "Photo added.",
+  "perfInstFotoQuitada": "Photo deleted.",
+  "perfInstFotoVer": "View photo {n}",
+  "@perfInstFotoVer": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "perfInstFotoNoDisponible": "Photo unavailable",
+  "perfInstGaleriaError": "We couldn't open your images. Check the permissions and try again.",
+  "perfInstSecSobre": "About the institution",
+  "perfInstDescripcion": "Description",
+  "perfInstDescripcionHint": "Describe your educational approach, your values and what makes your institution unique.",
+  "perfInstSecHorarios": "Hours",
+  "perfInstHorarioAtencion": "Office hours",
+  "perfInstHorarioAtencionHint": "E.g. Monday to Friday, 8 am to 4 pm",
+  "perfInstHorarioClases": "Class hours",
+  "perfInstHorarioClasesHint": "E.g. morning shift, 7:30 am to 12:30 pm",
+  "perfInstSecContacto": "Contact for families",
+  "perfInstSecContactoAyuda": "Families see this on your page. Add at least one way to reach you.",
+  "perfInstWhatsapp": "WhatsApp",
+  "perfInstWhatsappAyuda": "Include the area code.",
+  "perfInstEmailFamilias": "Email for families",
+  "perfInstWeb": "Website",
+  "perfInstWebHint": "yourschool.edu",
+  "perfInstWebInvalida": "Enter a valid web address.",
+  "perfInstSecRedes": "Social media",
+  "perfInstSecRedesAyuda": "Type your @username or paste the link to your page.",
+  "perfInstInstagram": "Instagram",
+  "perfInstFacebook": "Facebook",
+  "perfInstYoutube": "YouTube",
+  "perfInstRedInvalida": "Enter a valid @username or link.",
+  "perfInstSecServicios": "Services",
+  "perfInstSecServiciosAyuda": "Tell families what you offer beyond classes.",
+  "perfInstServicioAgregar": "Add service",
+  "perfInstServicioHint": "E.g. school garden",
+  "perfInstServicioQuitar": "Remove {servicio}",
+  "@perfInstServicioQuitar": {
+    "placeholders": {
+      "servicio": {}
+    }
+  },
+  "perfInstServiciosSugeridos": "Suggestions",
+  "perfInstServiciosMax": "You can add up to {max} services.",
+  "@perfInstServiciosMax": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "perfInstServicioRepetido": "That service is already on the list.",
+  "perfInstSrvComedor": "Cafeteria",
+  "perfInstSrvTransporte": "School bus",
+  "perfInstSrvGabinete": "Educational psychology team",
+  "perfInstSrvJornadaExtendida": "Extended school day",
+  "perfInstSrvBilingue": "Bilingual education",
+  "perfInstSrvDeportes": "Sports",
+  "perfInstSrvBecas": "Scholarships",
+  "perfInstSrvLaboratorio": "Laboratory",
+  "perfInstSrvBiblioteca": "Library",
+  "perfInstSrvAccesibilidad": "Accessibility",
+  "perfInstCambiosPendientes": "You have unsaved changes",
+  "perfInstDescartar": "Discard",
+  "perfInstDescartarTitulo": "Discard changes?",
+  "perfInstDescartarMensaje": "You'll lose everything you changed since you last saved.",
+  "perfInstGuardado": "Changes saved.",
+  "perfInstRevisarCampos": "Please check the highlighted fields.",
+  "perfInstSalirTitulo": "Leave without saving?",
+  "perfInstSalirMensaje": "You have unsaved changes. If you leave now, they'll be lost.",
+  "perfInstSalir": "Leave without saving",
+  "perfInstVistaTitulo": "This is how families see you",
+  "perfInstVistaAyuda": "It's the page they see when they find you on ATENA.",
+  "perfInstVistaSinGuardar": "It includes changes you haven't saved yet.",
+  "perfInstVistaCompletar": "Complete profile",
+  "perfInstVistaSinDescripcion": "No description yet.",
+  "perfInstVistaContacto": "Contact",
+  "perfInstVistaSinContacto": "No contact details yet.",
+  "perfInstSinNombre": "Your institution",
+  "plnTitulo": "Choose your plan",
+  "plnHeroTitulo": "Build a plan that fits you",
+  "plnHeroAyuda": "You only pay for the levels and modules you use, and you can change them anytime.",
+  "plnPrueba": "{dias}-day free trial",
+  "@plnPrueba": {
+    "placeholders": {
+      "dias": {
+        "type": "int"
+      }
+    }
+  },
+  "plnSinPagos": "No payments for now",
+  "plnFlexible": "Change it anytime",
+  "plnNiveles": "Curricular levels",
+  "plnNivelesAyuda": "Classes and grades of your official curriculum · {precio} per level per month",
+  "@plnNivelesAyuda": {
+    "placeholders": {
+      "precio": {}
+    }
+  },
+  "plnModulos": "Extracurricular modules",
+  "plnModulosAyuda": "Workshops and after-school activities · {precio} per module per month",
+  "@plnModulosAyuda": {
+    "placeholders": {
+      "precio": {}
+    }
+  },
+  "plnPorMes": "{precio} / month",
+  "@plnPorMes": {
+    "placeholders": {
+      "precio": {}
+    }
+  },
+  "plnUsd": "USD {monto}",
+  "@plnUsd": {
+    "placeholders": {
+      "monto": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "plnUsdDecimal": "USD {monto}",
+  "@plnUsdDecimal": {
+    "placeholders": {
+      "monto": {
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 2
+        }
+      }
+    }
+  },
+  "plnBloqueDeporte": "Soccer, swimming, gymnastics, martial arts and more.",
+  "plnBloqueArte": "Music, theater, dance and visual arts.",
+  "plnBloqueIdiomas": "Languages, conversation, speaking and writing.",
+  "plnBloqueCiencia": "Robotics, coding and STEAM projects.",
+  "plnBloqueApoyo": "Tutoring, study skills and exam prep.",
+  "plnBloqueBienestar": "Well-being, social-emotional skills and career guidance.",
+  "plnBloqueOtros": "Programs that don't fit the other categories.",
+  "plnVacantesActivas": "{n, plural, =1{1 published opening} other{{n} published openings}}",
+  "@plnVacantesActivas": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plnSePausan": "{n, plural, =1{1 opening will be paused} other{{n} openings will be paused}}",
+  "@plnSePausan": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plnPromoTitulo": "Do you have a promo code?",
+  "plnPromoCampo": "Code",
+  "plnPromoHint": "Enter your code",
+  "plnPromoAplicar": "Apply",
+  "plnPromoVacio": "Enter a code.",
+  "plnPromoInvalido": "That code isn't valid. Check it and try again.",
+  "plnPromoAgotado": "This code has reached its usage limit.",
+  "plnPromoValido": "Code applied! You get {pct}% off.",
+  "@plnPromoValido": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "plnPromoActivo": "You have an active promo code: {pct}% off.",
+  "@plnPromoActivo": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "plnPromoQuitar": "Remove code",
+  "plnResumen": "Summary",
+  "plnResumenNiveles": "{n, plural, =1{1 curricular level} other{{n} curricular levels}}",
+  "@plnResumenNiveles": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plnResumenModulos": "{n, plural, =1{1 extracurricular module} other{{n} extracurricular modules}}",
+  "@plnResumenModulos": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plnSubtotal": "Subtotal",
+  "plnDescuentoVolumen": "Discount for {min} or more items ({pct}%)",
+  "@plnDescuentoVolumen": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "plnDescuentoPromo": "Promo code ({pct}%)",
+  "@plnDescuentoPromo": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "plnTotalMes": "Monthly total",
+  "plnFaltanItems": "{n, plural, =1{Add 1 more item and get {pct}% off.} other{Add {n} more items and get {pct}% off.}}",
+  "@plnFaltanItems": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "plnElegiAlMenosUno": "Choose at least one level or module to build your plan.",
+  "plnElegiAlMenosUnoCorto": "Choose at least one level or module",
+  "plnPruebaTexto": "Nothing is charged during the trial; we'll let you know before enabling payments.",
+  "plnPruebaEmpieza": "Your {dias}-day free trial starts when you save your changes.",
+  "@plnPruebaEmpieza": {
+    "placeholders": {
+      "dias": {
+        "type": "int"
+      }
+    }
+  },
+  "plnPruebaTerminada": "Your trial ended on {fecha}. Payments aren't enabled yet: we'll let you know before charging anything.",
+  "@plnPruebaTerminada": {
+    "placeholders": {
+      "fecha": {}
+    }
+  },
+  "plnSinCobros": "Payments aren't enabled on ATENA yet: you won't be charged anything without prior notice.",
+  "plnGratisTitulo": "No-cost plan",
+  "plnGratisTexto": "With your promo code, your plan is active at no cost.",
+  "plnDiasRestantes": "{n, plural, =0{Today is the last day of your trial.} =1{1 day of trial left.} other{{n} days of trial left.}}",
+  "@plnDiasRestantes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plnCrear": "Create institution",
+  "plnCreando": "Creating…",
+  "plnGuardar": "Save changes",
+  "plnCreada": "All set! Your institution is now on ATENA.",
+  "plnGuardado": "Plan updated.",
+  "plnPausadas": "{n, plural, =1{Plan updated. 1 opening was paused.} other{Plan updated. {n} openings were paused.}}",
+  "@plnPausadas": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plnCorregirDatos": "Edit my details",
+  "plnPausarTitulo": "Pause published openings?",
+  "plnPausarMensaje": "You removed {categorias} from your plan. {n, plural, =1{We'll pause 1 published opening so families no longer see it.} other{We'll pause {n} published openings so families no longer see them.}} You can reactivate them when you add the category back.",
+  "@plnPausarMensaje": {
+    "placeholders": {
+      "categorias": {},
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "plnPausarAccion": "Save and pause",
+  "plnErrorCarga": "We couldn't load your plan.",
+  "plnTuPlan": "Your plan",
+  "plnPlanActual": "Current plan: {precio} per month",
+  "@plnPlanActual": {
+    "placeholders": {
+      "precio": {}
+    }
+  },
+  "explorarTitulo": "Explore institutions",
+  "explorarPara": "For {nombre}",
+  "@explorarPara": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "explorarBuscarHint": "Search by name, city or province",
+  "explorarBorrarBusqueda": "Clear search",
+  "explorarFiltros": "Filters",
+  "explorarFiltroNivel": "Level",
+  "explorarFiltroActividad": "Activities",
+  "explorarFiltroModalidad": "Format",
+  "explorarCualquierNivel": "Any level",
+  "explorarCualquierActividad": "Any activity",
+  "explorarCualquierModalidad": "Any format",
+  "explorarConLugarPara": "With openings for {nombre}",
+  "@explorarConLugarPara": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "explorarConLugarAyuda": "Only institutions with openings for {nombre}'s age ({edad}).",
+  "@explorarConLugarAyuda": {
+    "placeholders": {
+      "nombre": {},
+      "edad": {}
+    }
+  },
+  "explorarLimpiarFiltros": "Clear filters",
+  "explorarResultados": "{n, plural, =1{1 institution} other{{n} institutions}}",
+  "@explorarResultados": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "explorarVacioTitulo": "No institutions published yet",
+  "explorarVacioMensaje": "Institutions show up here as they join ATENA. Check back soon.",
+  "explorarSinResultadosTitulo": "No institutions found",
+  "explorarSinResultadosMensaje": "Try different words or remove a filter to see more options.",
+  "explorarVerInstitucion": "View institution",
+  "explorarFotoDe": "Photo {n} of {total}",
+  "@explorarFotoDe": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "explorarVerFotos": "View photos full screen",
+  "explorarFotoAnterior": "Previous photo",
+  "explorarFotoSiguiente": "Next photo",
+  "explorarSobre": "About the institution",
+  "explorarLeerMas": "Read more",
+  "explorarLeerMenos": "Show less",
+  "explorarHorarios": "Hours",
+  "explorarHorarioAtencion": "Office hours",
+  "explorarHorarioClases": "Classes",
+  "explorarServicios": "Services",
+  "explorarContacto": "Contact",
+  "explorarLlamar": "Call",
+  "explorarWhatsapp": "WhatsApp",
+  "explorarSitioWeb": "Website",
+  "explorarInstagram": "Instagram",
+  "explorarFacebook": "Facebook",
+  "explorarYoutube": "YouTube",
+  "explorarComoLlegar": "Get directions",
+  "explorarNoSePudoAbrir": "We couldn't open this on your device. Please try again later.",
+  "explorarVacantes": "Openings",
+  "explorarPropuestas": "{n, plural, =1{1 program} other{{n} programs}}",
+  "@explorarPropuestas": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "explorarSinVacantesTitulo": "No openings published yet",
+  "explorarSinVacantesMensaje": "This institution hasn't published any courses or activities yet. You can contact them to ask.",
+  "explorarPedirVacante": "Request a spot",
+  "explorarVerSolicitud": "View request",
+  "explorarCompleto": "Full",
+  "explorarUltimasVacantes": "Few spots left",
+  "explorarArancel": "Fee: {valor}",
+  "@explorarArancel": {
+    "placeholders": {
+      "valor": {}
+    }
+  },
+  "explorarFueraDeEdad": "Doesn't match {nombre}'s age",
+  "@explorarFueraDeEdad": {
+    "placeholders": {
+      "nombre": {}
+    }
+  },
+  "explorarOcupacion": "Occupancy",
+  "explorarInstNoEncontradaTitulo": "We couldn't find this institution",
+  "explorarInstNoEncontradaMensaje": "It may no longer be listed on ATENA.",
+  "solAlPedirTitulo": "Request a spot",
+  "solAlAlumno": "Student",
+  "solAlFueraDeEdadTitulo": "Age doesn't match",
+  "solAlFueraDeEdadMensaje": "{nombre} is {edad} and this spot is meant for a different age. You can still send the request; the institution will decide.",
+  "@solAlFueraDeEdadMensaje": {
+    "placeholders": {
+      "nombre": {},
+      "edad": {}
+    }
+  },
+  "solAlMensajeLabel": "Message for the institution (optional)",
+  "solAlMensajeAyuda": "Tell them about the student or ask a question.",
+  "solAlComoSigue": "The institution will review your request, and we'll notify you as soon as they reply.",
+  "solAlEnviar": "Send request",
+  "solAlEnviadaOk": "Request sent! We'll let you know when the institution replies.",
+  "solAlTitulo": "My requests",
+  "solAlTabActivas": "Active",
+  "solAlTabHistorial": "History",
+  "solAlActivasVacioTitulo": "You have no active requests",
+  "solAlActivasVacioMensaje": "Once you request a spot, you can follow every step from here.",
+  "solAlHistorialVacioTitulo": "Your history is empty",
+  "solAlHistorialVacioMensaje": "Requests that are closed (declined, cancelled or withdrawn) will appear here.",
+  "solAlRespuestaDe": "Reply from {institucion}",
+  "@solAlRespuestaDe": {
+    "placeholders": {
+      "institucion": {}
+    }
+  },
+  "solAlDetalleTitulo": "Request details",
+  "solAlNoEncontradaTitulo": "We couldn't find this request",
+  "solAlNoEncontradaMensaje": "It may have been deleted or belong to another student.",
+  "solAlEstadoPendienteTitulo": "Your request is under review",
+  "solAlEstadoPendienteMensaje": "{institucion} is reviewing it. We'll notify you as soon as they reply.",
+  "@solAlEstadoPendienteMensaje": {
+    "placeholders": {
+      "institucion": {}
+    }
+  },
+  "solAlEstadoConfirmadaTitulo": "You got the spot!",
+  "solAlEstadoConfirmadaMensaje": "{institucion} confirmed your spot. Next steps: check Documents in case they ask for paperwork, and keep track of key dates in the Calendar.",
+  "@solAlEstadoConfirmadaMensaje": {
+    "placeholders": {
+      "institucion": {}
+    }
+  },
+  "solAlEstadoRechazadaTitulo": "Not this time",
+  "solAlEstadoRechazadaMensaje": "{institucion} couldn't accept the request. Don't give up: other institutions have openings.",
+  "@solAlEstadoRechazadaMensaje": {
+    "placeholders": {
+      "institucion": {}
+    }
+  },
+  "solAlEstadoCanceladaTitulo": "You cancelled this request",
+  "solAlEstadoCanceladaMensaje": "If you change your mind, you can request the spot again while there's room.",
+  "solAlEstadoBajaTitulo": "Your spot was withdrawn",
+  "solAlEstadoBajaMensaje": "{institucion} withdrew this spot. If you have questions, get in touch with them.",
+  "@solAlEstadoBajaMensaje": {
+    "placeholders": {
+      "institucion": {}
+    }
+  },
+  "solAlLaVacante": "The spot",
+  "solAlTurnoHorario": "Shift and schedule",
+  "solAlDias": "Days",
+  "solAlEdad": "Age",
+  "solAlEdadAlumno": "{nombre} is {edad}",
+  "@solAlEdadAlumno": {
+    "placeholders": {
+      "nombre": {},
+      "edad": {}
+    }
+  },
+  "solAlArancel": "Fee",
+  "solAlTuMensaje": "Your message",
+  "solAlSeguimiento": "Progress",
+  "solAlHitoEnviada": "Request sent",
+  "solAlHitoConfirmada": "Spot confirmed",
+  "solAlHitoRechazada": "Request declined",
+  "solAlHitoCancelada": "You cancelled the request",
+  "solAlHitoBaja": "Spot withdrawn",
+  "solAlCancelar": "Cancel request",
+  "solAlCancelarTitulo": "Cancel this request?",
+  "solAlCancelarMsgPendiente": "You'll withdraw your request for {oferta} at {institucion}. If you change your mind, you can request it again while there's room.",
+  "@solAlCancelarMsgPendiente": {
+    "placeholders": {
+      "oferta": {},
+      "institucion": {}
+    }
+  },
+  "solAlCancelarMsgConfirmada": "You'll give up your confirmed spot in {oferta} ({institucion}), and another family will be able to take it.",
+  "@solAlCancelarMsgConfirmada": {
+    "placeholders": {
+      "oferta": {},
+      "institucion": {}
+    }
+  },
+  "solAlCancelarConfirmar": "Yes, cancel",
+  "solAlMantener": "No, keep it",
+  "solAlCanceladaOk": "Request cancelled.",
+  "solAlComprobante": "Download receipt",
+  "solAlComprobanteError": "We couldn't create the receipt. Please try again in a few minutes.",
+  "comInstAvisosEnviadosAyuda": "They reach the families of confirmed students as notifications.",
+  "comInstEventoNoDisponible": "This event is no longer available",
+  "comInstEventoNoDisponibleMensaje": "It may have been deleted. Go back to the calendar to see current events.",
+  "docInstErrorTipo": "Choose which document you need.",
+  "docInstPedidoNoDisponible": "This request is no longer available",
+  "docInstPedidoNoDisponibleMensaje": "The family may have deleted their account, or the request may have been removed.",
+  "solInstYaNoExisteTitulo": "This request no longer exists",
+  "solInstYaNoExisteMsg": "The family may have deleted their account. If the student had a confirmed spot, it's free again.",
+  "solInstYaNoExiste": "That request no longer exists. The family may have deleted their account.",
+  "solAlLaInstitucion": "the institution",
+  "solAlInstNoDisponible": "No longer on ATENA",
+  "solAlEstadoBajaSinInstMensaje": "{institucion} is no longer on ATENA, so this spot was withdrawn. You can look for other institutions with openings.",
+  "@solAlEstadoBajaSinInstMensaje": {
+    "placeholders": {
+      "institucion": {}
+    }
+  },
+  "plnVerResumen": "View summary",
+  "commonConfirm": "Confirm",
+  "commonEdit": "Edit",
+  "commonRequiredField": "Required field.",
+  "institucionRegistroSectionBasics": "Basic details",
+  "institucionRegistroInstitutionName": "Institution name",
+  "institucionRegistroCuit": "CUIT (tax ID)",
+  "institucionRegistroCuitInvalid": "Invalid CUIT.",
+  "institucionRegistroAddress": "Address",
+  "institucionRegistroSectionLocation": "Location",
+  "institucionRegistroCountry": "Country",
+  "institucionRegistroProvince": "Province / State",
+  "institucionRegistroCity": "City",
+  "institucionRegistroSectionAccessContact": "Access and contact",
+  "perfInstConsejoFotosPrimeras": "Upload at least {n} photos of your spaces.",
+  "@perfInstConsejoFotosPrimeras": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStatActiveRequestsN": "{n, plural, =1{Active request} other{Active requests}}",
+  "@homeStatActiveRequestsN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStatUpcomingEventsN": "{n, plural, =1{Upcoming event} other{Upcoming events}}",
+  "@homeStatUpcomingEventsN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStatPendingDocsN": "{n, plural, =1{Document to submit} other{Documents to submit}}",
+  "@homeStatPendingDocsN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "instStatPendingN": "{n, plural, =1{Pending request} other{Pending requests}}",
+  "@instStatPendingN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "instStatStudentsN": "{n, plural, =1{Confirmed student} other{Confirmed students}}",
+  "@instStatStudentsN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "instStatFreeSpotsN": "{n, plural, =1{Available spot} other{Available spots}}",
+  "@instStatFreeSpotsN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "instStatOffersN": "{n, plural, =1{Active offering} other{Active offerings}}",
+  "@instStatOffersN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
     }
   }
 }

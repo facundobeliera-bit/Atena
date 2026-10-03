@@ -9,6 +9,4 @@ preferred-supported-locales:
   - en
   - pt
 
-# Hardening
-synthetic-package: false
 untranslated-messages-file: lib/l10n/untranslated.txt

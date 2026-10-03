@@ -1,61 +1,63 @@
 // lib/screens/instituciones/institucion_menu_page.dart
 //
-// ATENA – INSTITUCIÓN · HOME (FASE 2 · CANÓNICO · E2E)
-//
-// ✅ HARDENING (feb 2026 · anti-cuelgue):
-// - Todos los awaits críticos tienen timeout.
-// - Watchdog global: si _bootstrap no termina en X segundos, corta loader y muestra fatal.
-// - Si algo no responde, NO queda spinner infinito: cae a fatal “cannotLoadInstitutionTryAgain”.
-//
-// ✅ FIX DEFINITIVO (feb 2026 · cierre “Sesión inválida”):
-// - La sesión institucional (SessionService.role==institucion && userId==perfilId) es fuente válida
-//   aunque ownerTienePerfil falle (persistencia / migraciones / WEB).
-//
-// ✅ FIX (feb 2026 · ADMIN – navegación canónica):
-// - ✅ Alias de imports para evitar ambiguous_import:
-//     * perfil_page.InstitucionPerfilPage
-//     * selector_page.InstitucionPerfilesSelectorPage
-//
-// ✅ FIX (feb 2026 · analyzer):
-// - Elimina warning de campo/variable sin uso.
-// - Asegura que el selector se construye SIEMPRE como clase (no “función”)
-//   usando el alias selector_page.* (evita undefined_function).
-//
-// ✅ ESTÉTICA CANÓNICA (feb 2026 · fondo institucional):
-// - Fondo consistente: base (asset) + scrim por ColorScheme + glow sutil.
-// - Dark mode: alpha/contraste ajustado SIN withOpacity deprecated (usa withValues).
-// - Stack expand + Positioned.fill para evitar fondos “cortados”.
-//
+// ATENA – Panel de la institución.
+// Estado del plan, indicadores, primeros pasos, accesos a cada sección y
+// solicitudes pendientes de revisión.
 
-import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:atena_app/l10n/gen/app_localizations.dart';
 
-// ✅ Login real de institución (fase 2)
-import '../auth/institucion_login_page.dart';
-
-// ✅ Model + helpers canónicos (E2E)
+import '../../core/atena_core.dart';
+import '../../l10n/gen/app_localizations.dart';
 import '../../models/instituciones/instituciones_integrado.dart';
-import '../../services/instituciones_helpers.dart';
-
-// ✅ Sesión canónica (legacy/compat CUENTA)
+import '../../routes/atena_nav.dart';
+import '../../services/auth_service.dart';
 import '../../services/cuenta_service.dart';
-
-// ✅ FIX: sesión v2 (institución / cuenta)
 import '../../services/session_service.dart';
+import '../../ui/atena_format.dart';
+import '../../ui/atena_labels.dart';
+import '../../ui/atena_ui.dart';
+import '../../ui/widgets/atena_preferences_sheet.dart';
+import '../comunes/eliminar_cuenta_dialog.dart';
+import '../comunes/notificaciones_page.dart';
+import 'alumnos_institucion_page.dart';
+import 'comunicaciones_page.dart';
+import 'croquis_page.dart';
+import 'documentos_institucion_page.dart';
+import 'institucion_perfil_page.dart';
+import 'institucion_plan_page.dart';
+import 'ofertas_page.dart';
+import 'solicitudes_institucion_page.dart';
 
-// ✅ Assets centralizados
-import '../../ui/atena_assets.dart';
-
-// ✅ PERFIL (screen) — alias para evitar colisión
-import 'institucion_perfil_page.dart' as perfil_page;
-
-// ✅ SELECTOR (Actividad → Perfiles → Área) — alias para evitar colisión
-import 'institucion_perfiles_selector_page.dart' as selector_page;
-
-// ✅ PLAN habilitación (canónico)
-import '../../guards/plan_habilitacion_guard.dart';
+/// Abre el trámite relacionado con una notificación de la institución.
+Future<void> abrirNotificacionInstitucion(
+  BuildContext context,
+  Notificacion n, {
+  required String institucionId,
+  required String institucionNombre,
+}) async {
+  final Widget? page = switch (n.destino) {
+    DestinoNotificacion.solicitud => SolicitudesInstitucionPage(
+      institucionId: institucionId,
+      institucionNombre: institucionNombre,
+      initialSolicitudId: n.destinoId,
+    ),
+    DestinoNotificacion.documento => DocumentosInstitucionPage(
+      institucionId: institucionId,
+      institucionNombre: institucionNombre,
+      initialPedidoId: n.destinoId,
+    ),
+    DestinoNotificacion.evento => ComunicacionesPage(
+      institucionId: institucionId,
+      institucionNombre: institucionNombre,
+      initialEventoId: n.destinoId,
+    ),
+    _ => null,
+  };
+  if (page == null) return;
+  await Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+}
 
 class InstitucionMenuPage extends StatefulWidget {
   final String ownerAccountId;
@@ -73,700 +75,514 @@ class InstitucionMenuPage extends StatefulWidget {
   State<InstitucionMenuPage> createState() => _InstitucionMenuPageState();
 }
 
-enum _FatalReason {
-  noSession,
-  sessionMismatch,
-  perfilNotInOwner,
-  cannotLoadInstitution,
-}
-
 class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
-  bool _verificando = true;
-
   Institucion? _inst;
+  PerfilPublico _perfil = const PerfilPublico();
+  Uint8List? _logo;
+  List<OfertaConCupo> _ofertas = const [];
+  List<Solicitud> _solicitudes = const [];
+  int _docsParaRevisar = 0;
+  int _noLeidas = 0;
 
-  String _nombreUI = '';
+  bool _loading = true;
+  bool _sinAcceso = false;
+  Object? _error;
 
-  String _ownerId = '';
-  String _instPerfilId = '';
-
-  _FatalReason? _fatalReason;
-
-  bool _navPlan = false;
-  bool _navPerfil = false;
-  bool _navAdmin = false;
-
-  bool _refreshing = false;
-
-  Timer? _bootWatchdog;
-
-  int _bootToken = 0;
-
-  // ✅ Glow overlay (solo overlay; el background base viene por backgroundForRole)
-  String get _glow => AtenaAssets.ensureCanonical(AtenaAssets.highlightGlow);
-
-  static String _n(String? v) => (v ?? '').trim();
-
-  static String _normIdKeyLocal(String v) =>
-      v.trim().replaceAll(RegExp(r'\s+'), '');
-
-  static String _safeStr(Object? v) => v == null ? '' : v.toString();
-
-  Future<bool> _tryApplyVoidOrFuture(
-    Function f, {
-    List<dynamic> positional = const [],
-    Map<Symbol, dynamic> named = const {},
-    Duration timeout = const Duration(seconds: 2),
-  }) async {
-    try {
-      final res = Function.apply(f, positional, named);
-      if (res is Future) {
-        await res.timeout(timeout);
-      }
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<T?> _tryApplyReturn<T>(
-    Function f, {
-    List<dynamic> positional = const [],
-    Map<Symbol, dynamic> named = const {},
-    Duration timeout = const Duration(seconds: 4),
-  }) async {
-    try {
-      final res = Function.apply(f, positional, named);
-      if (res is Future) {
-        final v = await res.timeout(timeout);
-        return v is T ? v : null;
-      }
-      return res is T ? res : null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Color _cardColor(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    // Superficie “glass” pero legible.
-    return cs.surface.withValues(alpha: isDark ? 0.70 : 0.92);
-  }
-
-  Color _chipColor(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    // Chip con acento (no neón).
-    return cs.primary.withValues(alpha: isDark ? 0.22 : 0.14);
-  }
-
-  // ✅ Scrim canónico para legibilidad (dark más fuerte, light suave).
-  Color _overlayScrim(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    return cs.scrim.withValues(alpha: isDark ? 0.60 : 0.16);
-  }
-
-  double _glowOpacity(BuildContext context) {
-    final theme = Theme.of(context);
-    // Glow sutil, más presente en dark sin “lavar” texto.
-    return theme.brightness == Brightness.dark ? 0.16 : 0.08;
-  }
-
-  Color _transparentSurface(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return cs.surface.withValues(alpha: 0.0);
-  }
+  String get _instId => widget.institucionPerfilId;
+  String get _nombre => _inst?.nombre.trim().isNotEmpty == true
+      ? _inst!.nombre.trim()
+      : (widget.institucionNombre ?? '');
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      try {
-        // ✅ Background base: role institucional (mismo path que backgroundForRole)
-        // ignore: discarded_futures
-        precacheImage(
-          AssetImage(
-            AtenaAssets.ensureCanonical(
-              AtenaAssets.backgroundPathForRole(
-                AtenaBackgroundRole.institucion,
-              ),
-            ),
-          ),
-          context,
-        );
-        // ignore: discarded_futures
-        precacheImage(AssetImage(_glow), context);
-      } catch (_) {}
-    });
-
-    // ignore: discarded_futures
-    _bootstrap();
+    _load();
   }
 
-  @override
-  void dispose() {
-    _bootWatchdog?.cancel();
-    _bootWatchdog = null;
-    super.dispose();
-  }
-
-  void _startBootWatchdog({
-    required int token,
-    Duration timeout = const Duration(seconds: 10),
-  }) {
-    _bootWatchdog?.cancel();
-    _bootWatchdog = null;
-
-    _bootWatchdog = Timer(timeout, () {
-      if (!mounted) return;
-      if (_bootToken != token) return;
-      if (!_verificando) return;
-
-      debugPrint('[ATENA][INST-MENU][BOOT][WATCHDOG] timeout -> fatal');
-      _setFatal(_FatalReason.cannotLoadInstitution);
-    });
-  }
-
-  void _stopBootWatchdog() {
-    _bootWatchdog?.cancel();
-    _bootWatchdog = null;
-  }
-
-  Object? _tryResolvePlanStatusFromInstitucion(Institucion inst) {
+  Future<bool> _tieneAcceso() async {
     try {
-      final dyn = inst as dynamic;
-      final v = dyn.planStatus;
-      return v;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  List<String> _candidateInstIdsForFetch() {
-    final rawPerfil = _safeStr(widget.institucionPerfilId);
-    final trimmedPerfil = rawPerfil.trim();
-    final normalizedPerfil = _normIdKeyLocal(rawPerfil);
-
-    final rawOwner = _safeStr(widget.ownerAccountId);
-    final trimmedOwner = rawOwner.trim();
-    final normalizedOwner = _normIdKeyLocal(rawOwner);
-
-    final fromStatePerfil = _instPerfilId;
-    final fromStateOwner = _ownerId;
-
-    final set = <String>{};
-
-    void addIfOk(String v) {
-      if (v.trim().isEmpty) return;
-      set.add(v);
-    }
-
-    addIfOk(fromStatePerfil);
-    addIfOk(normalizedPerfil);
-    addIfOk(trimmedPerfil);
-    addIfOk(rawPerfil);
-    addIfOk(_normIdKeyLocal(trimmedPerfil));
-
-    if (fromStateOwner.isNotEmpty && fromStateOwner != fromStatePerfil) {
-      addIfOk(fromStateOwner);
-    }
-    if (normalizedOwner.isNotEmpty && normalizedOwner != normalizedPerfil) {
-      addIfOk(normalizedOwner);
-    }
-    if (trimmedOwner.isNotEmpty && trimmedOwner != trimmedPerfil) {
-      addIfOk(trimmedOwner);
-    }
-    if (rawOwner.isNotEmpty && rawOwner != rawPerfil) {
-      addIfOk(rawOwner);
-    }
-    addIfOk(_normIdKeyLocal(trimmedOwner));
-
-    return set.toList(growable: false);
-  }
-
-  Future<Institucion?> _tryLoadInstitutionByIds(List<String> ids) async {
-    if (ids.isEmpty) return null;
-
-    for (final id in ids) {
-      final idTrim = id.trim();
-      if (idTrim.isEmpty) continue;
-
-      try {
-        final instCache = await cargarInstitucionCachePorId(
-          idTrim,
-        ).timeout(const Duration(seconds: 4));
-        if (instCache != null) {
-          debugPrint('[ATENA][INST-MENU][LOAD] cache hit id=$idTrim');
-          return instCache;
-        }
-      } catch (e) {
-        debugPrint('[ATENA][INST-MENU][LOAD] cache fail id=$idTrim err=$e');
+      if (await CuentaService.ownerTienePerfil(
+        ownerAccountId: widget.ownerAccountId,
+        perfilId: _instId,
+      )) {
+        return true;
       }
-
-      try {
-        final inst = await cargarInstitucionPorId(
-          idTrim,
-        ).timeout(const Duration(seconds: 6));
-        if (inst != null) {
-          debugPrint('[ATENA][INST-MENU][LOAD] primary hit id=$idTrim');
-          return inst;
-        }
-      } catch (e) {
-        debugPrint('[ATENA][INST-MENU][LOAD] primary fail id=$idTrim err=$e');
-      }
-    }
-
-    return null;
-  }
-
-  Future<void> _ensureCuentaSesionBestEffort(String ownerId) async {
-    final o = _normIdKeyLocal(ownerId);
-    if (o.isEmpty) return;
-
-    final fn = (CuentaService.setSesionCuentaId as Function);
-
-    final ok1 = await _tryApplyVoidOrFuture(
-      fn,
-      positional: [o],
-      named: const {#recordarme: true},
-      timeout: const Duration(seconds: 2),
-    );
-    if (ok1) return;
-
-    final ok2 = await _tryApplyVoidOrFuture(
-      fn,
-      named: {#cuentaId: o, #recordarme: true},
-      timeout: const Duration(seconds: 2),
-    );
-    if (ok2) return;
-
-    await _tryApplyVoidOrFuture(
-      fn,
-      named: {#ownerAccountId: o, #recordarme: true},
-      timeout: const Duration(seconds: 2),
-    );
-  }
-
-  Future<void> _ensureInstOwnerBestEffort(String ownerId) async {
-    final o = _normIdKeyLocal(ownerId);
-    if (o.isEmpty) return;
-
-    final fn = (SessionService.setInstitucionOwnerAccountId as Function);
-
-    final ok1 = await _tryApplyVoidOrFuture(
-      fn,
-      positional: [o],
-      timeout: const Duration(seconds: 2),
-    );
-    if (ok1) return;
-
-    await _tryApplyVoidOrFuture(
-      fn,
-      named: {#ownerAccountId: o},
-      timeout: const Duration(seconds: 2),
-    );
-  }
-
-  Future<bool> _sessionMatchesInstitutionPerfilSafe() async {
-    final expected = _normIdKeyLocal(_instPerfilId);
-    if (expected.isEmpty) return false;
-
+    } catch (_) {}
     try {
-      final s = await SessionService.getSession().timeout(
-        const Duration(seconds: 2),
-      );
-      if (s == null) return false;
-      if (s.role != SessionRole.institucion) return false;
-      final userId = _normIdKeyLocal(_safeStr(s.userId));
-      return userId.isNotEmpty && userId == expected;
+      final s = await SessionService.getSession();
+      return s != null &&
+          s.role == SessionRole.institucion &&
+          s.userId == _instId;
     } catch (_) {
       return false;
     }
   }
 
-  Future<String?> _resolveSesionOwnerIdSafe({
-    required String expectedInstPerfilId,
-    required String fallbackOwnerIdFromWidget,
-  }) async {
-    final expected = _normIdKeyLocal(expectedInstPerfilId);
-    final fallbackOwner = _normIdKeyLocal(fallbackOwnerIdFromWidget);
-
+  Future<void> _load() async {
     try {
-      final s = await SessionService.getSession().timeout(
-        const Duration(seconds: 3),
-      );
-
-      if (s != null && s.role == SessionRole.institucion) {
-        String? instOwner;
-
-        try {
-          final fn =
-              (SessionService.getInstitucionOwnerAccountIdLogueado as Function);
-          final v = await _tryApplyReturn<Object?>(
-            fn,
-            timeout: const Duration(seconds: 3),
-          );
-          instOwner = _safeStr(v);
-        } catch (_) {
-          instOwner = null;
-        }
-
-        final v = _normIdKeyLocal(_safeStr(instOwner));
-        final userId = _normIdKeyLocal(_safeStr(s.userId));
-
-        if (v.isNotEmpty && fallbackOwner.isNotEmpty && v == fallbackOwner) {
-          return v;
-        }
-
-        final isSospechoso =
-            v.isNotEmpty &&
-            expected.isNotEmpty &&
-            v == expected &&
-            fallbackOwner.isNotEmpty &&
-            expected != fallbackOwner;
-
-        if (v.isNotEmpty && !isSospechoso) {
-          return v;
-        }
-
-        if (fallbackOwner.isNotEmpty &&
-            userId.isNotEmpty &&
-            expected.isNotEmpty &&
-            userId == expected) {
-          return fallbackOwner;
-        }
-      }
-    } catch (_) {}
-
-    try {
-      final id = await CuentaService.getSesionCuentaId().timeout(
-        const Duration(seconds: 4),
-      );
-      final v = _normIdKeyLocal(_safeStr(id));
-      if (v.isNotEmpty) return v;
-    } catch (_) {}
-
-    if (fallbackOwner.isNotEmpty) {
-      await _ensureCuentaSesionBestEffort(fallbackOwner);
-      try {
-        final id = await CuentaService.getSesionCuentaId().timeout(
-          const Duration(seconds: 2),
-        );
-        final v = _normIdKeyLocal(_safeStr(id));
-        return v.isEmpty ? null : v;
-      } catch (_) {
-        return null;
-      }
-    }
-
-    return null;
-  }
-
-  Future<void> _irAHomeHardReset() async {
-    if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-  }
-
-  Future<void> _resetDespuesDeFail() async {
-    try {
-      await CuentaService.logoutCuenta().timeout(const Duration(seconds: 2));
-    } catch (_) {}
-    try {
-      await SessionService.logout().timeout(const Duration(seconds: 2));
-    } catch (_) {}
-    if (!mounted) return;
-    await _irAHomeHardReset();
-  }
-
-  void _setFatal(_FatalReason reason) {
-    if (!mounted) return;
-    _stopBootWatchdog();
-    _bootToken++;
-
-    setState(() {
-      _inst = null;
-      _verificando = false;
-      _fatalReason = reason;
-    });
-  }
-
-  Future<bool> _ownerTienePerfilSafe({
-    required String ownerAccountId,
-    required String perfilId,
-  }) async {
-    final o = _normIdKeyLocal(ownerAccountId);
-    final p = _normIdKeyLocal(perfilId);
-    if (o.isEmpty || p.isEmpty) return false;
-
-    final fn = (CuentaService.ownerTienePerfil as Function);
-
-    final r1 = await _tryApplyReturn<bool>(
-      fn,
-      named: {#ownerAccountId: o, #perfilId: p},
-      timeout: const Duration(seconds: 4),
-    );
-    if (r1 != null) return r1;
-
-    final r2 = await _tryApplyReturn<bool>(
-      fn,
-      named: {#cuentaId: o, #perfilId: p},
-      timeout: const Duration(seconds: 4),
-    );
-    if (r2 != null) return r2;
-
-    final r3 = await _tryApplyReturn<bool>(
-      fn,
-      positional: [o, p],
-      timeout: const Duration(seconds: 4),
-    );
-    if (r3 != null) return r3;
-
-    return false;
-  }
-
-  Future<bool> _maybeAdoptSesionOwner({required String sesOwner}) async {
-    final s = _normIdKeyLocal(sesOwner);
-    if (s.isEmpty) return false;
-
-    if (s == _ownerId) return true;
-
-    final ok = await _ownerTienePerfilSafe(
-      ownerAccountId: s,
-      perfilId: _instPerfilId,
-    );
-    if (!ok) return false;
-
-    debugPrint(
-      '[ATENA][INST-MENU][BOOT] adopt sesOwner=$s (was owner=$_ownerId) for perfil=$_instPerfilId',
-    );
-    _ownerId = s;
-
-    await _ensureCuentaSesionBestEffort(_ownerId);
-    await _ensureInstOwnerBestEffort(_ownerId);
-
-    return true;
-  }
-
-  Future<void> _bootstrap() async {
-    final myToken = ++_bootToken;
-
-    _ownerId = _normIdKeyLocal(widget.ownerAccountId);
-    _instPerfilId = _normIdKeyLocal(widget.institucionPerfilId);
-    _nombreUI = _n(widget.institucionNombre);
-
-    debugPrint(
-      '[ATENA][INST-MENU][BOOT] start owner=$_ownerId instPerfilId=$_instPerfilId',
-    );
-
-    if (mounted) {
-      setState(() {
-        _verificando = true;
-        _fatalReason = null;
-        _inst = null;
-      });
-    }
-
-    _startBootWatchdog(token: myToken, timeout: const Duration(seconds: 12));
-
-    bool stillValid() => mounted && _bootToken == myToken;
-
-    try {
-      if (_ownerId.isEmpty || _instPerfilId.isEmpty) {
-        if (stillValid()) _setFatal(_FatalReason.cannotLoadInstitution);
+      if (!await _tieneAcceso()) {
+        if (!mounted) return;
+        setState(() {
+          _sinAcceso = true;
+          _loading = false;
+        });
         return;
       }
 
-      final sesOwner = await _resolveSesionOwnerIdSafe(
-        expectedInstPerfilId: _instPerfilId,
-        fallbackOwnerIdFromWidget: _ownerId,
-      );
-      if (!stillValid()) return;
+      final repo = InstitucionesRepo.instance;
+      final inst = await repo.obtener(_instId);
+      if (inst == null) throw const AtenaException(AtenaError.noEncontrado);
+      await repo.asegurarIndexada(inst);
 
-      final sesOwnerN = _normIdKeyLocal(_safeStr(sesOwner));
+      final perfil = await repo.perfilPublico(_instId);
+      final results = await Future.wait<Object?>([
+        repo.imagen(perfil.logoId),
+        OfertasRepo.instance.conCupo(_instId),
+        SolicitudesRepo.instance.porInstitucion(_instId),
+        DocumentosRepo.instance.porInstitucion(_instId),
+        NotificacionesRepo.instance.noLeidas(
+          widget.ownerAccountId,
+          perfilId: _instId,
+        ),
+      ]);
 
-      if (sesOwnerN.isEmpty) {
-        final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-        if (!stillValid()) return;
-
-        if (!okBySession) {
-          if (stillValid()) _setFatal(_FatalReason.noSession);
-          return;
-        }
-        await _ensureInstOwnerBestEffort(_ownerId);
-      } else {
-        if (sesOwnerN != _ownerId) {
-          final adopted = await _maybeAdoptSesionOwner(sesOwner: sesOwnerN);
-          if (!stillValid()) return;
-
-          if (!adopted) {
-            final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-            if (!stillValid()) return;
-            if (!okBySession) {
-              if (stillValid()) _setFatal(_FatalReason.sessionMismatch);
-              return;
-            }
-
-            _ownerId = sesOwnerN;
-            await _ensureCuentaSesionBestEffort(_ownerId);
-            await _ensureInstOwnerBestEffort(_ownerId);
-          }
-        } else {
-          await _ensureInstOwnerBestEffort(_ownerId);
-        }
-      }
-
-      bool pertenece = false;
-      try {
-        pertenece = await _ownerTienePerfilSafe(
-          ownerAccountId: _ownerId,
-          perfilId: _instPerfilId,
-        );
-      } catch (_) {
-        pertenece = false;
-      }
-      if (!stillValid()) return;
-
-      if (!pertenece) {
-        final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-        if (!stillValid()) return;
-        if (okBySession) pertenece = true;
-      }
-
-      if (!pertenece) {
-        if (stillValid()) _setFatal(_FatalReason.perfilNotInOwner);
-        return;
-      }
-
-      final ids = _candidateInstIdsForFetch();
-      final inst = await _tryLoadInstitutionByIds(ids);
-      if (!stillValid()) return;
-
-      if (inst == null) {
-        if (stillValid()) _setFatal(_FatalReason.cannotLoadInstitution);
-        return;
-      }
-
-      final nombreReal = _n(inst.nombre);
-
-      _stopBootWatchdog();
-
-      if (!stillValid()) return;
-
+      if (!mounted) return;
       setState(() {
         _inst = inst;
-        _nombreUI = nombreReal.isNotEmpty ? nombreReal : _nombreUI;
-        _verificando = false;
-        _fatalReason = null;
+        _perfil = perfil;
+        _logo = results[0] as Uint8List?;
+        _ofertas = results[1] as List<OfertaConCupo>;
+        _solicitudes = results[2] as List<Solicitud>;
+        _docsParaRevisar = (results[3] as List<PedidoDocumento>)
+            .where((d) => d.estado == EstadoPedidoDocumento.entregado)
+            .length;
+        _noLeidas = results[4] as int;
+        _loading = false;
+        _error = null;
       });
-    } catch (_) {
-      if (stillValid()) _setFatal(_FatalReason.cannotLoadInstitution);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e;
+      });
     }
   }
 
-  Future<void> _refrescar() async {
-    if (!mounted) return;
-    if (_refreshing) return;
-    _refreshing = true;
-    try {
-      await _bootstrap();
-    } finally {
-      _refreshing = false;
-    }
+  Future<void> _go(Widget page) async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+    if (mounted) await _load();
   }
+
+  void _solicitudesPage({String? id}) => _go(
+    SolicitudesInstitucionPage(
+      institucionId: _instId,
+      institucionNombre: _nombre,
+      initialSolicitudId: id,
+    ),
+  );
+
+  void _ofertasPage() =>
+      _go(OfertasPage(institucionId: _instId, institucionNombre: _nombre));
+
+  void _alumnosPage() => _go(
+    AlumnosInstitucionPage(institucionId: _instId, institucionNombre: _nombre),
+  );
+
+  void _comunicacionesPage() => _go(
+    ComunicacionesPage(institucionId: _instId, institucionNombre: _nombre),
+  );
+
+  void _documentosPage() => _go(
+    DocumentosInstitucionPage(
+      institucionId: _instId,
+      institucionNombre: _nombre,
+    ),
+  );
+
+  void _croquisPage() =>
+      _go(CroquisPage(institucionId: _instId, institucionNombre: _nombre));
+
+  void _perfilPage() => _go(
+    InstitucionPerfilPage(
+      ownerAccountId: widget.ownerAccountId,
+      institucionPerfilId: _instId,
+      institucionInicial: _inst,
+    ),
+  );
+
+  void _planPage() => _go(
+    InstitucionPlanPage.manage(
+      ownerAccountId: widget.ownerAccountId,
+      institucionPerfilId: _instId,
+      institucionNombre: _nombre,
+    ),
+  );
+
+  void _notificaciones() => _go(
+    NotificacionesPage(
+      cuentaId: widget.ownerAccountId,
+      perfilId: _instId,
+      role: AtenaRole.institucion,
+      onOpen: (ctx, n) => abrirNotificacionInstitucion(
+        ctx,
+        n,
+        institucionId: _instId,
+        institucionNombre: _nombre,
+      ),
+    ),
+  );
 
   Future<void> _logout() async {
-    try {
-      await CuentaService.logoutCuenta().timeout(const Duration(seconds: 2));
-    } catch (_) {}
-    try {
-      await SessionService.logout().timeout(const Duration(seconds: 2));
-    } catch (_) {}
-    await _irAHomeHardReset();
+    final t = AppLocalizations.of(context);
+    final ok = await showAtenaConfirm(
+      context,
+      title: t.uiLogoutConfirm,
+      confirmLabel: t.commonLogout,
+      icon: Icons.logout_rounded,
+    );
+    if (ok && mounted) await AtenaNav.logout(context);
   }
 
-  void _toast(String msg) {
-    if (!mounted) return;
-    final clean = msg.trim();
-    if (clean.isEmpty) return;
-    try {
-      final messenger = ScaffoldMessenger.of(context);
-      messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(SnackBar(content: Text(clean)));
-    } catch (_) {}
+  Future<void> _eliminarCuenta() async {
+    final t = AppLocalizations.of(context);
+    final eliminada = await showEliminarCuentaDialog(
+      context,
+      descripcion: t.deleteAccountInstitutionBody,
+      eliminar: (password) => AuthService.eliminarCuentaInstitucion(
+        sesion: InstitucionSesion(
+          ownerAccountId: widget.ownerAccountId,
+          institucionPerfilId: _instId,
+        ),
+        password: password,
+      ),
+    );
+    if (!eliminada || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    AtenaNav.toLanding(context);
+    messenger.showSnackBar(SnackBar(content: Text(t.deleteAccountDone)));
   }
 
-  // ✅ Fondo institucional canónico: base + scrim + glow + child.
-  Widget _withBackground(BuildContext context, Widget child) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // ✅ CANÓNICO: background centralizado (web fullscreen + fallback)
-        Positioned.fill(
-          child: AtenaAssets.backgroundForRole(
-            context,
-            role: AtenaBackgroundRole.institucion,
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+
+    if (_sinAcceso) {
+      return AtenaScaffold(
+        role: AtenaRole.institucion,
+        body: AtenaEmptyState(
+          icon: Icons.lock_outline_rounded,
+          title: t.authErrInvalidAccount,
+          action: FilledButton(
+            onPressed: () => AtenaNav.logout(context),
+            child: Text(t.instSignInAgain),
           ),
         ),
+      );
+    }
 
-        // Scrim (legibilidad)
-        Positioned.fill(child: Container(color: _overlayScrim(context))),
+    final pendientes = _solicitudes
+        .where((s) => s.estado == EstadoSolicitud.pendiente)
+        .toList();
+    final confirmados = _solicitudes
+        .where((s) => s.estado == EstadoSolicitud.confirmada)
+        .map((s) => s.alumno.perfilId)
+        .toSet()
+        .length;
+    final activas = _ofertas.where((o) => o.oferta.activa).toList();
+    final libres = activas.fold<int>(0, (acc, o) => acc + o.disponibles);
 
-        // Glow sutil (estética)
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Opacity(
-              opacity: _glowOpacity(context),
-              child: Image.asset(
-                _glow,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.medium,
-                errorBuilder: (context, error, stack) =>
-                    const SizedBox.shrink(),
-              ),
+    return AtenaScaffold(
+      role: AtenaRole.institucion,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const AtenaLogo(markSize: 30),
+        actions: [
+          IconButton(
+            tooltip: t.notifTitle,
+            onPressed: _loading ? null : _notificaciones,
+            icon: Badge(
+              isLabelVisible: _noLeidas > 0,
+              label: Text(_noLeidas > 99 ? '99+' : '$_noLeidas'),
+              child: const Icon(Icons.notifications_rounded),
             ),
           ),
-        ),
-
-        child,
-      ],
+          const AtenaPreferencesButton(),
+          PopupMenuButton<String>(
+            tooltip: t.uiMoreOptions,
+            enabled: !_loading,
+            onSelected: (v) {
+              switch (v) {
+                case 'perfil':
+                  _perfilPage();
+                case 'plan':
+                  _planPage();
+                case 'logout':
+                  _logout();
+                case 'delete':
+                  _eliminarCuenta();
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'perfil',
+                child: ListTile(
+                  leading: const Icon(Icons.storefront_rounded),
+                  title: Text(t.instActionProfile),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'plan',
+                child: ListTile(
+                  leading: const Icon(Icons.workspace_premium_rounded),
+                  title: Text(t.instActionPlan),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'logout',
+                child: ListTile(
+                  leading: const Icon(Icons.logout_rounded),
+                  title: Text(t.commonLogout),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(
+                    Icons.domain_disabled_rounded,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  title: Text(
+                    t.deleteAccount,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
+      body: _loading
+          ? const AtenaLoading()
+          : _error != null
+          ? AtenaErrorState(
+              title: t.instLoadError,
+              message: coreErrorText(t, _error!),
+              onRetry: () {
+                setState(() => _loading = true);
+                _load();
+              },
+            )
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: ListView(
+                padding: atenaPagePadding(context, maxWidth: 1000),
+                children: [
+                  _Hero(
+                    inst: _inst!,
+                    logo: _logo,
+                    pendientes: pendientes.length,
+                    alumnos: confirmados,
+                    libres: libres,
+                    ofertas: activas.length,
+                  ),
+                  if (_perfil.descripcion.isEmpty ||
+                      _ofertas.isEmpty ||
+                      _solicitudes.isEmpty) ...[
+                    const SizedBox(height: 16),
+                    _PrimerosPasos(
+                      perfilListo: _perfil.descripcion.isNotEmpty,
+                      ofertaLista: _ofertas.isNotEmpty,
+                      solicitudLista: _solicitudes.isNotEmpty,
+                      onPerfil: _perfilPage,
+                      onOferta: _ofertasPage,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  AtenaFeatureGrid(
+                    minTileWidth: 170,
+                    children: [
+                      AtenaFeatureCard(
+                        icon: Icons.move_to_inbox_rounded,
+                        title: t.instActionRequests,
+                        subtitle: t.instActionRequestsSub,
+                        badgeCount: pendientes.length,
+                        onTap: _solicitudesPage,
+                      ),
+                      AtenaFeatureCard(
+                        icon: Icons.event_seat_rounded,
+                        title: t.instActionOffers,
+                        subtitle: t.instActionOffersSub,
+                        accent: AtenaColors.indigo,
+                        onTap: _ofertasPage,
+                      ),
+                      AtenaFeatureCard(
+                        icon: Icons.groups_rounded,
+                        title: t.instActionStudents,
+                        subtitle: t.instActionStudentsSub,
+                        accent: AtenaColors.blue,
+                        onTap: _alumnosPage,
+                      ),
+                      AtenaFeatureCard(
+                        icon: Icons.campaign_rounded,
+                        title: t.instActionComms,
+                        subtitle: t.instActionCommsSub,
+                        accent: AtenaColors.goldDeep,
+                        onTap: _comunicacionesPage,
+                      ),
+                      AtenaFeatureCard(
+                        icon: Icons.folder_copy_rounded,
+                        title: t.instActionDocs,
+                        subtitle: t.instActionDocsSub,
+                        accent: AtenaColors.warning,
+                        badgeCount: _docsParaRevisar,
+                        onTap: _documentosPage,
+                      ),
+                      AtenaFeatureCard(
+                        icon: Icons.grid_view_rounded,
+                        title: t.instActionCroquis,
+                        subtitle: t.instActionCroquisSub,
+                        accent: AtenaColors.success,
+                        onTap: _croquisPage,
+                      ),
+                      AtenaFeatureCard(
+                        icon: Icons.storefront_rounded,
+                        title: t.instActionProfile,
+                        subtitle: t.instActionProfileSub,
+                        accent: AtenaColors.info,
+                        onTap: _perfilPage,
+                      ),
+                      AtenaFeatureCard(
+                        icon: Icons.workspace_premium_rounded,
+                        title: t.instActionPlan,
+                        subtitle: t.instActionPlanSub,
+                        accent: AtenaColors.goldDeep,
+                        onTap: _planPage,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  AtenaSectionHeader(
+                    title: t.instToReview,
+                    action: pendientes.isEmpty
+                        ? null
+                        : TextButton(
+                            onPressed: _solicitudesPage,
+                            child: Text(t.uiSeeAll),
+                          ),
+                  ),
+                  if (pendientes.isEmpty)
+                    AtenaCard(
+                      child: Row(
+                        children: [
+                          AtenaIconBadge(
+                            icon: Icons.task_alt_rounded,
+                            color: AtenaBrand.of(context).success,
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(child: Text(t.instNoPending)),
+                        ],
+                      ),
+                    )
+                  else
+                    AtenaCard(
+                      padding: EdgeInsets.zero,
+                      child: Column(
+                        children: [
+                          for (
+                            var i = 0;
+                            i < pendientes.length && i < 5;
+                            i++
+                          ) ...[
+                            if (i > 0) const Divider(indent: 76),
+                            _PendienteTile(
+                              s: pendientes[i],
+                              onTap: () =>
+                                  _solicitudesPage(id: pendientes[i].id),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
     );
   }
+}
 
-  Widget _bigActionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback? onTap,
-  }) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+class _Hero extends StatelessWidget {
+  final Institucion inst;
+  final Uint8List? logo;
+  final int pendientes;
+  final int alumnos;
+  final int libres;
+  final int ofertas;
 
-    return Card(
-      color: _cardColor(context),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: _chipColor(context),
+  const _Hero({
+    required this.inst,
+    required this.logo,
+    required this.pendientes,
+    required this.alumnos,
+    required this.libres,
+    required this.ofertas,
+  });
+
+  ({String label, IconData icon}) _plan(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final vencido = DateTime.now().isAfter(inst.planFin);
+    switch (inst.estadoPlan) {
+      case EstadoPlanInstitucion.activo:
+        return (label: t.instPlanActive, icon: Icons.verified_rounded);
+      case EstadoPlanInstitucion.enPrueba:
+        return vencido
+            ? (label: t.instPlanTrialEnded, icon: Icons.timer_off_rounded)
+            : (
+                label: t.instPlanTrialUntil(
+                  AtenaFormat.fechaCorta(context, inst.planFin),
                 ),
-                child: Icon(icon, color: cs.onSurface),
+                icon: Icons.hourglass_bottom_rounded,
+              );
+      case EstadoPlanInstitucion.vencido:
+        return (label: t.instPlanTrialEnded, icon: Icons.timer_off_rounded);
+      case EstadoPlanInstitucion.suspendido:
+        return (label: t.instPlanSuspended, icon: Icons.pause_circle_rounded);
+      case EstadoPlanInstitucion.sinPlan:
+        return (label: t.instPlanNone, icon: Icons.info_rounded);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final plan = _plan(context);
+    final ubicacion = [
+      inst.ciudad,
+      inst.provincia,
+    ].where((s) => s.trim().isNotEmpty).join(', ');
+
+    return AtenaGradientPanel(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AtenaAvatar(
+                name: inst.nombre,
+                imageBytes: logo,
+                size: 58,
+                ring: true,
+                fallbackIcon: Icons.account_balance_rounded,
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -774,458 +590,226 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
+                      inst.nombre,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
-                      subtitle,
+                      ubicacion.isEmpty ? t.instHomeSubtitle : ubicacion,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
+                        color: Colors.white.withValues(alpha: 0.85),
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _openLogin() {
-    if (!mounted) return;
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const InstitucionLoginPage()));
-  }
-
-  Future<bool> _validateSessionOrFailSnack() async {
-    if (!mounted) return false;
-    final l10n = AppLocalizations.of(context);
-
-    final sesOwner = await _resolveSesionOwnerIdSafe(
-      expectedInstPerfilId: _instPerfilId,
-      fallbackOwnerIdFromWidget: _ownerId,
-    );
-    if (!mounted) return false;
-
-    final sesOwnerN = _normIdKeyLocal(_safeStr(sesOwner));
-
-    if (sesOwnerN.isEmpty) {
-      final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-      if (!mounted) return false;
-      if (!okBySession) {
-        _toast(l10n.noActiveSessionGoBackToLogin);
-        return false;
-      }
-      await _ensureInstOwnerBestEffort(_ownerId);
-    } else {
-      if (sesOwnerN != _ownerId) {
-        final adopted = await _maybeAdoptSesionOwner(sesOwner: sesOwnerN);
-        if (!mounted) return false;
-
-        if (!adopted) {
-          final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-          if (!mounted) return false;
-          if (!okBySession) {
-            _toast(l10n.invalidSessionForThisAccount);
-            return false;
-          }
-
-          _ownerId = sesOwnerN;
-          await _ensureCuentaSesionBestEffort(_ownerId);
-          await _ensureInstOwnerBestEffort(_ownerId);
-        }
-      } else {
-        await _ensureInstOwnerBestEffort(_ownerId);
-      }
-    }
-
-    bool pertenece = false;
-    try {
-      pertenece = await _ownerTienePerfilSafe(
-        ownerAccountId: _ownerId,
-        perfilId: _instPerfilId,
-      );
-    } catch (_) {
-      pertenece = false;
-    }
-
-    if (!pertenece) {
-      final okBySession = await _sessionMatchesInstitutionPerfilSafe();
-      if (!mounted) return false;
-      if (okBySession) pertenece = true;
-    }
-
-    if (!mounted) return false;
-
-    if (!pertenece) {
-      _toast(l10n.invalidSessionForThisAccount);
-      return false;
-    }
-
-    return true;
-  }
-
-  Future<void> _openPlan() async {
-    if (_navPlan) return;
-    _navPlan = true;
-
-    try {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-
-      final inst = _inst;
-      if (inst == null) {
-        _toast(l10n.institutionNotLoadedYet);
-        return;
-      }
-
-      final ok = await _validateSessionOrFailSnack();
-      if (!ok) return;
-      if (!mounted) return;
-
-      final args = <String, dynamic>{
-        'ownerAccountId': _ownerId,
-        'institucionPerfilId': _instPerfilId,
-        if (_nombreUI.trim().isNotEmpty) 'institucionNombre': _nombreUI.trim(),
-      };
-
-      Navigator.of(context).pushNamed('/institucion/plan', arguments: args);
-    } catch (e) {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      _toast('${l10n.commonError}: $e');
-    } finally {
-      _navPlan = false;
-    }
-  }
-
-  Future<void> _openPerfil() async {
-    if (_navPerfil) return;
-    _navPerfil = true;
-
-    try {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      final inst = _inst;
-
-      if (inst == null) {
-        _toast(l10n.institutionNotLoadedYet);
-        return;
-      }
-
-      final ok = await _validateSessionOrFailSnack();
-      if (!ok) return;
-      if (!mounted) return;
-
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => perfil_page.InstitucionPerfilPage(
-            ownerAccountId: _ownerId,
-            institucionPerfilId: _instPerfilId,
-            institucionInicial: inst,
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      _toast('${l10n.commonError}: $e');
-    } finally {
-      _navPerfil = false;
-    }
-  }
-
-  Widget _buildSelectorPage({required Institucion inst}) {
-    // ✅ CRÍTICO: SIEMPRE referenciar por alias para que NO se interprete como “función”.
-    return selector_page.InstitucionPerfilesSelectorPage(
-      ownerAccountId: _ownerId,
-      institucionPerfilId: _instPerfilId,
-      institucionId: _instPerfilId, // compat legacy
-      institucionNombre: _nombreUI.trim().isEmpty ? inst.nombre : _nombreUI,
-      institucion: inst,
-    );
-    // ignore: dead_code
-  }
-
-  Future<void> _openAdmin() async {
-    if (_navAdmin) return;
-    _navAdmin = true;
-
-    try {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      final inst = _inst;
-
-      if (inst == null) {
-        _toast(l10n.institutionNotLoadedYet);
-        return;
-      }
-
-      final ok = await _validateSessionOrFailSnack();
-      if (!ok) return;
-      if (!mounted) return;
-
-      final planStatusAny = _tryResolvePlanStatusFromInstitucion(inst);
-      if (planStatusAny != null) {
-        try {
-          final fn = (PlanHabilitacionGuard.ensureOperativo as Function);
-          final res = Function.apply(fn, const [], <Symbol, dynamic>{
-            #context: context,
-            #plan: planStatusAny,
-          });
-          if (res is Future) {
-            await res.timeout(const Duration(seconds: 4));
-          }
-        } catch (_) {}
-        if (!mounted) return;
-      }
-
-      final page = _buildSelectorPage(inst: inst);
-      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-    } catch (e) {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      _toast('${l10n.commonError}: $e');
-    } finally {
-      _navAdmin = false;
-    }
-  }
-
-  String _fatalMessage(BuildContext context, _FatalReason reason) {
-    final l10n = AppLocalizations.of(context);
-    switch (reason) {
-      case _FatalReason.noSession:
-        return l10n.noActiveSessionGoBackToLogin;
-      case _FatalReason.sessionMismatch:
-        return l10n.invalidSessionForThisAccount;
-      case _FatalReason.perfilNotInOwner:
-        return l10n.invalidSessionForThisAccount;
-      case _FatalReason.cannotLoadInstitution:
-        return l10n.cannotLoadInstitutionTryAgain;
-    }
-  }
-
-  Widget _fatalView(BuildContext context, String msg) {
-    final l10n = AppLocalizations.of(context);
-
-    final transparent = _transparentSurface(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.institutionsTitle),
-        backgroundColor: transparent,
-        surfaceTintColor: transparent,
-        actions: [
-          IconButton(
-            onPressed: () {
-              // ignore: discarded_futures
-              _refrescar();
-            },
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.retry,
-          ),
-        ],
-      ),
-      extendBodyBehindAppBar: true,
-      body: _withBackground(
-        context,
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 44),
-                Card(
-                  elevation: 0,
-                  color: _cardColor(context),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      children: [
-                        Text(msg, textAlign: TextAlign.center),
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: _openLogin,
-                                icon: const Icon(Icons.login),
-                                label: Text(l10n.signIn),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  // ignore: discarded_futures
-                                  _resetDespuesDeFail();
-                                },
-                                icon: const Icon(Icons.home),
-                                label: Text(l10n.backToHome),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                Icon(plan.icon, size: 15, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(
+                  plan.label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 18),
+          LayoutBuilder(
+            builder: (context, c) {
+              final stats = [
+                AtenaStat(
+                  value: '$pendientes',
+                  label: t.instStatPendingN(pendientes),
+                  onGradient: true,
+                ),
+                AtenaStat(
+                  value: '$alumnos',
+                  label: t.instStatStudentsN(alumnos),
+                  onGradient: true,
+                ),
+                AtenaStat(
+                  value: '$libres',
+                  label: t.instStatFreeSpotsN(libres),
+                  onGradient: true,
+                ),
+                AtenaStat(
+                  value: '$ofertas',
+                  label: t.instStatOffersN(ofertas),
+                  onGradient: true,
+                ),
+              ];
+              final perRow = c.maxWidth < 420 ? 2 : 4;
+              final w = c.maxWidth / perRow;
+              return Wrap(
+                runSpacing: 12,
+                children: [for (final s in stats) SizedBox(width: w, child: s)],
+              );
+            },
+          ),
+        ],
       ),
     );
   }
+}
+
+class _PrimerosPasos extends StatelessWidget {
+  final bool perfilListo;
+  final bool ofertaLista;
+  final bool solicitudLista;
+  final VoidCallback onPerfil;
+  final VoidCallback onOferta;
+
+  const _PrimerosPasos({
+    required this.perfilListo,
+    required this.ofertaLista,
+    required this.solicitudLista,
+    required this.onPerfil,
+    required this.onOferta,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final t = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final hechos = [perfilListo, ofertaLista, solicitudLista].where((x) => x);
 
-    final transparentSurface = _transparentSurface(context);
-
-    if (_verificando) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.institutionsTitle),
-          backgroundColor: transparentSurface,
-          surfaceTintColor: transparentSurface,
-        ),
-        extendBodyBehindAppBar: true,
-        body: _withBackground(
-          context,
-          const SafeArea(child: Center(child: CircularProgressIndicator())),
+    Widget paso(String texto, bool listo, VoidCallback? onTap) {
+      final cs = theme.colorScheme;
+      final ok = AtenaBrand.of(context).success;
+      return InkWell(
+        onTap: listo ? null : onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                listo
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                color: listo ? ok : cs.outline,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  texto,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    decoration: listo ? TextDecoration.lineThrough : null,
+                    color: listo ? cs.onSurfaceVariant : cs.onSurface,
+                  ),
+                ),
+              ),
+              if (!listo && onTap != null)
+                Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+            ],
+          ),
         ),
       );
     }
 
-    final fatal = _fatalReason;
-    if (fatal != null) {
-      return _fatalView(context, _fatalMessage(context, fatal));
-    }
-
-    final nombre = _nombreUI.trim().isNotEmpty
-        ? _nombreUI.trim()
-        : l10n.institutionGeneric;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.institutionsTitle),
-        backgroundColor: transparentSurface,
-        surfaceTintColor: transparentSurface,
-        actions: [
-          IconButton(
-            onPressed: () {
-              // ignore: discarded_futures
-              _refrescar();
-            },
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.refresh,
-          ),
-          TextButton(
-            onPressed: () {
-              // ignore: discarded_futures
-              _logout();
-            },
-            child: Text(l10n.signOut),
-          ),
-        ],
-      ),
-      extendBodyBehindAppBar: true,
-      body: _withBackground(
-        context,
-        SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+    return AtenaCard(
+      padding: const EdgeInsets.fromLTRB(18, 16, 14, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              const SizedBox(height: 44),
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                color: _cardColor(context),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nombre,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.institutionProfileIdLabel(_instPerfilId),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        l10n.accountLabel(_ownerId),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+              Expanded(
+                child: Text(
+                  t.instGettingStarted,
+                  style: theme.textTheme.titleMedium,
                 ),
               ),
-              const SizedBox(height: 14),
-              _bigActionCard(
-                icon: Icons.workspace_premium,
-                title: l10n.planUpper,
-                subtitle: l10n.planCardSubtitle,
-                onTap: _navPlan
-                    ? null
-                    : () {
-                        // ignore: discarded_futures
-                        _openPlan();
-                      },
-              ),
-              _bigActionCard(
-                icon: Icons.badge,
-                title: l10n.profileUpper,
-                subtitle: l10n.profileCardSubtitle,
-                onTap: _navPerfil
-                    ? null
-                    : () {
-                        // ignore: discarded_futures
-                        _openPerfil();
-                      },
-              ),
-              _bigActionCard(
-                icon: Icons.admin_panel_settings,
-                title: l10n.administrationUpper,
-                subtitle: l10n.administrationCardSubtitle,
-                onTap: _navAdmin
-                    ? null
-                    : () {
-                        // ignore: discarded_futures
-                        _openAdmin();
-                      },
-              ),
+              Text('${hechos.length}/3', style: theme.textTheme.labelLarge),
             ],
           ),
+          const SizedBox(height: 4),
+          Text(t.instGettingStartedSub, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 10),
+          LinearProgressIndicator(value: hechos.length / 3),
+          const SizedBox(height: 6),
+          paso(t.instStepProfile, perfilListo, onPerfil),
+          paso(t.instStepOffer, ofertaLista, onOferta),
+          paso(t.instStepRequest, solicitudLista, null),
+        ],
+      ),
+    );
+  }
+}
+
+class _PendienteTile extends StatelessWidget {
+  final Solicitud s;
+  final VoidCallback onTap;
+
+  const _PendienteTile({required this.s, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final edad = s.alumno.edad;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+        child: Row(
+          children: [
+            AtenaAvatar(name: s.alumno.nombreCompleto, size: 44),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    s.alumno.apellidoNombre,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    [
+                      s.ofertaNombre,
+                      if (edad != null) t.lblEdadAnios(edad),
+                    ].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              AtenaFormat.haceTiempo(context, s.creadaEl),
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
         ),
       ),
     );

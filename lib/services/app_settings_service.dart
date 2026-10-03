@@ -1,6 +1,6 @@
 // lib/services/app_settings_service.dart
 //
-// ATENA – AppSettingsService (local prototipo)
+// Preferencias de la app guardadas en el dispositivo.
 // - Persistencia de preferencias simples (Locale / ThemeMode)
 // - Hardening: nunca lanzar excepción al leer prefs (fallback seguro)
 //

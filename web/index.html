@@ -1,38 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
+    Base href: se reemplaza con el valor de `--base-href` de `flutter build web`.
+    Debe empezar y terminar con "/".
   -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="ATENA conecta familias e instituciones educativas: búsqueda de instituciones, solicitudes de vacantes, documentos y calendario en un solo lugar.">
+  <meta name="theme-color" content="#4F46E5">
+  <meta name="color-scheme" content="light dark">
 
-  <!-- iOS meta tags & icons -->
+  <!-- Vista previa al compartir el enlace -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ATENA · Plataforma educativa">
+  <meta property="og:description" content="Alumnos e instituciones, en un mismo lugar.">
+  <meta property="og:image" content="icons/Icon-512.png">
+
+  <!-- iOS -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="flutter_application_1">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ATENA">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>flutter_application_1</title>
+  <title>ATENA · Plataforma educativa</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    :root { --atena-bg: #F5F7FC; }
+    @media (prefers-color-scheme: dark) { :root { --atena-bg: #0B101D; } }
+    html, body { margin: 0; height: 100%; background: var(--atena-bg); }
+    #atena-splash {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: var(--atena-bg); transition: opacity 280ms ease-out; z-index: 10;
+    }
+    #atena-splash img {
+      width: 96px; height: 96px; border-radius: 26px;
+      box-shadow: 0 14px 40px rgba(79, 70, 229, 0.35);
+      animation: atena-pulse 1.6s ease-in-out infinite;
+    }
+    #atena-splash.hidden { opacity: 0; pointer-events: none; }
+    @keyframes atena-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (prefers-reduced-motion: reduce) { #atena-splash img { animation: none; } }
+  </style>
 </head>
 <body>
+  <div id="atena-splash" aria-hidden="true">
+    <img src="icons/Icon-192.png" alt="">
+  </div>
+  <script>
+    (function () {
+      function hideSplash() {
+        var s = document.getElementById('atena-splash');
+        if (!s || s.classList.contains('hidden')) return;
+        s.classList.add('hidden');
+        setTimeout(function () { s.remove(); }, 400);
+      }
+      window.addEventListener('flutter-first-frame', hideSplash);
+      // Respaldo: cuando aparece la vista de Flutter, o como máximo a los 12 s.
+      var observer = new MutationObserver(function () {
+        if (document.querySelector('flutter-view')) {
+          observer.disconnect();
+          setTimeout(hideSplash, 600);
+        }
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+      setTimeout(hideSplash, 12000);
+    })();
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

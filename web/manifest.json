@@ -1,13 +1,15 @@
 {
-    "name": "flutter_application_1",
-    "short_name": "flutter_application_1",
+    "name": "ATENA · Plataforma educativa",
+    "short_name": "ATENA",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F5F7FC",
+    "theme_color": "#4F46E5",
+    "description": "Familias e instituciones educativas en un mismo lugar: vacantes, solicitudes, documentos y calendario.",
+    "lang": "es",
+    "orientation": "any",
     "prefer_related_applications": false,
+    "categories": ["education", "productivity"],
     "icons": [
         {
             "src": "icons/Icon-192.png",
