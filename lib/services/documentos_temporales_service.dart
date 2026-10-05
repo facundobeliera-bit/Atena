@@ -38,6 +38,7 @@
 // - Este servicio asume que institucionId == institucionPerfilId (canónico).
 //
 
+import 'dart:convert';
 import '../models/notificaciones/notificacion_atena.dart';
 import 'notificaciones_service.dart';
 import 'storage_service.dart';
@@ -84,6 +85,8 @@ enum EstadoDocumentoTemporal { activo, expirado, eliminado }
 class SolicitudDocumento {
   final String id;
   final String institucionId;
+  final String? areaId;
+  final String? emittedByOperatorId;
 
   final String ownerAccountId;
   final String perfilId;
@@ -104,6 +107,8 @@ class SolicitudDocumento {
     required this.createdAt,
     required this.estado,
     this.mensaje,
+    this.areaId,
+    this.emittedByOperatorId,
   });
 
   SolicitudDocumento copyWith({
@@ -113,6 +118,8 @@ class SolicitudDocumento {
     return SolicitudDocumento(
       id: id,
       institucionId: institucionId,
+      areaId: areaId,
+      emittedByOperatorId: emittedByOperatorId,
       ownerAccountId: ownerAccountId,
       perfilId: perfilId,
       tipo: tipo,
@@ -284,6 +291,9 @@ class DocumentosTemporalesService {
       <String, dynamic>{
         'id': s.id,
         'institucionId': s.institucionId,
+        if (s.areaId != null) 'areaId': s.areaId,
+        if (s.emittedByOperatorId != null)
+          'emittedByOperatorId': s.emittedByOperatorId,
         'ownerAccountId': s.ownerAccountId,
         'perfilId': s.perfilId,
         'tipo': s.tipo.name,
@@ -320,6 +330,8 @@ class DocumentosTemporalesService {
     return SolicitudDocumento(
       id: id,
       institucionId: institucionId,
+      areaId: map['areaId'] as String?,
+      emittedByOperatorId: map['emittedByOperatorId'] as String?,
       ownerAccountId: owner,
       perfilId: perfil,
       tipo: tipo,
@@ -389,13 +401,32 @@ class DocumentosTemporalesService {
     );
   }
 
+  static Future<List<Map<String, dynamic>>> _leerColeccion(String key) async {
+    final text = await _storage.getString(key);
+    if (text == null) return [];
+    final decoded = jsonDecode(text);
+    if (decoded is! List) {
+      throw const FormatException('La colección documental no es una lista.');
+    }
+    return decoded.map((row) {
+      final value = row is String ? jsonDecode(row) : row;
+      if (value is! Map) {
+        throw const FormatException('Registro documental ilegible.');
+      }
+      return Map<String, dynamic>.from(value);
+    }).toList();
+  }
+
   static Future<List<SolicitudDocumento>> _leerSolicitudes(
     String perfilId,
   ) async {
-    final raw = await _storage.getJsonList(_kSolicitudes(perfilId));
+    final raw = await _leerColeccion(_kSolicitudes(perfilId));
     return raw
-        .map(_solicitudFromMap)
-        .whereType<SolicitudDocumento>()
+        .map(
+          (r) =>
+              _solicitudFromMap(r) ??
+              (throw const FormatException('Solicitud documental ilegible.')),
+        )
         .toList(growable: false);
   }
 
@@ -414,10 +445,13 @@ class DocumentosTemporalesService {
   static Future<List<DocumentoTemporal>> _leerDocumentos(
     String perfilId,
   ) async {
-    final raw = await _storage.getJsonList(_kDocumentos(perfilId));
+    final raw = await _leerColeccion(_kDocumentos(perfilId));
     return raw
-        .map(_documentoFromMap)
-        .whereType<DocumentoTemporal>()
+        .map(
+          (r) =>
+              _documentoFromMap(r) ??
+              (throw const FormatException('Documento ilegible.')),
+        )
         .toList(growable: false);
   }
 
@@ -693,6 +727,8 @@ class DocumentosTemporalesService {
     required String perfilId,
     required TipoDocumento tipo,
     String? mensaje,
+    String? areaId,
+    String? emittedByOperatorId,
     bool duplicarEnPerfil = true,
   }) async {
     final inst = _normIdKey(institucionId);
@@ -707,6 +743,8 @@ class DocumentosTemporalesService {
     final s = SolicitudDocumento(
       id: _newId('SOL_DOC'),
       institucionId: inst,
+      areaId: areaId,
+      emittedByOperatorId: emittedByOperatorId,
       ownerAccountId: owner,
       perfilId: perfil,
       tipo: tipo,

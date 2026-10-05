@@ -1,3 +1,5 @@
+import '../../ui/catalogo_publico.dart';
+import '../../ui/atena_workspace.dart';
 // lib/screens/alumnos/alumno_area_page.dart
 //
 // FIX: Buscar Instituciones ahora abre la pantalla real de búsqueda.
@@ -19,6 +21,8 @@ import '../alumnos/alumno_calendario_page.dart';
 import '../alumnos/alumno_notificaciones_page.dart';
 import '../alumnos/alumno_mis_solicitudes_page.dart';
 import '../alumnos/alumno_pdfs_page.dart';
+import '../alumnos/alumno_documentos_page.dart';
+import '../alumnos/trayectoria_educativa_page.dart';
 
 import '../auth/alumno_login_page.dart';
 import '../cuentas/cuenta_home_page.dart';
@@ -325,6 +329,7 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
         title: Text(l10n.commonDeletePhotoTitle),
         content: Text(l10n.commonDeletePhotoConfirm),
         actions: [
+          const AccesoBuscadorPublico(),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
             child: Text(l10n.cancelar),
@@ -437,6 +442,7 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         actions: [
+          const AccesoBuscadorPublico(),
           IconButton(
             tooltip: l10n.actualizar,
             icon: const Icon(Icons.refresh),
@@ -597,64 +603,90 @@ class _AlumnoAreaPageState extends State<AlumnoAreaPage>
           ),
         ),
         const SizedBox(height: 14),
-        Card(
-          color: cardColor,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.assignment),
-                title: Text(l10n.alumnoDashboardMisSolicitudes),
-                subtitle: Text(l10n.alumnoDashboardMisSolicitudesSub),
-                onTap: (_cargando || _navegando) ? null : _abrirMisSolicitudes,
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.search),
-                title: Text(l10n.alumnoBuscarInstituciones),
-                subtitle: Text(l10n.alumnoBuscarInstitucionesSub),
-                onTap: (_cargando || _navegando)
-                    ? null
-                    : _abrirBuscarInstituciones,
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.calendar_month),
-                title: Text(l10n.commonCalendar),
-                onTap: (_cargando || _navegando)
-                    ? null
-                    : () {
-                        _runNavigation(() async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => AlumnoCalendarioPage(
-                                ownerAccountId: _ownerAccountId,
-                                perfilId: _perfilId,
-                              ),
+        AtenaResponsiveGrid(
+          children: [
+            AtenaNavigationTile(
+              leading: const Icon(Icons.assignment),
+              title: Text(l10n.alumnoDashboardMisSolicitudes),
+              subtitle: Text(l10n.alumnoDashboardMisSolicitudesSub),
+              onTap: (_cargando || _navegando) ? null : _abrirMisSolicitudes,
+            ),
+            AtenaNavigationTile(
+              leading: const Icon(Icons.search),
+              title: Text(l10n.alumnoBuscarInstituciones),
+              subtitle: Text(l10n.alumnoBuscarInstitucionesSub),
+              onTap: (_cargando || _navegando)
+                  ? null
+                  : _abrirBuscarInstituciones,
+            ),
+            AtenaNavigationTile(
+              leading: const Icon(Icons.calendar_month),
+              title: Text(l10n.commonCalendar),
+              onTap: (_cargando || _navegando)
+                  ? null
+                  : () {
+                      _runNavigation(() async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AlumnoCalendarioPage(
+                              ownerAccountId: _ownerAccountId,
+                              perfilId: _perfilId,
                             ),
-                          );
-                        });
-                      },
+                          ),
+                        );
+                      });
+                    },
+            ),
+            AtenaNavigationTile(
+              leading: const Icon(Icons.picture_as_pdf),
+              title: Text(l10n.commonDocumentsPdf),
+              subtitle: Text(l10n.commonStudentPdfSub),
+              onTap: (_cargando || _navegando) ? null : _abrirPdfs,
+            ),
+            AtenaNavigationTile(
+              leading: const Icon(Icons.folder_open_outlined),
+              title: Text(l10n.alumnoDocumentosTitle),
+              onTap: (_cargando || _navegando)
+                  ? null
+                  : () => _runNavigation(() async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AlumnoDocumentosPage(
+                            ownerAccountId: _ownerAccountId,
+                            perfilId: _perfilId,
+                          ),
+                        ),
+                      );
+                    }),
+            ),
+            AtenaNavigationTile(
+              leading: const Icon(Icons.notifications),
+              title: Text(l10n.commonNotifications),
+              onTap: (_cargando || _navegando) ? null : _abrirNotificaciones,
+            ),
+            AtenaNavigationTile(
+              leading: const Icon(Icons.school_outlined),
+              title: const Text('Trayectoria educativa'),
+              subtitle: const Text(
+                'Progreso, boletines, certificaciones, becas, convivencia y equivalencias',
               ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf),
-                title: Text(l10n.commonDocumentsPdf),
-                subtitle: Text(l10n.commonStudentPdfSub),
-                onTap: (_cargando || _navegando) ? null : _abrirPdfs,
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.notifications),
-                title: Text(l10n.commonNotifications),
-                onTap: (_cargando || _navegando) ? null : _abrirNotificaciones,
-              ),
-            ],
-          ),
+              onTap: (_cargando || _navegando)
+                  ? null
+                  : () => _runNavigation(() async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TrayectoriaEducativaPage.alumno(
+                            ownerAccountId: _ownerAccountId,
+                            perfilId: _perfilId,
+                          ),
+                        ),
+                      );
+                    }),
+            ),
+          ],
         ),
       ],
     );

@@ -1,7 +1,9 @@
+import '../../ui/catalogo_publico.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import '../../ui/atena_workspace.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/extracurriculares/bloque_extracurricular.dart';
@@ -15,14 +17,24 @@ import '../../models/instituciones/instituciones_integrado.dart';
 /// InstitucionPerfilPage mediante la clave canónica:
 /// inst_public_profile_v1_<institucionPerfilId>.
 class AlumnoInstitucionPerfilPage extends StatefulWidget {
-  final Institucion institucion;
+  final Institucion? _institucion;
+  Institucion get institucion => _institucion!;
+  final String? institucionPublicaId;
   final VoidCallback? onSolicitarVacante;
 
   const AlumnoInstitucionPerfilPage({
     super.key,
-    required this.institucion,
+    required Institucion institucion,
     this.onSolicitarVacante,
-  });
+  }) : _institucion = institucion,
+       institucionPublicaId = null;
+
+  const AlumnoInstitucionPerfilPage.publica({
+    super.key,
+    required String institucionId,
+  }) : institucionPublicaId = institucionId,
+       _institucion = null,
+       onSolicitarVacante = null;
 
   @override
   State<AlumnoInstitucionPerfilPage> createState() =>
@@ -37,13 +49,14 @@ class _AlumnoInstitucionPerfilPageState
   @override
   void initState() {
     super.initState();
-    _loadPublicExtra();
+    if (widget.institucionPublicaId == null) _loadPublicExtra();
   }
 
   Future<void> _loadPublicExtra() async {
     try {
-      final prefs = await SharedPreferences.getInstance()
-          .timeout(const Duration(seconds: 3));
+      final prefs = await SharedPreferences.getInstance().timeout(
+        const Duration(seconds: 3),
+      );
       final id = widget.institucion.id.trim();
       final raw = (prefs.getString('inst_public_profile_v1_$id') ?? '').trim();
       if (raw.isNotEmpty) {
@@ -129,9 +142,9 @@ class _AlumnoInstitucionPerfilPageState
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 10),
             child,
@@ -198,21 +211,13 @@ class _AlumnoInstitucionPerfilPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    inst.nombre.trim().isEmpty
-                        ? 'Institución'
-                        : inst.nombre.trim(),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                  ),
-                ),
-                const Chip(label: Text('Perfil institucional')),
-              ],
+            AtenaSectionHeader(
+              eyebrow: 'Conocé la institución',
+              title: inst.nombre.trim().isEmpty
+                  ? 'Institución'
+                  : inst.nombre.trim(),
+              subtitle:
+                  'Propuestas, ubicación y opciones de inscripción. Información local; sin verificación externa de Atena.',
             ),
             if (location.isNotEmpty) ...[
               const SizedBox(height: 8),
@@ -221,8 +226,8 @@ class _AlumnoInstitucionPerfilPageState
             _chips([
               _tipoLabel(inst.tipoInstitucion),
               _modalidadLabel(inst.modalidad),
-              if (inst.curricular) 'Curricular',
-              if (inst.extracurricular) 'Extracurricular',
+              if (inst.curricular) AtenaOfferLabels.formal,
+              if (inst.extracurricular) AtenaOfferLabels.activities,
             ]),
           ],
         ),
@@ -242,21 +247,30 @@ class _AlumnoInstitucionPerfilPageState
           _dataRow(Icons.location_city, 'Localidad', inst.ciudad),
           _dataRow(Icons.phone_outlined, 'Teléfono', inst.telefono),
           _dataRow(Icons.email_outlined, 'Email', inst.email),
-          _dataRow(Icons.account_balance_outlined, 'Tipo de institución',
-              _tipoLabel(inst.tipoInstitucion)),
-          _dataRow(Icons.devices_outlined, 'Modalidad',
-              _modalidadLabel(inst.modalidad)),
+          _dataRow(
+            Icons.account_balance_outlined,
+            'Tipo de institución',
+            _tipoLabel(inst.tipoInstitucion),
+          ),
+          _dataRow(
+            Icons.devices_outlined,
+            'Modalidad',
+            _modalidadLabel(inst.modalidad),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildOffer(Institucion inst) {
-    final levels = inst.planConfig?.niveles
+    final levels =
+        inst.planConfig?.niveles
             .where((e) => e.habilitado)
-            .map((e) => e.nombrePropio?.trim().isNotEmpty == true
-                ? e.nombrePropio!.trim()
-                : _nivelLabel(e.nivel))
+            .map(
+              (e) => e.nombrePropio?.trim().isNotEmpty == true
+                  ? e.nombrePropio!.trim()
+                  : _nivelLabel(e.nivel),
+            )
             .toList() ??
         <String>[];
 
@@ -264,8 +278,10 @@ class _AlumnoInstitucionPerfilPageState
         .where((e) => e.activa)
         .toList();
 
-    if (!inst.curricular && !inst.extracurricular &&
-        levels.isEmpty && extras.isEmpty) {
+    if (!inst.curricular &&
+        !inst.extracurricular &&
+        levels.isEmpty &&
+        extras.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -275,7 +291,10 @@ class _AlumnoInstitucionPerfilPageState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (inst.curricular) ...[
-            const Text('Curricular', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text(
+              AtenaOfferLabels.formal,
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
             if (levels.isNotEmpty) ...[
               const SizedBox(height: 7),
               _chips(levels),
@@ -283,20 +302,25 @@ class _AlumnoInstitucionPerfilPageState
           ],
           if (inst.extracurricular) ...[
             if (inst.curricular) const SizedBox(height: 14),
-            const Text('Extracurricular', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text(
+              AtenaOfferLabels.activities,
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
             if (extras.isNotEmpty) ...[
               const SizedBox(height: 7),
               for (final activity in extras)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(activity.nombre),
-                  subtitle: Text([
-                    activity.bloque.label,
-                    if ((activity.edades ?? '').trim().isNotEmpty)
-                      'Edades: ${activity.edades}',
-                    if ((activity.precio ?? '').trim().isNotEmpty)
-                      'Valor: ${activity.precio}',
-                  ].join(' • ')),
+                  subtitle: Text(
+                    [
+                      activity.bloque.label,
+                      if ((activity.edades ?? '').trim().isNotEmpty)
+                        'Edades: ${activity.edades}',
+                      if ((activity.precio ?? '').trim().isNotEmpty)
+                        'Valor: ${activity.precio}',
+                    ].join(' • '),
+                  ),
                 ),
             ],
           ],
@@ -316,7 +340,8 @@ class _AlumnoInstitucionPerfilPageState
       'LinkedIn': p.linkedin,
     }..removeWhere((_, value) => value.trim().isEmpty);
 
-    final hasPublic = p.descripcion.trim().isNotEmpty ||
+    final hasPublic =
+        p.descripcion.trim().isNotEmpty ||
         p.horariosAtencion.trim().isNotEmpty ||
         p.horariosAulas.trim().isNotEmpty ||
         p.telefonoPublico.trim().isNotEmpty ||
@@ -346,9 +371,9 @@ class _AlumnoInstitucionPerfilPageState
                     child: Container(
                       width: 118,
                       height: 118,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       child: bytes == null
                           ? const Icon(Icons.broken_image_outlined)
                           : Image.memory(bytes, fit: BoxFit.cover),
@@ -359,10 +384,7 @@ class _AlumnoInstitucionPerfilPageState
             ),
           ),
         if (p.descripcion.trim().isNotEmpty)
-          _section(
-            'Descripción',
-            Text(p.descripcion.trim()),
-          ),
+          _section('Descripción', Text(p.descripcion.trim())),
         if (p.horariosAtencion.trim().isNotEmpty ||
             p.horariosAulas.trim().isNotEmpty)
           _section(
@@ -370,7 +392,11 @@ class _AlumnoInstitucionPerfilPageState
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _dataRow(Icons.access_time, 'Horarios de atención', p.horariosAtencion),
+                _dataRow(
+                  Icons.access_time,
+                  'Horarios de atención',
+                  p.horariosAtencion,
+                ),
                 _dataRow(Icons.schedule, 'Horarios de aulas', p.horariosAulas),
               ],
             ),
@@ -381,7 +407,11 @@ class _AlumnoInstitucionPerfilPageState
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _dataRow(Icons.phone_in_talk, 'Teléfono público', p.telefonoPublico),
+                _dataRow(
+                  Icons.phone_in_talk,
+                  'Teléfono público',
+                  p.telefonoPublico,
+                ),
                 _dataRow(Icons.language, 'Sitio web', p.website),
               ],
             ),
@@ -397,8 +427,7 @@ class _AlumnoInstitucionPerfilPageState
               ],
             ),
           ),
-        if (p.servicios.isNotEmpty)
-          _section('Servicios', _chips(p.servicios)),
+        if (p.servicios.isNotEmpty) _section('Servicios', _chips(p.servicios)),
         if (p.ofreceCursosCortos && p.cursosCortos.isNotEmpty)
           _section(
             'Cursos cortos',
@@ -408,14 +437,16 @@ class _AlumnoInstitucionPerfilPageState
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(curso.nombre),
-                    subtitle: Text([
-                      if (curso.duracion.trim().isNotEmpty)
-                        'Duración: ${curso.duracion}',
-                      if (curso.precio.trim().isNotEmpty)
-                        'Precio: ${curso.precio}',
-                      if (curso.modalidad.trim().isNotEmpty)
-                        'Modalidad: ${curso.modalidad}',
-                    ].join(' • ')),
+                    subtitle: Text(
+                      [
+                        if (curso.duracion.trim().isNotEmpty)
+                          'Duración: ${curso.duracion}',
+                        if (curso.precio.trim().isNotEmpty)
+                          'Precio: ${curso.precio}',
+                        if (curso.modalidad.trim().isNotEmpty)
+                          'Modalidad: ${curso.modalidad}',
+                      ].join(' • '),
+                    ),
                   ),
               ],
             ),
@@ -426,32 +457,39 @@ class _AlumnoInstitucionPerfilPageState
 
   @override
   Widget build(BuildContext context) {
+    if (widget.institucionPublicaId != null) {
+      return CatalogoPublicoPerfil(institucionId: widget.institucionPublicaId!);
+    }
     final inst = widget.institucion;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Perfil de la institución')),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-          children: [
-            _buildHeader(inst),
-            _buildBasicInfo(inst),
-            _buildOffer(inst),
-            if (_cargando)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 12),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else
-              _buildPublicExtra(),
-            if (widget.onSolicitarVacante != null &&
-                (inst.curricular || inst.extracurricular))
-              FilledButton.icon(
-                onPressed: widget.onSolicitarVacante,
-                icon: const Icon(Icons.how_to_reg_outlined),
-                label: const Text('Solicitar vacante'),
-              ),
-          ],
+      body: AtenaWorkspace(
+        maxWidth: 860,
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            children: [
+              _buildHeader(inst),
+              const AtenaLocalNotice(),
+              _buildBasicInfo(inst),
+              _buildOffer(inst),
+              if (_cargando)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else
+                _buildPublicExtra(),
+              if (widget.onSolicitarVacante != null &&
+                  (inst.curricular || inst.extracurricular))
+                FilledButton.icon(
+                  onPressed: widget.onSolicitarVacante,
+                  icon: const Icon(Icons.how_to_reg_outlined),
+                  label: const Text('Solicitar vacante'),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -500,22 +538,22 @@ class _PublicExtra {
       final m = decoded.cast<String, dynamic>();
       final servicios = (m['servicios'] is List)
           ? (m['servicios'] as List)
-              .map((e) => (e ?? '').toString().trim())
-              .where((e) => e.isNotEmpty)
-              .toList()
+                .map((e) => (e ?? '').toString().trim())
+                .where((e) => e.isNotEmpty)
+                .toList()
           : const <String>[];
       final cursos = (m['cursosCortos'] is List)
           ? (m['cursosCortos'] as List)
-              .whereType<Map>()
-              .map((e) => _ShortCourse.fromMap(e.cast<String, dynamic>()))
-              .toList()
+                .whereType<Map>()
+                .map((e) => _ShortCourse.fromMap(e.cast<String, dynamic>()))
+                .toList()
           : const <_ShortCourse>[];
       final fotos = (m['fotos'] is List)
           ? (m['fotos'] as List)
-              .map((e) => (e ?? '').toString().trim())
-              .where((e) => e.isNotEmpty)
-              .take(5)
-              .toList()
+                .map((e) => (e ?? '').toString().trim())
+                .where((e) => e.isNotEmpty)
+                .take(5)
+                .toList()
           : const <String>[];
 
       bool asBool(dynamic value) {

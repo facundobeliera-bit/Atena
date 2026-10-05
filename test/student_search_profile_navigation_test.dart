@@ -65,7 +65,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Curricular').first);
+      await tester.tap(find.text('Educación formal').first);
       await tester.pumpAndSettle();
       final searchButton = tester.widget<FilledButton>(
         find.ancestor(

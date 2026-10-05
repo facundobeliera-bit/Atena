@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'l10n/gen/app_localizations.dart';
+import 'ui/atena_workspace.dart';
 
 import 'services/app_settings_service.dart';
 import 'services/atena_data_bootstrap_service.dart';
@@ -92,9 +93,6 @@ class _AtenaAppState extends State<AtenaApp> {
   Locale? _locale;
   ThemeMode _themeMode = ThemeMode.system;
   String? _initialDeeplink;
-
-  static const Color _seedLight = Color(0xFF3B82F6);
-  static const Color _seedDark = Color(0xFF7C3AED);
 
   static final List<Locale> _supportedLocales = AppLocalizations
       .supportedLocales
@@ -174,27 +172,14 @@ class _AtenaAppState extends State<AtenaApp> {
     } catch (_) {}
   }
 
-  ThemeData _buildTheme({required Brightness brightness, required Color seed}) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seed,
-      brightness: brightness,
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      scaffoldBackgroundColor: scheme.surface,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ATENA',
       themeMode: _themeMode,
-      theme: _buildTheme(brightness: Brightness.light, seed: _seedLight),
-      darkTheme: _buildTheme(brightness: Brightness.dark, seed: _seedDark),
+      theme: AtenaTheme.build(Brightness.light),
+      darkTheme: AtenaTheme.build(Brightness.dark),
       locale: _locale,
       supportedLocales: _supportedLocales,
       localizationsDelegates: const [

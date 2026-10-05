@@ -6,12 +6,8 @@
 // - Compartir (Printing.sharePdf)
 // - Guardar local en app dir (PdfService.savePdfToAppDir)
 //
-// Nota: Croquis queda preparado como placeholder por ahora.
-//       Cuando confirmes el modelo de croquis, se reemplaza el builder.
-//
 
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 
@@ -19,6 +15,9 @@ import '../../l10n/gen/app_localizations.dart';
 import '../../models/alumnos/alumnos_integrados.dart';
 import '../../services/pdf/pdf_service.dart';
 import '../../services/pdf/templates/ficha_alumno_pdf.dart';
+import '../../services/alumno_service.dart';
+import '../../services/documentacion_operativa_service.dart';
+import 'trayectoria_educativa_page.dart';
 
 class AlumnoPdfsPage extends StatefulWidget {
   final String ownerAccountId;
@@ -91,8 +90,16 @@ class _AlumnoPdfsPageState extends State<AlumnoPdfsPage> {
   // -------------------------------
 
   Future<Uint8List> _buildFichaBytes() async {
+    await DocumentacionOperativaService.validarAlumno(_owner, _perfil);
+    final actual = await AlumnoService.instance.getPerfilAlumnoByPerfilId(
+      ownerAccountId: _owner,
+      perfilId: _perfil,
+    );
+    if (actual == null) {
+      throw StateError('Completá la ficha personal antes de exportarla.');
+    }
     return FichaAlumnoPdf.build(
-      alumno: widget.alumno,
+      alumno: actual,
       ownerAccountId: _owner,
       perfilId: _perfil,
     );
@@ -158,6 +165,10 @@ class _AlumnoPdfsPageState extends State<AlumnoPdfsPage> {
           perfilId: _perfil,
         );
 
+        if (kIsWeb) {
+          await Printing.sharePdf(bytes: bytes, filename: filename);
+          return;
+        }
         final path = await PdfService.savePdfToAppDir(
           bytes: bytes,
           filename: filename,
@@ -187,10 +198,6 @@ class _AlumnoPdfsPageState extends State<AlumnoPdfsPage> {
     ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800);
 
     final subtitleStyle = Theme.of(context).textTheme.bodyMedium;
-
-    final subtleStyle = Theme.of(
-      context,
-    ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant);
 
     return Scaffold(
       appBar: AppBar(title: Text(l.alumnoPdfsTitle)),
@@ -243,17 +250,21 @@ class _AlumnoPdfsPageState extends State<AlumnoPdfsPage> {
           ),
           const SizedBox(height: 14),
 
-          // Placeholder Croquis (V1)
           Card(
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l.alumnoPdfsCroquisTitle, style: titleStyle),
-                  const SizedBox(height: 8),
-                  Text(l.alumnoPdfsCroquisPlaceholder, style: subtleStyle),
-                ],
+            child: ListTile(
+              leading: Icon(Icons.school_outlined, color: cs.primary),
+              title: const Text('Documentos educativos'),
+              subtitle: const Text(
+                'Consultá y exportá los boletines, títulos y registros compartidos por tus instituciones.',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => TrayectoriaEducativaPage.alumno(
+                    ownerAccountId: _owner,
+                    perfilId: _perfil,
+                  ),
+                ),
               ),
             ),
           ),

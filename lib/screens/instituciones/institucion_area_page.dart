@@ -81,7 +81,7 @@ import '../../services/session_service.dart';
 import '../../services/institucion_contexto_operativo_service.dart';
 
 // ✅ Assets
-import '../../ui/atena_assets.dart';
+import '../../ui/atena_workspace.dart';
 
 // ✅ Páginas operativas
 import 'institucion_documentos_page.dart' as docs;
@@ -98,6 +98,8 @@ import '../../services/institucion_area_locks.dart';
 import '../../services/institucion_areas_service.dart';
 import '../../services/institucion_operadores_service.dart';
 import 'institucion_historial_actividad_page.dart';
+import 'institucion_catalogo_page.dart';
+import 'institucion_trayectoria_page.dart';
 import 'institucion_operadores_page.dart';
 import 'institucion_respuestas_calendario_page.dart';
 
@@ -121,13 +123,6 @@ Color _neutralSurface(ColorScheme cs, {required bool isDark}) {
   // En dark, más scrim; en light, apenas.
   final overlay = _alpha(cs.scrim, isDark ? 0.26 : 0.10);
   return Color.alphaBlend(overlay, cs.surface);
-}
-
-Color _neutralContainer(ColorScheme cs, {required bool isDark}) {
-  // Container neutro para chips/íconos.
-  final base = cs.surfaceContainerHighest;
-  final overlay = _alpha(cs.scrim, isDark ? 0.18 : 0.08);
-  return Color.alphaBlend(overlay, base);
 }
 
 class InstitucionAreaPage extends StatefulWidget {
@@ -233,8 +228,6 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
   }
 
   // Assets
-  String get _bg => AtenaAssets.ensureCanonical(AtenaAssets.bgInstitucionHome);
-  String get _glow => AtenaAssets.ensureCanonical(AtenaAssets.highlightGlow);
 
   // ─────────────────────────────────────────────
   // Helpers
@@ -644,13 +637,6 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
       _depsBootstrapped = true;
 
       _resolveRouteArgsOnce();
-
-      try {
-        // ignore: discarded_futures
-        precacheImage(AssetImage(_bg), context);
-        // ignore: discarded_futures
-        precacheImage(AssetImage(_glow), context);
-      } catch (_) {}
     } else {
       _resolveRouteArgsOnce();
     }
@@ -1090,63 +1076,11 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
 
   bool _croquisHabilitado(Institucion inst) => true;
 
-  // ✅ Cards “botón” sobrias
-  Color _cardColor(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
+  Color _cardColor(BuildContext context) =>
+      Theme.of(context).colorScheme.surface;
 
-    final base = _neutralSurface(cs, isDark: isDark);
-    return _alpha(base, isDark ? 0.78 : 0.92);
-  }
-
-  // ✅ Icon-chip neutro (no depende de primary)
-  Color _chipColor(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    final base = _neutralContainer(cs, isDark: isDark);
-    return _alpha(base, isDark ? 0.92 : 0.98);
-  }
-
-  Widget _withBackground(BuildContext context, Widget child) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    final overlay = _alpha(cs.scrim, isDark ? 0.30 : 0.08);
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(
-          _bg,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.medium,
-          errorBuilder: (context, error, stackTrace) =>
-              ColoredBox(color: cs.surface),
-        ),
-        ColoredBox(color: overlay),
-        Align(
-          alignment: Alignment.topCenter,
-          child: IgnorePointer(
-            child: Opacity(
-              opacity: isDark ? 0.35 : 0.20,
-              child: Image.asset(
-                _glow,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.medium,
-                errorBuilder: (context, error, stackTrace) =>
-                    const SizedBox.shrink(),
-              ),
-            ),
-          ),
-        ),
-        child,
-      ],
-    );
-  }
+  Widget _withBackground(BuildContext context, Widget child) =>
+      AtenaWorkspace(child: child);
 
   Widget _opCard({
     required IconData icon,
@@ -1155,70 +1089,14 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
     required VoidCallback? onTap,
     bool locked = false,
     String? semanticsLabel,
-  }) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final tt = theme.textTheme;
-
-    return Semantics(
-      button: true,
-      enabled: onTap != null,
-      label: semanticsLabel ?? title,
-      hint: subtitle,
-      child: Card(
-        color: _cardColor(context),
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color: _chipColor(context),
-                    border: Border.all(color: _alpha(cs.outlineVariant, 0.35)),
-                  ),
-                  child: Icon(icon, color: cs.onSurface),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: (tt.titleMedium ?? const TextStyle()).copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: (tt.bodyMedium ?? const TextStyle()).copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  locked ? Icons.lock_outline : Icons.chevron_right,
-                  color: cs.onSurfaceVariant,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  }) => AtenaActionCard(
+    icon: icon,
+    title: title,
+    subtitle: subtitle,
+    onTap: onTap,
+    locked: locked,
+    semanticsLabel: semanticsLabel,
+  );
 
   Future<void> _openWithLock({
     required InstitucionAreaKey area,
@@ -1534,14 +1412,14 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
             TextButton(onPressed: _logout, child: Text(l10n.actionLogout)),
           ],
         ),
-        extendBodyBehindAppBar: true,
+        extendBodyBehindAppBar: false,
         body: _withBackground(
           context,
           SafeArea(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               children: [
-                const SizedBox(height: 44),
+                const AtenaLocalNotice(),
                 Card(
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -1563,12 +1441,6 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          l10n.institucionAreaIdLine(_instIdData),
-                          style: (tt.bodyMedium ?? const TextStyle()).copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
                         if (ubicacion.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Text(
@@ -1657,6 +1529,40 @@ class _InstitucionAreaPageState extends State<InstitucionAreaPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
+
+                _opCard(
+                  icon: Icons.public_outlined,
+                  title: 'Catálogo del área',
+                  subtitle:
+                      'Revisá grupos y prepará una versión local para compartir más adelante.',
+                  onTap: !canOperate
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => InstitucionCatalogoPage(
+                              institucionId: _instIdData,
+                              areaId: _areaIdResolved,
+                            ),
+                          ),
+                        ),
+                ),
+
+                _opCard(
+                  icon: Icons.school_outlined,
+                  title: 'Trayectoria del alumnado',
+                  subtitle:
+                      'Progreso, boletines, certificaciones, becas, sanciones y equivalencias de esta área.',
+                  onTap: !canOperate
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => InstitucionTrayectoriaPage(
+                              institucionId: _instIdData,
+                              areaId: _areaIdResolved,
+                            ),
+                          ),
+                        ),
+                ),
 
                 _opCard(
                   icon: Icons.notifications,

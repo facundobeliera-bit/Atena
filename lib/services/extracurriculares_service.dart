@@ -33,6 +33,12 @@
 //
 // ─────────────────────────────────────────────
 
+import 'institucion_contexto_operativo_service.dart';
+import 'institucion_emisiones_service.dart';
+import 'institucion_areas_service.dart';
+import 'solicitudes_service.dart';
+import 'cuenta_service.dart';
+import '../models/solicitudes/solicitud_alumno.dart';
 import 'dart:convert';
 
 import 'storage_service.dart';
@@ -445,6 +451,147 @@ class ExtracurricularesService {
   ///
   /// ✅ CANÓNICO: siempre pushToOwner (owner inbox).
   /// ✅ Duplicado a perfil: opcional (UX) — hoy lo dejamos desactivado por defecto.
+  Future<List<Map<String, dynamic>>> destinatariosOperativos({
+    required String institucionId,
+    required String moduleKey,
+  }) async {
+    final c = await InstitucionContextoOperativoService.instance
+        .reconstruirContextoOperativo();
+    final area = c == null
+        ? null
+        : await InstitucionAreasService.instance.buscarPorId(
+            institucionId,
+            c.areaId,
+          );
+    if (c == null ||
+        c.institutionId != institucionId ||
+        area?.claveOrigen != moduleKey) {
+      throw StateError('Ingresá con el contexto operativo del módulo.');
+    }
+    final candidates =
+        (await SolicitudesService.obtenerSolicitudesParaInstitucion(
+              institucionId: institucionId,
+            ))
+            .where(
+              (s) =>
+                  !s.esCurricular &&
+                  s.areaId == c.areaId &&
+                  s.moduleKey == moduleKey &&
+                  s.estado == EstadoSolicitud.confirmada,
+            )
+            .toList();
+    final valid = await InstitucionEmisionesService.instance
+        .validarDestinatarios(
+          institucionId: institucionId,
+          areaId: c.areaId,
+          esCurricular: false,
+          confirmados: candidates,
+        );
+    return [
+      for (final s in valid)
+        {
+          'ownerAccountId': s.ownerAccountId,
+          'perfilId': s.perfilId,
+          'solicitudId': s.id,
+          'displayName': (await CuentaService.getPerfilAlumnoById(
+            s.perfilId!,
+          ))!.displayName,
+        },
+    ];
+  }
+
+  Future<void> emitirFichaAutorizada(Map<String, dynamic> payload) async {
+    final institution = (payload['institucionId'] ?? '').toString();
+    final module = (payload['moduleKey'] ?? '').toString();
+    final initial = await InstitucionContextoOperativoService.instance
+        .reconstruirContextoOperativo();
+    final valid = await destinatariosOperativos(
+      institucionId: institution,
+      moduleKey: module,
+    );
+    final requested = payload['recipients'];
+    if (requested is! List ||
+        requested.isEmpty ||
+        requested.any(
+          (r) =>
+              r is! Map ||
+              !valid.any(
+                (v) =>
+                    v['ownerAccountId'] == r['ownerAccountId'] &&
+                    v['perfilId'] == r['perfilId'],
+              ),
+        )) {
+      throw StateError(
+        'Los destinatarios deben tener inscripción confirmada en esta área.',
+      );
+    }
+    final c = await InstitucionContextoOperativoService.instance
+        .reconstruirContextoOperativo();
+    if (c == null ||
+        initial == null ||
+        c.institutionId != institution ||
+        c.areaId != initial.areaId ||
+        c.operatorId != initial.operatorId ||
+        c.ownerAccountId != initial.ownerAccountId) {
+      throw StateError('Cambió el contexto operativo.');
+    }
+    final groupSelection = payload['grupo'];
+    Map<String, dynamic>? groupData;
+    if (groupSelection != null) {
+      final groupId = groupSelection is Map
+          ? (groupSelection['grupoId'] ?? '').toString()
+          : '';
+      final group = (await cargarGrupos(
+        institution,
+      )).where((g) => g.id == groupId && g.areaId == c.areaId).firstOrNull;
+      if (group == null || group.bloque.key != module) {
+        throw StateError('El grupo no pertenece al área actual.');
+      }
+      final requests =
+          await SolicitudesService.obtenerSolicitudesParaInstitucion(
+            institucionId: institution,
+          );
+      await InstitucionEmisionesService.instance.validarDestinatarios(
+        institucionId: institution,
+        areaId: c.areaId,
+        esCurricular: false,
+        grupoId: group.id,
+        confirmados: requests
+            .where(
+              (s) => valid.any(
+                (v) =>
+                    v['solicitudId'] == s.id &&
+                    requested.any(
+                      (r) =>
+                          r['ownerAccountId'] == s.ownerAccountId &&
+                          r['perfilId'] == s.perfilId,
+                    ),
+              ),
+            )
+            .toList(),
+      );
+      groupData = {
+        'grupoId': group.id,
+        'actividadNombre': group.actividadNombre,
+        'nombreGrupo': group.nombreGrupo,
+        'turno': group.turno,
+        'aula': group.aula,
+      };
+    }
+    final date = DateTime.tryParse('${payload['date']}T${payload['time']}:00');
+    if (date == null ||
+        (payload['title'] ?? '').toString().trim().isEmpty ||
+        (payload['content'] ?? '').toString().trim().isEmpty) {
+      throw ArgumentError('Completá fecha, hora, título y contenido.');
+    }
+    await emitirFichaExtracurricular({
+      ...payload,
+      'grupo': groupData,
+      'areaId': c.areaId,
+      'emittedByOperatorId': c.operatorId,
+    });
+  }
+
   Future<void> emitirFichaExtracurricular(Map<String, dynamic> payload) async {
     final version = payload['version'];
     if (version != 1) return;
@@ -478,6 +625,9 @@ class ExtracurricularesService {
     final fichaBase = <String, dynamic>{
       'version': 1,
       'type': 'extracurricular_ficha',
+      if (payload['areaId'] != null) 'areaId': payload['areaId'],
+      if (payload['emittedByOperatorId'] != null)
+        'emittedByOperatorId': payload['emittedByOperatorId'],
       'institucionId': institucionId,
       'moduleKey': moduleKey,
       'bloqueKey': bloqueKey,
@@ -571,6 +721,9 @@ class ExtracurricularesService {
               'note': content,
               'type': 'extracurricular',
               'source': 'institucion',
+              if (payload['areaId'] != null) 'areaId': payload['areaId'],
+              if (payload['emittedByOperatorId'] != null)
+                'emittedByOperatorId': payload['emittedByOperatorId'],
               'institucionId': institucionId,
               'moduleKey': moduleKey,
               'locked': true,

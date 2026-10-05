@@ -5,6 +5,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val atenaAndroidDemo = System.getenv("ATENA_ANDROID_DEMO") == "1"
+
 android {
     namespace = "com.example.flutter_application_1"
     compileSdk = flutter.compileSdkVersion
@@ -21,7 +23,16 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.flutter_application_1"
+        applicationId = if (atenaAndroidDemo) {
+            "org.atena.demo.municipio"
+        } else {
+            "com.example.flutter_application_1"
+        }
+        manifestPlaceholders["atenaAppLabel"] = if (atenaAndroidDemo) {
+            "Atena Demo"
+        } else {
+            "flutter_application_1"
+        }
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

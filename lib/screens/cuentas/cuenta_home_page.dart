@@ -1,3 +1,5 @@
+import '../../ui/catalogo_publico.dart';
+import '../../routes/solicitud_publica_intent.dart';
 // lib/screens/cuentas/cuenta_home_page.dart
 //
 // ATENA – CUENTA HOME (CANÓNICO)
@@ -50,6 +52,7 @@ import '../alumnos/alumno_mis_solicitudes_page.dart';
 import '../instituciones/institucion_menu_page.dart';
 
 class CuentaHomePage extends StatefulWidget {
+  final SolicitudPublicaIntent? solicitudPublica;
   final String cuentaId;
 
   /// ✅ Deeplink opcional (por ejemplo desde Notificaciones).
@@ -58,6 +61,7 @@ class CuentaHomePage extends StatefulWidget {
   const CuentaHomePage({
     super.key,
     required this.cuentaId,
+    this.solicitudPublica,
     this.initialDeeplink,
   });
 
@@ -863,10 +867,14 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         widget.cuentaId,
         perfilAlumnoId: p.id,
       );
-      // ignore: discarded_futures
-      _asegurarFichaAlumno(p);
+      await _asegurarFichaAlumno(p);
 
       if (!mounted) return;
+
+      if (widget.solicitudPublica != null) {
+        await widget.solicitudPublica!.continuar(context);
+        return;
+      }
 
       final pend = _deeplinkPendienteSinPerfil;
       if (pend != null && _deeplinkSoportado(pend)) {
@@ -1201,6 +1209,7 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
         backgroundColor: cs.surface.withAlpha(0),
         surfaceTintColor: cs.surface.withAlpha(0),
         actions: [
+          const AccesoBuscadorPublico(),
           IconButton(
             onPressed: (_cargando || _navegando) ? null : _cargar,
             icon: const Icon(Icons.refresh),

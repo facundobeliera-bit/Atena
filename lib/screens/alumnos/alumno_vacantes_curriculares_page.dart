@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../ui/atena_workspace.dart';
 
 import '../../models/instituciones/grupo_curricular.dart';
 import '../../models/instituciones/instituciones_integrado.dart';
 import '../../services/alumno_instituciones_search_service.dart';
-import '../../services/instituciones_helpers.dart' as ih;
+import '../../services/solicitudes_service.dart';
 import 'alumno_solicitar_vacante_page.dart';
 
 class AlumnoVacantesCurricularesPage extends StatefulWidget {
@@ -28,6 +29,7 @@ class AlumnoVacantesCurricularesPage extends StatefulWidget {
 }
 
 enum _Disponibilidad { todas, disponibles, completas }
+
 enum _Orden { recomendadas, gradoTurno, vacantesPrimero, horario }
 
 class _AlumnoVacantesCurricularesPageState
@@ -79,7 +81,7 @@ class _AlumnoVacantesCurricularesPageState
         throw StateError('La institución no tiene un identificador válido.');
       }
 
-      final grupos = await ih.cargarGruposCurricularesInstitucion(id);
+      final grupos = await SolicitudesService.gruposCurricularesParaAlumno(id);
 
       if (!mounted) return;
       setState(() {
@@ -250,13 +252,11 @@ class _AlumnoVacantesCurricularesPageState
     return lista;
   }
 
-  List<GrupoCurricular> get _recomendadas => _filtrados
-      .where((grupo) => _prioridadRecomendacion(grupo) < 3)
-      .toList();
+  List<GrupoCurricular> get _recomendadas =>
+      _filtrados.where((grupo) => _prioridadRecomendacion(grupo) < 3).toList();
 
-  List<GrupoCurricular> get _otras => _filtrados
-      .where((grupo) => _prioridadRecomendacion(grupo) == 3)
-      .toList();
+  List<GrupoCurricular> get _otras =>
+      _filtrados.where((grupo) => _prioridadRecomendacion(grupo) == 3).toList();
 
   void _limpiarFiltros() {
     setState(() {
@@ -290,12 +290,13 @@ class _AlumnoVacantesCurricularesPageState
                   children: [
                     Text(
                       'Ajustar búsqueda',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 4),
-                    const Text('Podés afinar las vacantes sin perder las recomendaciones iniciales.'),
+                    const Text(
+                      'Podés afinar las vacantes sin perder las recomendaciones iniciales.',
+                    ),
                     const SizedBox(height: 20),
                     TextField(
                       controller: _gradoCtrl,
@@ -364,19 +365,30 @@ class _AlumnoVacantesCurricularesPageState
                         ),
                       ),
                       items: const [
-                        DropdownMenuItem(value: _Disponibilidad.todas, child: Text('Todas')),
-                        DropdownMenuItem(value: _Disponibilidad.disponibles, child: Text('Con vacantes')),
-                        DropdownMenuItem(value: _Disponibilidad.completas, child: Text('Sin vacantes')),
+                        DropdownMenuItem(
+                          value: _Disponibilidad.todas,
+                          child: Text('Todas'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Disponibilidad.disponibles,
+                          child: Text('Con vacantes'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Disponibilidad.completas,
+                          child: Text('Sin vacantes'),
+                        ),
                       ],
                       onChanged: (value) => setSheetState(
-                        () => _disponibilidad = value ?? _Disponibilidad.disponibles,
+                        () => _disponibilidad =
+                            value ?? _Disponibilidad.disponibles,
                       ),
                     ),
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       value: _soloVacantes,
                       title: const Text('Mostrar solo vacantes disponibles'),
-                      onChanged: (value) => setSheetState(() => _soloVacantes = value),
+                      onChanged: (value) =>
+                          setSheetState(() => _soloVacantes = value),
                     ),
                     DropdownButtonFormField<_Orden>(
                       value: _orden,
@@ -390,10 +402,22 @@ class _AlumnoVacantesCurricularesPageState
                         ),
                       ),
                       items: const [
-                        DropdownMenuItem(value: _Orden.recomendadas, child: Text('Primero las recomendadas')),
-                        DropdownMenuItem(value: _Orden.gradoTurno, child: Text('Grado → turno → vacantes')),
-                        DropdownMenuItem(value: _Orden.vacantesPrimero, child: Text('Más vacantes primero')),
-                        DropdownMenuItem(value: _Orden.horario, child: Text('Por horario')),
+                        DropdownMenuItem(
+                          value: _Orden.recomendadas,
+                          child: Text('Primero las recomendadas'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Orden.gradoTurno,
+                          child: Text('Grado → turno → vacantes'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Orden.vacantesPrimero,
+                          child: Text('Más vacantes primero'),
+                        ),
+                        DropdownMenuItem(
+                          value: _Orden.horario,
+                          child: Text('Por horario'),
+                        ),
                       ],
                       onChanged: (value) => setSheetState(
                         () => _orden = value ?? _Orden.recomendadas,
@@ -450,7 +474,7 @@ class _AlumnoVacantesCurricularesPageState
           grupoCurricularId: grupo.id,
           aula: grupo.nombreCurso,
           turno:
-              '${_turnoLabel(grupo.turno)} • ${(grupo.horaInicio ?? '').trim()}-${(grupo.horaFin ?? '').trim()}',
+              '${_turnoLabel(grupo.turno)}${grupo.horaInicio == null && grupo.horaFin == null ? '' : ' • ${(grupo.horaInicio ?? '').trim()}-${(grupo.horaFin ?? '').trim()}'}',
           ownerAccountId: widget.ownerAccountId,
           perfilId: widget.perfilId,
         ),
@@ -491,10 +515,14 @@ class _AlumnoVacantesCurricularesPageState
 
     final chips = <Widget>[];
     if (contexto.nivel != null) {
-      chips.add(_chip('Nivel: ${_nivelLabel(contexto.nivel!)}', emphasized: true));
+      chips.add(
+        _chip('Nivel: ${_nivelLabel(contexto.nivel!)}', emphasized: true),
+      );
     }
     if (contexto.turno != null) {
-      chips.add(_chip('Turno: ${_turnoLabel(contexto.turno!)}', emphasized: true));
+      chips.add(
+        _chip('Turno: ${_turnoLabel(contexto.turno!)}', emphasized: true),
+      );
     }
     if (contexto.soloConVacantes) {
       chips.add(_chip('Con vacantes', emphasized: true));
@@ -517,12 +545,16 @@ class _AlumnoVacantesCurricularesPageState
         children: [
           Text(
             'Tu búsqueda',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 9),
           Wrap(spacing: 7, runSpacing: 7, children: chips),
           const SizedBox(height: 9),
-          const Text('Estas condiciones se usan para priorizar las vacantes que más se parecen a lo que buscabas.'),
+          const Text(
+            'Estas condiciones se usan para priorizar las vacantes que más se parecen a lo que buscabas.',
+          ),
         ],
       ),
     );
@@ -562,39 +594,46 @@ class _AlumnoVacantesCurricularesPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (recomendada)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                            'RECOMENDADA PARA VOS',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: .7,
-                              color: cs.primary,
-                            ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (recomendada)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          'RECOMENDADA PARA VOS',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: .7,
+                            color: cs.primary,
                           ),
                         ),
-                      if (_nivel(grupo).isNotEmpty)
-                        Text(
-                          _nivel(grupo),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      Text(
-                        _grado(grupo),
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
                       ),
-                    ],
-                  ),
+                    if (_nivel(grupo).isNotEmpty)
+                      Text(
+                        _nivel(grupo),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    Text(
+                      _grado(grupo),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w900),
+                    ),
+                  ],
                 ),
-                _chip(disponible ? '${grupo.cuposDisponibles} vacantes' : 'Sin vacantes', emphasized: disponible),
+                const SizedBox(height: 10),
+                _chip(
+                  disponible
+                      ? '${grupo.cuposDisponibles} vacantes'
+                      : 'Sin vacantes',
+                  emphasized: disponible,
+                ),
               ],
             ),
             const SizedBox(height: 14),
@@ -613,7 +652,9 @@ class _AlumnoVacantesCurricularesPageState
               child: FilledButton.icon(
                 onPressed: disponible ? () => _solicitar(grupo) : null,
                 icon: const Icon(Icons.arrow_forward_rounded),
-                label: Text(disponible ? 'Solicitar esta vacante' : 'Curso completo'),
+                label: Text(
+                  disponible ? 'Solicitar esta vacante' : 'Curso completo',
+                ),
               ),
             ),
           ],
@@ -637,7 +678,9 @@ class _AlumnoVacantesCurricularesPageState
           Text(
             'No encontramos vacantes con estos filtros',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 6),
           const Text(
@@ -672,97 +715,105 @@ class _AlumnoVacantesCurricularesPageState
           ),
         ],
       ),
-      body: _cargando
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+      body: AtenaWorkspace(
+        maxWidth: 860,
+        child: _cargando
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline_rounded, size: 48),
+                      const SizedBox(height: 12),
+                      Text(_error!, textAlign: TextAlign.center),
+                      const SizedBox(height: 14),
+                      FilledButton.icon(
+                        onPressed: _cargar,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Reintentar'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _cargar,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                  children: [
+                    AtenaSectionHeader(
+                      eyebrow: 'Vacantes curriculares',
+                      title: widget.institucionNombre,
+                      subtitle:
+                          'Compará turnos, horarios y disponibilidad antes de enviar tu solicitud.',
+                    ),
+                    const AtenaLocalNotice(),
+                    _contextoCard(),
+                    const SizedBox(height: 14),
+                    Row(
                       children: [
-                        const Icon(Icons.error_outline_rounded, size: 48),
-                        const SizedBox(height: 12),
-                        Text(_error!, textAlign: TextAlign.center),
-                        const SizedBox(height: 14),
-                        FilledButton.icon(
-                          onPressed: _cargar,
-                          icon: const Icon(Icons.refresh_rounded),
-                          label: const Text('Reintentar'),
+                        Expanded(
+                          child: Text(
+                            '${filtrados.length} opciones',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w900),
+                          ),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _abrirFiltros,
+                          icon: const Icon(Icons.tune_rounded),
+                          label: const Text('Filtrar'),
                         ),
                       ],
                     ),
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _cargar,
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                    children: [
+                    const SizedBox(height: 12),
+                    if (filtrados.isEmpty)
+                      _emptyState()
+                    else if (_orden == _Orden.recomendadas &&
+                        recomendadas.isNotEmpty) ...[
                       Text(
-                        widget.institucionNombre,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
+                        'Recomendadas para tu búsqueda',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
-                      const SizedBox(height: 5),
-                      const Text('Explorá las opciones disponibles y elegí el curso que mejor se adapte a tu búsqueda.'),
-                      const SizedBox(height: 16),
-                      _contextoCard(),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${filtrados.length} opciones',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-                            ),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: _abrirFiltros,
-                            icon: const Icon(Icons.tune_rounded),
-                            label: const Text('Filtrar'),
-                          ),
-                        ],
+                      const SizedBox(height: 10),
+                      ...recomendadas.map(
+                        (grupo) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _card(grupo, recomendada: true),
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      if (filtrados.isEmpty)
-                        _emptyState()
-                      else if (_orden == _Orden.recomendadas && recomendadas.isNotEmpty) ...[
+                      if (otras.isNotEmpty) ...[
+                        const SizedBox(height: 8),
                         Text(
-                          'Recomendadas para tu búsqueda',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                          'Otras opciones disponibles',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w900),
                         ),
                         const SizedBox(height: 10),
-                        ...recomendadas.map(
-                          (grupo) => Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _card(grupo, recomendada: true),
-                          ),
-                        ),
-                        if (otras.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            'Otras opciones disponibles',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-                          ),
-                          const SizedBox(height: 10),
-                          ...otras.map(
-                            (grupo) => Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: _card(grupo),
-                            ),
-                          ),
-                        ],
-                      ] else ...[
-                        ...filtrados.map(
+                        ...otras.map(
                           (grupo) => Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: _card(grupo),
                           ),
                         ),
                       ],
+                    ] else ...[
+                      ...filtrados.map(
+                        (grupo) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _card(grupo),
+                        ),
+                      ),
                     ],
-                  ),
+                  ],
                 ),
+              ),
+      ),
     );
   }
 }

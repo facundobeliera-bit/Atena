@@ -12,11 +12,13 @@ import 'package:flutter/material.dart';
 
 import '../../services/cuenta_service.dart';
 import '../cuentas/cuenta_home_page.dart';
+import '../../routes/solicitud_publica_intent.dart';
 
 class AlumnoRegistroPage extends StatefulWidget {
   final String? deeplink;
 
-  const AlumnoRegistroPage({super.key, this.deeplink});
+  final SolicitudPublicaIntent? solicitudPublica;
+  const AlumnoRegistroPage({super.key, this.deeplink, this.solicitudPublica});
 
   @override
   State<AlumnoRegistroPage> createState() => _AlumnoRegistroPageState();
@@ -167,6 +169,7 @@ class _AlumnoRegistroPageState extends State<AlumnoRegistroPage> {
       nav.pushReplacement(
         MaterialPageRoute(
           builder: (_) => CuentaHomePage(
+            solicitudPublica: widget.solicitudPublica,
             cuentaId: cuenta.id,
             initialDeeplink: widget.deeplink,
           ),

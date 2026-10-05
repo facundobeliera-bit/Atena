@@ -545,6 +545,12 @@ class _InstitucionMisSolicitudesPageState
       final canc = <SolicitudAlumno>[];
 
       for (final s in list) {
+        final area = (widget.areaId ?? '').trim();
+        if (area.isNotEmpty &&
+            (s.areaId ?? '').isNotEmpty &&
+            s.areaId != area) {
+          continue;
+        }
         switch (s.estado) {
           case EstadoSolicitud.pendiente:
             pend.add(s);

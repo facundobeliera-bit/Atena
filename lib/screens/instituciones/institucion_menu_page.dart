@@ -1,36 +1,5 @@
-// lib/screens/instituciones/institucion_menu_page.dart
-//
-// ATENA – INSTITUCIÓN · HOME (FASE 2 · CANÓNICO · E2E)
-//
-// ✅ HARDENING (feb 2026 · anti-cuelgue):
-// - Todos los awaits críticos tienen timeout.
-// - Watchdog global: si _bootstrap no termina en X segundos, corta loader y muestra fatal.
-// - Si algo no responde, NO queda spinner infinito: cae a fatal “cannotLoadInstitutionTryAgain”.
-//
-// ✅ FIX DEFINITIVO (feb 2026 · cierre “Sesión inválida”):
-// - La sesión institucional (SessionService.role==institucion && userId==perfilId) es fuente válida
-//   aunque ownerTienePerfil falle (persistencia / migraciones / WEB).
-//
-// ✅ FIX (feb 2026 · ADMIN – navegación canónica):
-// - ✅ Alias de imports para evitar ambiguous_import:
-//     * perfil_page.InstitucionPerfilPage
-//     * selector_page.InstitucionPerfilesSelectorPage
-//
-// ✅ FIX (feb 2026 · analyzer):
-// - Elimina warning de campo/variable sin uso.
-// - Asegura que el selector se construye SIEMPRE como clase (no “función”)
-//   usando el alias selector_page.* (evita undefined_function).
-//
-// ✅ ESTÉTICA CANÓNICA (feb 2026 · fondo institucional):
-// - Fondo consistente: base (asset) + scrim por ColorScheme + glow sutil.
-// - Dark mode: alpha/contraste ajustado SIN withOpacity deprecated (usa withValues).
-// - Stack expand + Positioned.fill para evitar fondos “cortados”.
-//
-// ARQUITECTURA CANÓNICA DE IDENTIDAD:
-//   * SessionService.role == institucion
-//   * SessionService.userId == institucionPerfilId
-//   * SessionService.institucionOwnerAccountId == ownerAccountId
-//   * CuentaService NO decide ni adopta la identidad institucional.
+import '../../ui/catalogo_publico.dart';
+// Presentation refreshed without changing the existing session and navigation contract.
 
 import 'dart:async';
 
@@ -53,7 +22,7 @@ import '../../services/session_service.dart';
 import '../../services/institucion_operadores_service.dart';
 
 // ✅ Assets centralizados
-import '../../ui/atena_assets.dart';
+import '../../ui/atena_workspace.dart';
 
 // ✅ PERFIL (screen) — alias para evitar colisión
 import 'institucion_perfil_page.dart' as perfil_page;
@@ -109,9 +78,6 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
 
   int _bootToken = 0;
 
-  // ✅ Glow overlay (solo overlay; el background base viene por backgroundForRole)
-  String get _glow => AtenaAssets.ensureCanonical(AtenaAssets.highlightGlow);
-
   static String _n(String? v) => (v ?? '').trim();
 
   static String _normIdKeyLocal(String v) =>
@@ -137,64 +103,14 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
     }
   }
 
-  Color _cardColor(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    // Superficie “glass” pero legible.
-    return cs.surface.withValues(alpha: isDark ? 0.70 : 0.92);
-  }
-
-  Color _chipColor(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    // Chip con acento (no neón).
-    return cs.primary.withValues(alpha: isDark ? 0.22 : 0.14);
-  }
-
-  // ✅ Scrim canónico para legibilidad (dark más fuerte, light suave).
-  Color _overlayScrim(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    return cs.scrim.withValues(alpha: isDark ? 0.60 : 0.16);
-  }
-
-  double _glowOpacity(BuildContext context) {
-    final theme = Theme.of(context);
-    // Glow sutil, más presente en dark sin “lavar” texto.
-    return theme.brightness == Brightness.dark ? 0.16 : 0.08;
-  }
-
-  Color _transparentSurface(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return cs.surface.withValues(alpha: 0.0);
-  }
+  Color _cardColor(BuildContext context) =>
+      Theme.of(context).colorScheme.surface;
+  Color _transparentSurface(BuildContext context) =>
+      Theme.of(context).colorScheme.surface;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      try {
-        // ✅ Background base: role institucional (mismo path que backgroundForRole)
-        // ignore: discarded_futures
-        precacheImage(
-          AssetImage(
-            AtenaAssets.ensureCanonical(
-              AtenaAssets.backgroundPathForRole(
-                AtenaBackgroundRole.institucion,
-              ),
-            ),
-          ),
-          context,
-        );
-        // ignore: discarded_futures
-        precacheImage(AssetImage(_glow), context);
-      } catch (_) {}
-    });
 
     // ignore: discarded_futures
     _bootstrap();
@@ -593,100 +509,8 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
     } catch (_) {}
   }
 
-  // ✅ Fondo institucional canónico: base + scrim + glow + child.
-  Widget _withBackground(BuildContext context, Widget child) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // ✅ CANÓNICO: background centralizado (web fullscreen + fallback)
-        Positioned.fill(
-          child: AtenaAssets.backgroundForRole(
-            context,
-            role: AtenaBackgroundRole.institucion,
-          ),
-        ),
-
-        // Scrim (legibilidad)
-        Positioned.fill(child: Container(color: _overlayScrim(context))),
-
-        // Glow sutil (estética)
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Opacity(
-              opacity: _glowOpacity(context),
-              child: Image.asset(
-                _glow,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.medium,
-                errorBuilder: (context, error, stack) =>
-                    const SizedBox.shrink(),
-              ),
-            ),
-          ),
-        ),
-
-        child,
-      ],
-    );
-  }
-
-  Widget _bigActionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback? onTap,
-  }) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Card(
-      color: _cardColor(context),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: _chipColor(context),
-                ),
-                child: Icon(icon, color: cs.onSurface),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _withBackground(BuildContext context, Widget child) =>
+      AtenaWorkspace(child: child);
 
   void _openLogin() {
     if (!mounted) return;
@@ -902,6 +726,7 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
         backgroundColor: transparent,
         surfaceTintColor: transparent,
         actions: [
+          const AccesoBuscadorPublico(),
           IconButton(
             onPressed: () {
               // ignore: discarded_futures
@@ -912,7 +737,7 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
           ),
         ],
       ),
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       body: _withBackground(
         context,
         SafeArea(
@@ -974,9 +799,6 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
     final transparentSurface = _transparentSurface(context);
 
     if (_verificando) {
@@ -986,7 +808,7 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
           backgroundColor: transparentSurface,
           surfaceTintColor: transparentSurface,
         ),
-        extendBodyBehindAppBar: true,
+        extendBodyBehindAppBar: false,
         body: _withBackground(
           context,
           const SafeArea(child: Center(child: CircularProgressIndicator())),
@@ -1009,6 +831,7 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
         backgroundColor: transparentSurface,
         surfaceTintColor: transparentSurface,
         actions: [
+          const AccesoBuscadorPublico(),
           IconButton(
             onPressed: () {
               // ignore: discarded_futures
@@ -1026,83 +849,44 @@ class _InstitucionMenuPageState extends State<InstitucionMenuPage> {
           ),
         ],
       ),
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       body: _withBackground(
         context,
         SafeArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             children: [
-              const SizedBox(height: 44),
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                color: _cardColor(context),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nombre,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.institutionProfileIdLabel(_instPerfilId),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        l10n.accountLabel(_ownerId),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+              AtenaSectionHeader(
+                eyebrow: l10n.institutionsTitle,
+                title: nombre,
+                subtitle:
+                    'Tu espacio de gestión. Ingresá a un área para trabajar con sus solicitudes, vacantes y comunicaciones.',
+              ),
+              AtenaResponsiveGrid(
+                children: [
+                  AtenaActionCard(
+                    icon: Icons.admin_panel_settings,
+                    title: l10n.administrationUpper,
+                    subtitle:
+                        'Elegí el área y tu operador para acceder a las funciones habilitadas.',
+                    prominent: true,
+                    onTap: _navAdmin ? null : _openAdmin,
                   ),
-                ),
+                  AtenaActionCard(
+                    icon: Icons.badge,
+                    title: l10n.profileUpper,
+                    subtitle: l10n.profileCardSubtitle,
+                    onTap: _navPerfil ? null : _openPerfil,
+                  ),
+                  AtenaActionCard(
+                    icon: Icons.workspace_premium,
+                    title: l10n.planUpper,
+                    subtitle: l10n.planCardSubtitle,
+                    onTap: _navPlan ? null : _openPlan,
+                  ),
+                ],
               ),
-              const SizedBox(height: 14),
-              _bigActionCard(
-                icon: Icons.workspace_premium,
-                title: l10n.planUpper,
-                subtitle: l10n.planCardSubtitle,
-                onTap: _navPlan
-                    ? null
-                    : () {
-                        // ignore: discarded_futures
-                        _openPlan();
-                      },
-              ),
-              _bigActionCard(
-                icon: Icons.badge,
-                title: l10n.profileUpper,
-                subtitle: l10n.profileCardSubtitle,
-                onTap: _navPerfil
-                    ? null
-                    : () {
-                        // ignore: discarded_futures
-                        _openPerfil();
-                      },
-              ),
-              _bigActionCard(
-                icon: Icons.admin_panel_settings,
-                title: l10n.administrationUpper,
-                subtitle: l10n.administrationCardSubtitle,
-                onTap: _navAdmin
-                    ? null
-                    : () {
-                        // ignore: discarded_futures
-                        _openAdmin();
-                      },
-              ),
+              const AtenaLocalNotice(),
             ],
           ),
         ),

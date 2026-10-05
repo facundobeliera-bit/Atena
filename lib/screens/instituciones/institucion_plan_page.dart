@@ -36,11 +36,9 @@
 // - Se elimina “Recordarme” del REGISTRO. El “Recordarme” vive solo en LOGIN.
 //   Por eso el draft ya NO trae recordarme.
 //
-// ✅ CAMBIO (feb 2026 · PRICING POR MÓDULO + DESCUENTO + PROMO):
-// - Curricular: cada NIVEL seleccionado suma USD 10.
-// - Extracurricular: cada MÓDULO seleccionado suma USD 15.
-// - Descuento: 5% sobre el TOTAL de módulos si cantidad total >= 3 (aplica a Standard y Premium).
-// - Promo: “ATHENA2026” = 1 mes gratis (100% off), cupo 100 instituciones.
+// Free/Premium V1: selección institucional local, sin precios ni pagos.
+// Los códigos, estados y fechas históricos se conservan, no son una suscripción.
+// La política comercial vive exclusivamente en PlanHabilitacionService.
 //
 // ✅ ESTÉTICA CANÓNICA (feb 2026 · fondo institucional):
 // - Fondo consistente: base (asset) + scrim por ColorScheme + glow sutil.
@@ -50,25 +48,17 @@
 // -----------------------------------------------------------------------------
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/plan_habilitacion_service.dart';
 
 import '../../l10n/gen/app_localizations.dart';
 import '../../models/extracurriculares/bloque_extracurricular.dart';
 import '../../models/instituciones/instituciones_integrado.dart';
 import '../../services/cuenta_service.dart';
 import '../../services/institucion_service.dart';
+import '../../services/instituciones_helpers.dart' as instituciones;
 import '../../services/session_service.dart';
 import '../../ui/atena_assets.dart';
 import 'institucion_menu_page.dart';
-
-// =============================================================================
-// PROMO (TOP-LEVEL) – necesario para const map + scopes fuera del State
-// =============================================================================
-
-const String kPromoCodeAthena2026 = 'ATHENA2026';
-const String kPromoUsedCounterAthena2026 = 'promo_used_ATHENA2026';
-const String kPromoUsedOwnersAthena2026 = 'promo_owners_ATHENA2026';
-const int kPromoMaxCuposAthena2026 = 100;
 
 // =============================================================================
 // Draft (de InstitucionRegistroPage)
@@ -113,14 +103,6 @@ class InstitucionRegistroDraft {
   bool get tieneCurricular => nivelesSeleccionados.isNotEmpty;
   bool get tieneExtracurricular => bloquesSeleccionados.isNotEmpty;
 }
-
-// =============================================================================
-// Plan tiers
-// =============================================================================
-
-enum _TierCurricular { standard, premium }
-
-enum _TierExtracurricular { basico, premium }
 
 // =============================================================================
 // Helpers estética (theme-driven, neutralización)
@@ -180,14 +162,8 @@ class InstitucionPlanPage extends StatefulWidget {
 class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
   bool _cargando = false;
 
-  final _codigoCtrl = TextEditingController();
-  _PromoResult? _promo;
-  bool _mostrarCodigo = false;
-
-  _TierCurricular _tierCur = _TierCurricular.standard;
-  _TierExtracurricular _tierExt = _TierExtracurricular.basico;
-
-  _PlanCalculo _calc = _PlanCalculo.zero();
+  // null preserves an unclassified historical value until an explicit choice.
+  PlanComercial? _planSeleccionado;
 
   Institucion? _instActual;
 
@@ -195,7 +171,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
   String _routeOwnerId = '';
   String _routeInstPerfilId = '';
   String _routeNombre = '';
-  String _routeTipoPlan = '';
 
   // ✅ Guard puede mandar PlanStatus tipado (capturamos y logueamos para evitar unused_field).
   Object? _routePlanStatus;
@@ -225,7 +200,7 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     final d = widget.draft;
     if (d != null) {
       _seedSelectionsFromDraft(d);
-      _recompute(); // ✅ puro (sin context)
+      _planSeleccionado = PlanComercial.free;
     }
   }
 
@@ -265,20 +240,8 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
             });
           }
         }
-      } else {
-        // Registro: por si un router mete tipoPlan, seed tiers best-effort
-        if (_routeTipoPlan.isNotEmpty) {
-          _seedTiersFromTipoPlan(_routeTipoPlan);
-          _recompute();
-        }
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _codigoCtrl.dispose();
-    super.dispose();
   }
 
   // =============================================================================
@@ -290,39 +253,32 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
   ) async {
     final id = institucionId.trim();
     if (id.isEmpty) return null;
-
-    // Intentamos varias APIs posibles del InstitucionService sin romper compilación.
-    try {
-      final dyn = InstitucionService as dynamic;
-
-      try {
-        final r = await dyn.cargarInstitucionPorId(id);
-        if (r is Institucion?) return r;
-      } catch (_) {}
-
-      try {
-        final r = await dyn.getInstitucionPorId(id);
-        if (r is Institucion?) return r;
-      } catch (_) {}
-
-      try {
-        final r = await dyn.getById(id);
-        if (r is Institucion?) return r;
-      } catch (_) {}
-
-      try {
-        final r = await dyn.read(id);
-        if (r is Institucion?) return r;
-      } catch (_) {}
-
-      try {
-        final r = await dyn.cargarInstitucion(id);
-        if (r is Institucion?) return r;
-      } catch (_) {}
-    } catch (_) {}
-
-    return null;
+    return InstitucionService.getInstitucionById(id);
   }
+
+  String _savedPlanDescription(Institucion inst) {
+    final commercial = PlanHabilitacionService.planComercial(inst.tipoPlan);
+    if (commercial != PlanComercial.desconocido) {
+      return 'Plan Atena: ${PlanHabilitacionService.nombreComercial(commercial)}';
+    }
+    final config = inst.planConfig;
+    if (config == null) return 'Referencia local: ${inst.tipoPlan}';
+    final levels = config.niveles.where((entry) => entry.habilitado).length;
+    final modules = config.modulos.where((entry) => entry.habilitado).length;
+    final code = inst.tipoPlan.toUpperCase();
+    final curricularTier = code.contains('CUR-PREM') ? 'Premium' : 'Standard';
+    final extraTier = code.contains('EXT-PREM') ? 'Premium' : 'Básico';
+    return 'Referencia histórica · Curricular: $levels ${levels == 1 ? 'nivel' : 'niveles'} ($curricularTier) · '
+        'Extracurricular: $modules ${modules == 1 ? 'módulo' : 'módulos'} ($extraTier)';
+  }
+
+  String _savedPlanStatus(EstadoPlanInstitucion status) => switch (status) {
+    EstadoPlanInstitucion.activo => 'Activo en Atena',
+    EstadoPlanInstitucion.enPrueba => 'En prueba',
+    EstadoPlanInstitucion.vencido => 'Vencido',
+    EstadoPlanInstitucion.suspendido => 'Suspendido',
+    EstadoPlanInstitucion.sinPlan => 'Sin plan',
+  };
 
   // =============================================================================
   // L10N SAFE (best-effort, sin inventar keys)
@@ -350,11 +306,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     () => (l10n as dynamic).planUpper,
     () => (l10n as dynamic).planTitle,
   ], 'PLAN');
-
-  String _tSummaryLabel(AppLocalizations l10n) => _l10nTxt(l10n, [
-    () => (l10n as dynamic).summaryLabel,
-    () => (l10n as dynamic).summary,
-  ], 'Resumen');
 
   String _tCurricularLabel(AppLocalizations l10n) => _l10nTxt(l10n, [
     () => (l10n as dynamic).curricularLabel,
@@ -387,17 +338,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     () => (l10n as dynamic).commonBack,
   ], 'Volver');
 
-  String _tClear(AppLocalizations l10n) => _l10nTxt(l10n, [
-    () => (l10n as dynamic).actionClear,
-    () => (l10n as dynamic).clear,
-    () => (l10n as dynamic).commonClear,
-  ], 'Limpiar');
-
-  String _tApply(AppLocalizations l10n) => _l10nTxt(l10n, [
-    () => (l10n as dynamic).actionApply,
-    () => (l10n as dynamic).apply,
-  ], 'Aplicar');
-
   String _tSave(AppLocalizations l10n) => _l10nTxt(l10n, [
     () => (l10n as dynamic).actionSave,
     () => (l10n as dynamic).save,
@@ -408,10 +348,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     () => (l10n as dynamic).actionConfirm,
     () => (l10n as dynamic).confirm,
   ], 'Confirmar');
-
-  String _tPlanCardSubtitle(AppLocalizations l10n) => _l10nTxt(l10n, [
-    () => (l10n as dynamic).planCardSubtitle,
-  ], 'Seleccioná el plan para las actividades habilitadas.');
 
   String _tAccountLabel(AppLocalizations l10n, String ownerId) => _l10nTxt(
     l10n,
@@ -428,30 +364,9 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     () => (l10n as dynamic).atLeastOneActivityRequired,
   ], 'Seleccioná al menos 1 actividad.');
 
-  // Etiqueta “Código promo” sin inventar keys (best-effort)
-  String _tPromoCodeLabel(AppLocalizations l10n) => _l10nTxt(l10n, [
-    () => (l10n as dynamic).promoCodeLabel,
-    () => (l10n as dynamic).couponCodeLabel,
-  ], 'Código promo');
-
   // =============================================================================
   // Labels (ARB-ready, sin inventar keys acá) – best-effort
   // =============================================================================
-
-  String _labelTierStandard(AppLocalizations l10n) => _l10nTxt(l10n, [
-    () => (l10n as dynamic).planTierStandard,
-    () => (l10n as dynamic).standard,
-  ], 'Standard');
-
-  String _labelTierPremium(AppLocalizations l10n) => _l10nTxt(l10n, [
-    () => (l10n as dynamic).planTierPremium,
-    () => (l10n as dynamic).premium,
-  ], 'Premium');
-
-  String _labelTierBasico(AppLocalizations l10n) => _l10nTxt(l10n, [
-    () => (l10n as dynamic).planTierBasic,
-    () => (l10n as dynamic).basic,
-  ], 'Básico');
 
   String _labelActividades(AppLocalizations l10n) => _l10nTxt(l10n, [
     () => (l10n as dynamic).activitiesLabel,
@@ -467,9 +382,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     () => (l10n as dynamic).modulesLabel,
     () => (l10n as dynamic).modulosLabel,
   ], 'Módulos');
-
-  String _labelPlanKey(AppLocalizations l10n) =>
-      _l10nTxt(l10n, [() => (l10n as dynamic).planKeyLabel], 'PlanKey');
 
   // =============================================================================
   // Args por ruta (best-effort)
@@ -534,11 +446,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         'name',
       ]);
 
-      final tipoPlan = _pickArgString(map, const <String>[
-        'tipoPlan',
-        'planKey',
-      ]);
-
       _routePlanStatus = _pickArgAny(map, const <String>[
         'planStatus',
         'status',
@@ -547,11 +454,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       _routeOwnerId = _n(owner);
       _routeInstPerfilId = _n(perf);
       _routeNombre = _n(nombre);
-      _routeTipoPlan = _n(tipoPlan);
-
-      if (_routeTipoPlan.isNotEmpty) {
-        _seedTiersFromTipoPlan(_routeTipoPlan);
-      }
     }
   }
 
@@ -639,12 +541,10 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       _instActual = inst;
 
       if (inst != null) {
-        _seedTiersFromTipoPlan(inst.tipoPlan);
+        final saved = PlanHabilitacionService.planComercial(inst.tipoPlan);
+        _planSeleccionado = saved == PlanComercial.desconocido ? null : saved;
         _seedSelectionsFromInstitution(inst);
       } else {
-        if (_routeTipoPlan.isNotEmpty) {
-          _seedTiersFromTipoPlan(_routeTipoPlan);
-        }
         if (!_selectionsSeeded) {
           _nivelesSel.clear();
           _bloquesSel.clear();
@@ -652,23 +552,12 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         }
       }
 
-      _recompute();
       if (mounted) setState(() {});
     } catch (_) {
       _instActual = null;
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
-  }
-
-  void _seedTiersFromTipoPlan(String? tipoPlanRaw) {
-    final tp = (tipoPlanRaw ?? '').toLowerCase();
-    _tierCur = tp.contains('cur-prem')
-        ? _TierCurricular.premium
-        : _TierCurricular.standard;
-    _tierExt = tp.contains('ext-prem')
-        ? _TierExtracurricular.premium
-        : _TierExtracurricular.basico;
   }
 
   bool get _hasAnyActividadSelected =>
@@ -691,47 +580,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       tipo: baseDraft.tipo,
       nivelesSeleccionados: List<NivelCurricular>.from(_nivelesSel),
       bloquesSeleccionados: List<BloqueExtracurricular>.from(_bloquesSel),
-    );
-  }
-
-  void _recompute() {
-    if (_missingEntryData) {
-      _calc = _PlanCalculo.zero();
-      return;
-    }
-
-    final effectiveManage = _isManageEffective;
-
-    final baseDraft = effectiveManage
-        ? _draftFromInstitution(_instActual)
-        : (widget.draft ??
-              const InstitucionRegistroDraft(
-                nombre: '',
-                cuit: '',
-                direccion: '',
-                pais: '',
-                provincia: '',
-                ciudad: '',
-                modalidad: ModalidadCursado.presencial,
-                email: '',
-                telefono: '',
-                pass: '',
-                tipo: TipoInstitucion.otra,
-                nivelesSeleccionados: <NivelCurricular>[],
-                bloquesSeleccionados: <BloqueExtracurricular>[],
-              ));
-
-    if (!_selectionsSeeded) {
-      _seedSelectionsFromDraft(baseDraft);
-    }
-
-    final draft = _effectiveDraftForCalc(baseDraft: baseDraft);
-
-    _calc = _PlanCalculo.compute(
-      draft: draft,
-      tierCur: _tierCur,
-      tierExt: _tierExt,
-      promo: _promo,
     );
   }
 
@@ -774,74 +622,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     );
   }
 
-  // =============================================================================
-  // Promo / Código
-  // =============================================================================
-
-  Future<void> _aplicarCodigo() async {
-    if (_cargando) return;
-    if (!mounted) return;
-
-    final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-
-    final raw = _codigoCtrl.text.trim();
-    if (raw.isEmpty) {
-      _snack(messenger, _tCommonError(l10n));
-      return;
-    }
-
-    final promo = _PromoCodes.tryResolve(raw);
-    if (promo == null) {
-      _promo = null;
-      _recompute();
-      if (mounted) setState(() {});
-      _snack(messenger, _tCommonError(l10n));
-      return;
-    }
-
-    try {
-      final prefs = await SharedPreferences.getInstance().timeout(
-        const Duration(seconds: 3),
-      );
-
-      final used = prefs.getInt(kPromoUsedCounterAthena2026) ?? 0;
-      if (used >= kPromoMaxCuposAthena2026) {
-        _snack(messenger, _tCommonError(l10n));
-        return;
-      }
-
-      final owner = _ownerIdManage;
-      if (owner.isNotEmpty) {
-        final owners =
-            prefs.getStringList(kPromoUsedOwnersAthena2026) ?? <String>[];
-        if (owners.contains(owner)) {
-          _snack(messenger, _tCommonError(l10n));
-          return;
-        }
-      }
-
-      _promo = promo;
-      _recompute();
-
-      if (!mounted) return;
-      setState(() {});
-
-      _snack(messenger, _tApply(l10n));
-    } catch (_) {
-      _promo = promo;
-      _recompute();
-      if (mounted) setState(() {});
-    }
-  }
-
-  void _limpiarCodigo() {
-    _codigoCtrl.text = '';
-    _promo = null;
-    _recompute();
-    if (mounted) setState(() {});
-  }
-
   void _snack(ScaffoldMessengerState messenger, String msg) {
     final clean = msg.trim();
     if (clean.isEmpty) return;
@@ -866,13 +646,16 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     );
   }
 
-  EstadoPlanInstitucion _estadoPlanForSelection() {
-    final bool free = (_promo?.percentOff ?? 0) >= 100 || _calc.totalUsd <= 0.0;
-    return free ? EstadoPlanInstitucion.activo : EstadoPlanInstitucion.enPrueba;
-  }
+  // Operational local state, never a paid subscription assertion.
+  EstadoPlanInstitucion _estadoPlanForSelection() =>
+      EstadoPlanInstitucion.activo;
 
-  String _tipoPlanForSelection() => _calc.planKey;
+  String _tipoPlanForSelection() => _planSeleccionado == null
+      ? (_instActual?.tipoPlan ?? 'Free')
+      : PlanHabilitacionService.nombreComercial(_planSeleccionado!);
 
+  // Required legacy date fields retain their previous registration defaults.
+  // They do not establish a Free/Premium subscription duration.
   DateTime _planInicioNow() => DateTime.now();
   DateTime _planFinDefault(DateTime inicio) =>
       inicio.add(const Duration(days: 30));
@@ -935,22 +718,90 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
           ? null
           : await CuentaService.getCuentaById(previousOwner);
       final remember = previousAccount?.recordarme ?? false;
-      await CuentaService.logoutCuenta().timeout(const Duration(seconds: 3));
+      await CuentaService.logoutCuenta();
 
-      final auth = await InstitucionService.registrarInstitucion(
-        email: d.email.trim().toLowerCase(),
-        passwordHash: d.pass,
-        nombre: d.nombre,
-      ).timeout(const Duration(seconds: 10));
+      // A timed-out local write keeps running. Retrying after that used to
+      // encounter an auth record without its institutional profile.
+      final email = d.email.trim().toLowerCase();
+      final existingId = await InstitucionService.getInstitucionIdByEmail(
+        email,
+      );
+      final String ownerId;
+      if (existingId == null) {
+        final auth = await InstitucionService.registrarInstitucion(
+          email: email,
+          passwordHash: d.pass,
+          nombre: d.nombre,
+        );
+        ownerId = auth.institucionId;
+      } else {
+        final auth = await InstitucionService.loginInstitucion(
+          email: email,
+          passwordHash: d.pass,
+        );
+        if (auth == null ||
+            auth.institucionId != existingId ||
+            (await InstitucionService.getNombreInstitucionById(
+                  existingId,
+                ))?.trim() !=
+                d.nombre.trim()) {
+          throw StateError(
+            'El registro existente no corresponde a esta identidad.',
+          );
+        }
+        ownerId = existingId;
+      }
 
-      final ownerId = auth.institucionId;
+      final owner = await CuentaService.getCuentaById(ownerId);
+      final indexedOwner = await CuentaService.getCuentaByEmail(email);
+      if (owner == null ||
+          indexedOwner?.id != ownerId ||
+          owner.email.trim().toLowerCase() != email ||
+          owner.perfilesAlumnoIds.isNotEmpty) {
+        throw StateError(
+          'La cuenta propietaria no coincide con la institución.',
+        );
+      }
+      if (existingId != null) {
+        // The institutional and owner credentials may legitimately diverge.
+        // Recover only when BOTH identities are independently authenticated.
+        final authenticatedOwner = await CuentaService.loginCuenta(
+          email: email,
+          password: d.pass,
+          recordarme: false,
+        );
+        if (authenticatedOwner.id != ownerId) {
+          throw StateError(
+            'La cuenta propietaria no coincide con la institución.',
+          );
+        }
+      }
 
-      final perfil = await CuentaService.crearPerfilInstitucion(
-        cuentaId: ownerId,
-        nombre: d.nombre,
-        emailContacto: d.email,
-        telefonoContacto: d.telefono,
-      ).timeout(const Duration(seconds: 10));
+      final existingProfile = await CuentaService.getPerfilInstitucionById(
+        ownerId,
+      );
+      if (await InstitucionService.getInstitucionById(ownerId) != null ||
+          (existingProfile == null &&
+              owner.perfilesInstitucionIds.isNotEmpty) ||
+          (existingProfile != null &&
+              !owner.perfilesInstitucionIds.contains(ownerId)) ||
+          owner.perfilesInstitucionIds.any((id) => id != ownerId) ||
+          (existingProfile != null &&
+              (existingProfile.cuentaId != ownerId ||
+                  existingProfile.ownerAccountId != ownerId ||
+                  existingProfile.emailContacto.trim().toLowerCase() != email ||
+                  existingProfile.nombre.trim() != d.nombre.trim()))) {
+        throw StateError('La institución ya está registrada.');
+      }
+
+      final perfil =
+          existingProfile ??
+          await CuentaService.crearPerfilInstitucion(
+            cuentaId: ownerId,
+            nombre: d.nombre,
+            emailContacto: d.email,
+            telefonoContacto: d.telefono,
+          );
 
       final inicio = _planInicioNow();
       final fin = _planFinDefault(inicio);
@@ -976,31 +827,13 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
         planConfig: _buildPlanConfigFromSelections(),
       );
 
-      await InstitucionService.upsertInstitucion(
-        inst,
-      ).timeout(const Duration(seconds: 10));
+      await InstitucionService.upsertInstitucion(inst);
 
       await CuentaService.iniciarSesionAutenticada(
         ownerId,
         recordarme: remember,
       );
       await CuentaService.activarContextoInstitucion(ownerId, perfil.id);
-
-      if ((_promo?.code ?? '').isNotEmpty) {
-        try {
-          final prefs = await SharedPreferences.getInstance().timeout(
-            const Duration(seconds: 3),
-          );
-          final used = prefs.getInt(kPromoUsedCounterAthena2026) ?? 0;
-          await prefs.setInt(kPromoUsedCounterAthena2026, used + 1);
-          final owners =
-              prefs.getStringList(kPromoUsedOwnersAthena2026) ?? <String>[];
-          if (!owners.contains(ownerId)) {
-            owners.add(ownerId);
-            await prefs.setStringList(kPromoUsedOwnersAthena2026, owners);
-          }
-        } catch (_) {}
-      }
 
       if (!mounted) return;
 
@@ -1048,8 +881,8 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
     setState(() => _cargando = true);
 
     try {
-      Institucion? inst = _instActual;
-      inst ??= await _cargarInstitucionPorIdBestEffort(
+      // Reload before saving: keep data changed since this form was opened.
+      final inst = await _cargarInstitucionPorIdBestEffort(
         perfilId,
       ).timeout(const Duration(seconds: 8));
 
@@ -1061,41 +894,21 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       final base = _draftFromInstitution(inst);
       final d = _effectiveDraftForCalc(baseDraft: base);
 
-      final inicio = _planInicioNow();
-      final fin = _planFinDefault(inicio);
-
-      final updated = Institucion(
-        id: inst.id,
-        nombre: inst.nombre,
-        cuit: inst.cuit,
-        direccion: inst.direccion,
-        pais: inst.pais,
-        provincia: inst.provincia,
-        ciudad: inst.ciudad,
-        modalidad: inst.modalidad,
-        email: inst.email,
-        telefono: inst.telefono,
+      final updated = inst.copyWith(
         curricular: d.tieneCurricular,
         extracurricular: d.tieneExtracurricular,
-        tipoInstitucion: inst.tipoInstitucion,
         tipoPlan: _tipoPlanForSelection(),
-        estadoPlan: _estadoPlanForSelection(),
-        planInicio: inicio,
-        planFin: fin,
         planConfig: _buildPlanConfigFromSelections(),
-        logoLocalPath: inst.logoLocalPath,
-        croquisLocalPath: inst.croquisLocalPath,
-        croquisAula: inst.croquisAula,
-        gruposCurriculares: inst.gruposCurriculares,
-        actividadesExtracurriculares: inst.actividadesExtracurriculares,
       );
 
       await InstitucionService.upsertInstitucion(
         updated,
       ).timeout(const Duration(seconds: 10));
 
+      // Menus/editors read this cache. Do not leave an old plan that a later
+      // unrelated edit could copy back into the canonical institutional record.
+      await instituciones.guardarInstitucionCachePorId(perfilId, updated);
       _instActual = updated;
-      _recompute();
 
       await CuentaService.activarContextoInstitucion(ownerId, perfilId);
 
@@ -1280,7 +1093,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
                   } else {
                     _nivelesSel.add(n);
                   }
-                  _recompute();
                 });
               },
             );
@@ -1310,7 +1122,6 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
                   } else {
                     _bloquesSel.add(b);
                   }
-                  _recompute();
                 });
               },
             );
@@ -1446,6 +1257,31 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
                         ),
                       ),
                     ),
+                    if (effectiveManage) ...[
+                      const SizedBox(height: 12),
+                      _sectionCard(
+                        context,
+                        title: 'Plan institucional guardado',
+                        child:
+                            _instActual == null ||
+                                (_instActual?.tipoPlan ?? '').trim().isEmpty
+                            ? const Text(
+                                'No hay un plan local guardado para este perfil institucional.',
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(_savedPlanDescription(_instActual!)),
+                                  Text(
+                                    'Estado local: ${_savedPlanStatus(_instActual!.estadoPlan)}',
+                                  ),
+                                  const Text(
+                                    'Este dato local no acredita una suscripción o pago verificado.',
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     _sectionCard(
                       context,
@@ -1453,110 +1289,61 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
                       child: _actividadesSelector(context),
                     ),
                     const SizedBox(height: 12),
-                    if (_nivelesSel.isNotEmpty) ...[
-                      _sectionCard(
-                        context,
-                        title: _tCurricularLabel(l10n),
-                        child: _tierSelectorCurricular(context),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    if (_bloquesSel.isNotEmpty) ...[
-                      _sectionCard(
-                        context,
-                        title: _tExtracurricularLabel(l10n),
-                        child: _tierSelectorExtracurricular(context),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
                     _sectionCard(
                       context,
-                      title: _tPromoCodeLabel(l10n),
+                      title: 'Plan Atena · configuración local',
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SwitchListTile.adaptive(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(_tPromoCodeLabel(l10n)),
-                            value: _mostrarCodigo,
-                            onChanged: (v) =>
-                                setState(() => _mostrarCodigo = v),
-                          ),
-                          if (_mostrarCodigo) ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _codigoCtrl,
-                                    textInputAction: TextInputAction.done,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      hintText: kPromoCodeAthena2026,
+                          Wrap(
+                            spacing: 12,
+                            children: [
+                              for (final plan in [
+                                PlanComercial.free,
+                                PlanComercial.premium,
+                              ])
+                                ChoiceChip(
+                                  label: Text(
+                                    PlanHabilitacionService.nombreComercial(
+                                      plan,
                                     ),
                                   ),
+                                  selected: _planSeleccionado == plan,
+                                  onSelected: _cargando
+                                      ? null
+                                      : (_) => setState(
+                                          () => _planSeleccionado = plan,
+                                        ),
                                 ),
-                                const SizedBox(width: 10),
-                                OutlinedButton(
-                                  onPressed: _cargando ? null : _limpiarCodigo,
-                                  child: Text(_tClear(l10n)),
-                                ),
-                                const SizedBox(width: 10),
-                                ElevatedButton(
-                                  onPressed: _cargando ? null : _aplicarCodigo,
-                                  child: Text(_tApply(l10n)),
-                                ),
-                              ],
-                            ),
-                            if (_promo != null) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                '${_promo!.code} • ${_promo!.label}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
                             ],
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _sectionCard(
-                      context,
-                      title: _tSummaryLabel(l10n),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _kvLine(context, _labelPlanKey(l10n), _calc.planKey),
-                          const SizedBox(height: 6),
-                          _moneyLine(context, 'USD', _calc.subtotalUsd),
-                          if (_calc.descuentoModulosUsd > 0) ...[
-                            const SizedBox(height: 4),
-                            _moneyLine(
-                              context,
-                              'USD',
-                              -_calc.descuentoModulosUsd,
-                            ),
-                          ],
-                          if (_calc.descuentoCodigoUsd > 0) ...[
-                            const SizedBox(height: 4),
-                            _moneyLine(
-                              context,
-                              'USD',
-                              -_calc.descuentoCodigoUsd,
-                            ),
-                          ],
-                          const SizedBox(height: 10),
-                          Divider(color: cs.onSurface.withValues(alpha: 0.12)),
-                          const SizedBox(height: 8),
-                          _moneyLine(
-                            context,
-                            'USD',
-                            _calc.totalUsd,
-                            bold: true,
                           ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Free: presencia pública y descubrimiento.',
+                          ),
+                          const Text(
+                            'Premium: presencia pública y nuevas solicitudes digitales.',
+                          ),
+                          const Text(
+                            'El plan pertenece a la institución completa. El costo de cada oferta es independiente.',
+                          ),
+                          if (_planSeleccionado == null)
+                            const Text(
+                              'Plan histórico sin clasificar. Se conserva salvo selección explícita; no concede Premium automáticamente.',
+                            ),
+                          const SizedBox(height: 12),
+                          Text(
+                            PlanHabilitacionService.commercialEnforcementEnabled
+                                ? 'Restricción comercial activada en esta compilación.'
+                                : 'Modo de pruebas: restricción comercial desactivada. Free y Premium permiten probar solicitudes.',
+                          ),
+                          const Text(
+                            'Precios y condiciones comerciales no definidos. Esta selección local no acredita una suscripción o pago verificado.',
+                          ),
+                          if (_instActual != null)
+                            const Text(
+                              'Se conservan el estado operativo y las fechas históricas. Elegir Premium no reactiva un registro vencido o suspendido.',
+                            ),
                         ],
                       ),
                     ),
@@ -1623,301 +1410,4 @@ class _InstitucionPlanPageState extends State<InstitucionPlanPage> {
       ),
     );
   }
-
-  Widget _tierSelectorCurricular(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
-
-    Widget chip({
-      required bool selected,
-      required String label,
-      required VoidCallback onTap,
-    }) {
-      return ChoiceChip(
-        selected: selected,
-        onSelected: (_) => onTap(),
-        label: Text(label),
-        selectedColor: cs.primary.withValues(alpha: 0.18),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            chip(
-              selected: _tierCur == _TierCurricular.standard,
-              label: _labelTierStandard(l10n),
-              onTap: () {
-                setState(() {
-                  _tierCur = _TierCurricular.standard;
-                  _recompute();
-                });
-              },
-            ),
-            chip(
-              selected: _tierCur == _TierCurricular.premium,
-              label: _labelTierPremium(l10n),
-              onTap: () {
-                setState(() {
-                  _tierCur = _TierCurricular.premium;
-                  _recompute();
-                });
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          _tPlanCardSubtitle(l10n),
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-        ),
-      ],
-    );
-  }
-
-  Widget _tierSelectorExtracurricular(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
-
-    Widget chip({
-      required bool selected,
-      required String label,
-      required VoidCallback onTap,
-    }) {
-      return ChoiceChip(
-        selected: selected,
-        onSelected: (_) => onTap(),
-        label: Text(label),
-        selectedColor: cs.primary.withValues(alpha: 0.18),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            chip(
-              selected: _tierExt == _TierExtracurricular.basico,
-              label: _labelTierBasico(l10n),
-              onTap: () {
-                setState(() {
-                  _tierExt = _TierExtracurricular.basico;
-                  _recompute();
-                });
-              },
-            ),
-            chip(
-              selected: _tierExt == _TierExtracurricular.premium,
-              label: _labelTierPremium(l10n),
-              onTap: () {
-                setState(() {
-                  _tierExt = _TierExtracurricular.premium;
-                  _recompute();
-                });
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          _tPlanCardSubtitle(l10n),
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-        ),
-      ],
-    );
-  }
-
-  Widget _kvLine(BuildContext context, String k, String v) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final kk = k.trim().isEmpty ? 'PlanKey' : k.trim();
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            kk,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          v,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _moneyLine(
-    BuildContext context,
-    String currency,
-    double value, {
-    bool bold = false,
-  }) {
-    final theme = Theme.of(context);
-    final sign = value < 0 ? '-' : '';
-    final abs = value.abs();
-
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            currency,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        Text(
-          '$sign\$${abs.toStringAsFixed(2)}',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: bold ? FontWeight.w900 : FontWeight.w800,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// =============================================================================
-// Promos / Códigos
-// =============================================================================
-
-class _PromoResult {
-  final String code;
-  final String label;
-  final int percentOff;
-  final int fixedOffUsd;
-
-  const _PromoResult({
-    required this.code,
-    required this.label,
-    required this.percentOff,
-    required this.fixedOffUsd,
-  });
-}
-
-class _PromoCodes {
-  static const Map<String, _PromoResult> _allow = <String, _PromoResult>{
-    kPromoCodeAthena2026: _PromoResult(
-      code: kPromoCodeAthena2026,
-      label: '1 mes gratis (límite 100)',
-      percentOff: 100,
-      fixedOffUsd: 0,
-    ),
-  };
-
-  static _PromoResult? tryResolve(String raw) {
-    final key = raw.trim().toUpperCase();
-    if (key.isEmpty) return null;
-    return _allow[key];
-  }
-}
-
-// =============================================================================
-// Plan cálculo
-// =============================================================================
-
-class _PlanCalculo {
-  final String planKey;
-  final double subtotalUsd;
-  final double descuentoModulosUsd;
-  final double descuentoCodigoUsd;
-  final double totalUsd;
-  final List<String> explicaciones;
-
-  const _PlanCalculo({
-    required this.planKey,
-    required this.subtotalUsd,
-    required this.descuentoModulosUsd,
-    required this.descuentoCodigoUsd,
-    required this.totalUsd,
-    required this.explicaciones,
-  });
-
-  static _PlanCalculo zero() => const _PlanCalculo(
-    planKey: '',
-    subtotalUsd: 0,
-    descuentoModulosUsd: 0,
-    descuentoCodigoUsd: 0,
-    totalUsd: 0,
-    explicaciones: [],
-  );
-
-  static _PlanCalculo compute({
-    required InstitucionRegistroDraft draft,
-    required _TierCurricular tierCur,
-    required _TierExtracurricular tierExt,
-    required _PromoResult? promo,
-  }) {
-    const usdCurPorNivel = _InstitucionPlanPricing.usdCurPorNivel;
-    const usdExtPorModulo = _InstitucionPlanPricing.usdExtPorModulo;
-    const descuentoPctDesde3 = _InstitucionPlanPricing.descuentoPctDesde3;
-
-    final nivelesCount = draft.nivelesSeleccionados.length;
-    final modulosCount = draft.bloquesSeleccionados.length;
-    final totalModulos = nivelesCount + modulosCount;
-
-    final subtotal =
-        (nivelesCount * usdCurPorNivel) + (modulosCount * usdExtPorModulo);
-
-    final double descModulos = totalModulos >= 3
-        ? (subtotal * descuentoPctDesde3)
-        : 0.0;
-
-    final double afterModulesDiscount = (subtotal - descModulos).clamp(
-      0.0,
-      double.infinity,
-    );
-
-    final double descCodigo = promo == null
-        ? 0.0
-        : (afterModulesDiscount * (promo.percentOff / 100.0)) +
-              promo.fixedOffUsd.toDouble();
-
-    final double total = (afterModulesDiscount - descCodigo).clamp(
-      0.0,
-      double.infinity,
-    );
-
-    final parts = <String>['FASE2'];
-    parts.add(tierCur == _TierCurricular.premium ? 'CUR-PREM' : 'CUR-STD');
-    parts.add(tierExt == _TierExtracurricular.premium ? 'EXT-PREM' : 'EXT-BAS');
-    parts.add('N$nivelesCount');
-    parts.add('M$modulosCount');
-
-    return _PlanCalculo(
-      planKey: parts.join('-'),
-      subtotalUsd: subtotal,
-      descuentoModulosUsd: descModulos,
-      descuentoCodigoUsd: descCodigo,
-      totalUsd: total,
-      explicaciones: const <String>[],
-    );
-  }
-}
-
-// =============================================================================
-// Pricing constants
-// =============================================================================
-
-class _InstitucionPlanPricing {
-  static const double usdCurPorNivel = 10.0;
-  static const double usdExtPorModulo = 15.0;
-  static const double descuentoPctDesde3 = 0.05;
 }

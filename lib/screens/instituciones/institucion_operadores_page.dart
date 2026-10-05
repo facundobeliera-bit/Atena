@@ -220,6 +220,11 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
     CapacidadInstitucional.responsesRead => 'Consultar respuestas',
     CapacidadInstitucional.communicationsWrite => 'Emitir comunicaciones',
     CapacidadInstitucional.auditRead => 'Consultar historial de actividad',
+    CapacidadInstitucional.documentsRead => 'Consultar documentación',
+    CapacidadInstitucional.documentsWrite => 'Solicitar documentación',
+    CapacidadInstitucional.educationRead => 'Consultar trayectoria educativa',
+    CapacidadInstitucional.educationWrite =>
+      'Registrar y publicar información educativa',
     _ => capability,
   };
 
@@ -380,6 +385,36 @@ class _InstitucionOperadoresPageState extends State<InstitucionOperadoresPage> {
                               ),
                             ],
                           ),
+                        ),
+                        SwitchListTile(
+                          title: const Text('Función de Dirección'),
+                          subtitle: const Text(
+                            'Conserva los permisos explícitos de cada área. No cambia al propietario.',
+                          ),
+                          value: operator.esDirector,
+                          onChanged:
+                              _operators.any(
+                                (o) => o.id == _activeId && o.esPropietario,
+                              )
+                              ? (value) async {
+                                  final messenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
+                                  try {
+                                    await InstitucionOperadoresService.instance
+                                        .establecerDireccion(
+                                          institucionId: widget.institucionId,
+                                          operadorId: operator.id,
+                                          esDirector: value,
+                                        );
+                                    await _load();
+                                  } catch (e) {
+                                    messenger.showSnackBar(
+                                      SnackBar(content: Text('$e')),
+                                    );
+                                  }
+                                }
+                              : null,
                         ),
                         if (!operator.esPropietario)
                           for (final assignment

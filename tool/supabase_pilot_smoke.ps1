@@ -2,6 +2,7 @@ param(
   [string]$ProjectRef = 'eaegvxxxkvhdukbkydvy',
   [string]$ExistingRun = '',
   [switch]$RunFlutterTest,
+  [switch]$TestVerifiedLinks,
   [switch]$RunBrowserTest,
   [ValidateSet('a','b')][string]$BrowserRole = 'a',
   [switch]$BrowserAlreadyAtLogin
@@ -28,7 +29,13 @@ function CallApi([string]$Method, [string]$Path, [string]$Key, [string]$Token, $
     return Invoke-RestMethod @args
   } catch {
     $status = [int]$_.Exception.Response.StatusCode
-    throw "Remote request $Method $Path failed (HTTP $status)."
+    $detail = ''
+    try {
+      $problem = $_.ErrorDetails.Message | ConvertFrom-Json
+      if ($problem.code) { $detail = " Code: $($problem.code)." }
+      if ($problem.message) { $detail += " Message: $($problem.message)." }
+    } catch { }
+    throw "Remote request $Method $Path failed (HTTP $status).$detail"
   }
 }
 
@@ -40,6 +47,18 @@ function Expect([bool]$Condition, [string]$Message) {
 function ExpectDenied([scriptblock]$Action, [string]$Message) {
   try { $null = & $Action } catch {
     if ($_.Exception.Message -match 'HTTP (401|403)') {
+      Write-Output "PASS: $Message"
+      return
+    }
+    throw
+  }
+  throw "FAIL: $Message"
+}
+
+function ExpectPostgresError([scriptblock]$Action, [string]$Message, [int]$HttpStatus, [string]$SqlState) {
+  try { $null = & $Action } catch {
+    if ($_.Exception.Message -match ('\(HTTP ' + $HttpStatus + '\)') -and
+        $_.Exception.Message -match ('Code: ' + [regex]::Escape($SqlState) + '\.')) {
       Write-Output "PASS: $Message"
       return
     }
@@ -159,6 +178,121 @@ foreach ($account in $accounts) {
 ExpectDenied {
   CallApi 'GET' '/rest/v1/atena_pilot_institutions?select=id' $publicKey '' $null
 } 'anonymous user cannot read pilot institutions'
+if ($TestVerifiedLinks) {
+  $a = $accounts[0]
+  $b = $accounts[1]
+  $linkA = @{
+    auth_user_id = $a.UserId; local_account_id = "pilot-account-a-$run"
+    institution_id = $a.Institution; operator_id = $a.Operator
+    verification_ref = "pilot-proof-a-$run"
+    verified_by = 'pilot-fixture-admin'
+  }
+  ExpectDenied {
+    CallApi 'POST' '/rest/v1/atena_pilot_identity_links' $publicKey $a.Token $linkA
+  } 'client cannot create its own verified link'
+  $before = @(CallApi 'GET' '/rest/v1/atena_pilot_identity_links?select=id' $publicKey $a.Token $null | Where-Object { $_ -and $_.id })
+  Expect ($before.Count -eq 0) 'unlinked account has no verified identity'
+  ExpectDenied {
+    CallApi 'POST' '/rest/v1/rpc/atena_pilot_record_verified_note' $publicKey $a.Token @{
+      p_institution_id = $a.Institution; p_area_id = $a.Area
+      p_operator_id = $a.Operator; p_resource_id = "unlinked-$run"
+      p_note = 'Unlinked request must fail'
+    }
+  } 'unlinked account cannot write verified notes'
+  $operatorCheck = @(CallApi 'GET' "/rest/v1/atena_pilot_operators?select=id,auth_user_id,is_owner,active&institution_id=eq.$($a.Institution)" $adminKey $adminKey $null | Where-Object { $_ -and $_.id })
+  $institutionCheck = @(CallApi 'GET' "/rest/v1/atena_pilot_institutions?select=id,owner_auth_user_id&id=eq.$($a.Institution)" $adminKey $adminKey $null | Where-Object { $_ -and $_.id })
+  Expect (@($operatorCheck | Where-Object { $_.id -eq $a.Operator -and $_.auth_user_id -eq $a.UserId -and $_.active }).Count -eq 1) 'administrator sees matching active pilot operator'
+  Expect (@($institutionCheck | Where-Object { $_.owner_auth_user_id -eq $a.UserId }).Count -eq 1) 'administrator sees matching pilot owner'
+  Expect ($linkA.auth_user_id -eq $a.UserId -and $linkA.institution_id -eq $a.Institution -and $linkA.operator_id -eq $a.Operator) 'link payload matches the verified pilot fixture'
+  $null = CallApi 'POST' '/rest/v1/atena_pilot_identity_links' $adminKey $adminKey $linkA
+  $contradictory = $linkA.Clone()
+  $contradictory.institution_id = $b.Institution
+  $contradictory.operator_id = $b.Operator
+  $contradictory.verification_ref = "pilot-contradiction-$run"
+  ExpectPostgresError {
+    CallApi 'POST' '/rest/v1/atena_pilot_identity_links' $adminKey $adminKey $contradictory
+  } 'server rejects a link whose Auth user contradicts the operator' 400 '23514'
+  $duplicateLocal = $linkA.Clone()
+  $duplicateLocal.auth_user_id = $b.UserId
+  $duplicateLocal.institution_id = $b.Institution
+  $duplicateLocal.operator_id = $b.Operator
+  $duplicateLocal.verification_ref = "pilot-duplicate-$run"
+  ExpectPostgresError {
+    CallApi 'POST' '/rest/v1/atena_pilot_identity_links' $adminKey $adminKey $duplicateLocal
+  } 'server rejects two active Auth identities for one local account' 409 '23505'
+  $linkB = @{
+    auth_user_id = $b.UserId; local_account_id = "pilot-account-b-$run"
+    institution_id = $b.Institution; operator_id = $b.Operator
+    verification_ref = "pilot-proof-b-$run"
+    verified_by = 'pilot-fixture-admin'
+  }
+  $null = CallApi 'POST' '/rest/v1/atena_pilot_identity_links' $adminKey $adminKey $linkB
+  $own = @(CallApi 'GET' '/rest/v1/atena_pilot_identity_links?select=id,local_account_id' $publicKey $a.Token $null | Where-Object { $_ -and $_.id })
+  $foreign = @(CallApi 'GET' '/rest/v1/atena_pilot_identity_links?select=id' $publicKey $b.Token $null | Where-Object { $_ -and $_.id })
+  Expect (@($own | Where-Object { $_.local_account_id -eq $linkA.local_account_id }).Count -eq 1 -and $foreign.Count -eq 1) 'two verified users read only their own links'
+  $verifiedId = CallApi 'POST' '/rest/v1/rpc/atena_pilot_record_verified_note' $publicKey $a.Token @{
+    p_institution_id = $a.Institution; p_area_id = $a.Area
+    p_operator_id = $a.Operator; p_resource_id = "verified-$run"
+    p_note = 'Fictitious verified operation'
+  }
+  Expect ([bool]$verifiedId) 'verified user writes with own operator and area'
+  $verifiedBId = CallApi 'POST' '/rest/v1/rpc/atena_pilot_record_verified_note' $publicKey $b.Token @{
+    p_institution_id = $b.Institution; p_area_id = $b.Area
+    p_operator_id = $b.Operator; p_resource_id = "verified-b-$run"
+    p_note = 'Fictitious second institution operation'
+  }
+  Expect ([bool]$verifiedBId) 'second verified user writes in own institution'
+  ExpectDenied {
+    CallApi 'POST' '/rest/v1/atena_pilot_verified_operations' $publicKey $a.Token @{
+      institution_id = $a.Institution; area_id = $a.Area
+      operator_id = $a.Operator; auth_user_id = $a.UserId
+      resource_id = "bypass-$run"; note = 'Direct write must fail'
+    }
+  } 'verified user cannot bypass the RPC with a direct insert'
+  $unassignedArea = "unassigned-$run"
+  $null = CallApi 'POST' '/rest/v1/atena_pilot_areas' $adminKey $adminKey @{
+    institution_id = $a.Institution; id = $unassignedArea
+    display_name = 'Fictitious unassigned area'
+  }
+  ExpectDenied {
+    CallApi 'POST' '/rest/v1/rpc/atena_pilot_record_verified_note' $publicKey $a.Token @{
+      p_institution_id = $a.Institution; p_area_id = $unassignedArea
+      p_operator_id = $a.Operator; p_resource_id = "unassigned-$run"
+      p_note = 'Unassigned area must fail'
+    }
+  } 'verified operator cannot write to an unassigned area'
+  ExpectDenied {
+    CallApi 'POST' '/rest/v1/rpc/atena_pilot_record_verified_note' $publicKey $a.Token @{
+      p_institution_id = $b.Institution; p_area_id = $b.Area
+      p_operator_id = $b.Operator; p_resource_id = "forged-$run"
+      p_note = 'Foreign operator must fail'
+    }
+  } 'verified user cannot impersonate foreign operator'
+  ExpectDenied {
+    CallApi 'POST' '/rest/v1/rpc/atena_pilot_record_verified_note' $publicKey $b.Token @{
+      p_institution_id = $a.Institution; p_area_id = $a.Area
+      p_operator_id = $a.Operator; p_resource_id = "forged-b-$run"
+      p_note = 'Unlinked user must fail'
+    }
+  } 'another verified user cannot use the foreign identity'
+  $aSeesB = @(CallApi 'GET' "/rest/v1/atena_pilot_verified_operations?select=id&resource_id=eq.verified-b-$run" $publicKey $a.Token $null | Where-Object { $_ -and $_.id })
+  $bSeesA = @(CallApi 'GET' "/rest/v1/atena_pilot_verified_operations?select=id&resource_id=eq.verified-$run" $publicKey $b.Token $null | Where-Object { $_ -and $_.id })
+  Expect ($aSeesB.Count -eq 0 -and $bSeesA.Count -eq 0) 'verified operations remain isolated between institutions'
+  $null = CallApi 'PATCH' "/rest/v1/atena_pilot_identity_links?auth_user_id=eq.$($a.UserId)&institution_id=eq.$($a.Institution)" $adminKey $adminKey @{
+    active = $false; revoked_at = [DateTime]::UtcNow.ToString('o')
+  }
+  $after = @(CallApi 'GET' "/rest/v1/atena_pilot_verified_operations?select=id&resource_id=eq.verified-$run" $publicKey $a.Token $null | Where-Object { $_ -and $_.id })
+  Expect ($after.Count -eq 0) 'revoked link cannot read previous verified note'
+  ExpectDenied {
+    CallApi 'POST' '/rest/v1/rpc/atena_pilot_record_verified_note' $publicKey $a.Token @{
+      p_institution_id = $a.Institution; p_area_id = $a.Area
+      p_operator_id = $a.Operator; p_resource_id = "revoked-$run"
+      p_note = 'Revoked request must fail'
+    }
+  } 'revoked link cannot write with an existing access token'
+  $bAfterRevoke = @(CallApi 'GET' "/rest/v1/atena_pilot_verified_operations?select=id&resource_id=eq.verified-b-$run" $publicKey $b.Token $null | Where-Object { $_ -and $_.id })
+  Expect ($bAfterRevoke.Count -eq 1) 'revoking A does not revoke B'
+}
 Write-Output "Pilot remote smoke complete; run id: $run"
 if ($RunFlutterTest) {
   $env:ATENA_PILOT_PUBLIC_KEY = $publicKey

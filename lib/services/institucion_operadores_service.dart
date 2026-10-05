@@ -3,6 +3,7 @@ import '../models/instituciones/operador_institucional.dart';
 import 'institucion_areas_service.dart';
 import 'session_service.dart';
 import 'storage_service.dart';
+import 'cuenta_service.dart';
 
 class InstitucionOperadoresService {
   InstitucionOperadoresService._();
@@ -127,6 +128,41 @@ class InstitucionOperadoresService {
   ) async => (await listar(
     institution,
   )).where((value) => value.id == _id(operatorId)).firstOrNull;
+
+  Future<void> establecerDireccion({
+    required String institucionId,
+    required String operadorId,
+    required bool esDirector,
+  }) async {
+    final session = await SessionService.getSession();
+    final owner = await SessionService.getInstitucionOwnerAccountIdLogueado();
+    final actor = await operadorActivo(institucionId);
+    final profile = await CuentaService.getPerfilInstitucionById(institucionId);
+    final account = await CuentaService.getCuentaById(owner ?? '');
+    if (session?.role != SessionRole.institucion ||
+        session?.userId != institucionId ||
+        actor?.esPropietario != true ||
+        actor?.cuentaId != owner ||
+        profile == null ||
+        account == null ||
+        profile.cuentaId != owner ||
+        (profile.ownerAccountId ?? profile.cuentaId) != owner ||
+        !account.perfilesInstitucionIds.contains(institucionId)) {
+      throw StateError(
+        'Sólo el propietario validado puede designar Dirección.',
+      );
+    }
+    final values = await listar(institucionId);
+    final index = values.indexWhere((o) => o.id == operadorId);
+    if (index < 0 || (esDirector && !values[index].puedeActivarse)) {
+      throw StateError('Elegí un operador activo de esta institución.');
+    }
+    values[index] = values[index].copyWith(
+      esDirector: esDirector,
+      updatedAt: DateTime.now().toUtc(),
+    );
+    await _saveOperators(institucionId, values);
+  }
 
   Future<bool> actualizar({
     required String institucionId,

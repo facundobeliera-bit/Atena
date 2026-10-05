@@ -32,7 +32,7 @@ import '../../l10n/gen/app_localizations.dart';
 
 import '../../models/extracurriculares/bloque_extracurricular.dart';
 import '../../models/extracurriculares/grupo_extracurricular.dart';
-import '../../services/extracurriculares_service.dart';
+import '../../services/solicitudes_service.dart';
 
 import 'alumno_solicitar_vacante_page.dart';
 
@@ -96,8 +96,9 @@ class _AlumnoSeleccionGrupoExtracurricularPageState
     _busquedaCtrl.text = widget.filtroInicial ?? '';
     _busquedaCtrl.addListener(_onFiltro);
 
-    // ignore: discarded_futures
-    _cargar();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_cargar());
+    });
   }
 
   @override
@@ -153,9 +154,9 @@ class _AlumnoSeleccionGrupoExtracurricularPageState
     });
 
     try {
-      final grupos = await ExtracurricularesService.instance
-          .cargarGrupos(_instId)
-          .timeout(const Duration(seconds: 10));
+      final grupos = await SolicitudesService.gruposExtracurricularesParaAlumno(
+        _instId,
+      ).timeout(const Duration(seconds: 10));
 
       if (!mounted) return;
       if (mySeq != _loadSeq) return; // resultado stale

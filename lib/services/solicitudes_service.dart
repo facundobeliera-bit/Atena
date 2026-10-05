@@ -1,3 +1,4 @@
+import 'plan_habilitacion_service.dart';
 // ─────────────────────────────────────────────
 // ATENA – SOLICITUDES SERVICE (CANÓNICO)
 // Orquestación Alumno ↔ Institución
@@ -64,6 +65,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/extracurriculares/actividad_extracurricular.dart';
+import '../models/extracurriculares/grupo_extracurricular.dart';
 import '../models/extracurriculares/bloque_extracurricular.dart';
 import '../models/instituciones/grupo_curricular.dart';
 import '../models/notificaciones/notificacion_atena.dart';
@@ -732,7 +734,8 @@ class SolicitudesService {
     if (o.isEmpty) return <SolicitudAlumno>[];
 
     final list = await _repo.getSolicitudesOwner(o);
-    return list..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
+    return list.toList()
+      ..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
   }
 
   // =====================================================
@@ -854,6 +857,23 @@ class SolicitudesService {
     // ✅ DEDUP KEY (E2E):
     // - Curricular: prioriza grupoCurricularId si existe
     // - Extracurricular: incluye moduleKey
+    final resolvedArea = await _areaDelGrupo(
+      instId,
+      curricular: solicitudAlumno.esCurricular,
+      grupoId: grupoCurricularId,
+      actividad: actNombre,
+      aula: aulaSnapshot,
+      turno: turnoSnapshot,
+      moduleKey: moduleKey,
+    );
+    if (resolvedArea.isNotEmpty &&
+        _n(solicitudAlumno.areaId).isNotEmpty &&
+        _n(solicitudAlumno.areaId) != resolvedArea) {
+      throw SolicitudesException(
+        'forbidden',
+        'El grupo no pertenece al área indicada.',
+      );
+    }
     final dedup = SolicitudAlumno.buildDedupKeyPublic(
       ownerAccountId: o,
       perfilId: p,
@@ -909,7 +929,7 @@ class SolicitudesService {
       institucionNombre: instNombre,
       actividadNombre: actNombre,
       grupoCurricularId: solicitudAlumno.esCurricular ? grupoCurricularId : '',
-      areaId: solicitudAlumno.areaId,
+      areaId: resolvedArea.isEmpty ? solicitudAlumno.areaId : resolvedArea,
       aula: aulaSnapshot,
       turno: turnoSnapshot,
       moduleKey: moduleKey,
@@ -922,6 +942,14 @@ class SolicitudesService {
       dedupKey: dedup,
     );
 
+    // Check the current plan immediately before creating data, indexes or notices.
+    // Existing applications and state transitions do not pass through this gate.
+    if (!await PlanHabilitacionService.puedeRecibirPorId(instId)) {
+      throw SolicitudesException(
+        'digital_enrollment_disabled',
+        PlanHabilitacionService.inscripcionNoHabilitada,
+      );
+    }
     await _repo.saveSolicitudAlumno(base);
     await _rebuildIfPossible();
 
@@ -1076,7 +1104,8 @@ class SolicitudesService {
     if (id.isEmpty) return <SolicitudAlumno>[];
 
     final list = await _repo.getSolicitudesInstitucion(id);
-    return list..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
+    return list.toList()
+      ..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
   }
 
   static Future<List<SolicitudAlumno>> obtenerPendientesParaInstitucion({
@@ -1086,7 +1115,8 @@ class SolicitudesService {
     if (id.isEmpty) return <SolicitudAlumno>[];
 
     final list = await _repo.getSolicitudesInstitucionPendientes(id);
-    return list..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
+    return list.toList()
+      ..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
   }
 
   static Future<List<SolicitudAlumno>>
@@ -1149,6 +1179,42 @@ class SolicitudesService {
   // =====================================================
 
   // Persisted occupation is total occupation, not an additive request counter.
+  // Read-only shared match contract for capacity validation and public catalog.
+  static int contarConfirmadasDeGrupo({
+    required Iterable<SolicitudAlumno> solicitudes,
+    required String institucionId,
+    required bool curricular,
+    String grupoId = '',
+    String actividadNombre = '',
+    String nombreGrupo = '',
+    String turno = '',
+    String moduleKey = '',
+  }) {
+    final key = _kMatchGrupo(
+      actividadNombre: actividadNombre,
+      nombreGrupo: nombreGrupo,
+      turno: turno,
+      moduleKey: moduleKey,
+    );
+    return solicitudes.where((s) {
+      if (_kid(s.institucionId) != _kid(institucionId) ||
+          s.estado != EstadoSolicitud.confirmada ||
+          s.esCurricular != curricular) {
+        return false;
+      }
+      if (curricular) {
+        return grupoId.isNotEmpty && s.grupoCurricularIdCanonico == grupoId;
+      }
+      return _kMatchGrupo(
+            actividadNombre: s.actividadNombre,
+            nombreGrupo: s.aula,
+            turno: s.turno,
+            moduleKey: s.moduleKey,
+          ) ==
+          key;
+    }).length;
+  }
+
   static int _ocupacionTrasCambio(
     int occupied,
     int confirmed,
@@ -1196,16 +1262,20 @@ class SolicitudesService {
               (_n(s.aula).isNotEmpty &&
                   _n(s.aula) !=
                       (_n(g.aula).isEmpty ? _n(g.nombreGrupo) : _n(g.aula))) ||
-              (_n(s.turno).isNotEmpty && _n(s.turno) != _n(g.turno)))) {
+              (_n(s.turno).isNotEmpty &&
+                  _turnoComparable(s.turno) != _turnoComparable(g.turno)))) {
         throw SolicitudesException(
           'incompatible_group',
           'La configuración del grupo cambió.',
         );
       }
 
-      final count = confirmed
-          .where((x) => x.esCurricular && x.grupoCurricularIdCanonico == g.id)
-          .length;
+      final count = contarConfirmadasDeGrupo(
+        solicitudes: confirmed,
+        institucionId: inst,
+        curricular: true,
+        grupoId: g.id,
+      );
       final next = _ocupacionTrasCambio(
         g.cupoOcupado,
         count,
@@ -1261,19 +1331,15 @@ class SolicitudesService {
       );
     }
     final g = matches.single;
-    final count = confirmed
-        .where(
-          (x) =>
-              !x.esCurricular &&
-              _kMatchGrupo(
-                    actividadNombre: x.actividadNombre,
-                    nombreGrupo: x.aula,
-                    turno: x.turno,
-                    moduleKey: x.moduleKey,
-                  ) ==
-                  key,
-        )
-        .length;
+    final count = contarConfirmadasDeGrupo(
+      solicitudes: confirmed,
+      institucionId: inst,
+      curricular: false,
+      actividadNombre: g.actividadNombre,
+      nombreGrupo: g.nombreGrupo,
+      turno: g.turno,
+      moduleKey: g.bloque.key,
+    );
     final next = _ocupacionTrasCambio(
       g.cupoOcupado,
       count,
@@ -1573,6 +1639,21 @@ class SolicitudesService {
         'No se pudo comprobar el ámbito de esta solicitud.',
       );
     }
+    final groupArea = await _areaDelGrupo(
+      institution,
+      curricular: request.esCurricular,
+      grupoId: request.grupoCurricularIdCanonico,
+      actividad: request.actividadNombre,
+      aula: request.aula,
+      turno: request.turno,
+      moduleKey: request.moduleKey,
+    );
+    if (groupArea.isNotEmpty && groupArea != area) {
+      throw SolicitudesException(
+        'forbidden',
+        'La solicitud pertenece a otra área.',
+      );
+    }
     final operator = await InstitucionOperadoresService.instance
         .autorizarActivo(
           institucionId: institution,
@@ -1684,6 +1765,130 @@ class SolicitudesService {
     // La misma resolución que usa el alumno y Gestión, incluido vacío explícito.
     // No ocultar corrupción como ausencia de grupos.
     return ih.cargarGruposCurricularesInstitucion(id);
+  }
+
+  // Presentation may capitalize/accent the shift. Hours remain part of the
+  // comparison so a changed schedule still requires a new request.
+  static String _turnoComparable(String? value) => _n(
+    value,
+  ).toLowerCase().replaceAll('ñ', 'n').replaceAll(RegExp(r'\s+'), '');
+
+  static Future<String> _areaDelGrupo(
+    String institution, {
+    required bool curricular,
+    required String grupoId,
+    required String actividad,
+    required String aula,
+    required String turno,
+    required String moduleKey,
+  }) async {
+    if (curricular) {
+      final matches = (await ih.cargarGruposInstitucion(
+        institution,
+      )).where((g) => g.id == grupoId).toList();
+      return matches.length == 1 ? _n(matches.single.areaId) : '';
+    }
+    final key = _kMatchGrupo(
+      actividadNombre: actividad,
+      nombreGrupo: aula,
+      turno: turno,
+      moduleKey: moduleKey,
+    );
+    final matches =
+        (await ExtracurricularesService.instance.cargarGrupos(institution))
+            .where(
+              (g) =>
+                  _kMatchGrupo(
+                    actividadNombre: g.actividadNombre,
+                    nombreGrupo: g.nombreGrupo,
+                    turno: g.turno,
+                    moduleKey: g.moduleKey,
+                  ) ==
+                  key,
+            )
+            .toList();
+    return matches.length == 1 ? _n(matches.single.areaId) : '';
+  }
+
+  /// Read-only availability for student search and vacancy selection.
+  /// Management remains the source of group identity; confirmations only
+  /// increase the effective occupation, never add to persisted occupation.
+  static Future<List<GrupoCurricular>> gruposCurricularesParaAlumno(
+    String id,
+  ) async {
+    final groups = await ih.cargarGruposCurricularesInstitucion(id);
+    final management = {
+      for (final g in await ih.cargarGruposInstitucion(id)) g.id: g,
+    };
+    final requests = await obtenerSolicitudesParaInstitucion(institucionId: id);
+    return groups
+        .where((g) => management[g.id]?.estado.name != 'suspendido')
+        .map((g) {
+          final count = contarConfirmadasDeGrupo(
+            solicitudes: requests,
+            institucionId: id,
+            curricular: true,
+            grupoId: g.id,
+          );
+          final occupied = count > g.cuposOcupados ? count : g.cuposOcupados;
+          return g.copyWith(cuposOcupados: occupied);
+        })
+        // An explicitly closed group with inconsistent counters must not be
+        // offered. Do not manufacture occupation to disguise that state.
+        .where(
+          (g) =>
+              management[g.id]?.estado.name != 'completo' ||
+              !g.tieneCuposDisponibles,
+        )
+        .toList();
+  }
+
+  static Future<List<GrupoExtracurricular>> gruposExtracurricularesParaAlumno(
+    String id,
+  ) async {
+    final groups = await ExtracurricularesService.instance.cargarGrupos(id);
+    final requests = await obtenerSolicitudesParaInstitucion(institucionId: id);
+    final activities = await _cargarCatalogoExtraCompleto(id);
+    return groups.map((g) {
+      final count = contarConfirmadasDeGrupo(
+        solicitudes: requests,
+        institucionId: id,
+        curricular: false,
+        actividadNombre: g.actividadNombre,
+        nombreGrupo: g.nombreGrupo,
+        turno: g.turno,
+        moduleKey: g.moduleKey,
+      );
+      final matches = activities
+          .where(
+            (a) =>
+                _l(a.nombre) == _l(g.actividadNombre) && a.bloque == g.bloque,
+          )
+          .toList();
+      var active = g.activo && matches.length <= 1;
+      if (matches.length == 1) {
+        final a = matches.single;
+        final confirmed = requests
+            .where(
+              (s) =>
+                  !s.esCurricular &&
+                  s.estado == EstadoSolicitud.confirmada &&
+                  _l(s.actividadNombre) == _l(a.nombre) &&
+                  s.moduleKey == a.bloque.key,
+            )
+            .length;
+        active =
+            active &&
+            a.activa &&
+            (a.cupoMaximo == 0 ||
+                (a.cupoOcupado < a.cupoMaximo && confirmed < a.cupoMaximo));
+      }
+      return GrupoExtracurricular.fromMap({
+        ...g.toMap(),
+        'cupoOcupado': count > g.cupoOcupado ? count : g.cupoOcupado,
+        'activo': active,
+      });
+    }).toList();
   }
 
   static Future<List<GrupoCurricular>>

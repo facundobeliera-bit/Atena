@@ -499,6 +499,7 @@ void main() {
     final student = pendingRequest(
       primary.id,
     ).copyWith(estado: EstadoSolicitud.confirmada);
+    await SolicitudesRepositoryPrefs().saveSolicitudAlumno(student);
     final emitted = await InstitucionEmisionesService.instance
         .emitirEventoEspecialAutorizado(
           institucionId: institution,

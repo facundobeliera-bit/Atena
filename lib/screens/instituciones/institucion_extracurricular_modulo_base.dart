@@ -528,7 +528,7 @@ class _InstitucionExtracurricularModuloBaseState
     try {
       final svc = ExtracurricularesService.instance as dynamic;
 
-      final raw = await svc.listarDestinatariosConfirmadosPorModulo(
+      final raw = await svc.destinatariosOperativos(
         institucionId: k.instIdCanon,
         moduleKey: k.normalizedKey,
       );
@@ -579,6 +579,13 @@ class _InstitucionExtracurricularModuloBaseState
     }
 
     final destinos = await _tryLoadDestinatariosConfirmados(k: k);
+    if (destinos.isEmpty) {
+      _toast(
+        messenger,
+        'No hay destinatarios confirmados accesibles en esta área. Revisá las inscripciones y los permisos.',
+      );
+      return;
+    }
     final gruposForDialog = await _loadGrupos(k: k);
 
     if (!mounted) return;
@@ -586,13 +593,10 @@ class _InstitucionExtracurricularModuloBaseState
     final now = DateTime.now();
     DateTime date = DateTime(now.year, now.month, now.day);
     TimeOfDay time = TimeOfDay.fromDateTime(now);
-    GrupoExtracurricular? grupo = gruposForDialog.isNotEmpty
-        ? gruposForDialog.first
-        : null;
+    GrupoExtracurricular? grupo;
 
     final titleCtrl = TextEditingController();
     final bodyCtrl = TextEditingController();
-    final manualCtrl = TextEditingController();
 
     final selected = <String, bool>{for (final d in destinos) d.key: true};
 
@@ -731,26 +735,7 @@ class _InstitucionExtracurricularModuloBaseState
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 6),
-                  if (destinos.isEmpty) ...[
-                    Text(
-                      l10n.institucionExtracBaseEmitirFichaDestinatariosEmptyHelp,
-                      style: TextStyle(
-                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: manualCtrl,
-                      minLines: 2,
-                      maxLines: 6,
-                      decoration: InputDecoration(
-                        labelText:
-                            l10n.institucionExtracBaseEmitirFichaManualLabel,
-                        hintText:
-                            l10n.institucionExtracBaseEmitirFichaManualHint,
-                      ),
-                    ),
-                  ] else ...[
+                  ...[
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -820,33 +805,12 @@ class _InstitucionExtracurricularModuloBaseState
 
     final recipients = <Map<String, dynamic>>[];
 
-    if (destinos.isNotEmpty) {
-      for (final d in destinos) {
-        if (selected[d.key] == true) {
-          recipients.add({
-            'ownerAccountId': d.ownerAccountId,
-            'perfilId': d.perfilId,
-            'displayName': d.displayName,
-          });
-        }
-      }
-    } else {
-      final lines = manualCtrl.text
-          .split('\n')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-
-      for (final line in lines) {
-        final p = line.split('|');
-        if (p.length != 2) continue;
-        final owner = p[0].trim();
-        final perfil = p[1].trim();
-        if (owner.isEmpty || perfil.isEmpty) continue;
+    for (final d in destinos) {
+      if (selected[d.key] == true) {
         recipients.add({
-          'ownerAccountId': owner,
-          'perfilId': perfil,
-          'displayName': perfil,
+          'ownerAccountId': d.ownerAccountId,
+          'perfilId': d.perfilId,
+          'displayName': d.displayName,
         });
       }
     }
@@ -884,7 +848,7 @@ class _InstitucionExtracurricularModuloBaseState
 
     try {
       final svc = ExtracurricularesService.instance as dynamic;
-      await svc.emitirFichaExtracurricular(payload);
+      await svc.emitirFichaAutorizada(payload);
 
       if (!mounted) return;
       _toast(messenger, l10n.institucionExtracBaseEmitirFichaOk);

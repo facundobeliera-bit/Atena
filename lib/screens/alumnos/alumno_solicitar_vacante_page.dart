@@ -1,3 +1,4 @@
+import '../../services/plan_habilitacion_service.dart';
 // ─────────────────────────────────────────────
 // ATENA – UI ALUMNO: SOLICITAR VACANTE (OWNER-ONLY)
 // Archivo: lib/screens/alumnos/alumno_solicitar_vacante_page.dart
@@ -103,6 +104,37 @@ class AlumnoSolicitarVacantePage extends StatefulWidget {
 class _AlumnoSolicitarVacantePageState
     extends State<AlumnoSolicitarVacantePage> {
   bool _enviando = false;
+  bool _recibeSolicitudes =
+      !PlanHabilitacionService.commercialEnforcementEnabled;
+  String? _errorComercial;
+
+  @override
+  void initState() {
+    super.initState();
+    _consultarPolitica();
+  }
+
+  Future<void> _consultarPolitica() async {
+    try {
+      final permite = await PlanHabilitacionService.puedeRecibirPorId(
+        widget.institucionId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _recibeSolicitudes = permite;
+        _errorComercial = permite
+            ? null
+            : PlanHabilitacionService.inscripcionNoHabilitada;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _recibeSolicitudes = false;
+        _errorComercial =
+            'No se pudo comprobar si la institución recibe solicitudes.';
+      });
+    }
+  }
 
   static const String _sepDot = '•';
 
@@ -218,6 +250,8 @@ class _AlumnoSolicitarVacantePageState
 
   Future<void> _confirmarYEnviar() async {
     if (_enviando) return;
+    await _consultarPolitica();
+    if (!_recibeSolicitudes) return;
     if (!mounted) return;
 
     final l = AppLocalizations.of(context);
@@ -295,6 +329,7 @@ class _AlumnoSolicitarVacantePageState
       ok = await showDialog<bool>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
+          scrollable: true,
           title: Text(l.alumnoSolicitarVacanteConfirmTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -460,7 +495,7 @@ class _AlumnoSolicitarVacantePageState
       appBar: AppBar(title: Text(l.alumnoSolicitarVacanteTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: ListView(
           children: [
             Semantics(
               container: true,
@@ -496,11 +531,14 @@ class _AlumnoSolicitarVacantePageState
                 ),
               ),
             ),
-            const Spacer(),
+            if (_errorComercial != null) Text(_errorComercial!),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: _enviando ? null : _confirmarYEnviar,
+                onPressed: _enviando || !_recibeSolicitudes
+                    ? null
+                    : _confirmarYEnviar,
                 icon: _enviando
                     ? SizedBox(
                         width: 18,

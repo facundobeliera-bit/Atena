@@ -40,12 +40,15 @@ import '../../services/alumno_service.dart';
 import '../../services/cuenta_service.dart';
 import '../../ui/atena_assets.dart';
 import '../cuentas/cuenta_home_page.dart';
+import 'alumno_registro_page.dart';
+import '../../routes/solicitud_publica_intent.dart';
 
 class AlumnoLoginPage extends StatefulWidget {
   /// ✅ Soporte deeplink (canónico).
   final String? deeplink;
 
-  const AlumnoLoginPage({super.key, this.deeplink});
+  final SolicitudPublicaIntent? solicitudPublica;
+  const AlumnoLoginPage({super.key, this.deeplink, this.solicitudPublica});
 
   @override
   State<AlumnoLoginPage> createState() => _AlumnoLoginPageState();
@@ -194,8 +197,11 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) =>
-            CuentaHomePage(cuentaId: cuenta.id, initialDeeplink: dl),
+        builder: (_) => CuentaHomePage(
+          cuentaId: cuenta.id,
+          initialDeeplink: dl,
+          solicitudPublica: widget.solicitudPublica,
+        ),
       ),
     );
   }
@@ -283,6 +289,15 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
 
     final t = AppLocalizations.of(context);
     final seedEmail = _normalizeEmail(_emailCtrl.text);
+    if (widget.solicitudPublica != null) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) =>
+              AlumnoRegistroPage(solicitudPublica: widget.solicitudPublica),
+        ),
+      );
+      return;
+    }
 
     try {
       await Navigator.of(

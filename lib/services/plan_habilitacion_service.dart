@@ -19,6 +19,8 @@
 // ─────────────────────────────────────────────────────────────
 
 import 'dart:convert';
+import '../models/instituciones/instituciones_integrado.dart';
+import 'institucion_service.dart';
 
 /// ✅ Estado canónico de habilitación comercial.
 ///
@@ -27,8 +29,53 @@ import 'dart:convert';
 /// - Todo lo demás => Guard redirige a /institucion/plan.
 enum PlanStatus { active, inactive, pending, expired, unknown }
 
+/// Institution-wide commercial plan; legacy module codes are not entitlements.
+enum PlanComercial { free, premium, desconocido }
+
 class PlanHabilitacionService {
   PlanHabilitacionService._(); // static-only
+
+  /// Build configuration only. Never read from preferences, route args or UI.
+  /// Local evaluation is NOT proof of a paid or server-verified subscription.
+  static const commercialEnforcementEnabled = bool.fromEnvironment(
+    'ATENA_COMMERCIAL_ENFORCEMENT',
+    defaultValue: false,
+  );
+  static const inscripcionNoHabilitada =
+      'Esta institución no recibe solicitudes digitales mediante Atena.';
+
+  static PlanComercial planComercial(String? value) =>
+      switch (value?.trim().toLowerCase()) {
+        'free' => PlanComercial.free,
+        'premium' => PlanComercial.premium,
+        _ => PlanComercial.desconocido,
+      };
+
+  static String nombreComercial(PlanComercial plan) => switch (plan) {
+    PlanComercial.free => 'Free',
+    PlanComercial.premium => 'Premium',
+    PlanComercial.desconocido => 'Histórico / sin clasificar',
+  };
+
+  /// Additional gate for NEW applications only. Never gate history or updates.
+  /// Status keeps its existing operational meaning; pending/expired/unknown
+  /// records are not automatically granted a commercial entitlement.
+  static bool puedeRecibirNuevasSolicitudes(Institucion? institucion) {
+    if (!commercialEnforcementEnabled) return true;
+    return institucion != null &&
+        planComercial(institucion.tipoPlan) == PlanComercial.premium &&
+        institucion.estadoPlan == EstadoPlanInstitucion.activo;
+  }
+
+  /// Read the current canonical institution, never a caller-supplied plan or
+  /// a public snapshot. OFF preserves the existing legacy/test contracts.
+  static Future<bool> puedeRecibirPorId(String institucionId) async {
+    if (!commercialEnforcementEnabled) return true;
+    final inst = await InstitucionService.getInstitucionById(
+      institucionId.trim(),
+    );
+    return puedeRecibirNuevasSolicitudes(inst);
+  }
 
   /// ✅ Normaliza cualquier forma de plan/estado a un PlanStatus canónico.
   ///

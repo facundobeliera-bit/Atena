@@ -15,6 +15,8 @@
 // - Dark-mode: Theme/ColorScheme (sin hardcodear colores)
 // - i18n: AppLocalizations (keys ARB a consolidar al final)
 
+import '../../services/documentacion_operativa_service.dart';
+import '../../ui/documento_local_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:atena_app/l10n/gen/app_localizations.dart';
 
@@ -499,6 +501,7 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
         throw Exception(_l10n.alumnoDocumentosInvalidPerfil);
       }
 
+      await DocumentacionOperativaService.validarAlumno(ownerId, perfilId);
       final solsAll = List<SolicitudDocumento>.from(
         await DocumentosTemporalesService.listarSolicitudesPerfil(
           perfilId: perfilId,
@@ -716,6 +719,10 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
     final messenger = ScaffoldMessenger.maybeOf(context);
 
     try {
+      await DocumentacionOperativaService.validarAlumno(
+        widget.ownerAccountId,
+        widget.perfilId,
+      );
       final removed = await DocumentosTemporalesService.limpiarExpiradosPerfil(
         perfilId: _n(widget.perfilId),
         notify: true,
@@ -772,6 +779,11 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
     final messenger = ScaffoldMessenger.maybeOf(context);
 
     try {
+      await DocumentacionOperativaService.validarAlumno(
+        widget.ownerAccountId,
+        widget.perfilId,
+      );
+      await DocumentacionOperativaService.abrir(d);
       await DocumentosTemporalesService.eliminarDocumento(
         perfilId: _n(widget.perfilId),
         documentoId: _n(d.id),
@@ -979,7 +991,18 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
                           overflow: TextOverflow.ellipsis,
                         ),
                         isThreeLine: true,
-                        trailing: _chipEstadoSolicitud(s.estado),
+                        onTap: s.estado != EstadoSolicitudDocumento.pendiente
+                            ? null
+                            : () async {
+                                await adjuntarDocumentoLocal(context, s);
+                                if (mounted) await _load();
+                              },
+                        trailing: s.estado == EstadoSolicitudDocumento.pendiente
+                            ? const Icon(
+                                Icons.upload_file,
+                                semanticLabel: 'Adjuntar archivo',
+                              )
+                            : _chipEstadoSolicitud(s.estado),
                       ),
                     );
                   },
@@ -1036,11 +1059,14 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
                           '$expLine'
                           '${_l10n.alumnoDocumentosFieldInstitucion}: ${d.institucionSolicitanteId}\n'
                           '${_l10n.alumnoDocumentosFieldSolicitud}: $solicitudLabel\n'
-                          '${_l10n.alumnoDocumentosFieldRef}: ${d.ref}',
+                          '${_l10n.alumnoDocumentosFieldRef}: ${d.ref.startsWith('data:') ? 'Archivo local adjunto' : d.ref}',
                           maxLines: 10,
                           overflow: TextOverflow.ellipsis,
                         ),
                         isThreeLine: true,
+                        onTap: exp
+                            ? null
+                            : () => abrirDocumentoLocal(context, d),
                         trailing: _buildTrailingDocActions(d),
                       ),
                     );

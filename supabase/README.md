@@ -1,5 +1,50 @@
 # Piloto remoto de Atena
 
+## Registro experimental de identidades verificadas (aplicado, validación bloqueada)
+
+`20260920000001_atena_pilot_verified_links.sql` se aplicó al proyecto piloto
+el 20 de septiembre de 2026. Añade un circuito separado para identidades y operaciones
+ficticias. No cambia el ingreso habitual, las cinco tablas piloto previas, sus
+políticas ni la función `atena_pilot_record_note`. Los IDs locales admitidos en
+este circuito empiezan con `pilot-`; no se incorporan cuentas históricas.
+
+El vínculo no puede crearse desde Flutter. Un responsable administrativo debe:
+
+1. Verificar por separado a la persona y su facultad de representar la cuenta
+   ficticia, sin aceptar como prueba un email, nombre o ID introducido en el
+   cliente. Para el ensayo se usa una orden de prueba con referencia única.
+2. Comprobar el `auth.users.id` autenticado, la institución y el operador
+   aprovisionado. Cada operador tiene su propio usuario Auth. El estado de
+   propietario se obtiene del registro de operador, no de una etiqueta enviada
+   por el cliente.
+3. Registrar el vínculo con `service_role` **sólo en un entorno administrativo**,
+   incluyendo `verification_ref` y `verified_by`. La clave administrativa no
+   debe entrar en Flutter, el build web, Git ni registros de pruebas. La FK
+   compuesta impide asociar al operador de otra identidad Auth; índices únicos
+   impiden dos identidades activas para la misma cuenta local u operador.
+4. Revocar el vínculo estableciendo `active=false` y `revoked_at`. El circuito
+   verificado comprueba el vínculo y la asignación activa en cada operación;
+   los datos de auditoría permanecen almacenados, pero dejan de ser legibles
+   para el vínculo revocado.
+
+La tabla de vínculos permite al usuario leer sólo su propio registro y no
+concede escrituras al cliente. La tabla de operaciones verificadas permite
+lectura según RLS y escritura únicamente por la función
+`atena_pilot_record_verified_note`, que toma la identidad de `auth.uid()`.
+La prueba opcional `-TestVerifiedLinks` del smoke test anterior crea sólo
+identidades ficticias y comprueba ausencia de vínculo, contradicciones,
+suplantación, aislamiento por institución y área y revocación con un token ya
+emitido. En la ejecución remota, las 29 comprobaciones anteriores y las
+primeras del vínculo nuevo pasaron. La creación administrativa del primer
+vínculo falló con HTTP 400 / `23514` (`Identidad piloto contradictoria`),
+aunque las lecturas administrativas mostraron operador y propietario
+coherentes. No se alcanzaron las pruebas posteriores de aislamiento y
+revocación del circuito verificado. No interpretar esta etapa como validada.
+
+El registro de `verification_ref` documenta la decisión administrativa; no
+verifica por sí mismo una cuenta histórica. Diseñar esa comprobación real,
+revocar sesiones Auth y migrar módulos habituales son etapas posteriores.
+
 Las migraciones `20260919000000_atena_pilot_operational_context.sql`,
 `20260919000001_atena_pilot_admin_provisioning.sql`,
 `20260919000002_atena_pilot_self_assignments.sql` y
@@ -81,5 +126,6 @@ funcionó con un perfil local aislado; no hubo publicación ni prueba sobre la U
 de staging.
 
 Esto valida el circuito Flutter–Supabase aislado, no la seguridad de las
-credenciales históricas de Atena. P1-B y P1-D siguen pendientes. Staging no se
-modificó.
+credenciales históricas de Atena. P1-B y P1-D ya se cerraron para las sesiones
+locales, pero aún no existe vinculación con Supabase Auth para cuentas reales.
+Staging no se modificó durante aquella validación.

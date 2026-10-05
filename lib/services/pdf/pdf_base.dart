@@ -71,7 +71,6 @@ class PdfBase {
 
     doc.addPage(
       pw.MultiPage(
-        margin: const pw.EdgeInsets.fromLTRB(32, 32, 32, 40),
         pageTheme: _pageTheme(),
         header: (_) => _header(params),
         footer: (ctx) => _footer(params, ctx),
@@ -97,6 +96,7 @@ class PdfBase {
 
   static pw.PageTheme _pageTheme() {
     return pw.PageTheme(
+      margin: const pw.EdgeInsets.fromLTRB(32, 32, 32, 40),
       theme: pw.ThemeData.withFont(
         base: pw.Font.helvetica(),
         bold: pw.Font.helveticaBold(),
@@ -173,7 +173,7 @@ class PdfBase {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            'Documento generado por $_brandName – ${_t(p.generadoPor)}. '
+            'Documento generado por $_brandName - ${_t(p.generadoPor)}. '
             'Uso administrativo. No sustituye documentación oficial.',
             style: pw.TextStyle(fontSize: 7, color: _colorMuted),
           ),

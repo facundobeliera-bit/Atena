@@ -8,6 +8,7 @@ import '../models/extracurriculares/actividad_extracurricular.dart';
 import '../models/instituciones/grupo_curricular.dart';
 import '../models/instituciones/instituciones_integrado.dart';
 import 'instituciones_helpers.dart' as ih;
+import 'solicitudes_service.dart';
 
 /// Scope principal del buscador del alumno.
 enum AlumnoBusquedaScope { curricular, extracurricular }
@@ -71,6 +72,23 @@ class AlumnoInstitucionesSearchService {
 
   static String _norm(String value) => value.trim().toLowerCase();
 
+  // Accent folding is only for discovery, never for IDs or group association.
+  static String _searchText(String value) {
+    var normalized = value.trim().toLowerCase();
+    const accents = {
+      'á': 'a',
+      'é': 'e',
+      'í': 'i',
+      'ó': 'o',
+      'ú': 'u',
+      'ü': 'u',
+    };
+    for (final entry in accents.entries) {
+      normalized = normalized.replaceAll(entry.key, entry.value);
+    }
+    return normalized;
+  }
+
   static double? _toDouble(dynamic value) {
     if (value is num) return value.toDouble();
     final text = (value ?? '').toString().trim();
@@ -116,7 +134,7 @@ class AlumnoInstitucionesSearchService {
 
   static bool _actividadAdmiteEdad(ActividadExtracurricular a, int edad) {
     final raw = (a.edades ?? '').trim().toLowerCase();
-    if (raw.isEmpty) return true;
+    if (raw.isEmpty) return false;
 
     final normalized = raw.replaceAll('años', '').replaceAll('año', '');
     final numbers = RegExp(r'\d+')
@@ -125,24 +143,38 @@ class AlumnoInstitucionesSearchService {
         .whereType<int>()
         .toList();
 
-    if (numbers.isEmpty) return true;
-    if (numbers.length == 1) return edad == numbers.first;
+    if (normalized.contains('todas las edades')) return true;
+    if (numbers.isEmpty) return false;
+    if (numbers.length == 1) {
+      if (normalized.contains('desde') ||
+          normalized.contains('a partir') ||
+          normalized.contains('+') ||
+          normalized.contains('en adelante')) {
+        return edad >= numbers.first;
+      }
+      if (normalized.contains('hasta')) return edad <= numbers.first;
+      return edad == numbers.first;
+    }
 
     final min = math.min(numbers[0], numbers[1]);
     final max = math.max(numbers[0], numbers[1]);
     return edad >= min && edad <= max;
   }
 
-  static bool _esGratuito(String? precio) {
+  static bool? _esGratuito(String? precio) {
     final p = (precio ?? '').trim().toLowerCase();
-    if (p.isEmpty) return true;
+    if (p.isEmpty) return null;
     if (p == '0' ||
         p == r'$0' ||
-        p.contains('gratis') ||
-        p.contains('gratuito')) {
+        p == 'gratis' ||
+        p == 'gratuito' ||
+        p == 'sin costo') {
       return true;
     }
-    return false;
+    final amount = p.replaceAll(RegExp(r'[^0-9,.]'), '');
+    if (amount.isEmpty) return null;
+    if (RegExp(r'^0+([,.]0+)*$').hasMatch(amount)) return true;
+    return RegExp(r'[1-9]').hasMatch(amount) ? false : null;
   }
 
   static bool _cumplePrecio(
@@ -153,9 +185,9 @@ class AlumnoInstitucionesSearchService {
       case AlumnoPrecioFiltro.todos:
         return true;
       case AlumnoPrecioFiltro.gratuitos:
-        return _esGratuito(a.precio);
+        return _esGratuito(a.precio) == true;
       case AlumnoPrecioFiltro.conCosto:
-        return !_esGratuito(a.precio);
+        return _esGratuito(a.precio) == false;
     }
   }
 
@@ -177,7 +209,7 @@ class AlumnoInstitucionesSearchService {
     AlumnoInstitucionSearchFilters filters,
   ) {
     return inst.gruposCurriculares.any((g) {
-      if (!g.tieneCuposDisponibles) return false;
+      if (filters.soloConVacantes && !g.tieneCuposDisponibles) return false;
       if (filters.nivel != null) {
         final nombre = _norm(g.nombreCurso);
         final nivel = _norm(filters.nivel!.name);
@@ -246,6 +278,10 @@ class AlumnoInstitucionesSearchService {
       var inst = original;
       try {
         inst = await ih.hidratarInstitucionConGruposCurriculares(original);
+        inst = inst.copyWith(
+          gruposCurriculares:
+              await SolicitudesService.gruposCurricularesParaAlumno(inst.id),
+        );
       } catch (e) {
         // Estado curricular desconocido: no atribuir disponibilidad histórica.
         // Conservar la institución para filtros generales y extracurriculares.
@@ -269,8 +305,18 @@ class AlumnoInstitucionesSearchService {
         continue;
       }
 
-      final texto = _norm(filters.texto);
-      if (texto.isNotEmpty && !_norm(inst.nombre).contains(texto)) continue;
+      final texto = _searchText(filters.texto);
+      final matchesInstitution = _searchText(inst.nombre).contains(texto);
+      if (texto.isNotEmpty &&
+          !matchesInstitution &&
+          !_actividadesActivas(
+            inst,
+          ).any((a) => _searchText(a.nombre).contains(texto)) &&
+          !inst.gruposCurriculares.any(
+            (g) => _searchText(g.nombreCurso).contains(texto),
+          )) {
+        continue;
+      }
 
       if (filters.pais != null &&
           filters.pais!.trim().isNotEmpty &&
@@ -303,12 +349,17 @@ class AlumnoInstitucionesSearchService {
       if (filters.scope == AlumnoBusquedaScope.curricular) {
         final niveles = _nivelesHabilitados(inst);
         if (filters.nivel != null && !niveles.contains(filters.nivel)) continue;
-        if (filters.soloConVacantes &&
+        if ((filters.soloConVacantes || filters.turno != null) &&
             !_tieneVacantesCurricularesConFiltro(inst, filters)) {
           continue;
         }
       } else {
         var actividades = _actividadesActivas(inst);
+        if (texto.isNotEmpty && !matchesInstitution) {
+          actividades = actividades
+              .where((a) => _searchText(a.nombre).contains(texto))
+              .toList();
+        }
 
         if (filters.bloques.isNotEmpty) {
           actividades = actividades
@@ -329,8 +380,19 @@ class AlumnoInstitucionesSearchService {
         }
 
         if (filters.soloConVacantes) {
+          final grupos =
+              await SolicitudesService.gruposExtracurricularesParaAlumno(
+                inst.id,
+              );
           actividades = actividades
-              .where((a) => a.tieneCuposDisponibles)
+              .where(
+                (a) => grupos.any(
+                  (g) =>
+                      g.tieneCupos &&
+                      g.bloque == a.bloque &&
+                      _norm(g.actividadNombre) == _norm(a.nombre),
+                ),
+              )
               .toList();
         }
 

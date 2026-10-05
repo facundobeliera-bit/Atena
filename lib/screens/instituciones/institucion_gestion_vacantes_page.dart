@@ -86,6 +86,7 @@
 // - Ahora: TabController propio + animateTo en _applyFocusAfterLoad() (E2E funcional).
 //
 
+import '../../services/institucion_contexto_operativo_service.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -111,6 +112,19 @@ import '../../models/notificaciones/notificacion_atena.dart';
 
 import '../../models/calendario/evento_calendario.dart';
 import '../../services/institucion_emisiones_service.dart';
+
+/// Parses a stored 24-hour clock value without changing historical groups.
+TimeOfDay? parseCurricularClockTime(String raw) {
+  final match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(raw.trim());
+  if (match == null) return null;
+  final hour = int.parse(match.group(1)!);
+  final minute = int.parse(match.group(2)!);
+  if (hour > 23 || minute > 59) return null;
+  return TimeOfDay(hour: hour, minute: minute);
+}
+
+String formatCurricularClockTime(TimeOfDay time) =>
+    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
 class InstitucionGestionVacantesPage extends StatefulWidget {
   final String institucionId;
@@ -151,6 +165,9 @@ class _InstitucionGestionVacantesPageState
   String? _fatalError;
 
   List<GrupoInstitucional> _grupos = <GrupoInstitucional>[];
+  final Map<String, int> _confirmadasPorGrupo = {};
+  int _ocupacion(GrupoInstitucional g) =>
+      math.max(g.cupoOcupado, _confirmadasPorGrupo[g.id] ?? 0);
 
   final List<_AlumnoOperativo> _alumnos = <_AlumnoOperativo>[];
   final Set<String> _selectedAlumnoKeys = <String>{};
@@ -927,12 +944,49 @@ class _InstitucionGestionVacantesPageState
           .cargarGruposInstitucion(instId)
           .timeout(const Duration(seconds: 4));
 
-      final gruposCopy = List<GrupoInstitucional>.of(outGrupos);
+      final areas = (await InstitucionAreasService.instance.listar(
+        instId,
+      )).where((a) => a.tipo == TipoAreaOperativa.curricular).toList();
+      final areaId = InstitucionAreasService.stableId(
+        institucionId: instId,
+        tipo: TipoAreaOperativa.curricular,
+        claveOrigen: _actividadKeyResolved,
+      );
+      final currentAreas = areas.where((a) => a.id == areaId).toList();
+      final gruposCopy = outGrupos
+          .where(
+            (g) =>
+                currentAreas.isEmpty ||
+                InstitucionGruposAutorizacionService.perteneceAlArea(
+                  g,
+                  currentAreas.single,
+                  cantidadAreas: areas.length,
+                ),
+          )
+          .toList();
       gruposCopy.sort(
         (a, b) =>
             a.nombreGrupo.toLowerCase().compareTo(b.nombreGrupo.toLowerCase()),
       );
 
+      final requests =
+          await SolicitudesService.obtenerSolicitudesParaInstitucion(
+            institucionId: instId,
+          );
+      _confirmadasPorGrupo.clear();
+      for (final g in gruposCopy) {
+        _confirmadasPorGrupo[g.id] =
+            SolicitudesService.contarConfirmadasDeGrupo(
+              solicitudes: requests,
+              institucionId: instId,
+              curricular: true,
+              grupoId: g.id,
+              actividadNombre: g.actividadNombre,
+              nombreGrupo: g.nombreGrupo,
+              turno: g.turno ?? '',
+              moduleKey: '',
+            );
+      }
       final alumnos = await _cargarAlumnosOperativos(instId);
 
       if (!mounted) return;
@@ -982,11 +1036,19 @@ class _InstitucionGestionVacantesPageState
         institucionId: instId,
       ).timeout(const Duration(seconds: 6));
 
+      final operational = await InstitucionContextoOperativoService.instance
+          .reconstruirContextoOperativo();
+      if (operational == null || operational.institutionId != instId) {
+        throw StateError('No se pudo validar el área del alumnado.');
+      }
       final out = <_AlumnoOperativo>[];
       final seen = <String>{};
 
       for (final SolicitudAlumno s in list) {
-        if (s.estado != EstadoSolicitud.confirmada) continue;
+        if (s.estado != EstadoSolicitud.confirmada ||
+            s.areaId != operational.areaId) {
+          continue;
+        }
 
         final a = _AlumnoOperativo.fromSolicitudBestEffort(s);
         if (a.key.isEmpty) continue;
@@ -997,7 +1059,7 @@ class _InstitucionGestionVacantesPageState
       out.sort((a, b) => a.nombreComparable.compareTo(b.nombreComparable));
       return out;
     } catch (_) {
-      return <_AlumnoOperativo>[];
+      rethrow;
     }
   }
 
@@ -1286,10 +1348,32 @@ class _InstitucionGestionVacantesPageState
               String? validateHorario(String v) {
                 final t = v.trim();
                 if (t.isEmpty) return null;
-                final re = RegExp(r'^\d{1,2}:\d{2}$');
-                return re.hasMatch(t)
+                return parseCurricularClockTime(t) != null
                     ? null
                     : _t(l10n, 'invalidTimeFormat', 'Formato inválido (HH:MM)');
+              }
+
+              Future<void> pickHorario(
+                TextEditingController controller, {
+                required bool isStart,
+              }) async {
+                final picked = await showTimePicker(
+                  context: dialogCtx2,
+                  initialTime:
+                      parseCurricularClockTime(controller.text) ??
+                      TimeOfDay(hour: isStart ? 8 : 12, minute: 0),
+                  builder: (context, child) => MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(alwaysUse24HourFormat: true),
+                    child: child!,
+                  ),
+                );
+                if (picked != null) {
+                  setLocal(
+                    () => controller.text = formatCurricularClockTime(picked),
+                  );
+                }
               }
 
               final e1 = validateHorario(horarioIniCtrl.text);
@@ -1398,8 +1482,9 @@ class _InstitucionGestionVacantesPageState
                           Expanded(
                             child: TextField(
                               controller: horarioIniCtrl,
-                              keyboardType: TextInputType.datetime,
-                              textInputAction: TextInputAction.next,
+                              readOnly: true,
+                              onTap: () =>
+                                  pickHorario(horarioIniCtrl, isStart: true),
                               decoration: InputDecoration(
                                 labelText: _t(
                                   l10n,
@@ -1408,16 +1493,24 @@ class _InstitucionGestionVacantesPageState
                                 ),
                                 hintText: '08:00',
                                 border: const OutlineInputBorder(),
+                                suffixIcon: IconButton(
+                                  tooltip: 'Elegir hora de inicio',
+                                  icon: const Icon(Icons.access_time),
+                                  onPressed: () => pickHorario(
+                                    horarioIniCtrl,
+                                    isStart: true,
+                                  ),
+                                ),
                               ),
-                              onChanged: (_) => setLocal(() {}),
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: TextField(
                               controller: horarioFinCtrl,
-                              keyboardType: TextInputType.datetime,
-                              textInputAction: TextInputAction.next,
+                              readOnly: true,
+                              onTap: () =>
+                                  pickHorario(horarioFinCtrl, isStart: false),
                               decoration: InputDecoration(
                                 labelText: _t(
                                   l10n,
@@ -1426,8 +1519,15 @@ class _InstitucionGestionVacantesPageState
                                 ),
                                 hintText: '12:00',
                                 border: const OutlineInputBorder(),
+                                suffixIcon: IconButton(
+                                  tooltip: 'Elegir hora de finalización',
+                                  icon: const Icon(Icons.access_time),
+                                  onPressed: () => pickHorario(
+                                    horarioFinCtrl,
+                                    isStart: false,
+                                  ),
+                                ),
                               ),
-                              onChanged: (_) => setLocal(() {}),
                             ),
                           ),
                         ],
@@ -1513,11 +1613,10 @@ class _InstitucionGestionVacantesPageState
                       }
 
                       if (hIni.isNotEmpty || hFin.isNotEmpty) {
-                        final re = RegExp(r'^\d{1,2}:\d{2}$');
                         if (hIni.isEmpty ||
                             hFin.isEmpty ||
-                            !re.hasMatch(hIni) ||
-                            !re.hasMatch(hFin)) {
+                            parseCurricularClockTime(hIni) == null ||
+                            parseCurricularClockTime(hFin) == null) {
                           localSnack(
                             _t(
                               l10n,
@@ -1613,6 +1712,9 @@ class _InstitucionGestionVacantesPageState
 
       await _guardar();
     } finally {
+      // showDialog resolves when pop starts, before its closing animation has
+      // detached the text fields. Keep their controllers alive until it ends.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       nombreCtrl.dispose();
       actividadCtrl.dispose();
       gradoCtrl.dispose();
@@ -2462,6 +2564,14 @@ class _InstitucionGestionVacantesPageState
               .timeout(const Duration(seconds: 6));
         }
 
+        final operational = await InstitucionContextoOperativoService.instance
+            .reconstruirContextoOperativo();
+        if (operational == null || operational.institutionId != instId) {
+          throw StateError('No se pudo validar el área.');
+        }
+        confirmados = confirmados
+            .where((s) => s.areaId == operational.areaId)
+            .toList();
         if (confirmados.isEmpty) {
           _snack(
             _t(l10n, 'noTargetsFound', 'No se encontraron destinatarios.'),
@@ -2530,6 +2640,39 @@ class _InstitucionGestionVacantesPageState
         return;
       }
 
+      final context = await InstitucionContextoOperativoService.instance
+          .reconstruirContextoOperativo();
+      if (context == null || context.institutionId != _instIdData) {
+        throw StateError('Ingresá con un operador del área.');
+      }
+      final saved = await SolicitudesService.obtenerSolicitudesParaInstitucion(
+        institucionId: _instIdData,
+      );
+      final verified = <SolicitudAlumno>[];
+      for (final target in targets) {
+        final matches = saved
+            .where(
+              (s) =>
+                  s.perfilId == target.perfilId &&
+                  s.areaId == context.areaId &&
+                  s.estado == EstadoSolicitud.confirmada,
+            )
+            .toList();
+        if (matches.isEmpty) {
+          throw StateError('Un destinatario no está confirmado en esta área.');
+        }
+        verified.addAll(matches);
+      }
+      for (final curricular in [true, false]) {
+        await InstitucionEmisionesService.instance.validarDestinatarios(
+          institucionId: _instIdData,
+          areaId: context.areaId,
+          esCurricular: curricular,
+          confirmados: verified
+              .where((s) => s.esCurricular == curricular)
+              .toList(),
+        );
+      }
       int okCount = 0;
 
       for (final a in targets) {
@@ -2541,6 +2684,8 @@ class _InstitucionGestionVacantesPageState
 
         final payload = <String, dynamic>{
           'source': 'institucion_gestion_vacantes',
+          'areaId': context.areaId,
+          'emittedByOperatorId': context.operatorId,
           'institucionId': _instIdData,
           'institucionPerfilId': _institucionPerfilIdResolved.trim().isEmpty
               ? null
@@ -2607,6 +2752,8 @@ class _InstitucionGestionVacantesPageState
       }
 
       _snack(_t(l10n, 'notifyOk', 'Notificación enviada.'));
+    } catch (e) {
+      _snack('No se pudo completar el envío: $e');
     } finally {
       if (mounted) setState(() => _guardando = false);
     }
@@ -2665,8 +2812,15 @@ class _InstitucionGestionVacantesPageState
 
   Widget _buildTabGrupos(AppLocalizations l10n) {
     final totCap = _grupos.fold<int>(0, (a, b) => a + b.cupoMaximo);
-    final totOcc = _grupos.fold<int>(0, (a, b) => a + b.cupoOcupado);
-    final totDisp = math.max(0, totCap - totOcc);
+    final totOcc = _grupos.fold<int>(0, (a, b) => a + _ocupacion(b));
+    final totDisp = _grupos.fold<int>(
+      0,
+      (sum, g) =>
+          sum +
+          (g.estado == EstadoCupo.disponible
+              ? math.max(0, g.cupoMaximo - _ocupacion(g))
+              : 0),
+    );
 
     final summaryTitleStyle =
         Theme.of(
@@ -2702,7 +2856,9 @@ class _InstitucionGestionVacantesPageState
                   itemCount: _grupos.length,
                   itemBuilder: (context, i) {
                     final g = _grupos[i];
-                    final disp = g.cupoDisponible;
+                    final disp = g.estado == EstadoCupo.disponible
+                        ? math.max(0, g.cupoMaximo - _ocupacion(g))
+                        : 0;
 
                     final curso = _parseCursoFromGrupo(g);
                     final nivel = curso.nivel.trim();
@@ -2735,7 +2891,7 @@ class _InstitucionGestionVacantesPageState
                               l10n.vacancyGroupSubtitle(
                                 g.actividadNombre,
                                 g.cupoMaximo,
-                                g.cupoOcupado,
+                                _ocupacion(g),
                                 disp,
                               ),
                             ),

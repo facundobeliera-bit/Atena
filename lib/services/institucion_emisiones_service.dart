@@ -8,6 +8,7 @@
 // - Notificación: vía notificarOwner=true en AlumnoService (calendario unificado).
 //
 import 'dart:math';
+import '../models/extracurriculares/bloque_extracurricular.dart';
 
 import '../models/calendario/evento_calendario.dart';
 import '../models/instituciones/area_operativa.dart';
@@ -15,6 +16,8 @@ import '../models/instituciones/operador_institucional.dart';
 import '../models/instituciones/registro_auditoria_institucional.dart';
 import '../models/solicitudes/solicitud_alumno.dart';
 import 'alumno_service.dart';
+import 'cuenta_service.dart';
+import 'extracurriculares_service.dart';
 import 'institucion_areas_service.dart';
 import 'institucion_operadores_service.dart';
 import 'institucion_auditoria_service.dart';
@@ -294,6 +297,79 @@ class InstitucionEmisionesService {
     return out;
   }
 
+  Future<List<SolicitudAlumno>> validarDestinatarios({
+    required String institucionId,
+    required String areaId,
+    required bool esCurricular,
+    required List<SolicitudAlumno> confirmados,
+    String? grupoId,
+  }) async {
+    final operator = await InstitucionOperadoresService.instance
+        .autorizarActivo(
+          institucionId: institucionId,
+          areaId: areaId,
+          capacidad: CapacidadInstitucional.communicationsWrite,
+        );
+    if (operator == null) {
+      throw StateError('Operador no autorizado para emitir en esta área.');
+    }
+    // La selección visual no concede acceso: volver a obtener inscripciones
+    // persistidas y rechazar TODO el envío antes de escribir si hay un cruce.
+    final persisted =
+        await SolicitudesService.obtenerSolicitudesParaInstitucion(
+          institucionId: institucionId,
+        );
+    final extraGroup = esCurricular || (grupoId ?? '').isEmpty
+        ? null
+        : (await ExtracurricularesService.instance.cargarGrupos(
+            institucionId,
+          )).where((g) => g.id == grupoId && g.areaId == areaId).firstOrNull;
+    final recipients = <String, SolicitudAlumno>{};
+    for (final supplied in confirmados) {
+      final current = persisted.where((s) => s.id == supplied.id).firstOrNull;
+      final profile = await CuentaService.getPerfilAlumnoById(
+        current?.perfilId ?? '',
+      );
+      final account = await CuentaService.getCuentaById(
+        current?.ownerAccountId ?? '',
+      );
+      if (current == null ||
+          current.estado != EstadoSolicitud.confirmada ||
+          current.institucionId != institucionId ||
+          current.areaId != areaId ||
+          current.esCurricular != esCurricular ||
+          current.ownerAccountId != supplied.ownerAccountId ||
+          current.perfilId != supplied.perfilId ||
+          profile == null ||
+          account == null ||
+          profile.cuentaId != account.id ||
+          (profile.ownerAccountId ?? profile.cuentaId) != account.id ||
+          profile.documento != current.alumnoDocumento ||
+          !account.perfilesAlumnoIds.contains(profile.id) ||
+          (grupoId != null &&
+              grupoId.isNotEmpty &&
+              (esCurricular
+                  ? current.grupoCurricularId != grupoId
+                  : extraGroup == null ||
+                        SolicitudesService.contarConfirmadasDeGrupo(
+                              solicitudes: [current],
+                              institucionId: institucionId,
+                              curricular: false,
+                              actividadNombre: extraGroup.actividadNombre,
+                              nombreGrupo: extraGroup.nombreGrupo,
+                              turno: extraGroup.turno,
+                              moduleKey: extraGroup.bloque.key,
+                            ) !=
+                            1))) {
+        throw StateError(
+          'La selección contiene un alumno sin inscripción válida en esta área.',
+        );
+      }
+      recipients['${account.id}::${profile.id}'] = current;
+    }
+    return recipients.values.toList();
+  }
+
   Future<Map<String, String>> emitirEventoEspecialAutorizado({
     required String institucionId,
     required String institucionNombre,
@@ -324,10 +400,20 @@ class InstitucionEmisionesService {
         'El operador activo no puede emitir comunicaciones en esta área.',
       );
     }
+    if (titulo.trim().isEmpty || (fin != null && fin.isBefore(inicio))) {
+      throw ArgumentError('Revisá el título y las fechas de la comunicación.');
+    }
+    final recipients = await validarDestinatarios(
+      institucionId: institucionId,
+      areaId: areaId,
+      esCurricular: esCurricular,
+      confirmados: confirmados,
+      grupoId: grupoId,
+    );
     final result = await emitirEventoEspecialAConfirmados(
       institucionId: institucionId,
       institucionNombre: institucionNombre,
-      confirmados: confirmados,
+      confirmados: recipients,
       esCurricular: esCurricular,
       areaId: areaId,
       grupoId: grupoId,

@@ -41,6 +41,8 @@
 // ignore_for_file: unnecessary_type_check
 
 import 'dart:math';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'storage_service.dart';
 import 'local_password_hasher.dart';
@@ -520,6 +522,65 @@ class AlumnoService {
   // =====================================================
   // BOLETINES (RAW)
   // =====================================================
+
+  /// Mismas claves históricas; lectura estricta para no reemplazar datos dañados.
+  String _educacionKey(String modulo, String perfil) => switch (modulo) {
+    'progreso' => _kProgresos(perfil),
+    'boletines' => _kBoletines(perfil),
+    'titulos' => _kTitulos(perfil),
+    'becas' => _kBecas(perfil),
+    'sanciones' => _kSanciones(perfil),
+    'equivalencias' => _kEquivalencias(perfil),
+    _ => throw ArgumentError('Módulo educativo inválido'),
+  };
+
+  Future<List<Map<String, dynamic>>> leerEducacion({
+    required String ownerAccountId,
+    required String perfilId,
+    required String modulo,
+  }) async {
+    await _assertPerfilPerteneceAOwner(
+      ownerAccountId: ownerAccountId,
+      perfilId: perfilId,
+    );
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.get(_educacionKey(modulo, perfilId));
+    if (raw == null) return [];
+    final dynamic decoded = raw is String ? jsonDecode(raw) : raw;
+    final items = decoded is Map ? [decoded] : decoded;
+    if (items is! List) {
+      throw const FormatException(
+        'Registro educativo ilegible; no se modificó.',
+      );
+    }
+    return items.map<Map<String, dynamic>>((item) {
+      final dynamic value = item is String ? jsonDecode(item) : item;
+      if (value is! Map) {
+        throw const FormatException(
+          'Registro educativo ilegible; no se modificó.',
+        );
+      }
+      return Map<String, dynamic>.from(value);
+    }).toList();
+  }
+
+  Future<void> guardarEducacion({
+    required String ownerAccountId,
+    required String perfilId,
+    required String modulo,
+    required List<Map<String, dynamic>> registros,
+  }) async {
+    await _assertPerfilPerteneceAOwner(
+      ownerAccountId: ownerAccountId,
+      perfilId: perfilId,
+    );
+    if (!await _storage.setJsonList(
+      _educacionKey(modulo, perfilId),
+      registros,
+    )) {
+      throw StateError('No se pudo guardar en este dispositivo. Reintentá.');
+    }
+  }
 
   Future<List<Map<String, dynamic>>> getBoletinesRaw({
     required String ownerAccountId,

@@ -22,6 +22,8 @@
 // - Mutaciones: siempre en OWNER; duplicado en PERFIL best-effort si existe.
 
 import 'package:flutter/material.dart';
+import '../../models/alumnos/modulo_educativo.dart';
+import 'trayectoria_educativa_page.dart';
 import 'package:atena_app/l10n/gen/app_localizations.dart';
 
 import '../../models/notificaciones/notificacion_atena.dart';
@@ -511,6 +513,25 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
       perfilId: pid,
     );
 
+    final educational = ModuloEducativo.desdeRuta(
+      Uri.tryParse(raw)?.path ?? '',
+    );
+    if (educational != null) {
+      if (!mounted) return true;
+      await _runNavigation(() async {
+        if (!mounted) return;
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => TrayectoriaEducativaPage.alumno(
+              ownerAccountId: ownerId,
+              perfilId: pid,
+            ).pagina(educational),
+          ),
+        );
+      });
+      return true;
+    }
+
     if (!ensured.isCalendario &&
         !ensured.isDocumentos &&
         !ensured.isSolicitudes) {
@@ -598,6 +619,30 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
     if (ownerId.isEmpty) return;
 
     final a = _actionFor(n);
+
+    final educational = switch (a.intent) {
+      _NotiIntent.boletines => ModuloEducativo.boletines,
+      _NotiIntent.becas => ModuloEducativo.becas,
+      _NotiIntent.sanciones => ModuloEducativo.sanciones,
+      _NotiIntent.equivalencias => ModuloEducativo.equivalencias,
+      _ => null,
+    };
+    if (educational != null) {
+      final pid = _resolverPerfilIdParaNavegacion(n);
+      if (pid.isEmpty || !mounted) return;
+      await _runNavigation(() async {
+        if (!mounted) return;
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => TrayectoriaEducativaPage.alumno(
+              ownerAccountId: ownerId,
+              perfilId: pid,
+            ).pagina(educational),
+          ),
+        );
+      });
+      return;
+    }
 
     if (a.intent == _NotiIntent.calendario ||
         a.intent == _NotiIntent.documentos) {

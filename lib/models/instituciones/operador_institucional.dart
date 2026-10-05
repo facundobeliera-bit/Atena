@@ -11,6 +11,10 @@ abstract final class CapacidadInstitucional {
   static const responsesRead = 'responses.read';
   static const communicationsWrite = 'communications.write';
   static const auditRead = 'audit.read';
+  static const educationRead = 'education.read';
+  static const educationWrite = 'education.write';
+  static const documentsRead = 'documents.read';
+  static const documentsWrite = 'documents.write';
 
   static const all = <String>{
     areaManage,
@@ -23,6 +27,10 @@ abstract final class CapacidadInstitucional {
     responsesRead,
     communicationsWrite,
     auditRead,
+    educationRead,
+    educationWrite,
+    documentsRead,
+    documentsWrite,
   };
 }
 
@@ -35,6 +43,9 @@ class OperadorInstitucional {
   final String? perfilInstitucionId;
   final String nombreVisible;
   final bool esPropietario;
+
+  /// Función organizativa; no concede permisos ni cambia la propiedad.
+  final bool esDirector;
   final EstadoOperadorInstitucional estado;
   final Set<String> capacidades;
   final DateTime createdAt;
@@ -48,6 +59,7 @@ class OperadorInstitucional {
     required this.perfilInstitucionId,
     required this.nombreVisible,
     required this.esPropietario,
+    this.esDirector = false,
     required this.estado,
     this.capacidades = const {},
     required this.createdAt,
@@ -59,6 +71,7 @@ class OperadorInstitucional {
 
   OperadorInstitucional copyWith({
     String? nombreVisible,
+    bool? esDirector,
     EstadoOperadorInstitucional? estado,
     Set<String>? capacidades,
     DateTime? updatedAt,
@@ -69,6 +82,7 @@ class OperadorInstitucional {
     perfilInstitucionId: perfilInstitucionId,
     nombreVisible: nombreVisible ?? this.nombreVisible,
     esPropietario: esPropietario,
+    esDirector: esDirector ?? this.esDirector,
     estado: estado ?? this.estado,
     capacidades: capacidades ?? this.capacidades,
     createdAt: createdAt,
@@ -83,6 +97,7 @@ class OperadorInstitucional {
     'perfilInstitucionId': perfilInstitucionId,
     'nombreVisible': nombreVisible,
     'esPropietario': esPropietario,
+    'esDirector': esDirector,
     'estado': estado.name,
     'capacidades': capacidades.toList()..sort(),
     'createdAtIso': createdAt.toIso8601String(),
@@ -104,6 +119,7 @@ class OperadorInstitucional {
           : (map['perfilInstitucionId'] ?? '').toString().trim(),
       nombreVisible: (map['nombreVisible'] ?? '').toString().trim(),
       esPropietario: map['esPropietario'] == true,
+      esDirector: map['esDirector'] == true,
       estado: EstadoOperadorInstitucional.values.firstWhere(
         (value) => value.name == state,
         orElse: () => EstadoOperadorInstitucional.revocado,

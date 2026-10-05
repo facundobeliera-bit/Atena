@@ -1,3 +1,4 @@
+import '../screens/alumnos/alumno_buscar_instituciones_page.dart';
 // lib/routes/atena_router.dart
 //
 // ATENA – Router canónico (onGenerateRoute)
@@ -288,6 +289,12 @@ class AtenaRouter {
   // =========================
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    if (settings.name == '/buscar') {
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => const AlumnoBuscarInstitucionesPage.publica(),
+      );
+    }
     try {
       final nameForParse = _canonicalizeSettingsName(settings);
 
