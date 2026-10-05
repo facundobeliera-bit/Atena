@@ -52,6 +52,7 @@ class OfertaPublica {
       precio,
       edades,
       descripcion,
+      requisitos,
       tipoFormal;
   final CategoriaPublica categoria;
   final int? disponibles;
@@ -70,6 +71,7 @@ class OfertaPublica {
     required this.disponibles,
     required this.habilitada,
     this.tipoFormal = 'escolar',
+    this.requisitos = '',
   });
   CostoOferta get costo => clasificarCosto(precio);
   String get costoLabel => switch (costo) {
@@ -102,6 +104,7 @@ class OfertaPublica {
     disponibles: n,
     habilitada: enabled,
     tipoFormal: tipoFormal,
+    requisitos: requisitos,
   );
   Map<String, dynamic> toMap() => {
     'id': id,
@@ -117,6 +120,7 @@ class OfertaPublica {
     'available': disponibles,
     'enabled': habilitada,
     'formal_type': tipoFormal,
+    'requirements': requisitos,
   };
   factory OfertaPublica.fromMap(Map<String, dynamic> m) => OfertaPublica(
     id: m['id'] as String,
@@ -132,6 +136,7 @@ class OfertaPublica {
     disponibles: m['available'] as int?,
     habilitada: m['enabled'] == true,
     tipoFormal: m['formal_type'] as String? ?? 'escolar',
+    requisitos: m['requirements'] as String? ?? '',
   );
 }
 

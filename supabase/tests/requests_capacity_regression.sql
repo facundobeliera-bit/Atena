@@ -20,7 +20,8 @@ insert into atena_private.catalog_scopes(institution_id,area_id,public_instituti
 insert into atena_private.applicant_links values
  ('test-profile-one','11111111-1111-4111-8111-111111111111',true,now()),('test-profile-two','11111111-1111-4111-8111-111111111111',true,now());
 insert into atena_private.capacity_pools values ('test-pool','test-request-school','test-request-area','group',1,0);
-insert into atena_private.request_resources values ('atena_'||repeat('c',64),'test-request-school','test-request-area','curricular','test-pool',null,true);
+insert into atena_private.request_resources(group_id,institution_id,area_id,kind,group_pool_id,activity_pool_id,active)
+ values ('atena_'||repeat('c',64),'test-request-school','test-request-area','curricular','test-pool',null,true);
 insert into public.atena_catalog_publications values ('atena_'||repeat('a',64),'atena_'||repeat('b',64),1,'published',
  jsonb_build_object('schema_version',2,'groups',jsonb_build_array(jsonb_build_object('id','atena_'||repeat('c',64),'kind','curricular','status','disponible'))),now());
 set local role authenticated;

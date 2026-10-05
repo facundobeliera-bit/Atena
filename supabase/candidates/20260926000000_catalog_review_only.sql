@@ -117,6 +117,23 @@ create policy catalog_published_read on public.atena_catalog_publications
   );
 -- No INSERT/UPDATE/DELETE policies or grants for clients. Writes only via RPC.
 
+-- One public catalog boundary; the requests candidate adds live availability
+-- to this same read operation without creating a second public data source.
+create function public.atena_catalog_read(p_offset integer default 0,p_limit integer default 200)
+returns setof public.atena_catalog_publications
+language plpgsql stable security definer set search_path='' as $$
+begin
+  if p_offset is null or p_offset<0 or p_limit is null or p_limit not between 1 and 200 then
+    raise exception 'Invalid page' using errcode='22023';
+  end if;
+  return query select p.* from public.atena_catalog_publications p
+    where p.publication_state='published' and atena_private.catalog_visible(p.institution_id,p.area_id)
+    order by p.area_id offset p_offset limit p_limit;
+end;
+$$;
+revoke all on function public.atena_catalog_read(integer,integer) from public,anon,authenticated;
+grant execute on function public.atena_catalog_read(integer,integer) to anon,authenticated;
+
 -- Authorized discovery of the current version, including a withdrawn scope.
 -- Does not create a scope or mark a local payload as confirmed.
 create function public.atena_catalog_status(p_institution_id text,p_area_id text)
@@ -158,7 +175,7 @@ returns void language plpgsql immutable set search_path = '' as $$
 declare x jsonb; cap integer; occ integer; avail integer;
 begin
   if (atena_private.catalog_exact_keys(p,array['schema_version','institution','area','activities','groups'])
-      and p->'schema_version'='2'::jsonb
+      and p->'schema_version' in ('2'::jsonb,'3'::jsonb)
       and atena_private.catalog_exact_keys(p->'institution',array['id','name','city','province','country'])
       and atena_private.catalog_strings(p->'institution',array['id','name','city','province','country'])
       and p#>>'{institution,id}'=p_inst
@@ -182,7 +199,10 @@ begin
   end loop;
   for x in select value from jsonb_array_elements(p->'groups') loop
     if (atena_private.catalog_exact_keys(x,array['id','kind','name','activity_label','schedule',
-          'capacity','occupied','available','availability','status'])
+          'capacity','occupied','available','availability','status'] ||
+          case when p->'schema_version'='3'::jsonb
+            then array['formal_type','price','requirements','description','ages']::text[]
+            else array[]::text[] end)
       and atena_private.catalog_strings(x,array['id','kind','name','activity_label','schedule','availability','status'])
       and x->>'id' ~ '^atena_[0-9a-f]{64}$'
       and x->>'kind'=p#>>'{area,kind}'
@@ -190,6 +210,11 @@ begin
         or (x->>'kind'='extracurricular' and x->>'status' in ('activo','suspendido')))
       and jsonb_typeof(x->'occupied')='number' and x->>'occupied' ~ '^[0-9]{1,7}$') is not true then
       raise exception 'Invalid public group' using errcode='22023';
+    end if;
+    if p->'schema_version'='3'::jsonb and (
+      atena_private.catalog_strings(x,array['formal_type','price','requirements','description','ages'])
+      and x->>'formal_type' in ('escolar','superior','universidad')) is not true then
+      raise exception 'Invalid public presentation' using errcode='22023';
     end if;
     occ := (x->>'occupied')::integer;
     if x->'capacity'='null'::jsonb then
@@ -210,8 +235,8 @@ begin
       end if;
     end if;
   end loop;
-  if exists(select 1 from jsonb_array_elements(p->'groups') x group by x->>'id' having count(*)>1)
-    or exists(select 1 from jsonb_array_elements(p->'activities') x group by x->>'id' having count(*)>1) then
+  if exists(select 1 from jsonb_array_elements(p->'groups') item group by item->>'id' having count(*)>1)
+    or exists(select 1 from jsonb_array_elements(p->'activities') item group by item->>'id' having count(*)>1) then
     raise exception 'Duplicate catalog ID' using errcode='22023';
   end if;
 end;

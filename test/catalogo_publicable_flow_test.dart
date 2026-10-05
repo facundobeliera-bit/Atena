@@ -625,7 +625,7 @@ void main() {
         extraArea.id,
       );
       expect(value.catalogo.actividades, hasLength(1));
-      expect(value.catalogo.datos['schema_version'], 2);
+      expect(value.catalogo.datos['schema_version'], 3);
       expect(
         value.catalogo.actividades.single.keys,
         containsAll(['description', 'ages', 'price']),

@@ -1,9 +1,29 @@
-# Pruebas de concurrencia preparadas — NO EJECUTADAS
+# Pruebas de concurrencia — ejecutadas localmente el 05/10/2026
 
 No ejecutar en el proyecto remoto ni sobre datos existentes. Requieren PostgreSQL
 aislado, base `atena_disposable_candidate`, las migraciones piloto y ambos candidatos
-revisados. No hay PostgreSQL/psql/Docker disponible en este entorno. Estas instrucciones
-no constituyen evidencia de aceptación ni autorización de una migración.
+revisados. Se ejecutaron en PostgreSQL 17.11 portátil, sólo localhost, sin servicio
+permanente ni conexión a Supabase. Esto no autoriza una migración remota.
+
+El ejecutor reproducible es `tool/test_backend_candidates.py --psql <psql.exe>`.
+Sólo acepta localhost, usuario `atena_test` y una base VACÍA llamada
+`atena_disposable_candidate` (puerto por defecto 55439). No descarga, borra ni
+recrea bases; instala las migraciones/candidatos en esa base y deja las fixtures
+ficticias para inspección. Para repetir, preparar otra base desechable vacía.
+Simula `auth.uid()` mediante claims locales; no sustituye la validación de JWT
+de Supabase Auth/PostgREST.
+
+48 comprobaciones PASS: aplicación de ambos candidatos, regresión transaccional,
+identidad de propietario y operador independiente, rechazo de IDs contradictorios,
+RLS y capacidades, catálogo schema 2/3, publicación/retiro/versiones/privacidad,
+Free/Premium del servidor, cupo efectivo, revocación, aislamiento institucional y
+por área, suspensión de actividad, lectura pública de cupos actuales y cinco
+casos concurrentes reales: último cupo, actividad compartida entre DOS grupos,
+misma confirmación, creación con misma clave y rollback liberando el cupo.
+
+La matriz siguiente conserva casos manuales adicionales (por ejemplo, revocación
+en plena transacción y clave simultánea contradictoria). No se declaran ejecutados
+por el resultado de 48 comprobaciones. Ninguna prueba de esta unidad fue remota.
 
 La prueba ejecutable de una conexión es `requests_capacity_regression.sql`. Usa
 identidades ficticias, exige el nombre de base anterior y revierte sus fixtures.
@@ -66,5 +86,6 @@ de un entorno con datos. Registrar salida/SQLSTATE de ambas conexiones sin secre
 
 El test compartido exige un mapeo administrativo real de actividad, nunca inferido
 por nombre. La ocupación debe comprobarse contra `greatest(occupied, count(confirmed))`.
-Además de estas pruebas falta validar el contrato HTTP/PostgREST real, pérdida de
-respuesta/reintento y dos dispositivos con el adaptador Flutter, todavía no conectado.
+Los adaptadores Flutter ya se probaron con SupabaseClient real y un servidor HTTP
+de contrato en loopback, incluida respuesta incierta/reintento. Falta ejecutar
+Auth/PostgREST remoto y el circuito completo desde dos dispositivos independientes.

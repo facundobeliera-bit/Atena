@@ -1,4 +1,4 @@
--- REVIEW ONLY / NOT APPLIED. Requires the existing catalog candidate (schema 2).
+-- REVIEW ONLY / NOT APPLIED. Requires the existing catalog candidate (schema 2/3).
 -- No account provisioning, identity inference, legacy migration or automatic grants.
 -- Admin must verify applicant links, resource mappings and opening occupancy.
 begin;
@@ -7,6 +7,35 @@ alter table public.atena_pilot_assignments
 alter table public.atena_pilot_assignments
   add constraint atena_pilot_assignments_capabilities_requests_check
   check (capabilities <@ array['pilot.read','pilot.write','catalog.publish','requests.read','requests.decide']::text[]);
+
+-- Server-owned commercial policy. Development default OFF; clients cannot
+-- change it or provide entitlements in a request. Production activation needs
+-- explicit administrative authorization and verified institution entitlements.
+create table atena_private.commercial_policy (
+  singleton boolean primary key default true check(singleton),
+  enforcement_enabled boolean not null default false
+);
+insert into atena_private.commercial_policy(singleton) values(true);
+create table atena_private.institution_entitlements (
+  institution_id text primary key references public.atena_pilot_institutions(id),
+  plan text not null check(plan in ('free','premium')),
+  active boolean not null default false
+);
+alter table atena_private.commercial_policy enable row level security;
+alter table atena_private.institution_entitlements enable row level security;
+revoke all on atena_private.commercial_policy,atena_private.institution_entitlements from public,anon,authenticated;
+create function atena_private.require_new_request_entitlement(p_inst text)
+returns void language plpgsql volatile security definer set search_path='' as $$
+declare enabled boolean; allowed text;
+begin
+  select enforcement_enabled into strict enabled from atena_private.commercial_policy where singleton for share;
+  if not enabled then return; end if;
+  select plan into allowed from atena_private.institution_entitlements
+    where institution_id=p_inst and active and plan='premium' for share;
+  if allowed is null then raise exception 'Digital enrollment unavailable' using errcode='42501'; end if;
+end;
+$$;
+revoke all on function atena_private.require_new_request_entitlement(text) from public,anon,authenticated;
 
 -- A verified profile mapping, NOT a client-created local account or credential.
 create table atena_private.applicant_links (
@@ -36,8 +65,11 @@ create table atena_private.request_resources (
   group_pool_id text not null unique,
   activity_pool_id text,
   active boolean not null default false,
+  activity_public_id text,
   unique(group_id,institution_id,area_id),
   check(activity_pool_id is null or activity_pool_id<>group_pool_id),
+  check((kind='curricular' and activity_public_id is null) or
+    (kind='extracurricular' and activity_public_id is not null and activity_public_id ~ '^atena_[0-9a-f]{64}$')),
   foreign key(group_pool_id,institution_id,area_id) references atena_private.capacity_pools(id,institution_id,area_id),
   foreign key(activity_pool_id,institution_id,area_id) references atena_private.capacity_pools(id,institution_id,area_id),
   foreign key(institution_id,area_id) references atena_private.catalog_scopes(institution_id,area_id)
@@ -111,7 +143,7 @@ begin
       join atena_private.request_resources resource on resource.group_id=r.group_id
       where r.state='confirmed' and (resource.group_pool_id=pool.id or resource.activity_pool_id=pool.id);
     effective := greatest(pool.occupied,n);
-    if effective>=9999999 or (pool.capacity is not null and effective>=pool.capacity) then
+    if pool.capacity is null or pool.capacity<=0 or effective>=9999999 or effective>=pool.capacity then
       raise exception 'No available capacity' using errcode='PT409';
     end if;
     if p_consume then
@@ -146,8 +178,13 @@ begin
     join atena_private.catalog_scopes scope on scope.public_area_id=pub.area_id
     where scope.institution_id=g.institution_id and scope.area_id=g.area_id and pub.publication_state='published'
       and exists(select 1 from jsonb_array_elements(pub.document->'groups') item
-        where item->>'id'=p_group_id and item->>'kind'=g.kind and item->>'status' in ('disponible','activo')) for share of pub;
+        where item->>'id'=p_group_id and item->>'kind'=g.kind and item->>'status' in ('disponible','activo'))
+      and (g.kind='curricular' or exists(select 1 from jsonb_array_elements(pub.document->'activities') activity
+        where activity->>'id'=g.activity_public_id and activity->'active'='true'::jsonb)) for share of pub;
   if not found then raise exception 'Resource not published' using errcode='42501'; end if;
+  perform 1 from public.atena_pilot_areas where institution_id=g.institution_id and id=g.area_id and active for share;
+  if not found then raise exception 'Area unavailable' using errcode='42501'; end if;
+  perform atena_private.require_new_request_entitlement(g.institution_id);
   perform atena_private.lock_request_capacity(g.group_id,false);
   insert into public.atena_requests(group_id,institution_id,area_id,applicant_profile_id,applicant_auth_user_id,operation_id)
     values(g.group_id,g.institution_id,g.area_id,p_profile_id,(select auth.uid()),p_operation_id) returning * into r;
@@ -181,6 +218,14 @@ begin
       for share of o,i,l,a,ar;
     if op is null then raise exception 'Not authorized' using errcode='42501'; end if;
   end if;
+  select * into strict r from public.atena_requests where id=p_request_id for update;
+  if r.state=p_state then return r; end if;
+  if r.state<>'pending' then raise exception 'Terminal request' using errcode='PT409'; end if;
+  if p_state='confirmed' then
+    perform 1 from atena_private.applicant_links where profile_id=r.applicant_profile_id
+      and auth_user_id=r.applicant_auth_user_id and active for share;
+    if not found then raise exception 'Applicant link revoked' using errcode='42501'; end if;
+  end if;
   -- Resource mapping is immutable to clients; keep it fixed throughout decision.
   select * into strict g from atena_private.request_resources where group_id=r.group_id for share;
   if p_state='confirmed' and r.state='pending' then
@@ -188,13 +233,12 @@ begin
       join atena_private.catalog_scopes scope on scope.public_area_id=pub.area_id
       where scope.institution_id=g.institution_id and scope.area_id=g.area_id and pub.publication_state='published'
         and exists(select 1 from jsonb_array_elements(pub.document->'groups') item
-          where item->>'id'=g.group_id and item->>'kind'=g.kind and item->>'status' in ('disponible','activo')) for share of pub;
+          where item->>'id'=g.group_id and item->>'kind'=g.kind and item->>'status' in ('disponible','activo'))
+        and (g.kind='curricular' or exists(select 1 from jsonb_array_elements(pub.document->'activities') activity
+          where activity->>'id'=g.activity_public_id and activity->'active'='true'::jsonb)) for share of pub;
     if not found then raise exception 'Resource not published' using errcode='PT409'; end if;
   end if;
   perform 1 from atena_private.capacity_pools where id=g.group_pool_id or id=g.activity_pool_id order by id for update;
-  select * into strict r from public.atena_requests where id=p_request_id for update;
-  if r.state=p_state then return r; end if;
-  if r.state<>'pending' then raise exception 'Terminal request' using errcode='PT409'; end if;
   if p_state='confirmed' then
     if not g.active then raise exception 'Resource suspended' using errcode='PT409'; end if;
     perform atena_private.lock_request_capacity(g.group_id,true);
@@ -207,4 +251,60 @@ end;
 $$;
 revoke all on function public.atena_request_create(text,text,uuid),public.atena_request_decide(uuid,text) from public,anon,authenticated;
 grant execute on function public.atena_request_create(text,text,uuid),public.atena_request_decide(uuid,text) to authenticated;
+
+-- Public availability is calculated from the SAME authoritative pools used by
+-- confirmation. It is advisory at read time; confirmation still locks/rechecks.
+create function atena_private.catalog_live_group(p_group jsonb,p_inst text,p_area text)
+returns jsonb language plpgsql stable security definer set search_path='' as $$
+declare g atena_private.request_resources%rowtype; pool atena_private.capacity_pools%rowtype;
+  effective bigint; n bigint; remaining bigint:=9999999; result jsonb:=p_group;
+begin
+  select * into g from atena_private.request_resources where group_id=p_group->>'id'
+    and institution_id=p_inst and area_id=p_area;
+  if not found then return result || jsonb_build_object('available',null,'availability','unmanaged'); end if;
+  if not g.active or p_group->>'status'='suspendido' then
+    return result || jsonb_build_object('available',0,'availability','suspended');
+  end if;
+  if g.kind='extracurricular' and not exists (
+    select 1 from public.atena_catalog_publications pub join atena_private.catalog_scopes s on s.public_area_id=pub.area_id,
+      jsonb_array_elements(pub.document->'activities') activity
+    where s.institution_id=p_inst and s.area_id=p_area and pub.publication_state='published'
+      and activity->>'id'=g.activity_public_id and activity->'active'='true'::jsonb
+  ) then return result || jsonb_build_object('available',0,'availability','suspended'); end if;
+  for pool in select * from atena_private.capacity_pools where id=g.group_pool_id or id=g.activity_pool_id loop
+    select count(*) into n from public.atena_requests r
+      join atena_private.request_resources resource on resource.group_id=r.group_id
+      where r.state='confirmed' and (resource.group_pool_id=pool.id or resource.activity_pool_id=pool.id);
+    effective:=greatest(pool.occupied,n);
+    if pool.id=g.group_pool_id then result:=result || jsonb_build_object('capacity',pool.capacity,'occupied',effective); end if;
+    if pool.capacity is null then
+      return result || jsonb_build_object('available',null,'availability','unmanaged');
+    end if;
+    remaining:=least(remaining,greatest(0,pool.capacity-effective));
+  end loop;
+  if p_group->>'status'='completo' then remaining:=0; end if;
+  return result || jsonb_build_object('available',remaining,'availability',case when remaining>0 then 'available' else 'full' end);
+end;
+$$;
+revoke all on function atena_private.catalog_live_group(jsonb,text,text) from public,anon,authenticated;
+
+create or replace function public.atena_catalog_read(p_offset integer default 0,p_limit integer default 200)
+returns setof public.atena_catalog_publications
+language plpgsql stable security definer set search_path='' as $$
+declare publication public.atena_catalog_publications%rowtype; scope atena_private.catalog_scopes%rowtype; groups jsonb;
+begin
+  if p_offset is null or p_offset<0 or p_limit is null or p_limit not between 1 and 200 then
+    raise exception 'Invalid page' using errcode='22023';
+  end if;
+  for publication in select p.* from public.atena_catalog_publications p
+    where p.publication_state='published' and atena_private.catalog_visible(p.institution_id,p.area_id)
+    order by p.area_id offset p_offset limit p_limit loop
+    select * into strict scope from atena_private.catalog_scopes where public_area_id=publication.area_id;
+    select coalesce(jsonb_agg(atena_private.catalog_live_group(item,scope.institution_id,scope.area_id) order by ord),'[]'::jsonb)
+      into groups from jsonb_array_elements(publication.document->'groups') with ordinality items(item,ord);
+    publication.document:=jsonb_set(publication.document,'{groups}',groups);
+    return next publication;
+  end loop;
+end;
+$$;
 commit;

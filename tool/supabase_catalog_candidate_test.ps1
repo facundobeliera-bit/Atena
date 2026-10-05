@@ -44,10 +44,11 @@ function Denied($result,[string]$label) { Check ($result.Status -eq 403 -and $re
 
 $status=Api 'POST' '/rest/v1/rpc/atena_catalog_status' $c.TokenA @{p_institution_id=$c.InstitutionA;p_area_id=$c.AreaA}
 Check ($status.Status -eq 200) 'authorized scope status'
-$doc=@{schema_version=2;institution=@{id=$c.PublicInstitutionA;name='Institución ficticia';city='Ciudad piloto';province='Provincia piloto';country='Argentina'};
+$doc=@{schema_version=3;institution=@{id=$c.PublicInstitutionA;name='Institución ficticia';city='Ciudad piloto';province='Provincia piloto';country='Argentina'};
   area=@{id=$c.PublicAreaA;name='Área ficticia';kind='curricular'};activities=@();
   groups=@(@{id=('atena_'+(Hash 'candidate-fictitious-group'));kind='curricular';name='Grupo ficticio';activity_label='Primaria';
-    schedule='08:00–12:00';capacity=10;occupied=2;available=8;availability='available';status='disponible'})}
+    schedule='08:00–12:00';capacity=10;occupied=2;available=8;availability='available';status='disponible';
+    formal_type='universidad';price='Gratuito';requirements='Requisito ficticio';description='Programa ficticio';ages='Adultos'})}
 $first=Envelope $doc $status.Data.version
 $a=Publish $first $c.TokenA
 Check ($a.Status -eq 200 -and $a.Data.version -eq $status.Data.version+1) 'A: institution publishes'
@@ -62,6 +63,11 @@ $other=Envelope $doc $b.Data.version; $other.p_area_id=$c.AreaOther
 Denied (Publish $other $c.TokenOperatorA) 'E: manipulated area denied'
 $read=PublicRead
 Check ($read.Status -eq 200 -and @($read.Data).Count -eq 1) 'F: anonymous family can read published catalog only'
+$live=Api 'POST' '/rest/v1/rpc/atena_catalog_read' '' @{p_offset=0;p_limit=200}
+Check ($live.Status -eq 200) 'F: public availability RPC accepts anonymous reader'
+$own=@($live.Data | Where-Object { $_.area_id -ceq $c.PublicAreaA })
+Check ($own.Count -eq 1 -and $own[0].document.groups[0].formal_type -ceq 'universidad') 'F: university taxonomy survives public RPC'
+Check ($own[0].document.groups[0].price -ceq 'Gratuito' -and $own[0].document.groups[0].requirements -ceq 'Requisito ficticio') 'F: cost and requirements preserved'
 $secret=@{ schema_version=$doc.schema_version;institution=$doc.institution;area=$doc.area;activities=$doc.activities;groups=$doc.groups;password='FICTIONAL_FORBIDDEN_MARKER' }
 $bad=Publish (Envelope $secret $b.Data.version) $c.TokenA
 Check ($bad.Status -eq 400 -and $bad.Code -eq '22023') 'G: forbidden DTO field rejected server-side'

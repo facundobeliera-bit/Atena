@@ -1,5 +1,90 @@
 # Atena — cierre local y preparación del backend
 
+## Actualización del sprint — 05/10/2026
+
+El checkpoint `1c2f29accd201e8d797f079d3cf22ab7caab8295` consolida el trabajo
+anterior y fue subido normalmente a `fix/buscar-instituciones-alumno`. Los apartados
+fechados más abajo son el registro histórico de sus respectivas unidades.
+
+### Backend preparado y comprobado localmente
+
+- `CatalogoSupabaseRepository` implementa el transporte del catálogo/outbox existente:
+  publicación explícita, versión, retiro y reintento con la misma clave/huella.
+  Un rechazo de autorización no se convierte en éxito ni en lista vacía.
+  Lectura pública paginada mediante `atena_catalog_read`; reutiliza `FichaPublicaInstitucion`
+  y `OfertaPublica`, sin modelos canónicos privados. No hay fallback silencioso local.
+- Proyección schema 3: educación formal, universidad, precio gratuito/arancelado/a
+  consultar, horario, edades, descripción y requisitos. Sólo campos de presentación
+  explícitamente publicados; no owner, credencial, alumno, solicitud ni teléfono
+  privado. El servidor conserva compatibilidad schema 2 para outboxes pendientes.
+- `SolicitudesSupabaseRepository` envía únicamente perfil verificado, grupo público y
+  UUID de operación; para decidir, ID de solicitud y estado. Nunca envía cupos,
+  propietario, rol ni plan como prueba de autorización. No genera sesiones ni vínculos.
+  El consumidor debe conservar el UUID en reintentos; no sustituye el repositorio local.
+- Candidatos existentes de catálogo y solicitudes ampliados y EJECUTADOS en PostgreSQL
+  17.11 desechable de localhost. Se corrigió una referencia SQL ambigua en la validación
+  de duplicados que impedía publicar. Confirmación atómica, pool de grupo/actividad,
+  `max(persistida, confirmadas)`, capacidad positiva, comprobación de vínculos vigentes,
+  actividad publicada activa, idempotencia y estados terminales. La actividad se mapea
+  administrativamente por ID público verificado; nunca se infiere por nombre.
+- La lectura pública recalcula disponibilidad sobre los mismos pools e índice de
+  confirmadas. No oculta sobreocupación; un recurso sin mapeo comprobado no anuncia
+  cupos solicitables. La tabla de publicaciones conserva la instantánea/versionado;
+  usar la RPC para disponibilidad vigente. La confirmación vuelve a comprobarla.
+- Política comercial sólo administrable en servidor, OFF inicialmente para desarrollo.
+  ON exige entitlement Premium activo para NUEVAS solicitudes; Free conserva catálogo,
+  historial y gestión/reintento de solicitudes existentes. Flutter no puede cambiarla.
+
+No se activó este backend en las pantallas habituales: conservan el modo local y su
+enforcement OFF. Publicación/lectura remota y solicitudes quedan como adaptadores
+opcionales comprobados, no como sincronización habilitada ni demostrada entre teléfonos.
+El retiro remoto requiere conservar su clave/versionado hasta recibir confirmación;
+no se agregó todavía un botón remoto ni una cola de retiro en la interfaz habitual.
+
+### Identidad y autorización remota pendiente
+
+La migración local admite propietario coherente y operador independiente; ambos se
+probaron en SQL. IDs contradictorios y propietario inconsistente producen 23514.
+Esto NO identifica la causa histórica remota. Siguen faltando el cuerpo completo de
+la función instalada, todos los triggers efectivos y el predicado con el payload
+ficticio exacto del fallo. Usar únicamente
+`supabase/diagnostics/pilot_link_predicate_readonly.sql`; no se modificó el trigger.
+
+Después de aclarar esa evidencia, se requiere autorización separada para:
+
+1. Aplicar al proyecto piloto `20260926000000_catalog_review_only.sql` y después
+   `20260928000000_requests_capacity_review_only.sql`, ambos en `supabase/candidates/`.
+   No aplicar automáticamente todas las migraciones ni cambiar la identidad histórica.
+2. Provisionar EXCLUSIVAMENTE fixtures verificadas: vínculos, capacidades específicas,
+   namespaces/scopes, perfiles solicitantes y mapeos grupo/actividad/pools con ocupación
+   inicial comprobada. No se crean automáticamente desde Flutter o por coincidencia de correo.
+3. Ejecutar el smoke candidato de catálogo y el circuito de solicitudes con Auth/PostgREST
+   real y dos sesiones. Los scripts remotos siguen deshabilitados sin autorización explícita.
+4. Sólo al definir activación comercial remota: entitlements verificados y
+   `update atena_private.commercial_policy set enforcement_enabled=true where singleton;`.
+   No hay precios/pagos ni escrituras remotas ejecutadas por este sprint.
+
+Falta integrar la selección de identidades remotas verificadas en el recorrido habitual,
+habilitar explícitamente los adaptadores después de aceptación remota, persistir reintentos
+de solicitudes/retiros en esa interfaz y probar dos dispositivos. Calendario,
+comunicaciones, módulos educativos, documentos y notificaciones siguen locales;
+no se amplió su migración con las etapas previas todavía sin aceptación remota.
+
+### Validación de esta actualización
+
+402 tests Flutter PASS (18 nuevos), 0 omitidos; 76 avisos estáticos históricos,
+0 nuevos. 48 comprobaciones PostgreSQL locales PASS, incluida la regresión SQL
+existente y concurrencia real, y 8 comprobaciones offline del smoke PASS.
+Build web JavaScript PASS; APK de evaluación PASS:
+`build/atena-v1-sprint-local-2026-10-05.apk`, paquete `org.atena.demo.municipio`.
+SHA-256: `73DB27894663173B7FFD47BD96CBB37D82259F5691E80C7B5F65A791C27D791D`.
+No instalado ni probado en un teléfono durante este sprint. `git diff --check` PASS.
+No se ejecutaron las 29 comprobaciones contra Supabase: requieren escrituras remotas
+no autorizadas en este bloque. Las pruebas locales no se presentan como pruebas remotas.
+
+Los cuatro históricos continúan fuera de Git. No se modificaron dependencias,
+configuración de deployment, credenciales locales, Supabase remoto ni datos del teléfono.
+
 Fecha: 02/10/2026. Base de esta unidad: Operativa V2, 303 pruebas, 81 avisos.
 HEAD conservado: `fb1388ccc14741e6e10cd12d36eca5712db59faf`.
 No commit, staging, push, deployment ni cambios remotos. No sustituye la aceptación

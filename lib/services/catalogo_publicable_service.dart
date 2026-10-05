@@ -67,7 +67,7 @@ class ConflictoCatalogo implements Exception {}
 
 class ConexionCatalogo implements Exception {}
 
-/// Future server adapter boundary. No Supabase implementation is enabled.
+/// Optional server adapter boundary. Normal builds keep local mode.
 /// The server MUST authenticate from its token, authorize the live link/area,
 /// and atomically check expectedVersion + deduplicate operationId + replace
 /// only this area's projection. A client-supplied ID is never authorization.
@@ -105,6 +105,7 @@ class CatalogoPublicableService {
     String area, {
     String tipoFormal = 'escolar',
     Map<String, String> precios = const {},
+    Map<String, String> requisitos = const {},
   }) async {
     if (!['escolar', 'superior', 'universidad'].contains(tipoFormal)) {
       throw const FormatException('Tipo de educación formal inválido.');
@@ -167,6 +168,7 @@ class CatalogoPublicableService {
             disponibles: g['available'],
             habilitada: g['availability'] != 'full',
             tipoFormal: tipoFormal,
+            requisitos: requisitos[g['id']] ?? '',
           ),
         );
       }
@@ -562,8 +564,36 @@ class CatalogoPublicableService {
     }
     groups.sort((a, b) => (a['id'] as String).compareTo(b['id'] as String));
     activities.sort((a, b) => (a['id'] as String).compareTo(b['id'] as String));
+    // Only explicitly published presentation fields may enrich the remote
+    // projection. Canonical identity/contact records are never serialized.
+    final published = await publicacionLocal(institution, areaId);
+    final presentation = <String, OfertaPublica>{};
+    for (final offer in published?.ofertas ?? <OfertaPublica>[]) {
+      presentation[await identificador(
+            offer.categoria == CategoriaPublica.formal
+                ? 'curricular-group'
+                : 'extra-group',
+            institution,
+            offer.id,
+          )] =
+          offer;
+    }
+    for (final group in groups) {
+      final offer = presentation[group['id']];
+      final matches = activities.where(
+        (a) => a['name'] == group['activity_label'],
+      );
+      final activity = matches.length == 1 ? matches.single : null;
+      group.addAll({
+        'formal_type': offer?.tipoFormal ?? 'escolar',
+        'price': offer?.precio ?? activity?['price'] ?? '',
+        'requirements': offer?.requisitos ?? '',
+        'description': offer?.descripcion ?? activity?['description'] ?? '',
+        'ages': offer?.edades ?? activity?['ages'] ?? '',
+      });
+    }
     final data = <String, dynamic>{
-      'schema_version': 2,
+      'schema_version': 3,
       'institution': {
         'id': await identificador('institution', institution, institution),
         'name': inst.nombre,
