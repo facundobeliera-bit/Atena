@@ -38,6 +38,7 @@ import '../../models/cuentas/cuenta.dart';
 import '../../routes/atena_deeplink.dart';
 import '../../services/alumno_service.dart';
 import '../../services/cuenta_service.dart';
+import '../../services/remote/multiuser_session.dart';
 import '../../ui/atena_assets.dart';
 import '../cuentas/cuenta_home_page.dart';
 import 'alumno_registro_page.dart';
@@ -223,6 +224,21 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
     try {
       final email = _normalizeEmail(_emailCtrl.text);
       final pass = _passCtrl.text.trim();
+      if (MultiuserSession.enabled) {
+        await MultiuserSession.current.signIn(email, _passCtrl.text);
+        _passCtrl.clear();
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => CuentaHomePage(
+              cuentaId: MultiuserSession.current.userId,
+              solicitudPublica: widget.solicitudPublica,
+            ),
+          ),
+          (_) => false,
+        );
+        return;
+      }
 
       final cuenta = await CuentaService.loginCuenta(
         email: email,
@@ -494,31 +510,34 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: _cargando ? null : _goForgotPassword,
+                      onPressed: (_cargando || MultiuserSession.enabled)
+                          ? null
+                          : _goForgotPassword,
                       child: Text(t.alumnoLoginForgotPassword),
                     ),
                   ),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _recordarme,
-                        onChanged: _cargando
-                            ? null
-                            : (v) {
-                                if (!mounted) return;
-                                setState(() => _recordarme = v ?? true);
-                              },
-                      ),
-                      Expanded(
-                        child: Text(
-                          t.commonRememberMe,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: cs.onSurface,
+                  if (!MultiuserSession.enabled)
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _recordarme,
+                          onChanged: _cargando
+                              ? null
+                              : (v) {
+                                  if (!mounted) return;
+                                  setState(() => _recordarme = v ?? true);
+                                },
+                        ),
+                        Expanded(
+                          child: Text(
+                            t.commonRememberMe,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: cs.onSurface,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -549,7 +568,9 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
                     width: double.infinity,
                     height: 40,
                     child: OutlinedButton(
-                      onPressed: _cargando ? null : _goRegistro,
+                      onPressed: (_cargando || MultiuserSession.enabled)
+                          ? null
+                          : _goRegistro,
                       child: Text(t.commonRegister),
                     ),
                   ),
@@ -569,6 +590,17 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
 
     return Scaffold(
       appBar: AppBar(
+        bottom: MultiuserSession.enabled
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(40),
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text(
+                    'Supabase compartido · Sólo cuentas piloto habilitadas',
+                  ),
+                ),
+              )
+            : null,
         title: Text(t.alumnoLoginAppBar),
         leading: Navigator.of(context).canPop()
             ? null

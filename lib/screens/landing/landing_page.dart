@@ -8,6 +8,7 @@ import '../../routes/atena_deeplink.dart';
 import '../../services/cuenta_service.dart';
 import '../../services/session_service.dart';
 import '../../services/remote/atena_supabase_client.dart';
+import '../../services/remote/multiuser_session.dart';
 import '../../services/remote/pilot_remote_gateway.dart';
 import '../../ui/atena_workspace.dart';
 
@@ -117,6 +118,10 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Future<void> _boot() async {
+    if (MultiuserSession.enabled) {
+      if (mounted) setState(() => _booting = false);
+      return;
+    }
     try {
       final session = await SessionService.getSession();
       final institutional = session?.role == SessionRole.institucion;
@@ -355,22 +360,26 @@ class _LandingPageState extends State<LandingPage> {
                     ),
                     const SizedBox(height: 24),
                     const Divider(),
-                    const AtenaLocalNotice(),
-                    if (AtenaSupabaseClient.optionalClient case final client?)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => PilotRemotePage(
-                                gateway: SupabasePilotRemoteGateway(client),
+                    if (MultiuserSession.enabled)
+                      const Text('Supabase compartido · Piloto de evaluación')
+                    else
+                      const AtenaLocalNotice(),
+                    if (!MultiuserSession.enabled)
+                      if (AtenaSupabaseClient.optionalClient case final client?)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => PilotRemotePage(
+                                  gateway: SupabasePilotRemoteGateway(client),
+                                ),
                               ),
                             ),
+                            icon: const Icon(Icons.science_outlined),
+                            label: const Text('Abrir piloto remoto'),
                           ),
-                          icon: const Icon(Icons.science_outlined),
-                          label: const Text('Abrir piloto remoto'),
                         ),
-                      ),
                   ],
                 ),
               ),

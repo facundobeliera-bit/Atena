@@ -1,3 +1,5 @@
+import '../../services/remote/multiuser_session.dart';
+import '../../ui/multiuser_panels.dart';
 // lib/screens/alumnos/alumno_mis_solicitudes_page.dart
 //
 // ATENA – ALUMNO / MIS SOLICITUDES
@@ -84,6 +86,7 @@ class _AlumnoMisSolicitudesPageState extends State<AlumnoMisSolicitudesPage> {
   @override
   void initState() {
     super.initState();
+    if (MultiuserSession.enabled) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // ignore: discarded_futures
       _cargar();
@@ -367,6 +370,9 @@ class _AlumnoMisSolicitudesPageState extends State<AlumnoMisSolicitudesPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (MultiuserSession.enabled) {
+      return RemoteRequestsPanel(profile: widget.perfilId);
+    }
     final titulo = _modoOwner
         ? _l10n.alumnoMisSolicitudesTitleOwner
         : _l10n.alumnoMisSolicitudesTitlePerfil(

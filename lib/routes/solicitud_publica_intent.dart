@@ -5,6 +5,7 @@ import '../models/extracurriculares/bloque_extracurricular.dart';
 import '../services/catalogo_publicable_service.dart';
 import '../services/cuenta_service.dart';
 import '../services/session_service.dart';
+import '../services/remote/multiuser_session.dart';
 import '../services/solicitudes_service.dart';
 import '../services/instituciones_helpers.dart' as helpers;
 import '../screens/auth/alumno_login_page.dart';
@@ -24,6 +25,19 @@ class SolicitudPublicaIntent {
   Future<void> continuar(BuildContext context) async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    if (MultiuserSession.enabled) {
+      await navigator.push(
+        MaterialPageRoute(
+          builder: (_) => MultiuserSession.current.signedIn
+              ? CuentaHomePage(
+                  cuentaId: MultiuserSession.current.userId,
+                  solicitudPublica: this,
+                )
+              : AlumnoLoginPage(solicitudPublica: this),
+        ),
+      );
+      return;
+    }
     try {
       if (!await PlanHabilitacionService.puedeRecibirPorId(institucionId)) {
         throw StateError(PlanHabilitacionService.inscripcionNoHabilitada);

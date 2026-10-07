@@ -42,6 +42,8 @@
 // - InstitucionMenuPage (home institucional)
 
 import 'package:flutter/material.dart';
+import '../../services/remote/multiuser_session.dart';
+import '../cuentas/cuenta_home_page.dart';
 import 'package:flutter/services.dart';
 
 import 'package:atena_app/l10n/gen/app_localizations.dart';
@@ -276,6 +278,19 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
     try {
       final email = _normalizeEmail(_emailCtrl.text);
       final pass = _passCtrl.text.trim();
+      if (MultiuserSession.enabled) {
+        await MultiuserSession.current.signIn(email, _passCtrl.text);
+        _passCtrl.clear();
+        if (!mounted) return;
+        nav.pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) =>
+                CuentaHomePage(cuentaId: MultiuserSession.current.userId),
+          ),
+          (_) => false,
+        );
+        return;
+      }
 
       final auth = await InstitucionService.loginInstitucion(
         email: email,
@@ -532,25 +547,28 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
                       enabled: !_cargando,
                       label: t.commonForgotPassword,
                       child: TextButton(
-                        onPressed: _cargando ? null : _openForgotPassword,
+                        onPressed: (_cargando || MultiuserSession.enabled)
+                            ? null
+                            : _openForgotPassword,
                         child: Text(t.commonForgotPassword),
                       ),
                     ),
                   ),
-                  CheckboxListTile(
-                    value: _rememberMe,
-                    onChanged: _cargando
-                        ? null
-                        : (v) {
-                            if (!mounted) {
-                              return;
-                            }
-                            setState(() => _rememberMe = v ?? true);
-                          },
-                    title: Text(t.commonRememberMe),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                  ),
+                  if (!MultiuserSession.enabled)
+                    CheckboxListTile(
+                      value: _rememberMe,
+                      onChanged: _cargando
+                          ? null
+                          : (v) {
+                              if (!mounted) {
+                                return;
+                              }
+                              setState(() => _rememberMe = v ?? true);
+                            },
+                      title: Text(t.commonRememberMe),
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -585,7 +603,7 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
                       enabled: !_cargando,
                       label: t.commonRegister,
                       child: OutlinedButton(
-                        onPressed: _cargando
+                        onPressed: (_cargando || MultiuserSession.enabled)
                             ? null
                             : () {
                                 Navigator.of(context).push(
@@ -615,6 +633,17 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
 
     return Scaffold(
       appBar: AppBar(
+        bottom: MultiuserSession.enabled
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(40),
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text(
+                    'Supabase compartido · Sólo cuentas piloto habilitadas',
+                  ),
+                ),
+              )
+            : null,
         title: Text(t.institucionLoginAppBar),
         leading: Navigator.of(context).canPop()
             ? null

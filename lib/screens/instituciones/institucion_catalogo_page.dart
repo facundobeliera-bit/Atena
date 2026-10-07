@@ -1,3 +1,5 @@
+import '../../services/remote/multiuser_session.dart';
+import '../../ui/multiuser_panels.dart';
 import 'package:flutter/material.dart';
 import '../../services/catalogo_publicable_service.dart';
 import '../../ui/atena_workspace.dart';
@@ -175,6 +177,7 @@ class _InstitucionCatalogoPageState extends State<InstitucionCatalogoPage> {
   @override
   void initState() {
     super.initState();
+    if (MultiuserSession.enabled) return;
     _load();
   }
 
@@ -227,6 +230,12 @@ class _InstitucionCatalogoPageState extends State<InstitucionCatalogoPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (MultiuserSession.enabled) {
+      return RemoteCatalogPanel(
+        institutionId: widget.institucionId,
+        areaId: widget.areaId,
+      );
+    }
     final value = _value;
     return Scaffold(
       appBar: AppBar(title: const Text('Catálogo del área')),

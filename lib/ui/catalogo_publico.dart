@@ -1,3 +1,4 @@
+import '../services/remote/multiuser_session.dart';
 import '../services/plan_habilitacion_service.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -8,8 +9,9 @@ import '../screens/alumnos/alumno_buscar_instituciones_page.dart';
 import '../screens/alumnos/alumno_institucion_perfil_page.dart';
 import 'atena_workspace.dart';
 
-const _local =
-    'Publicaciones de este dispositivo. Todavía no se comparten entre dispositivos.';
+String get _local => MultiuserSession.enabled
+    ? 'Supabase compartido · Publicaciones del piloto'
+    : 'Publicaciones de este dispositivo. Todavía no se comparten entre dispositivos.';
 
 class AccesoBuscadorPublico extends StatelessWidget {
   const AccesoBuscadorPublico({super.key});
@@ -112,7 +114,7 @@ class _PortadaBuscadorPublicoState extends State<PortadaBuscadorPublico> {
             ],
           ),
           const SizedBox(height: 12),
-          const Text(_local),
+          Text(_local),
         ],
       ),
     ),
@@ -350,7 +352,7 @@ class _CatalogoPublicoBusquedaState extends State<CatalogoPublicoBusqueda> {
               label: const Text('Buscar'),
             ),
             const SizedBox(height: 16),
-            const Text(_local),
+            Text(_local),
             const SizedBox(height: 16),
             if (_busy) const LinearProgressIndicator(),
             if (_error != null)
@@ -440,9 +442,11 @@ class _CatalogoPublicoPerfilState extends State<CatalogoPublicoPerfil> {
       final all = await CatalogoPublicableService().buscarPublico();
       final matches = all.where((i) => i.id == widget.institucionId).toList();
       if (mounted) {
-        final recibe = await PlanHabilitacionService.puedeRecibirPorId(
-          widget.institucionId,
-        );
+        final recibe =
+            MultiuserSession.enabled ||
+            await PlanHabilitacionService.puedeRecibirPorId(
+              widget.institucionId,
+            );
         if (!mounted) return;
         setState(() {
           _data = matches.isEmpty ? null : matches.single;
@@ -499,8 +503,10 @@ class _CatalogoPublicoPerfilState extends State<CatalogoPublicoPerfil> {
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Información publicada localmente por un operador autorizado. Sin verificación externa.',
+                Text(
+                  MultiuserSession.enabled
+                      ? 'Información publicada en Supabase por un operador autorizado.'
+                      : 'Información publicada localmente por un operador autorizado. Sin verificación externa.',
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -582,7 +588,7 @@ class _CatalogoPublicoPerfilState extends State<CatalogoPublicoPerfil> {
                     ),
                   ),
                 const SizedBox(height: 16),
-                const Text(_local),
+                Text(_local),
               ],
             ],
           ),

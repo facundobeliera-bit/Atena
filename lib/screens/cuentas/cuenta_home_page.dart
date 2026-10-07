@@ -1,3 +1,5 @@
+import '../../services/remote/multiuser_session.dart';
+import '../../ui/multiuser_panels.dart';
 import '../../ui/catalogo_publico.dart';
 import '../../routes/solicitud_publica_intent.dart';
 // lib/screens/cuentas/cuenta_home_page.dart
@@ -240,6 +242,7 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
   @override
   void initState() {
     super.initState();
+    if (MultiuserSession.enabled) return;
 
     final dl = (widget.initialDeeplink ?? '').trim();
     _deeplinkEfectivo = dl.isEmpty ? null : dl;
@@ -294,6 +297,7 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (MultiuserSession.enabled) return;
 
     if ((_deeplinkEfectivo ?? '').trim().isNotEmpty) return;
 
@@ -1187,6 +1191,9 @@ class _CuentaHomePageState extends State<CuentaHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (MultiuserSession.enabled) {
+      return RemoteAccountPanel(intent: widget.solicitudPublica);
+    }
     final cuenta = _cuenta;
     final t = AppLocalizations.of(context);
     final theme = Theme.of(context);

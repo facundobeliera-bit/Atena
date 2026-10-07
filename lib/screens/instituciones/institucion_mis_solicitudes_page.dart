@@ -1,3 +1,5 @@
+import '../../services/remote/multiuser_session.dart';
+import '../../ui/multiuser_panels.dart';
 // lib/screens/instituciones/institucion_mis_solicitudes_page.dart
 //
 // ATENA – INSTITUCIÓN / MIS SOLICITUDES
@@ -297,6 +299,7 @@ class _InstitucionMisSolicitudesPageState
   @override
   void initState() {
     super.initState();
+    if (MultiuserSession.enabled) return;
 
     // ✅ post-frame (evita l10n/theme en initState + edge cases web)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -307,6 +310,7 @@ class _InstitucionMisSolicitudesPageState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (MultiuserSession.enabled) return;
     _resolveRouteArgsOnce();
   }
 
@@ -857,6 +861,12 @@ class _InstitucionMisSolicitudesPageState
 
   @override
   Widget build(BuildContext context) {
+    if (MultiuserSession.enabled) {
+      return RemoteRequestsPanel(
+        institutionId: widget.institucionId,
+        areaId: widget.areaId,
+      );
+    }
     final l10n = AppLocalizations.of(context);
 
     final nombre = widget.institucionNombre.trim().isEmpty

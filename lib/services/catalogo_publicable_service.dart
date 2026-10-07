@@ -14,6 +14,7 @@ import 'institucion_areas_service.dart';
 import 'institucion_operadores_service.dart';
 import 'instituciones_helpers.dart' as helpers;
 import 'solicitudes_service.dart';
+import 'remote/multiuser_session.dart';
 
 enum EstadoCatalogo {
   local,
@@ -30,6 +31,17 @@ class CatalogoPublicable {
   final String json;
   final String huella;
   CatalogoPublicable._(this.json, this.huella);
+  static Future<CatalogoPublicable> fromRemoteDocument(
+    Map<String, dynamic> document,
+  ) async {
+    final raw = jsonEncode(document);
+    final hash = await Sha256().hash(utf8.encode(raw));
+    return CatalogoPublicable._(
+      raw,
+      hash.bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join(),
+    );
+  }
+
   Map<String, dynamic> get datos => jsonDecode(json) as Map<String, dynamic>;
   List<dynamic> get grupos => datos['groups'] as List<dynamic>;
   List<dynamic> get actividades => datos['activities'] as List<dynamic>;
@@ -220,6 +232,43 @@ class CatalogoPublicableService {
     String tipoFormal = '',
     bool soloDisponibles = false,
   }) async {
+    if (MultiuserSession.enabled) {
+      final values = await MultiuserSession.current.catalog();
+      bool match(String value, String query) => normalizarBusquedaPublica(
+        value,
+      ).contains(normalizarBusquedaPublica(query));
+      return values
+          .where(
+            (i) =>
+                match(i.localidad, localidad) &&
+                match(i.provincia, provincia) &&
+                match(i.pais, pais) &&
+                match(i.modalidad, modalidad),
+          )
+          .map(
+            (i) => i.conOfertas(
+              i.ofertas
+                  .where(
+                    (o) =>
+                        (categoria == null || o.categoria == categoria) &&
+                        (costo == null || o.costo == costo) &&
+                        (tipoFormal.isEmpty || o.tipoFormal == tipoFormal) &&
+                        match(o.horario, horario) &&
+                        match(o.edades, edades) &&
+                        match(
+                          '${i.nombre} ${o.nombre} ${o.grupo} ${o.descripcion}',
+                          texto,
+                        ) &&
+                        (!soloDisponibles ||
+                            (o.habilitada &&
+                                (o.disponibles == null || o.disponibles! > 0))),
+                  )
+                  .toList(),
+            ),
+          )
+          .where((i) => i.ofertas.isNotEmpty)
+          .toList();
+    }
     final prefs = await SharedPreferences.getInstance();
     final result = <String, FichaPublicaInstitucion>{};
     bool matches(String value, String query) => normalizarBusquedaPublica(

@@ -6,6 +6,7 @@ plugins {
 }
 
 val atenaAndroidDemo = System.getenv("ATENA_ANDROID_DEMO") == "1"
+val atenaAndroidMultiuser = System.getenv("ATENA_ANDROID_MULTIUSER") == "1"
 
 android {
     namespace = "com.example.flutter_application_1"
@@ -23,12 +24,16 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = if (atenaAndroidDemo) {
+        applicationId = if (atenaAndroidMultiuser) {
+            "org.atena.evaluation.multiuser"
+        } else if (atenaAndroidDemo) {
             "org.atena.demo.municipio"
         } else {
             "com.example.flutter_application_1"
         }
-        manifestPlaceholders["atenaAppLabel"] = if (atenaAndroidDemo) {
+        manifestPlaceholders["atenaAppLabel"] = if (atenaAndroidMultiuser) {
+            "Atena Multiusuario"
+        } else if (atenaAndroidDemo) {
             "Atena Demo"
         } else {
             "flutter_application_1"

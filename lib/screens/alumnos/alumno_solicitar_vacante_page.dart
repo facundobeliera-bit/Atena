@@ -1,3 +1,6 @@
+import '../../models/catalogo/ficha_publica.dart';
+import '../../services/remote/multiuser_session.dart';
+import '../../ui/multiuser_panels.dart';
 import '../../services/plan_habilitacion_service.dart';
 // ─────────────────────────────────────────────
 // ATENA – UI ALUMNO: SOLICITAR VACANTE (OWNER-ONLY)
@@ -45,6 +48,7 @@ import '../../services/solicitudes_service.dart';
 
 class AlumnoSolicitarVacantePage extends StatefulWidget {
   /// ⚠️ LEGACY/COMPAT: no usar como key lógica.
+  final OfertaPublica? ofertaRemota;
   final String alumnoDocumento;
 
   final String institucionId;
@@ -83,6 +87,7 @@ class AlumnoSolicitarVacantePage extends StatefulWidget {
 
   const AlumnoSolicitarVacantePage({
     super.key,
+    this.ofertaRemota,
     required this.alumnoDocumento,
     required this.institucionId,
     required this.institucionNombre,
@@ -111,6 +116,7 @@ class _AlumnoSolicitarVacantePageState
   @override
   void initState() {
     super.initState();
+    if (MultiuserSession.enabled) return;
     _consultarPolitica();
   }
 
@@ -457,6 +463,17 @@ class _AlumnoSolicitarVacantePageState
 
   @override
   Widget build(BuildContext context) {
+    if (MultiuserSession.enabled) {
+      final offer = widget.ofertaRemota;
+      if (offer == null) {
+        return const Scaffold(
+          body: Center(
+            child: Text('Falta una oferta remota válida. Volvé al catálogo.'),
+          ),
+        );
+      }
+      return RemoteRequestPanel(profile: widget.perfilId, offer: offer);
+    }
     final l = AppLocalizations.of(context);
     final t = Theme.of(context);
     final cs = t.colorScheme;

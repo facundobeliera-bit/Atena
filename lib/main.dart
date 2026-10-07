@@ -30,6 +30,9 @@ import 'services/cuenta_service.dart';
 import 'services/institucion_contexto_operativo_service.dart';
 import 'services/institucion_areas_service.dart';
 import 'services/remote/atena_supabase_client.dart';
+import 'services/remote/multiuser_session.dart';
+import 'screens/auth/alumno_login_page.dart';
+import 'screens/auth/institucion_login_page.dart';
 
 import 'screens/landing/landing_page.dart';
 import 'screens/alumno/alumno_area_page.dart';
@@ -48,12 +51,17 @@ Future<void> main() async {
 
   // Sólo al iniciar el proceso, antes de cualquier ruta (incluidos enlaces).
   // Volver a '/' durante el uso no debe cerrar una sesión temporal activa.
-  await SessionService.clearTempIfNeeded();
-  await CuentaService.clearSesionTemporalIfNeeded();
+  if (!MultiuserSession.enabled) {
+    await SessionService.clearTempIfNeeded();
+    await CuentaService.clearSesionTemporalIfNeeded();
 
-  try {
-    await AtenaDataBootstrapService.instance.initialize();
-  } catch (_) {}
+    try {
+      await AtenaDataBootstrapService.instance.initialize();
+    } catch (_) {}
+  } else {
+    // Fail closed if the explicitly selected shared backend is not configured.
+    MultiuserSession.current;
+  }
 
   Locale? initialLocale;
   ThemeMode initialThemeMode = ThemeMode.system;
@@ -154,6 +162,17 @@ class _AtenaAppState extends State<AtenaApp> {
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final name = (settings.name ?? '/').trim();
     if (name.isEmpty || name == '/') return _routeBootRoot();
+    if (MultiuserSession.enabled) {
+      return switch (name) {
+        '/alumno_login' => MaterialPageRoute(
+          builder: (_) => const AlumnoLoginPage(),
+        ),
+        '/institucion_login' => MaterialPageRoute(
+          builder: (_) => const InstitucionLoginPage(),
+        ),
+        _ => _routeBootRoot(),
+      };
+    }
     // Conservar los argumentos de navegación de las pantallas vigentes.
     return AtenaRouter.onGenerateRoute(settings);
   }
@@ -238,6 +257,21 @@ class _AtenaBootGateState extends State<_AtenaBootGate> {
     _running = true;
 
     final nav = Navigator.of(context);
+    if (MultiuserSession.enabled) {
+      nav.pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => MultiuserSession.current.signedIn
+              ? CuentaHomePage(cuentaId: MultiuserSession.current.userId)
+              : LandingPage(
+                  locale: widget.locale,
+                  themeMode: widget.themeMode,
+                  onLocaleChanged: widget.onLocaleChanged,
+                  onThemeModeChanged: widget.onThemeModeChanged,
+                ),
+        ),
+      );
+      return;
+    }
 
     try {
       SessionData? session;
