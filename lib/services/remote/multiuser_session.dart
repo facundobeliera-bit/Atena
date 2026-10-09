@@ -121,18 +121,25 @@ class MultiuserSession {
     OfertaPublica selected,
     String operation,
   ) async {
-    if (!(await context()).profiles.contains(profile)) {
+    final identity = await context();
+    if (!identity.profiles.contains(profile)) {
       throw StateError('El perfil no pertenece a tu sesión remota.');
     }
-    final live = await offer(selected.institucionId, selected.id);
-    // Let the RPC resolve retries before checking capacity: a previously accepted
-    // operation must remain recoverable after another session fills the pool.
-    // New requests and decisions remain subject to server authorization/capacity.
-    return SolicitudesSupabaseRepository(client).crear(
+    // The RPC resolves an accepted operation before checking current publication
+    // and capacity. A withdrawn/offline catalog must not block that recovery.
+    // New requests still require server-validated publication and availability.
+    final result = await SolicitudesSupabaseRepository(client).crear(
       perfilVerificado: profile,
-      grupoPublico: live.id,
+      grupoPublico: selected.id,
       operationId: operation,
     );
+    if (userId != identity.userId) throw StateError('La sesión cambió.');
+    if (result['applicant_auth_user_id'] != identity.userId) {
+      throw const FormatException(
+        'Propietario remoto de solicitud contradictorio.',
+      );
+    }
+    return result;
   }
 
   Future<List<Map<String, dynamic>>> requests({

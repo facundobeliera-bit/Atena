@@ -17,7 +17,10 @@
 //
 // Los deeplinks (/calendario, /documentos) siguen entrando por Router.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'l10n/gen/app_localizations.dart';
@@ -101,6 +104,9 @@ class _AtenaAppState extends State<AtenaApp> {
   Locale? _locale;
   ThemeMode _themeMode = ThemeMode.system;
   String? _initialDeeplink;
+  StreamSubscription<AuthState>? _remoteAuth;
+  String? _remoteUserId;
+  int _remoteNavigationEpoch = 0;
 
   static final List<Locale> _supportedLocales = AppLocalizations
       .supportedLocales
@@ -112,6 +118,37 @@ class _AtenaAppState extends State<AtenaApp> {
     _locale = widget.initialLocale;
     _themeMode = widget.initialThemeMode;
     _initialDeeplink = _readInitialDeeplinkBestEffort();
+    if (MultiuserSession.enabled) {
+      final session = MultiuserSession.current;
+      _remoteUserId = session.userId;
+      _remoteAuth = session.client.auth.onAuthStateChange.listen(
+        (state) {
+          final next = state.session?.user.id ?? '';
+          if (!mounted || next == _remoteUserId) return;
+          final previous = _remoteUserId;
+          _remoteUserId = next;
+          // First login owns its navigation (including a pending public offer).
+          // There is no previous authenticated stack to discard in that case.
+          if (previous == null || previous.isEmpty) return;
+          setState(() {
+            // Discard every private route and in-memory document/profile view.
+            // Token refresh for the same user preserves the current navigation.
+            _remoteNavigationEpoch++;
+            _initialDeeplink = null;
+          });
+        },
+        onError: (Object _) {
+          // A transient refresh/network error is not proof of a signed-out user.
+          // Protected operations still validate their context against Supabase.
+        },
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _remoteAuth?.cancel();
+    super.dispose();
   }
 
   String? _readInitialDeeplinkBestEffort() {
@@ -194,6 +231,7 @@ class _AtenaAppState extends State<AtenaApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      key: ValueKey(_remoteNavigationEpoch),
       debugShowCheckedModeBanner: false,
       title: 'ATENA',
       themeMode: _themeMode,

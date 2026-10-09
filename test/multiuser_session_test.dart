@@ -29,6 +29,9 @@ void main() {
   late Map<String, dynamic> identity;
   final calls = <Map<String, dynamic>>[];
   bool failCatalog = false;
+  bool hideCatalog = false;
+  bool changeDuringCreate = false;
+  bool wrongOwner = false;
   final document = {
     'schema_version': 3,
     'institution': {
@@ -69,6 +72,9 @@ void main() {
     SharedPreferences.setMockInitialValues({'local_marker': 'keep'});
     calls.clear();
     failCatalog = false;
+    hideCatalog = false;
+    changeDuringCreate = false;
+    wrongOwner = false;
     (document['groups'] as List).single['availability'] = 'available';
     (document['groups'] as List).single['available'] = 1;
     identity = {
@@ -117,6 +123,7 @@ void main() {
             'version': 1,
           },
         ];
+        if (hideCatalog) response = [];
         if (failCatalog) {
           request.response.statusCode = 503;
           response = {'code': '503', 'message': 'offline'};
@@ -126,7 +133,11 @@ void main() {
         response = {
           ...row('created', 'assigned-inst', body['p_profile_id']),
           'operation_id': body['p_operation_id'],
+          if (wrongOwner) 'applicant_auth_user_id': 'another-auth',
         };
+      }
+      if (path.endsWith('atena_request_create') && changeDuringCreate) {
+        session.identity = 'another-auth';
       }
       if (path.endsWith('/atena_requests')) {
         response = [
@@ -283,5 +294,38 @@ void main() {
       throwsStateError,
     );
     expect(calls.any((c) => c['path'].endsWith('/atena_requests')), isFalse);
+  });
+  for (final unavailable in ['withdrawn', 'offline']) {
+    test('accepted request retry survives $unavailable catalog', () async {
+      final offer = (await session.catalog()).single.ofertas.single;
+      final first = await session.create('own-profile', offer, 'retry-id');
+      hideCatalog = unavailable == 'withdrawn';
+      failCatalog = unavailable == 'offline';
+      final retry = await session.create('own-profile', offer, 'retry-id');
+      expect(retry['id'], first['id']);
+      expect(
+        calls.where((c) => c['path'].endsWith('atena_request_create')),
+        hasLength(2),
+      );
+    });
+  }
+  test(
+    'in-flight creation cannot confirm success in a different session',
+    () async {
+      final offer = (await session.catalog()).single.ofertas.single;
+      changeDuringCreate = true;
+      await expectLater(
+        session.create('own-profile', offer, 'retry-id'),
+        throwsStateError,
+      );
+    },
+  );
+  test('creation rejects response assigned to another auth identity', () async {
+    final offer = (await session.catalog()).single.ofertas.single;
+    wrongOwner = true;
+    await expectLater(
+      session.create('own-profile', offer, 'retry-id'),
+      throwsA(isA<FormatException>()),
+    );
   });
 }
