@@ -1,3 +1,5 @@
+import '../../services/remote/multiuser_session.dart';
+import '../../services/remote/emisiones_supabase_repository.dart';
 // lib/screens/alumnos/alumno_calendario_page.dart
 
 import 'dart:async';
@@ -474,14 +476,17 @@ class _AlumnoCalendarioPageState extends State<AlumnoCalendarioPage> {
     final perfilId = _normIdKey(widget.perfilId);
 
     try {
-      final updated = await AlumnoCalendarioInteraccionesService.instance
-          .setRsvp(
-            ownerAccountId: ownerId,
-            perfilId: perfilId,
-            eventId: id,
-            status: _toRsvpEnum(v),
-            notificarOwner: true,
-          );
+      final updated = MultiuserSession.enabled
+          ? await EmisionesSupabaseRepository(
+              MultiuserSession.current,
+            ).respond(perfilId, id, v)
+          : await AlumnoCalendarioInteraccionesService.instance.setRsvp(
+              ownerAccountId: ownerId,
+              perfilId: perfilId,
+              eventId: id,
+              status: _toRsvpEnum(v),
+              notificarOwner: true,
+            );
 
       if (!mounted) return;
 
@@ -548,13 +553,21 @@ class _AlumnoCalendarioPageState extends State<AlumnoCalendarioPage> {
         throw Exception(_l10n.commonPerfilInvalid);
       }
 
-      final cal = await AlumnoCalendarioInteraccionesService.instance
-          .listarEventos(ownerAccountId: ownerId, perfilId: perfilId);
+      final cal = MultiuserSession.enabled
+          ? await EmisionesSupabaseRepository(
+              MultiuserSession.current,
+            ).student(perfilId)
+          : await AlumnoCalendarioInteraccionesService.instance.listarEventos(
+              ownerAccountId: ownerId,
+              perfilId: perfilId,
+            );
 
-      final agenda = await AlumnoService.instance.getAgendaPersonalRaw(
-        ownerAccountId: ownerId,
-        perfilId: perfilId,
-      );
+      final agenda = MultiuserSession.enabled
+          ? <Map<String, dynamic>>[]
+          : await AlumnoService.instance.getAgendaPersonalRaw(
+              ownerAccountId: ownerId,
+              perfilId: perfilId,
+            );
 
       if (!mounted) return;
       setState(() {
@@ -567,15 +580,17 @@ class _AlumnoCalendarioPageState extends State<AlumnoCalendarioPage> {
         _tryResolveFocusDateFromItemId(fid);
       }
 
-      Future.microtask(() async {
-        try {
-          await AlumnoService.instance.emitPreEventosDue(
-            ownerAccountId: ownerId,
-            perfilId: perfilId,
-            duplicarEnPerfil: true,
-          );
-        } catch (_) {}
-      });
+      if (!MultiuserSession.enabled) {
+        Future.microtask(() async {
+          try {
+            await AlumnoService.instance.emitPreEventosDue(
+              ownerAccountId: ownerId,
+              perfilId: perfilId,
+              duplicarEnPerfil: true,
+            );
+          } catch (_) {}
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
@@ -1255,11 +1270,13 @@ class _AlumnoCalendarioPageState extends State<AlumnoCalendarioPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _cargando ? null : _agregarNota,
-        icon: const Icon(Icons.add),
-        label: Text(_l10n.alumnoCalendarioFabNotaAlarma),
-      ),
+      floatingActionButton: MultiuserSession.enabled
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _cargando ? null : _agregarNota,
+              icon: const Icon(Icons.add),
+              label: Text(_l10n.alumnoCalendarioFabNotaAlarma),
+            ),
       body: _cargando
           ? const Center(child: CircularProgressIndicator())
           : (_error != null)

@@ -1,3 +1,5 @@
+import 'remote/multiuser_session.dart';
+import 'remote/educacion_supabase_repository.dart';
 import 'dart:async';
 import 'dart:convert';
 import '../models/alumnos/modulo_educativo.dart';
@@ -63,6 +65,18 @@ class TrayectoriaEducativaService {
   }
 
   Future<bool> puedeEditar(String institution, String area) async {
+    if (MultiuserSession.enabled) {
+      try {
+        await MultiuserSession.current.institution(
+          institution,
+          area,
+          'education.write',
+        );
+        return true;
+      } on StateError {
+        return false;
+      }
+    }
     try {
       await _autorizar(institution, area, escribir: true);
       return true;
@@ -96,6 +110,11 @@ class TrayectoriaEducativaService {
     String institution,
     String area,
   ) async {
+    if (MultiuserSession.enabled) {
+      return EducacionSupabaseRepository(
+        MultiuserSession.current,
+      ).enrollments(institution, area);
+    }
     await _autorizar(institution, area);
     final all = await SolicitudesService.obtenerSolicitudesParaInstitucion(
       institucionId: institution,
@@ -141,6 +160,11 @@ class TrayectoriaEducativaService {
     required String solicitudId,
     required ModuloEducativo modulo,
   }) async {
+    if (MultiuserSession.enabled) {
+      return EducacionSupabaseRepository(
+        MultiuserSession.current,
+      ).readInstitution(institucionId, areaId, solicitudId, modulo);
+    }
     final s = await _inscripcion(institucionId, areaId, solicitudId);
     final all = await AlumnoService.instance.leerEducacion(
       ownerAccountId: s.ownerAccountId!,
@@ -163,6 +187,11 @@ class TrayectoriaEducativaService {
     required String perfilId,
     required ModuloEducativo modulo,
   }) async {
+    if (MultiuserSession.enabled) {
+      return EducacionSupabaseRepository(
+        MultiuserSession.current,
+      ).readStudent(ownerAccountId, perfilId, modulo);
+    }
     final session = await SessionService.getSession();
     if (session?.role != SessionRole.cuenta ||
         session?.userId != ownerAccountId ||
@@ -268,6 +297,18 @@ class TrayectoriaEducativaService {
     bool published,
     int? revision,
   ) async {
+    if (MultiuserSession.enabled) {
+      return EducacionSupabaseRepository(MultiuserSession.current).save(
+        institution: institution,
+        area: area,
+        request: enrollment,
+        id: id,
+        module: module,
+        data: data,
+        visible: published,
+        revision: revision ?? 0,
+      );
+    }
     final operator = await _autorizar(institution, area, escribir: true);
     final s = await _inscripcion(institution, area, enrollment);
     if (id.trim().isEmpty) {

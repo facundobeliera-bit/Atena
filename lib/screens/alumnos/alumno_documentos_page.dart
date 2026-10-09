@@ -1,3 +1,4 @@
+import '../../services/remote/multiuser_session.dart';
 // lib/screens/alumnos/alumno_documentos_page.dart
 //
 // ATENA – ALUMNO / DOCUMENTOS (CANÓNICO)
@@ -503,14 +504,13 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
 
       await DocumentacionOperativaService.validarAlumno(ownerId, perfilId);
       final solsAll = List<SolicitudDocumento>.from(
-        await DocumentosTemporalesService.listarSolicitudesPerfil(
-          perfilId: perfilId,
+        await DocumentacionOperativaService.solicitudesAlumno(
+          ownerId,
+          perfilId,
         ),
       );
       final docsAll = List<DocumentoTemporal>.from(
-        await DocumentosTemporalesService.listarDocumentosPerfil(
-          perfilId: perfilId,
-        ),
+        await DocumentacionOperativaService.documentosAlumno(ownerId, perfilId),
       );
 
       final oKey = _kid(ownerId);
@@ -723,10 +723,9 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
         widget.ownerAccountId,
         widget.perfilId,
       );
-      final removed = await DocumentosTemporalesService.limpiarExpiradosPerfil(
-        perfilId: _n(widget.perfilId),
-        notify: true,
-        duplicarEnPerfil: true,
+      final removed = await DocumentacionOperativaService.limpiar(
+        widget.ownerAccountId,
+        widget.perfilId,
       );
 
       if (!mounted) return;
@@ -784,9 +783,10 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
         widget.perfilId,
       );
       await DocumentacionOperativaService.abrir(d);
-      await DocumentosTemporalesService.eliminarDocumento(
-        perfilId: _n(widget.perfilId),
-        documentoId: _n(d.id),
+      await DocumentacionOperativaService.eliminar(
+        widget.ownerAccountId,
+        widget.perfilId,
+        d.id,
       );
 
       if (!mounted) return;
@@ -1059,7 +1059,11 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
                           '$expLine'
                           '${_l10n.alumnoDocumentosFieldInstitucion}: ${d.institucionSolicitanteId}\n'
                           '${_l10n.alumnoDocumentosFieldSolicitud}: $solicitudLabel\n'
-                          '${_l10n.alumnoDocumentosFieldRef}: ${d.ref.startsWith('data:') ? 'Archivo local adjunto' : d.ref}',
+                          '${_l10n.alumnoDocumentosFieldRef}: ${MultiuserSession.enabled || d.ref.startsWith('data:')
+                              ? MultiuserSession.enabled
+                                    ? 'Archivo privado remoto'
+                                    : 'Archivo local adjunto'
+                              : d.ref}',
                           maxLines: 10,
                           overflow: TextOverflow.ellipsis,
                         ),

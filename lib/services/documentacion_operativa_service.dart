@@ -1,3 +1,5 @@
+import 'remote/multiuser_session.dart';
+import 'remote/documentos_supabase_repository.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import '../models/instituciones/operador_institucional.dart';
@@ -16,6 +18,12 @@ class DocumentacionOperativaService {
   static const maxBytes = 2 * 1024 * 1024;
 
   static Future<void> validarAlumno(String owner, String perfil) async {
+    if (MultiuserSession.enabled) {
+      await DocumentosSupabaseRepository(
+        MultiuserSession.current,
+      ).profile(owner, perfil);
+      return;
+    }
     final session = await SessionService.getSession();
     if (session?.role != SessionRole.cuenta ||
         session?.userId != owner ||
@@ -76,7 +84,15 @@ class DocumentacionOperativaService {
     return (area: c.areaId, actor: op);
   }
 
-  static Future<List<SolicitudAlumno>> destinatarios(String institution) async {
+  static Future<List<SolicitudAlumno>> destinatarios(
+    String institution, {
+    String? remoteAreaId,
+  }) async {
+    if (MultiuserSession.enabled) {
+      return DocumentosSupabaseRepository(
+        MultiuserSession.current,
+      ).enrollments(institution, remoteAreaId ?? '');
+    }
     final c = await contexto(institution);
     final result = <SolicitudAlumno>[];
     for (final s in await SolicitudesService.obtenerSolicitudesParaInstitucion(
@@ -105,8 +121,21 @@ class DocumentacionOperativaService {
     String institution,
     String inscripcion,
     TipoDocumento tipo,
-    String mensaje,
-  ) async {
+    String mensaje, {
+    String? remoteAreaId,
+    String? operationId,
+  }) async {
+    if (MultiuserSession.enabled) {
+      await DocumentosSupabaseRepository(MultiuserSession.current).request(
+        institution,
+        remoteAreaId ?? '',
+        inscripcion,
+        tipo,
+        mensaje,
+        operationId ?? MultiuserSession.operationId(),
+      );
+      return;
+    }
     final c = await contexto(institution, escribir: true);
     final s = (await destinatarios(
       institution,
@@ -130,8 +159,16 @@ class DocumentacionOperativaService {
   }
 
   static Future<List<SolicitudDocumento>> solicitudesInstitucion(
-    String institution,
-  ) async {
+    String institution, {
+    String? remoteAreaId,
+  }) async {
+    if (MultiuserSession.enabled) {
+      return DocumentosSupabaseRepository.requests(
+        await DocumentosSupabaseRepository(
+          MultiuserSession.current,
+        ).read(institution: institution, area: remoteAreaId ?? ''),
+      );
+    }
     final c = await contexto(institution);
     final enrolled = await destinatarios(institution);
     return (await DocumentosTemporalesService.listarSolicitudesInstitucion(
@@ -150,8 +187,16 @@ class DocumentacionOperativaService {
   }
 
   static Future<List<DocumentoTemporal>> documentosInstitucion(
-    String institution,
-  ) async {
+    String institution, {
+    String? remoteAreaId,
+  }) async {
+    if (MultiuserSession.enabled) {
+      return DocumentosSupabaseRepository.documents(
+        await DocumentosSupabaseRepository(
+          MultiuserSession.current,
+        ).read(institution: institution, area: remoteAreaId ?? ''),
+      );
+    }
     final requests = await solicitudesInstitucion(institution);
     return (await DocumentosTemporalesService.listarDocumentosInstitucion(
           institucionId: institution,
@@ -168,7 +213,17 @@ class DocumentacionOperativaService {
         .toList();
   }
 
-  static Future<void> cancelar(String institution, String id) async {
+  static Future<void> cancelar(
+    String institution,
+    String id, {
+    String? remoteAreaId,
+  }) async {
+    if (MultiuserSession.enabled) {
+      await DocumentosSupabaseRepository(
+        MultiuserSession.current,
+      ).cancel(institution, remoteAreaId ?? '', id);
+      return;
+    }
     await contexto(institution, escribir: true);
     final s = (await solicitudesInstitucion(
       institution,
@@ -179,6 +234,68 @@ class DocumentacionOperativaService {
     await DocumentosTemporalesService.cancelarSolicitud(
       perfilId: s.perfilId,
       solicitudId: s.id,
+    );
+  }
+
+  static Future<List<SolicitudDocumento>> solicitudesAlumno(
+    String owner,
+    String profile,
+  ) async {
+    await validarAlumno(owner, profile);
+    if (MultiuserSession.enabled) {
+      return DocumentosSupabaseRepository.requests(
+        await DocumentosSupabaseRepository(
+          MultiuserSession.current,
+        ).read(profile: profile),
+      );
+    }
+    return DocumentosTemporalesService.listarSolicitudesPerfil(
+      perfilId: profile,
+    );
+  }
+
+  static Future<List<DocumentoTemporal>> documentosAlumno(
+    String owner,
+    String profile,
+  ) async {
+    await validarAlumno(owner, profile);
+    if (MultiuserSession.enabled) {
+      return DocumentosSupabaseRepository.documents(
+        await DocumentosSupabaseRepository(
+          MultiuserSession.current,
+        ).read(profile: profile),
+      );
+    }
+    return DocumentosTemporalesService.listarDocumentosPerfil(
+      perfilId: profile,
+    );
+  }
+
+  static Future<int> limpiar(String owner, String profile) async {
+    await validarAlumno(owner, profile);
+    if (MultiuserSession.enabled) {
+      return DocumentosSupabaseRepository(
+        MultiuserSession.current,
+      ).remove(profile, expiredOnly: true);
+    }
+    return DocumentosTemporalesService.limpiarExpiradosPerfil(
+      perfilId: profile,
+      notify: true,
+      duplicarEnPerfil: true,
+    );
+  }
+
+  static Future<void> eliminar(String owner, String profile, String id) async {
+    await validarAlumno(owner, profile);
+    if (MultiuserSession.enabled) {
+      await DocumentosSupabaseRepository(
+        MultiuserSession.current,
+      ).remove(profile, id: id);
+      return;
+    }
+    await DocumentosTemporalesService.eliminarDocumento(
+      perfilId: profile,
+      documentoId: id,
     );
   }
 
@@ -217,6 +334,12 @@ class DocumentacionOperativaService {
     }
     try {
       final ref = referencia(bytes);
+      if (MultiuserSession.enabled) {
+        await DocumentosSupabaseRepository(
+          MultiuserSession.current,
+        ).upload(owner, perfil, solicitudId, bytes);
+        return;
+      }
       await validarAlumno(owner, perfil);
       final s =
           (await DocumentosTemporalesService.listarSolicitudesPerfil(
@@ -281,6 +404,11 @@ class DocumentacionOperativaService {
   }
 
   static Future<DocumentoTemporal> abrir(DocumentoTemporal supplied) async {
+    if (MultiuserSession.enabled) {
+      return DocumentosSupabaseRepository(
+        MultiuserSession.current,
+      ).open(supplied.id);
+    }
     final session = await SessionService.getSession();
     List<DocumentoTemporal> docs;
     if (session?.role == SessionRole.institucion) {

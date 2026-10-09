@@ -1,3 +1,4 @@
+import '../services/remote/multiuser_session.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -31,8 +32,12 @@ Future<void> adjuntarDocumentoLocal(
       file.bytes!,
     );
     messenger.showSnackBar(
-      const SnackBar(
-        content: Text('Archivo guardado localmente. Solicitud cumplida.'),
+      SnackBar(
+        content: Text(
+          MultiuserSession.enabled
+              ? 'Archivo privado confirmado por Supabase. Solicitud cumplida.'
+              : 'Archivo guardado localmente. Solicitud cumplida.',
+        ),
       ),
     );
   } catch (e) {

@@ -1,9 +1,15 @@
+import '../../services/remote/multiuser_session.dart';
 import '../../ui/atena_workspace.dart';
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import '../../models/alumnos/modulo_educativo.dart';
 import '../../services/trayectoria_educativa_service.dart';
 import '../../services/pdf/pdf_trayectoria.dart';
+
+String _aviso(ModuloEducativo module) =>
+    MultiuserSession.enabled && module == ModuloEducativo.titulos
+    ? 'Registro de Atena. No acredita validación oficial por una autoridad externa.'
+    : module.aviso;
 
 class TrayectoriaEducativaPage extends StatelessWidget {
   final String? institucionId, areaId, solicitudId, ownerAccountId, perfilId;
@@ -55,14 +61,19 @@ class TrayectoriaEducativaPage extends StatelessWidget {
                 ? 'Registros y documentos asociados a esta inscripción.'
                 : 'Información compartida por tus instituciones',
           ),
-          const AtenaLocalNotice(),
+          if (MultiuserSession.enabled)
+            const Text(
+              'Supabase compartido · Datos autorizados por el servidor',
+            )
+          else
+            const AtenaLocalNotice(),
           AtenaResponsiveGrid(
             children: [
               for (final module in ModuloEducativo.values)
                 AtenaActionCard(
                   icon: Icons.auto_stories_outlined,
                   title: module.label,
-                  subtitle: module.aviso,
+                  subtitle: _aviso(module),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) =>
@@ -173,7 +184,7 @@ class _RegistrosPageState extends State<_RegistrosPage> {
               ? 'Con calificaciones registradas; verificar alcance del período.'
               : 'INCOMPLETO: faltan calificaciones.',
         ),
-      if (widget.module == ModuloEducativo.titulos) Text(widget.module.aviso),
+      if (widget.module == ModuloEducativo.titulos) Text(_aviso(widget.module)),
       const SizedBox(height: 8),
       Text(
         'Registrado por ${r['operadorNombre'] ?? 'Sin autor verificado'} · Revisión ${r['revision'] ?? 'histórica'}',
@@ -232,7 +243,7 @@ class _RegistrosPageState extends State<_RegistrosPage> {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(widget.module.aviso),
+                Text(_aviso(widget.module)),
                 if (_editable) ...[
                   const SizedBox(height: 12),
                   FilledButton.icon(
@@ -369,8 +380,12 @@ class _EditorState extends State<_Editor> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Información guardada en este dispositivo.'),
+        SnackBar(
+          content: Text(
+            MultiuserSession.enabled
+                ? 'Información confirmada por Supabase.'
+                : 'Información guardada en este dispositivo.',
+          ),
         ),
       );
       Navigator.of(context).pop(true);
@@ -399,7 +414,7 @@ class _EditorState extends State<_Editor> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Text(widget.module.aviso),
+            Text(_aviso(widget.module)),
             const SizedBox(height: 16),
             for (final field in widget.module.campos.entries)
               Padding(

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import '../../services/remote/multiuser_session.dart';
+import '../../services/remote/emisiones_supabase_repository.dart';
 // lib/screens/instituciones/institucion_gestion_vacantes_page.dart
 //
 // ATENA – INSTITUCIÓN / GESTIÓN VACANTES (CORAZÓN OPERATIVO CURRICULAR)
@@ -129,6 +132,7 @@ String formatCurricularClockTime(TimeOfDay time) =>
 class InstitucionGestionVacantesPage extends StatefulWidget {
   final String institucionId;
   final String institucionNombre;
+  final String? remoteAreaId;
 
   final String? ownerAccountId;
   final String? institucionPerfilId;
@@ -142,6 +146,7 @@ class InstitucionGestionVacantesPage extends StatefulWidget {
     super.key,
     required this.institucionId,
     required this.institucionNombre,
+    this.remoteAreaId,
     this.ownerAccountId,
     this.institucionPerfilId,
     this.actividadKey,
@@ -881,7 +886,56 @@ class _InstitucionGestionVacantesPageState
     }
   }
 
+  List<Map<String, dynamic>> _remoteEnrollments = [];
+  String? _remoteFingerprint, _remoteId, _remoteOperation;
+  Future<void> _loadRemoteEmissions() async {
+    setState(() {
+      _cargando = true;
+      _fatalError = null;
+      _alumnos.clear();
+    });
+    try {
+      final values = await EmisionesSupabaseRepository(
+        MultiuserSession.current,
+      ).enrollments(widget.institucionId, widget.remoteAreaId ?? '');
+      if (!mounted) return;
+      setState(() {
+        _remoteEnrollments = values;
+        _alumnos.addAll(
+          values.map(
+            (r) => _AlumnoOperativo(
+              key: r['id'],
+              perfilId: r['profile_id'],
+              ownerAccountId: '',
+              nombreUI: r['profile_id'],
+              actividad: r['kind'] == 'curricular'
+                  ? 'Curricular'
+                  : 'Extracurricular',
+              aula: r['group_id'],
+              turno: '',
+              edad: null,
+            ),
+          ),
+        );
+        _tabIndex = 1;
+        _tabCtrl.animateTo(1);
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(
+          () => _fatalError = 'No se pudo consultar el servidor. Reintentá.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _cargando = false);
+    }
+  }
+
   Future<void> _cargarSafe() async {
+    if (MultiuserSession.enabled) {
+      await _loadRemoteEmissions();
+      return;
+    }
     if (!mounted) return;
     if (_booting) return;
     _booting = true;
@@ -2066,7 +2120,9 @@ class _InstitucionGestionVacantesPageState
 
                 final hintSelected = _t(l10n, 'selectedCount', 'Seleccionados');
                 final hintAula = _t(l10n, 'scopeAula', 'Aula');
-                final hintInst = _t(l10n, 'scopeInstitucion', 'Institución');
+                final hintInst = MultiuserSession.enabled
+                    ? 'Área autorizada'
+                    : _t(l10n, 'scopeInstitucion', 'Institución');
 
                 final canSelected = hasSelected;
                 final canAula =
@@ -2518,6 +2574,58 @@ class _InstitucionGestionVacantesPageState
         return;
       }
 
+      if (MultiuserSession.enabled) {
+        // Selection is a filter only. RPC revalidates every confirmed enrollment.
+        final targetKeys = targets.map((a) => a.key).toSet();
+        final byProfile = <String, String>{};
+        for (final r in _remoteEnrollments.where(
+          (r) => targetKeys.contains(r['id']),
+        )) {
+          byProfile.putIfAbsent(r['profile_id'], () => r['id']);
+        }
+        final ids = byProfile.values.toList()..sort();
+        final calendar = tipo == _EmisionTipo.emitir;
+        final fingerprint = jsonEncode([
+          widget.institucionId,
+          widget.remoteAreaId,
+          ids,
+          titulo,
+          mensaje,
+          calendar,
+          calendar ? inicio.toIso8601String() : null,
+          calendar ? fin?.toIso8601String() : null,
+          tipoEspecial.name,
+          segmento?.grupoKey,
+        ]);
+        if (_remoteFingerprint != fingerprint) {
+          _remoteFingerprint = fingerprint;
+          _remoteId = MultiuserSession.operationId();
+          _remoteOperation = MultiuserSession.operationId();
+        }
+        final result =
+            await EmisionesSupabaseRepository(MultiuserSession.current).save(
+              institution: widget.institucionId,
+              area: widget.remoteAreaId ?? '',
+              id: _remoteId!,
+              operation: _remoteOperation!,
+              kind: calendar ? 'calendar' : 'communication',
+              title: titulo,
+              body: mensaje,
+              requests: ids,
+              start: calendar ? inicio : null,
+              end: calendar ? fin : null,
+              special: tipoEspecial.name,
+              group: (segmento?.grupoKey ?? '').isEmpty
+                  ? null
+                  : segmento!.grupoKey,
+            );
+        _remoteFingerprint = null;
+        _snack(
+          'Envío confirmado por Supabase: ${result['delivered']} destinatario(s).',
+        );
+        return;
+      }
+
       if (tipo == _EmisionTipo.emitir) {
         final instId = _instIdData;
         if (instId.isEmpty) {
@@ -2960,6 +3068,7 @@ class _InstitucionGestionVacantesPageState
       return Expanded(
         child: DropdownButtonFormField<String>(
           key: ValueKey<String>('$keyPrefix|$safeValue|${options.length}'),
+          isExpanded: true,
           initialValue: safeValue,
           items: <DropdownMenuItem<String>>[
             DropdownMenuItem(value: '', child: Text('— $label —')),
@@ -3179,13 +3288,14 @@ class _InstitucionGestionVacantesPageState
                 : () => unawaited(_cargarSafe()),
             tooltip: l10n.refresh,
           ),
-          IconButton(
-            icon: const Icon(Icons.calculate),
-            onPressed: (_cargando || _guardando)
-                ? null
-                : () => unawaited(_recalcularOcupadosDesdeSolicitudes()),
-            tooltip: l10n.recalculateOccupiedTooltip,
-          ),
+          if (!MultiuserSession.enabled)
+            IconButton(
+              icon: const Icon(Icons.calculate),
+              onPressed: (_cargando || _guardando)
+                  ? null
+                  : () => unawaited(_recalcularOcupadosDesdeSolicitudes()),
+              tooltip: l10n.recalculateOccupiedTooltip,
+            ),
           const SizedBox(width: 6),
           if (_tabIndex == 1) ...[
             IconButton(
@@ -3204,7 +3314,7 @@ class _InstitucionGestionVacantesPageState
           ],
         ],
       ),
-      floatingActionButton: (_tabIndex == 0)
+      floatingActionButton: (!MultiuserSession.enabled && _tabIndex == 0)
           ? FloatingActionButton.extended(
               onPressed: (_cargando || _guardando)
                   ? null
@@ -3220,7 +3330,16 @@ class _InstitucionGestionVacantesPageState
           : TabBarView(
               controller: _tabCtrl,
               physics: const NeverScrollableScrollPhysics(),
-              children: [_buildTabGrupos(l10n), _buildTabAlumnos(l10n)],
+              children: [
+                MultiuserSession.enabled
+                    ? const Center(
+                        child: Text(
+                          'Los grupos y cupos compartidos se consultan desde Catálogo y disponibilidad.',
+                        ),
+                      )
+                    : _buildTabGrupos(l10n),
+                _buildTabAlumnos(l10n),
+              ],
             ),
     );
   }

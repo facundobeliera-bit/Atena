@@ -1,3 +1,11 @@
+import '../screens/alumnos/alumno_documentos_page.dart';
+import '../screens/instituciones/institucion_documentos_page.dart';
+import '../screens/instituciones/institucion_trayectoria_page.dart';
+import '../screens/alumnos/trayectoria_educativa_page.dart';
+import '../screens/alumnos/alumno_calendario_page.dart';
+import '../screens/alumnos/alumno_notificaciones_page.dart';
+import '../screens/instituciones/institucion_gestion_vacantes_page.dart';
+import '../screens/instituciones/institucion_respuestas_calendario_page.dart';
 import 'package:flutter/material.dart';
 
 import '../models/catalogo/ficha_publica.dart';
@@ -165,6 +173,53 @@ class _RemoteAccountPanelState extends State<RemoteAccountPanel> {
             onTap: () => _profile(profile),
           ),
         ),
+      for (final profile in _identity?.profiles ?? <String>[]) ...[
+        OutlinedButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AlumnoCalendarioPage(
+                ownerAccountId: MultiuserSession.current.userId,
+                perfilId: profile,
+              ),
+            ),
+          ),
+          child: Text('Calendario · $profile'),
+        ),
+        OutlinedButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AlumnoNotificacionesPage(
+                alumnoDocumento: '',
+                perfilIdFiltro: profile,
+              ),
+            ),
+          ),
+          child: Text('Notificaciones · $profile'),
+        ),
+        OutlinedButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AlumnoDocumentosPage(
+                ownerAccountId: MultiuserSession.current.userId,
+                perfilId: profile,
+              ),
+            ),
+          ),
+          child: Text('Documentos · $profile'),
+        ),
+      ],
+      for (final profile in _identity?.profiles ?? <String>[])
+        OutlinedButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => TrayectoriaEducativaPage.alumno(
+                ownerAccountId: MultiuserSession.current.userId,
+                perfilId: profile,
+              ),
+            ),
+          ),
+          child: Text('Trayectoria educativa · $profile'),
+        ),
       for (final scope
           in _identity?.institutions ?? <RemoteInstitutionContext>[])
         Card(
@@ -185,6 +240,59 @@ class _RemoteAccountPanelState extends State<RemoteAccountPanel> {
                       ),
                     ),
                     child: const Text('Catálogo y disponibilidad'),
+                  ),
+                if (scope.capabilities.contains('calendar.write') ||
+                    scope.capabilities.contains('communications.write'))
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => InstitucionGestionVacantesPage(
+                          institucionId: scope.institutionId,
+                          institucionNombre: scope.name,
+                          remoteAreaId: scope.areaId,
+                        ),
+                      ),
+                    ),
+                    child: const Text('Notificar / Emitir'),
+                  ),
+                if (scope.capabilities.contains('responses.read'))
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => InstitucionRespuestasCalendarioPage(
+                          ownerAccountId: MultiuserSession.current.userId,
+                          institucionId: scope.institutionId,
+                          areaId: scope.areaId,
+                          areaNombre: scope.areaName,
+                        ),
+                      ),
+                    ),
+                    child: const Text('Respuestas de calendario'),
+                  ),
+                if (scope.capabilities.contains('documents.read'))
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => InstitucionDocumentosPage(
+                          institucionId: scope.institutionId,
+                          institucionNombre: scope.name,
+                          remoteAreaId: scope.areaId,
+                        ),
+                      ),
+                    ),
+                    child: const Text('Documentación del área'),
+                  ),
+                if (scope.capabilities.contains('education.read'))
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => InstitucionTrayectoriaPage(
+                          institucionId: scope.institutionId,
+                          areaId: scope.areaId,
+                        ),
+                      ),
+                    ),
+                    child: const Text('Trayectoria del alumnado'),
                   ),
                 if (scope.capabilities.contains('requests.read'))
                   FilledButton(

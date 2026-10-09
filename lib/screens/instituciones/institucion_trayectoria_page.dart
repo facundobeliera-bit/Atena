@@ -1,3 +1,4 @@
+import '../../services/remote/multiuser_session.dart';
 import 'package:flutter/material.dart';
 import '../../models/solicitudes/solicitud_alumno.dart';
 import '../../services/trayectoria_educativa_service.dart';
@@ -36,9 +37,12 @@ class _InstitucionTrayectoriaPageState
       widget.areaId,
     );
     for (final s in list) {
-      _names[s.id] =
-          (await CuentaService.getPerfilAlumnoById(s.perfilId!))?.displayName ??
-          '';
+      _names[s.id] = MultiuserSession.enabled
+          ? s.perfilId!
+          : (await CuentaService.getPerfilAlumnoById(
+                  s.perfilId!,
+                ))?.displayName ??
+                '';
     }
     return list;
   }
@@ -77,7 +81,11 @@ class _InstitucionTrayectoriaPageState
                     Card(
                       child: ListTile(
                         key: ValueKey('education-enrollment-${s.id}'),
-                        title: Text('Alumno ${s.alumnoDocumento}'),
+                        title: Text(
+                          MultiuserSession.enabled
+                              ? 'Perfil ${s.perfilId}'
+                              : 'Alumno ${s.alumnoDocumento}',
+                        ),
                         subtitle: Text(
                           '${_names[s.id]}\n${s.actividadNombre} · ${s.aula} · ${s.turno}',
                         ),

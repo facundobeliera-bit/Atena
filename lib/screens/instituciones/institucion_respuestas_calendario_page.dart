@@ -1,3 +1,5 @@
+import '../../services/remote/multiuser_session.dart';
+import '../../services/remote/emisiones_supabase_repository.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/alumno_calendario_interacciones_service.dart';
@@ -47,6 +49,14 @@ class _InstitucionRespuestasCalendarioPageState
   }
 
   Future<bool> _hasValidInstitutionContext() async {
+    if (MultiuserSession.enabled) {
+      await MultiuserSession.current.institution(
+        widget.institucionId,
+        widget.areaId ?? '',
+        'responses.read',
+      );
+      return true;
+    }
     final expectedOwner = _id(widget.ownerAccountId);
     final expectedInstitution = _id(widget.institucionId);
     if (expectedOwner.isEmpty || expectedInstitution.isEmpty) return false;
@@ -69,6 +79,7 @@ class _InstitucionRespuestasCalendarioPageState
   }
 
   Future<String> _studentName(RespuestaCalendarioInstitucion response) async {
+    if (MultiuserSession.enabled) return response.perfilId;
     final owner = await CuentaService.getOwnerAccountIdForPerfilAlumno(
       response.perfilId,
     );
@@ -100,7 +111,28 @@ class _InstitucionRespuestasCalendarioPageState
       }
 
       final area = _id(widget.areaId ?? '');
-      final responses = area.isEmpty
+      final responses = MultiuserSession.enabled
+          ? (await EmisionesSupabaseRepository(
+                  MultiuserSession.current,
+                ).responses(widget.institucionId, area))
+                .where((r) => r['respondedAt'] != null)
+                .map(
+                  (r) => RespuestaCalendarioInstitucion(
+                    id: r['id'],
+                    institucionId: r['institucionId'],
+                    ownerAccountId: '',
+                    perfilId: r['perfilId'],
+                    eventId: r['eventId'],
+                    areaId: r['areaId'],
+                    grupoId: r['grupoId'],
+                    dateKey: r['eventDate'],
+                    status: RsvpStatusAtena.values.byName(r['status']),
+                    respondedAt: DateTime.parse(r['respondedAt']),
+                    eventTitle: r['eventTitle'],
+                  ),
+                )
+                .toList()
+          : area.isEmpty
           ? await AlumnoCalendarioInteraccionesService.instance
                 .listarRespuestasInstitucion(widget.institucionId)
           : await AlumnoCalendarioInteraccionesService.instance

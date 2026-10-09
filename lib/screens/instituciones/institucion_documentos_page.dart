@@ -1,3 +1,4 @@
+import '../../services/remote/multiuser_session.dart';
 import 'package:flutter/material.dart';
 import '../../models/solicitudes/solicitud_alumno.dart';
 import '../../services/documentacion_operativa_service.dart';
@@ -7,11 +8,13 @@ import '../../ui/documento_local_actions.dart';
 
 class InstitucionDocumentosPage extends StatefulWidget {
   final String institucionId, institucionNombre;
+  final String? remoteAreaId;
   final String? initialOwnerAccountId,
       initialPerfilId,
       institucionOwnerAccountId;
   const InstitucionDocumentosPage({
     super.key,
+    this.remoteAreaId,
     required this.institucionId,
     required this.institucionNombre,
     this.initialOwnerAccountId,
@@ -30,6 +33,7 @@ class _InstitucionDocumentosPageState extends State<InstitucionDocumentosPage> {
   List<SolicitudDocumento> _requests = [];
   List<DocumentoTemporal> _documents = [];
   String? _selected, _error;
+  String? _requestOperation, _requestIntent;
   TipoDocumento _type = TipoDocumento.values.first;
   bool _busy = true, _write = false;
 
@@ -53,25 +57,38 @@ class _InstitucionDocumentosPageState extends State<InstitucionDocumentosPage> {
     try {
       final students = await DocumentacionOperativaService.destinatarios(
         widget.institucionId,
+        remoteAreaId: widget.remoteAreaId,
       );
       final requests =
           await DocumentacionOperativaService.solicitudesInstitucion(
             widget.institucionId,
+            remoteAreaId: widget.remoteAreaId,
           );
       final docs = await DocumentacionOperativaService.documentosInstitucion(
         widget.institucionId,
+        remoteAreaId: widget.remoteAreaId,
       );
       for (final s in students) {
-        _names[s.perfilId!] = (await CuentaService.getPerfilAlumnoById(
-          s.perfilId!,
-        ))!.displayName;
+        _names[s.perfilId!] = MultiuserSession.enabled
+            ? s.perfilId!
+            : (await CuentaService.getPerfilAlumnoById(
+                s.perfilId!,
+              ))!.displayName;
       }
       var write = false;
       try {
-        await DocumentacionOperativaService.contexto(
-          widget.institucionId,
-          escribir: true,
-        );
+        if (MultiuserSession.enabled) {
+          await MultiuserSession.current.institution(
+            widget.institucionId,
+            widget.remoteAreaId ?? '',
+            'documents.write',
+          );
+        } else {
+          await DocumentacionOperativaService.contexto(
+            widget.institucionId,
+            escribir: true,
+          );
+        }
         write = true;
       } on StateError {
         /* Sólo lectura. */
@@ -144,8 +161,10 @@ class _InstitucionDocumentosPageState extends State<InstitucionDocumentosPage> {
                 widget.institucionNombre,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const Text(
-                'Documentos locales de alumnos con inscripción confirmada en el área activa. Los archivos permanecen en este dispositivo.',
+              Text(
+                MultiuserSession.enabled
+                    ? 'Documentos privados compartidos. PDF, PNG o JPEG de hasta 2 MB, disponibles durante cinco días. Una copia descargada fuera de Atena no puede revocarse.'
+                    : 'Documentos locales de alumnos con inscripción confirmada en el área activa. Los archivos permanecen en este dispositivo.',
               ),
               if (_error != null)
                 Text(
@@ -211,14 +230,24 @@ class _InstitucionDocumentosPageState extends State<InstitucionDocumentosPage> {
                 FilledButton.icon(
                   onPressed: _selected == null
                       ? null
-                      : () => _mutate(
-                          () => DocumentacionOperativaService.solicitar(
+                      : () => _mutate(() async {
+                          final intent =
+                              '$_selected|${_type.name}|${_message.text.trim()}';
+                          if (_requestIntent != intent) {
+                            _requestIntent = intent;
+                            _requestOperation = MultiuserSession.operationId();
+                          }
+                          await DocumentacionOperativaService.solicitar(
                             widget.institucionId,
                             _selected!,
                             _type,
                             _message.text,
-                          ),
-                        ),
+                            remoteAreaId: widget.remoteAreaId,
+                            operationId: _requestOperation,
+                          );
+                          _requestIntent = null;
+                          _requestOperation = null;
+                        }),
                   icon: const Icon(Icons.assignment),
                   label: const Text('Solicitar documento'),
                 ),
@@ -246,6 +275,7 @@ class _InstitucionDocumentosPageState extends State<InstitucionDocumentosPage> {
                               () => DocumentacionOperativaService.cancelar(
                                 widget.institucionId,
                                 s.id,
+                                remoteAreaId: widget.remoteAreaId,
                               ),
                             ),
                           )

@@ -1,3 +1,6 @@
+import '../../services/remote/multiuser_session.dart';
+import '../../services/remote/emisiones_supabase_repository.dart';
+import 'alumno_calendario_page.dart';
 // lib/screens/alumnos/alumno_notificaciones_page.dart
 //
 // ATENA – CENTRO DE NOTIFICACIONES (ALUMNOS)
@@ -55,6 +58,7 @@ class AlumnoNotificacionesPage extends StatefulWidget {
 
 class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
   bool _cargando = true;
+  String? _remoteError;
 
   /// ✅ Guardia anti-doble navegación / multi taps
   bool _navegando = false;
@@ -129,7 +133,9 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
   }
 
   Future<void> _bootstrap() async {
-    final cuentaId = await CuentaService.getSesionCuentaId();
+    final cuentaId = MultiuserSession.enabled
+        ? MultiuserSession.current.userId
+        : await CuentaService.getSesionCuentaId();
     final owner = _normId(cuentaId ?? '');
 
     if (!mounted) return;
@@ -152,6 +158,7 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
     setState(() {
       _cargando = true;
       _items = <_NotiUi>[];
+      _remoteError = null;
     });
 
     try {
@@ -163,6 +170,42 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
       }
 
       final pf = _normId(_perfilFiltro ?? '');
+
+      if (MultiuserSession.enabled) {
+        final rows = await EmisionesSupabaseRepository(
+          MultiuserSession.current,
+        ).student(pf, calendar: false);
+        if (!mounted) return;
+        setState(() {
+          _items = rows
+              .map(
+                (r) => _NotiUi(
+                  id: r['id'],
+                  titulo: r['title'],
+                  mensaje: r['note'],
+                  fecha: DateTime.parse(r['createdAt']),
+                  leida: r['read'] == true,
+                  tipo: r['date'] == null
+                      ? TipoNotificacionAtena.info
+                      : TipoNotificacionAtena.calendario,
+                  ownerAccountId: ownerId,
+                  perfilId: pf,
+                  deeplink: r['date'] == null
+                      ? null
+                      : Uri(
+                          path: '/calendario',
+                          queryParameters: {
+                            'date': r['date'],
+                            'itemId': r['id'],
+                          },
+                        ).toString(),
+                ),
+              )
+              .toList();
+          _cargando = false;
+        });
+        return;
+      }
 
       // Inbox owner (canónico)
       final list = pf.isEmpty
@@ -184,6 +227,10 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
       if (!mounted) return;
       setState(() {
         _items = <_NotiUi>[];
+        if (MultiuserSession.enabled) {
+          _remoteError =
+              'No se pudo consultar Supabase. Actualizá para reintentar.';
+        }
         _cargando = false;
       });
     }
@@ -194,6 +241,22 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
   // =====================================================
 
   Future<void> _marcarLeida(_NotiUi n, bool leida) async {
+    if (MultiuserSession.enabled) {
+      try {
+        await EmisionesSupabaseRepository(
+          MultiuserSession.current,
+        ).inboxState(n.perfilId ?? '', n.id, read: leida);
+        if (mounted) setState(() => n.leida = leida);
+      } catch (_) {
+        if (mounted) {
+          _snackMaybe(
+            ScaffoldMessenger.maybeOf(context),
+            'El servidor no confirmó el cambio. Reintentá.',
+          );
+        }
+      }
+      return;
+    }
     if (n.leida == leida) return;
 
     // UI inmediata
@@ -242,6 +305,22 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
     if (!mounted) return;
     if (ok != true) return;
 
+    if (MultiuserSession.enabled) {
+      try {
+        await EmisionesSupabaseRepository(
+          MultiuserSession.current,
+        ).inboxState(n.perfilId ?? '', n.id, read: n.leida, hidden: true);
+        await _cargar();
+      } catch (_) {
+        if (mounted) {
+          _snackMaybe(
+            ScaffoldMessenger.maybeOf(context),
+            'No se pudo ocultar el aviso. Reintentá.',
+          );
+        }
+      }
+      return;
+    }
     final backup = List<_NotiUi>.from(_items);
 
     setState(() {
@@ -312,6 +391,22 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
     final pf = _normId(_perfilFiltro ?? '');
     final snapshot = List<_NotiUi>.from(_items);
 
+    if (MultiuserSession.enabled) {
+      try {
+        for (final n in snapshot) {
+          await EmisionesSupabaseRepository(
+            MultiuserSession.current,
+          ).inboxState(n.perfilId ?? '', n.id, read: n.leida, hidden: true);
+        }
+      } catch (_) {
+        _snackMaybe(
+          messenger,
+          'No se completó el cambio en Supabase. Actualizá para consultar el estado.',
+        );
+      }
+      await _cargar();
+      return;
+    }
     setState(() => _items = <_NotiUi>[]);
 
     try {
@@ -488,6 +583,7 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
 
   /// Devuelve true si navegó por deeplink canónico.
   Future<bool> _tryOpenDeeplink(_NotiUi n) async {
+    if (MultiuserSession.enabled) return false;
     final ownerId = _normId(_ownerAccountId ?? '');
     if (ownerId.isEmpty) return false;
 
@@ -680,6 +776,36 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
   }
 
   Future<void> _abrirAccionFallbackDialog(_NotiUi n) async {
+    if (MultiuserSession.enabled) {
+      if (n.tipo == TipoNotificacionAtena.calendario) {
+        final uri = Uri.tryParse(n.deeplink ?? '');
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AlumnoCalendarioPage(
+              ownerAccountId: MultiuserSession.current.userId,
+              perfilId: n.perfilId!,
+              initialDateKey: uri?.queryParameters['date'],
+              initialItemId: n.id,
+            ),
+          ),
+        );
+      } else {
+        await showDialog<void>(
+          context: context,
+          builder: (c) => AlertDialog(
+            title: Text(n.titulo),
+            content: SingleChildScrollView(child: Text(n.mensaje)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(c),
+                child: const Text('Cerrar'),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
     final l = AppLocalizations.of(context);
     final a = _actionFor(n);
 
@@ -839,6 +965,9 @@ class _AlumnoNotificacionesPageState extends State<AlumnoNotificacionesPage> {
               ? const Center(child: CircularProgressIndicator())
               : Column(
                   children: [
+                    if (MultiuserSession.enabled)
+                      const Text('Supabase compartido'),
+                    if (_remoteError != null) Text(_remoteError!),
                     _FiltroBar(
                       filtroLeidas: _filtroLeidas,
                       filtroTipo: _filtroTipo,
