@@ -128,14 +128,25 @@ class _RemoteAccountPanelState extends State<RemoteAccountPanel> {
     }
   }
 
-  Future<void> _logout() async {
+  Future<void> _logout({bool everywhere = false}) async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
     try {
-      await MultiuserSession.current.signOut();
+      if (everywhere) {
+        await MultiuserSession.current.signOutEverywhere();
+      } else {
+        await MultiuserSession.current.signOut();
+      }
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
       }
     } catch (e) {
       if (mounted) setState(() => _error = remoteError(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -313,6 +324,11 @@ class _RemoteAccountPanelState extends State<RemoteAccountPanel> {
               ],
             ),
           ),
+        ),
+      if (_identity?.globalRevocationAvailable == true)
+        OutlinedButton(
+          onPressed: _busy ? null : () => _logout(everywhere: true),
+          child: const Text('Cerrar todas mis sesiones'),
         ),
       if (_identity != null &&
           _identity!.profiles.isEmpty &&

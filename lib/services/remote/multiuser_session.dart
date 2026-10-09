@@ -24,10 +24,12 @@ class RemoteInstitutionContext {
 
 class RemoteIdentityContext {
   final String userId;
+  final bool globalRevocationAvailable;
   final List<String> profiles;
   final List<RemoteInstitutionContext> institutions;
   RemoteIdentityContext(Map<String, dynamic> row)
     : userId = row['auth_user_id'] as String,
+      globalRevocationAvailable = row['session_guard_version'] == 1,
       profiles = List.unmodifiable(
         (row['applicant_profiles'] as List).map(
           (p) => p['profile_id'] as String,
@@ -75,10 +77,38 @@ class MultiuserSession {
     await client.auth.signOut(scope: SignOutScope.local);
   }
 
+  Future<void> signOutEverywhere() async {
+    final identity = await context();
+    if (!identity.globalRevocationAvailable) {
+      throw StateError(
+        'El servidor todavía no permite el cierre global verificado.',
+      );
+    }
+    await client.rpc('atena_revoke_my_sessions');
+    if (userId != identity.userId) {
+      throw StateError('La identidad cambió durante el cierre global.');
+    }
+    // The server cutoff blocks prior access JWTs immediately; Auth global logout
+    // additionally revokes refresh tokens. Never substitute a local-only logout.
+    await client.auth.signOut(scope: SignOutScope.global);
+  }
+
   Future<RemoteIdentityContext> context() async {
     final expected = userId;
     if (expected.isEmpty) throw StateError('Ingresá con tu cuenta remota.');
-    final row = await client.rpc('atena_authenticated_context');
+    dynamic row;
+    try {
+      row = await client.rpc('atena_authenticated_context');
+    } on PostgrestException catch (e) {
+      // Only the explicit session guard signals invalid Auth. An area permission
+      // denial or a network failure must not destroy an otherwise valid login.
+      if (e.code == '42501' &&
+          e.message == 'Session revoked or expired' &&
+          userId == expected) {
+        await signOut();
+      }
+      rethrow;
+    }
     final result = RemoteIdentityContext(Map<String, dynamic>.from(row));
     if (result.userId != expected || userId != expected) {
       throw StateError('La identidad de la sesión cambió. Volvé a ingresar.');
