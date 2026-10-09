@@ -224,6 +224,78 @@ class MultiuserSession {
     );
   }
 
+  Future<Map<String, dynamic>> catalogWorkspace(
+    String institutionId,
+    String areaId,
+  ) async {
+    final auth = userId;
+    await institution(institutionId, areaId, 'catalog.publish');
+    final value = await client.rpc(
+      'atena_catalog_workspace',
+      params: {'p_institution': institutionId, 'p_area': areaId},
+    );
+    if (userId != auth) throw StateError('La sesión cambió.');
+    return _workspace(value, institutionId, areaId);
+  }
+
+  Future<Map<String, dynamic>> editCatalog(
+    String institutionId,
+    String areaId,
+    Map<String, dynamic> workspace,
+    Map<String, dynamic> document,
+    String action,
+    String operation,
+  ) async {
+    final auth = userId;
+    await institution(institutionId, areaId, 'catalog.publish');
+    if (!['save', 'publish', 'withdraw'].contains(action)) {
+      throw ArgumentError('Acción de catálogo inválida.');
+    }
+    final value = await client.rpc(
+      'atena_catalog_edit',
+      params: {
+        'p_institution': institutionId,
+        'p_area': areaId,
+        'p_operation': operation,
+        'p_revision': workspace['revision'],
+        'p_version': workspace['version'],
+        'p_action': action,
+        'p_document': document,
+      },
+    );
+    if (userId != auth) throw StateError('La sesión cambió.');
+    final result = _workspace(value, institutionId, areaId);
+    if (result['revision'] != workspace['revision'] + 1 ||
+        result['version'] !=
+            workspace['version'] + (action == 'save' ? 0 : 1) ||
+        (action == 'publish' && result['publication_state'] != 'published') ||
+        (action == 'withdraw' && result['publication_state'] != 'withdrawn')) {
+      throw const FormatException('Confirmación de catálogo contradictoria.');
+    }
+    return result;
+  }
+
+  static Map<String, dynamic> _workspace(
+    dynamic value,
+    String institution,
+    String area,
+  ) {
+    if (value is! Map ||
+        value['institution_id'] != institution ||
+        value['area_id'] != area ||
+        value['revision'] is! int ||
+        value['version'] is! int ||
+        value['document'] is! Map ||
+        ![
+          'never_published',
+          'published',
+          'withdrawn',
+        ].contains(value['publication_state'])) {
+      throw const FormatException('Catálogo institucional inválido.');
+    }
+    return Map<String, dynamic>.from(value);
+  }
+
   static String operationId({bool catalog = false}) {
     final random = Random.secure();
     final bytes = List.generate(catalog ? 32 : 16, (_) => random.nextInt(256));

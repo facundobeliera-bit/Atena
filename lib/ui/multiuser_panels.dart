@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'catalog_offer_editor.dart';
 import '../screens/alumnos/alumno_documentos_page.dart';
 import '../screens/instituciones/institucion_documentos_page.dart';
 import '../screens/instituciones/institucion_trayectoria_page.dart';
@@ -538,11 +541,10 @@ class RemoteCatalogPanel extends StatefulWidget {
 }
 
 class _RemoteCatalogPanelState extends State<RemoteCatalogPanel> {
-  Map<String, dynamic>? _record;
-  List<OfertaPublica> _offers = [];
-  String? _error, _success;
-  String _operation = MultiuserSession.operationId(catalog: true);
-  bool _busy = false;
+  Map<String, dynamic>? _record, _pending;
+  String? _error, _success, _pendingAction;
+  String _operation = MultiuserSession.operationId();
+  bool _busy = false, _authoring = true;
   @override
   void initState() {
     super.initState();
@@ -554,89 +556,169 @@ class _RemoteCatalogPanelState extends State<RemoteCatalogPanel> {
     setState(() {
       _busy = true;
       _error = null;
-    });
-    try {
-      final s = MultiuserSession.current;
-      final scope = await s.institution(
-        widget.institutionId,
-        widget.areaId,
-        'catalog.publish',
-      );
-      final record = await s.publication(widget.institutionId, widget.areaId);
-      final offers = (await s.catalog())
-          .expand((i) => i.ofertas)
-          .where((o) => o.areaId == scope.publicAreaId)
-          .toList();
-      if (mounted) {
-        setState(() {
-          _record = record;
-          _offers = offers;
-          _operation = MultiuserSession.operationId(catalog: true);
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _record = null;
-          _offers = [];
-          _error = remoteError(e);
-        });
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _publish() async {
-    final record = _record;
-    if (_busy || record == null) return;
-    setState(() {
-      _busy = true;
-      _error = null;
+      _record = null;
       _success = null;
     });
     try {
-      await MultiuserSession.current.publish(
-        widget.institutionId,
-        widget.areaId,
-        Map<String, dynamic>.from(record['document']),
-        record['version'] as int,
-        _operation,
-      );
+      final s = MultiuserSession.current;
+      Map<String, dynamic> record;
+      try {
+        record = await s.catalogWorkspace(widget.institutionId, widget.areaId);
+        _authoring = true;
+      } on PostgrestException catch (e) {
+        // Older pilot schema: preserve its existing read/publication contract.
+        // Auth, network and data errors never take this compatibility path.
+        if (e.code != 'PGRST202') rethrow;
+        _authoring = false;
+        record = await s.publication(widget.institutionId, widget.areaId);
+      }
       if (mounted) {
-        setState(() => _success = 'Publicación confirmada por Supabase.');
+        setState(() {
+          _record = record;
+          _pending = null;
+          _pendingAction = null;
+          _operation = MultiuserSession.operationId(catalog: !_authoring);
+        });
       }
     } catch (e) {
       if (mounted) setState(() => _error = remoteError(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-    if (mounted && _error == null) await _load();
+  }
+
+  Future<void> _execute(String action, Map<String, dynamic> document) async {
+    if (_busy || _record == null) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+      _success = null;
+      _pendingAction = action;
+      _pending = Map<String, dynamic>.from(jsonDecode(jsonEncode(document)));
+    });
+    try {
+      if (_authoring) {
+        final next = await MultiuserSession.current.editCatalog(
+          widget.institutionId,
+          widget.areaId,
+          _record!,
+          _pending!,
+          action,
+          _operation,
+        );
+        if (mounted) {
+          setState(() {
+            _record = next;
+            _pending = null;
+            _pendingAction = null;
+            _operation = MultiuserSession.operationId();
+            _success = action == 'save'
+                ? 'Borrador confirmado por Supabase.'
+                : action == 'withdraw'
+                ? 'Retiro confirmado por Supabase.'
+                : 'Publicación confirmada por Supabase.';
+          });
+        }
+      } else {
+        await MultiuserSession.current.publish(
+          widget.institutionId,
+          widget.areaId,
+          document,
+          _record!['version'] as int,
+          _operation,
+        );
+        if (mounted) {
+          setState(() {
+            _pending = null;
+            _pendingAction = null;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) setState(() => _error = remoteError(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    if (!_authoring && mounted && _error == null) await _load();
+  }
+
+  Future<void> _edit([int? index]) async {
+    final doc = Map<String, dynamic>.from(
+      jsonDecode(jsonEncode(_record!['document'])),
+    );
+    final updated = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        builder: (_) => CatalogOfferEditor(document: doc, groupIndex: index),
+      ),
+    );
+    if (mounted && updated != null) await _execute('save', updated);
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => _frame(context, 'Catálogo y disponibilidad', [
-    if (_busy) const LinearProgressIndicator(),
-    if (_error != null) Text(_error!),
-    if (_success != null) Text(_success!),
-    if (_record != null) Text('Versión remota: ${_record!['version']}'),
-    for (final offer in _offers)
-      Card(
-        child: ListTile(
-          title: Text(offer.nombre),
-          subtitle: Text(
-            '${offer.grupo} · ${offer.horario}\nVacantes disponibles: ${offer.disponibles ?? 'Consultar'}',
+  Widget build(BuildContext context) {
+    final groups = (_record?['document']?['groups'] as List?) ?? [];
+    final ready = !_busy && _record != null && _pending == null;
+    return _frame(context, 'Catálogo y disponibilidad', [
+      if (_busy) const LinearProgressIndicator(),
+      if (_error != null) Text(_error!),
+      if (_success != null) Text(_success!),
+      if (!_authoring)
+        const Text(
+          'Alta y edición pendientes de habilitación del backend. Las ofertas existentes siguen disponibles.',
+        ),
+      if (_record != null)
+        Text(
+          'Estado: ${_record!['publication_state']} · Versión remota: ${_record!['version']}',
+        ),
+      if (_authoring && _record != null)
+        const Text(
+          'El borrador es privado. Guardarlo no cambia la publicación actual. Publicar aplica datos y cupos; retirar conserva las solicitudes.',
+        ),
+      for (var i = 0; i < groups.length; i++)
+        Card(
+          child: ListTile(
+            title: Text(groups[i]['activity_label'] as String),
+            subtitle: Text(
+              '${groups[i]['name']} · ${groups[i]['schedule']}\nCupo configurado: ${groups[i]['capacity']}',
+            ),
+            trailing: _authoring
+                ? IconButton(
+                    tooltip: 'Editar oferta',
+                    icon: const Icon(Icons.edit),
+                    onPressed: ready ? () => _edit(i) : null,
+                  )
+                : null,
           ),
         ),
+      if (_authoring)
+        OutlinedButton(
+          onPressed: ready ? _edit : null,
+          child: const Text('Crear oferta'),
+        ),
+      FilledButton(
+        onPressed: ready && groups.isNotEmpty
+            ? () => _execute(
+                'publish',
+                Map<String, dynamic>.from(_record!['document']),
+              )
+            : null,
+        child: const Text('Publicar catálogo compartido'),
       ),
-    const Text(
-      'Sólo se muestran ofertas habilitadas en el piloto compartido. Los grupos locales no se importan automáticamente.',
-    ),
-    FilledButton(
-      onPressed: _busy || _record == null ? null : _publish,
-      child: const Text('Publicar catálogo compartido'),
-    ),
-  ], refresh: _busy ? null : _load);
+      if (_authoring)
+        OutlinedButton(
+          onPressed: ready && _record!['publication_state'] == 'published'
+              ? () => _execute(
+                  'withdraw',
+                  Map<String, dynamic>.from(_record!['document']),
+                )
+              : null,
+          child: const Text('Retirar publicación'),
+        ),
+      if (_pending != null)
+        OutlinedButton(
+          onPressed: _busy ? null : () => _execute(_pendingAction!, _pending!),
+          child: const Text('Reintentar la misma operación'),
+        ),
+    ], refresh: _busy ? null : _load);
+  }
 }
