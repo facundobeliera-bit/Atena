@@ -1,5 +1,8 @@
 # Sprint final V1 — publicación, sesiones y documentos
 
+> Informe histórico del 09/10. Las tres migraciones se aplicaron después; NO volver a ejecutarlas.
+> Estado actual y preparación: [preparacion_evaluacion_v1.md](preparacion_evaluacion_v1.md).
+
 Fecha: 09/10/2026. Base: `82f1e1dd731ea2326323c915f168a080898b0079`.
 Estado: implementación local validada; activación remota pendiente de autorización.
 No se aplicaron migraciones remotas, revocaciones ni purgas. Sin deployment.
