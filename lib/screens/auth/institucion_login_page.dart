@@ -43,6 +43,7 @@
 
 import 'package:flutter/material.dart';
 import '../../services/remote/multiuser_session.dart';
+import '../../ui/institution_onboarding_page.dart';
 import '../cuentas/cuenta_home_page.dart';
 import 'package:flutter/services.dart';
 
@@ -603,13 +604,14 @@ class _InstitucionLoginPageState extends State<InstitucionLoginPage> {
                       enabled: !_cargando,
                       label: t.commonRegister,
                       child: OutlinedButton(
-                        onPressed: (_cargando || MultiuserSession.enabled)
+                        onPressed: _cargando
                             ? null
                             : () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        const InstitucionRegistroPage(),
+                                    builder: (_) => MultiuserSession.enabled
+                                        ? const InstitutionOnboardingPage()
+                                        : const InstitucionRegistroPage(),
                                   ),
                                 );
                               },

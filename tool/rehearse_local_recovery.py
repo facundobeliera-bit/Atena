@@ -1,5 +1,5 @@
 """Rehearse a backup restore in a NEW local disposable database; never Supabase."""
-import argparse, hashlib, json, pathlib, re, subprocess, time, uuid
+import argparse, hashlib, json, pathlib, re, secrets, shutil, subprocess, time, uuid
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 def main():
@@ -7,6 +7,7 @@ def main():
     p.add_argument('--pg-bin', required=True, type=pathlib.Path)
     p.add_argument('--source', required=True)
     p.add_argument('--port', type=int, default=55440)
+    p.add_argument('--encrypted-roundtrip', action='store_true', help='Encrypt and restore fixture bundle before PostgreSQL restore')
     a = p.parse_args()
     if not re.fullmatch(r'atena_disposable_[a-z0-9_]+', a.source):
         raise ValueError('Only disposable fixture databases are allowed.')
@@ -39,6 +40,29 @@ def main():
     dump = directory / (target + '.dump')
     started = time.monotonic()
     subprocess.run([str(a.pg_bin/'pg_dump.exe'), *connection, '-d', a.source, '-Fc', '-f', str(dump)], check=True)
+    envelope_verified = False
+    if a.encrypted_roundtrip:
+        source_bundle = directory / (target + '_bundle')
+        source_bundle.mkdir()
+        shutil.copyfile(dump, source_bundle/'database.dump')
+        storage = source_bundle/'storage'
+        storage.mkdir()
+        (storage/'object.bin').write_bytes(b'FICTITIOUS PRIVATE STORAGE OBJECT')
+        (storage/'index.json').write_text(json.dumps([{'path':'object.bin','sha256':hashlib.sha256((storage/'object.bin').read_bytes()).hexdigest()}]), encoding='utf-8')
+        (source_bundle/'auth-plan.json').write_text(json.dumps({'local_fixture_only':True,'remote_sessions':'never reuse','remote_restore':'not authorized'}), encoding='utf-8')
+        (source_bundle/'configuration.json').write_text(json.dumps({'purge_enabled':False,'environment':'isolated-local'}), encoding='utf-8')
+        password = secrets.token_urlsafe(32)
+        envelope = directory/(target+'.aes')
+        restored = directory/(target+'_decrypted')
+        for action,src,dst in [('pack',source_bundle,envelope),('restore',envelope,restored)]:
+            subprocess.run(['node',str(ROOT/'tool/recovery_bundle.mjs'),action,str(src),str(dst)],input=password,text=True,capture_output=True,check=True)
+        password = None
+        if hashlib.sha256(dump.read_bytes()).digest() != hashlib.sha256((restored/'database.dump').read_bytes()).digest():
+            raise RuntimeError('Decrypted database differs')
+        if (restored/'storage/object.bin').read_bytes() != (storage/'object.bin').read_bytes():
+            raise RuntimeError('Storage fixture differs')
+        dump = restored/'database.dump'
+        envelope_verified = True
     query('postgres', 'create database ' + target)
     subprocess.run([str(a.pg_bin/'pg_restore.exe'), *connection, '-d', target, '--exit-on-error', str(dump)], check=True)
     after = state(target)
@@ -49,6 +73,7 @@ def main():
     if denial.returncode == 0 or '42501' not in denial.stderr: raise RuntimeError('Expected explicit permission denial after restore.')
     if query(target, 'select enabled from atena_private.document_purge_control;') != 'f': raise RuntimeError('Purge must remain OFF.')
     checks.update(anonymous_catalog=True, private_access_denied=True, purge_off=True)
+    if a.encrypted_roundtrip: checks.update(authenticated_envelope=envelope_verified, separate_storage_object=True)
     result = {'local_only': True, 'source': a.source, 'restored': target, 'checks': checks,
         'table_count': len(before['rows']), 'seconds': round(time.monotonic()-started,2),
         'dump_sha256': hashlib.sha256(dump.read_bytes()).hexdigest(),

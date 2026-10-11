@@ -1,3 +1,4 @@
+import 'institution_onboarding_page.dart';
 import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'catalog_offer_editor.dart';
@@ -178,6 +179,20 @@ class _RemoteAccountPanelState extends State<RemoteAccountPanel> {
         ),
         child: const Text('Explorar instituciones'),
       ),
+      if (_identity != null)
+        OutlinedButton(
+          onPressed: _busy
+              ? null
+              : () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const InstitutionOnboardingPage(),
+                    ),
+                  );
+                  if (mounted) await _load();
+                },
+          child: const Text('Incorporación y administración institucional'),
+        ),
       for (final profile in _identity?.profiles ?? <String>[])
         Card(
           child: ListTile(

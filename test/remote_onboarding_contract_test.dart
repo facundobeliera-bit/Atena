@@ -47,7 +47,22 @@ void main() {
           labels.commonRegister,
         );
         expect(register, findsOneWidget);
-        expect(tester.widget<OutlinedButton>(register).onPressed, isNull);
+        expect(
+          tester.widget<OutlinedButton>(register).onPressed,
+          entry.name == 'institution' ? isNotNull : isNull,
+        );
+        if (entry.name == 'institution') {
+          await tester.ensureVisible(register);
+          await tester.tap(register);
+          await tester.pumpAndSettle();
+          expect(find.text('Crear cuenta remota'), findsOneWidget);
+          expect(
+            find.textContaining('Crear una cuenta no aprueba'),
+            findsOneWidget,
+          );
+          tester.state<NavigatorState>(find.byType(Navigator)).pop();
+          await tester.pumpAndSettle();
+        }
         expect(
           find.textContaining('Sólo cuentas piloto habilitadas'),
           findsOneWidget,
