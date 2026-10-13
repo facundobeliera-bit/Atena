@@ -44,13 +44,14 @@ void main() {
   late InstitutionOnboarding api;
   final calls = <Map<String, dynamic>>[];
   final applications = <Map<String, dynamic>>[];
-  bool fail = false, wrong = false, change = false;
+  bool fail = false, wrong = false, change = false, reviewer = false;
   setUp(() async {
     calls.clear();
     applications.clear();
     fail = false;
     wrong = false;
     change = false;
+    reviewer = false;
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     client = SupabaseClient(
       'http://127.0.0.1:${server.port}',
@@ -95,6 +96,14 @@ void main() {
             'applicant': session.identity,
           });
         }
+        if (body['p_action'] == 'approve' || body['p_action'] == 'reject') {
+          final application = applications.singleWhere(
+            (a) => a['id'] == body['p_data']['application_id'],
+          );
+          application['status'] = body['p_action'] == 'approve'
+              ? 'approved'
+              : 'rejected';
+        }
         r.response.write(
           jsonEncode({
             'auth_user_id': wrong ? 'foreign' : session.identity,
@@ -102,7 +111,7 @@ void main() {
             'institutions': [],
             'invitations': [],
             'status': 'pending',
-            'reviewer': false,
+            'reviewer': reviewer,
           }),
         );
         if (change) session.identity = 'foreign';
@@ -211,6 +220,119 @@ void main() {
       );
       expect(calls.where((c) => c['p_action'] == 'apply'), hasLength(1));
       expect(find.text('Revisar y aprobar'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  Future<void> settleReview(WidgetTester tester) async {
+    for (var i = 0; i < 15; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+  }
+
+  Future<void> openReview(WidgetTester tester, {bool own = false}) async {
+    session.identity = 'reviewer-test';
+    reviewer = true;
+    applications.add({
+      'id': 'review-application-test',
+      'name': 'TEST revisión',
+      'reference': 'TEST expediente',
+      'applicant': own ? session.identity : 'applicant-test',
+      'status': 'pending',
+    });
+    await tester.pumpWidget(
+      const MaterialApp(home: InstitutionOnboardingPage()),
+    );
+    await settleReview(tester);
+  }
+
+  for (final approve in [true, false]) {
+    testWidgets(
+      'reviewer ${approve ? 'approval' : 'rejection'} uses audited server command',
+      (tester) async {
+        await openReview(tester);
+        final button = find.text(approve ? 'Revisar y aprobar' : 'Rechazar');
+        await tester.ensureVisible(button);
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.widgetWithText(
+            TextField,
+            'Referencia de revisión (sin datos sensibles)',
+          ),
+          'TEST evidencia revisada',
+        );
+        await tester.tap(find.text('Continuar'));
+        await settleReview(tester);
+        if (approve) {
+          expect(calls.where((c) => c['p_action'] == 'approve'), isEmpty);
+          expect(find.text('Verificación administrativa'), findsOneWidget);
+          await tester.tap(find.text('Confirmar revisión'));
+        }
+        await settleReview(tester);
+        final sent = calls.singleWhere(
+          (c) => c['p_action'] == (approve ? 'approve' : 'reject'),
+        );
+        expect(sent['p_data'], {
+          'application_id': 'review-application-test',
+          'review_reference': 'TEST evidencia revisada',
+          'representation_checked': approve,
+        });
+        expect(
+          find.text('TEST revisión · ${approve ? 'approved' : 'rejected'}'),
+          findsOneWidget,
+        );
+        expect(
+          find.text('Operación confirmada por el servidor.'),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
+  testWidgets(
+    'reviewer cannot approve their own application in the interface',
+    (tester) async {
+      await openReview(tester, own: true);
+      expect(find.text('TEST revisión · pending'), findsOneWidget);
+      expect(find.text('Revisar y aprobar'), findsNothing);
+      expect(find.text('Rechazar'), findsNothing);
+      expect(calls.where((c) => c['p_action'] != null), isEmpty);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'reviewer revoked while decision dialog is open cannot show success',
+    (tester) async {
+      await openReview(tester);
+      await tester.ensureVisible(find.text('Rechazar'));
+      await tester.tap(find.text('Rechazar'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(
+          TextField,
+          'Referencia de revisión (sin datos sensibles)',
+        ),
+        'TEST revisión revocada',
+      );
+      fail = true; // Server rejects the decision after permission revocation.
+      await tester.tap(find.text('Continuar'));
+      await settleReview(tester);
+      expect(find.text('Operación confirmada por el servidor.'), findsNothing);
+      expect(
+        find.text(
+          'Acceso no autorizado. Verificá tu correo, sesión y permisos.',
+        ),
+        findsOneWidget,
+      );
+      expect(applications.single['status'], 'pending');
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
     },

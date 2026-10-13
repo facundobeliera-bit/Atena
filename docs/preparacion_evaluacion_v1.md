@@ -1,6 +1,6 @@
 # Atena V1 — preparación de evaluación privada
 
-Actualizado: 10/10/2026. Base funcional: `5d6d305`.
+Actualizado: 13/10/2026. Base funcional: `ab1c784`; cierre operativo local posterior.
 Este documento reemplaza el estado «activación pendiente» del informe del 09/10.
 No autoriza despliegue, usuarios reales, purga ni nuevas migraciones.
 Las pruebas manuales están pospuestas; su única matriz está en
@@ -60,25 +60,13 @@ Para reproducir en otra computadora, usar la revisión indicada, lockfile versio
 SDK/Java del manifiesto y el mismo certificado privado protegido. No ejecutar `flutter clean`
 sobre los artefactos reservados. El escaneo de secretos no sustituye una auditoría integral.
 
-## Alta institucional: bloqueo real, no PASS simulado
+## Alta institucional: backend validado; operación pendiente
 
-| Paso | Evidencia y estado |
-| --- | --- |
-| Registro local, plan, propietario/perfil, logout e ingreso | Tests `institution_registration_android_flow_test.dart`: PASS; también recuperación legítima del registro parcial y rechazo de otra credencial. Sólo local. |
-| Registro en modo multiusuario | BLOQUEADO por diseño: botones de registro y recuperación deshabilitados; no hay `signUp` institucional en `MultiuserSession`. Dos tests `remote_onboarding_contract_test.dart` verifican esa separación. |
-| Identidad remota | `atena_authenticated_context` exige Auth + operador + vínculo verificado + área/asignación activa; una cuenta sin ellos devuelve listas vacías. Coincidir email/ID local no concede acceso. |
-| Asignación de operador/área | No existe onboarding remoto autónomo para dar esas autorizaciones. Configurar operadores locales no crea permisos remotos. |
-| Crear borrador/publicar/retirar | PASS para operador previamente habilitado; `catalogWorkspace`/`editCatalog` y SQL verifican capacidades y contexto. PARCIAL como proceso integral de una institución nueva. |
-| Solicitudes/confirmación | PASS con solicitante y operador previamente habilitados; no habilita instituciones nuevas por sí mismo. |
-| Alumno/familia | Requiere vínculo de perfil autorizado. El piloto no incorpora un alta autónoma de tutores ni acreditación de representación de menores. |
+La migración `20261010000000` está aplicada. Registro/confirmación real, aprobación por revisor, propietario, áreas, invitaciones/revocación, publicación e inscripción/cupo pasaron con JWT reales. La pantalla administrativa ya existe en Cuenta → Incorporación y administración institucional. El revisor temporal quedó deshabilitado.
 
-**Modificación mínima propuesta, no implementada:** flujo de invitación/alta verificada
-server-side que, tras prueba de titularidad aprobada, cree en una transacción institución,
-operador propietario individual, vínculo verificado y primera área/asignación con capacidades
-mínimas; unicidad e idempotencia. Los demás operadores aceptan invitaciones con su propio
-Auth; nunca heredan la contraseña del propietario. Requiere decidir quién verifica titularidad,
-cómo se acredita, y autorizar el esquema/RPC/RLS y UI mínimos. No abrir escrituras directas
-ni convertir datos locales o una coincidencia de correo en prueba de propiedad.
+El alta no equivale a autoaprobación: una persona autorizada debe verificar la representación. Pendientes operativos: retorno de correo accesible (hoy Site URL es localhost:3000), entrega de correo y designación del revisor. La página estática local y el cambio exacto propuesto se describen en [alta y recuperación](alta_institucional_y_recuperacion_v1.md). No se publicó ni se cambió Auth.
+
+Alumno/familia: aún requieren vínculo de perfil autorizado; las pruebas usaron un fixture administrativo. No se ha implementado ni validado aquí un alta autónoma de familias/tutores. Las cuentas locales no acreditan identidad remota.
 
 ## Respaldo y recuperación
 
@@ -144,26 +132,19 @@ puede contener IDs: no adjuntarlo sin revisión. No se añadió telemetría ni u
 
 ## Revocar un operador
 
-Procedimiento administrativo preparado, no ejecutado en esta unidad:
-identificar con evidencia institución + operador + área/asignación; registrar motivo y
-alcance; obtener autorización; desactivar sólo esa asignación/capacidad en una transacción
-controlada. Una baja de persona puede requerir revocar vínculo/operador y sesiones;
-no reemplazar un alcance por otro ni revocar la cuenta propietaria por error.
-Verificar con JWT anterior que el siguiente RPC y las lecturas RLS rechazan el acceso,
-y comprobar otra área/operador no afectado. No borrar historial ni atribución de operaciones.
-Rehabilitar acceso no debe revivir sesiones cortadas: exigir autenticación nueva cuando corresponda.
-No hay interfaz administrativa remota autónoma de alta/baja de operadores validada;
-es una dependencia explícita, no una función declarada lista para usuarios sin soporte técnico.
+El propietario institucional utiliza Cuenta → Incorporación y administración institucional → **Revocar operador** y confirma la acción. El RPC desactiva vínculo, asignaciones e invitaciones de esa persona dentro de la institución, conservando historial. No admite revocar al propietario ni conceder permisos ajenos. El JWT anterior pierde autorización institucional; el acceso propio como alumno sigue siendo legítimo si existe ese vínculo separado.
+
+No hay reactivación implícita mediante una invitación antigua; una eventual rehabilitación requiere decisión administrativa. No editar contadores, borrar usuarios ni revocar indiscriminadamente otras instituciones. El revisor se reemplaza con el procedimiento independiente de [alta institucional](alta_institucional_y_recuperacion_v1.md).
 
 ## Pendientes que requieren decisión/autorización
 
-- Onboarding remoto verificado de instituciones, operadores y perfiles solicitantes.
+- Autorizar retorno de correo/hosting accesible y designar revisor operativo. El alta institucional/operadores ya pasó; el alta autónoma de perfiles solicitantes y tutores continúa pendiente.
 - Respaldo remoto cifrado, custodios, periodicidad, RPO/RTO y ensayo de recuperación aislado.
 - Política de privacidad, representación de menores, conservación documental y operación del servicio antes de datos reales.
 - Identidad/firma/distribución de producción sólo si se decide publicar; fuera del piloto actual.
 - Validación integral futura: matriz preparada, ninguna fila ejecutada manualmente en este sprint.
 
-## Resultado de esta preparación
+## Referencia histórica de preparación (10/10/2026)
 
 - 463 tests Flutter PASS (461 anteriores + 2 contratos de alta remota), sin omitidos.
 - 8 pruebas del constructor PASS: entorno, proyecto, modo remoto, tipo booleano y claves.
@@ -177,3 +158,15 @@ es una dependencia explícita, no una función declarada lista para usuarios sin
   `5d6d305` como base compilada; el commit de preparación sólo contiene scripts, tests y documentación.
 - Firma Android verificada; Java 21.0.8 y Build Tools 36.1.0. Sin actualización de dependencias.
 - No se ejecutaron pruebas físicas/manuales, deployment, cambios remotos ni activación de purga/comercial.
+
+## Cierre operativo (13/10/2026)
+
+- Cambio ejecutable mínimo: `web/auth/return.html`; no cambia Dart, Auth, permisos ni datos. La página aún no está publicada ni configurada en Supabase.
+- Flutter pertinente: **22 PASS** (18 existentes + 4 de interfaz de revisión). No se repitió toda la suite de 472 ni las campañas SQL/JWT ya validadas; no hubo modificación de su implementación.
+- Retorno: **5 tests Node PASS**. Cifrado existente: **2 tests PASS**. Constructor del piloto: **8 tests PASS**. Se conserva la evidencia de recuperación previa: 13 controles/40 tablas locales; Supabase Auth/Storage remoto no certificado.
+- `flutter analyze`: **76 avisos históricos, 0 nuevos**, salida 1.
+- Android release y web JavaScript: **PASS**. Página de retorno del build idéntica a la fuente revisada. Advertencias Wasm históricas; no se declara build Wasm.
+- APK vigente: `build/evaluation/atena-v1-piloto-evaluacion.apk`, SHA-256 `75431a9ee08383e32457d17d20b172615550dea1b195c554844738c6d9166932`. Proyecto `eaegvxxxkvhdukbkydvy`, applicationId `org.atena.evaluation.multiuser`. No instalado ni distribuido. Manifiesto: `build/evaluation/manifest.json`; el código Dart/Android corresponde a la base `ab1c784`, sin cambios productivos Flutter en este sprint.
+- Escaneo acotado de patrones de claves secretas/administrativas y claves privadas en web/APK: sin hallazgos. No equivale a certificación universal de secretos.
+- 312 archivos protegidos conservan sus hashes. El diagnóstico SQL preexistente queda fuera del commit; staging aislado exclusivamente a la página, test y documentación de este sprint.
+- Pendientes mínimos: autorización de retorno/hosting, revisor responsable y recuperación completa en destino aislado autorizado. Para datos reales también se requieren política de privacidad/conservación, custodia/operación, entrega de correo y vinculación legítima de perfiles solicitantes/familias. Matriz manual íntegramente PENDIENTE.

@@ -1,18 +1,43 @@
-# Alta institucional y recuperación V1 — candidato local
+# Alta institucional y recuperación V1
 
-## Alcance y activación pendiente
+## Estado operativo — 13/10/2026
 
-Este bloque no aplicó migraciones, creó usuarios ni copió datos de Supabase. El servidor piloto mantiene su configuración anterior. La APK compilada contiene el cliente del alta, pero el servidor requiere una activación posterior autorizada. No es evidencia de alta remota end-to-end ni de recuperación de un proyecto Supabase real.
+La migración `20261010000000_institution_onboarding.sql` fue aplicada y validada en el piloto `eaegvxxxkvhdukbkydvy` el 11/10. **No volver a aplicarla**. Los dos correos ficticios se confirmaron mediante sus enlaces reales; 60 comprobaciones Auth/JWT y 5 controles finales aprobaron solicitud, aprobación, propietario, áreas, invitaciones/revocación, borrador/publicación, inscripción/confirmación y cupo compartido. No hubo prueba física ni recorrido visual completo. El solicitante de inscripción fue un perfil ficticio provisionado administrativamente: no acredita alta autónoma de alumnos/familias.
 
-Candidato único: `supabase/candidates/20261010000000_institution_onboarding.sql`.
-Depende de las identidades verificadas, catálogo/solicitudes, contexto autenticado y `20261009010000_session_revocation.sql` ya existentes. Se aplica una sola vez, dentro de una transacción. No toca filas históricas ni Auth, no cambia grants/RLS existentes, no configura cron, retención, cobros o revocaciones masivas. Agrega cinco tablas privadas con RLS, tres RPC públicas y dos helpers privados.
+La comparación de las 33 tablas previas y cuentas Auth anteriores confirmó que los datos históricos y el escenario de teléfonos quedaron intactos. Un falso positivo del script de integridad incluía la credencial de una cuenta NUEVA entre los históricos; se resolvió usando la línea base anterior a la campaña. No se relajaron controles. El revisor temporal quedó deshabilitado al finalizar.
 
-Antes de autorizar la aplicación: comparar historial y definiciones del servidor, verificar dependencias y propietario SECURITY DEFINER; comprobar que Confirm email está habilitado, que registro por correo está permitido y que el correo/redirect del piloto funcionan. `email_confirmed_at` es una garantía del proveedor sólo si su configuración exige confirmar correo; no se debe habilitar autoconfirmación para sortear este paso. SMTP/entrega y aprobación con JWT reales quedan pendientes, sin usar identidades reales.
+## Retorno de correo: cambio local preparado, activación pendiente
+
+Lectura de configuración real el 13/10: `site_url=http://localhost:3000`, `uri_allow_list` vacío, `mailer_autoconfirm=false`, registro por correo habilitado, SMTP propio ausente, límite de envío 2/hora. La plantilla usa `{{ .ConfirmationURL }}`. `InstitutionOnboarding.register` no envía `emailRedirectTo`: Supabase toma Site URL. Android no declara un intent-filter de callback. El registro no debe convertirse en aprobación ni sesión institucional automática.
+
+Solución mínima: página estática `web/auth/return.html`, incluida en el build web; **no publicada todavía**. Es HTML estándar para navegador Android o web, indica volver a Atena e ingresar, limpia query/fragmento antes de navegar, no intercambia ni almacena tokens, no carga SDK/recursos externos y no interpreta la URL como prueba de identidad. Los errores del proveedor se muestran como mensaje fijo, sin reflejar descripciones o secretos. No requiere deep links ni cambios en el contrato PKCE, roles, sesiones o contraseñas. Un código PKCE descartado no se reutiliza: el ingreso posterior usa las credenciales en Atena.
+
+Destino propuesto en el hosting EXISTENTE, no un dominio nuevo:
+
+`https://atena-staging.facundobeliera.workers.dev/auth/return.html`
+
+La consulta HTTP desde este entorno devolvió **403** tanto en raíz como en esa ruta; no prueba que la página esté publicada ni accesible. No activar el retorno hasta resolver ese acceso y comprobar HTTP 200 del archivo exacto, su CSP y contenido. Puede ser una restricción del punto de consulta: no se atribuye la causa sin evidencia.
+
+Secuencia que requiere autorización remota específica:
+
+1. Autorizar publicación de la página en el Worker existente, sin cambiar rutas, bindings o SPA ni publicar indiscriminadamente otra aplicación. Comprobar que el inicio web del mismo origen sea la versión piloto deseada; si no, acordar primero su actualización. Este sprint no desplegó nada.
+2. Después de verificar acceso, cambiar **sólo** `site_url` del proyecto piloto a la URL exacta anterior. Cuerpo preparado para la API de configuración Auth:
+
+```json
+{"site_url":"https://atena-staging.facundobeliera.workers.dev/auth/return.html"}
+```
+
+3. Mantener confirmación de correo y plantilla del proveedor, no agregar comodines, no cambiar `uri_allow_list`, SMTP, usuarios, RLS ni permisos. El retorno por defecto también afecta otros flujos Auth: la página no completa recuperación/cambio de contraseña ni OAuth. Es adecuada para el contrato actual de confirmación y regreso al ingreso; no habilitar esos otros flujos sin su revisión.
+4. Autorizar una comprobación real con correo ficticio; confirmar en servidor, enlace vencido/reutilizado y login posterior. No registrar URL completa, query, tokens ni códigos en observabilidad del hosting; comprobar configuración de logs antes de activar. Hasta entonces: redirección **PARCIAL**, nunca PASS remoto.
+
+Alternativa evaluada: deep links Android requieren esquema/intent-filter y allow-list, no sirven a quien abre el correo en otra computadora, y no son necesarios para confirmar correo y luego ingresar. No se añadieron. Antes de usuarios reales, definir entrega de correo propia/autorizada y sus límites; no se activó SMTP ni servicio pago.
+
+Fuentes: [Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), [deep links](https://supabase.com/docs/guides/auth/native-mobile-deep-linking).
 
 ## Contrato institucional
 
 1. Acceso institucional → Registrarse abre registro Supabase en modo multiusuario. El acceso local conserva su formulario anterior. Registro no escribe cuentas locales ni concede permisos institucionales.
-2. Confirmar el correo mediante Supabase y volver a Ingresar. El cliente inicializa PKCE con el almacenamiento existente de Supabase Flutter. No se asume una nueva configuración de enlaces Android ni se modifica el redirect del proyecto.
+2. Confirmar el correo mediante Supabase y volver a Ingresar. El cliente inicializa PKCE con el almacenamiento existente de Supabase Flutter. La página de retorno preparada arriba mantiene ese contrato; la configuración remota aún no cambió.
 3. Cuenta → Incorporación y administración institucional: enviar nombre y referencia institucional. El servidor toma `auth.uid()` de la sesión vigente, valida confirmación de correo y genera el ID de solicitud. Un UUID de operación sólo identifica reintentos.
 4. Un revisor habilitado ve solicitudes pendientes en esa misma pantalla. Debe verificar externamente la identidad del solicitante y su autorización para representar a la institución. La aplicación exige una confirmación explícita y una referencia de revisión, y registra revisor, fecha y decisión. **No existe verificación oficial ni automática de representación legal.** La referencia no debe contener documentos personales ni secretos; remite al expediente protegido del administrador.
 5. No se admite autoaprobación. Una solicitud rechazada no crea institución. No se asocian instituciones históricas por coincidencia de correo o nombre. Colisiones requieren revisión administrativa; este bloque no incorpora un procedimiento para reclamar instituciones existentes.
@@ -25,7 +50,7 @@ Limitaciones deliberadas: la aceptación no convierte al invitado en propietario
 
 ## Habilitar al primer revisor sin editar tablas
 
-Requiere autorización para elegir una identidad ficticia de revisor, distinta del solicitante. El candidato no habilita automáticamente a ningún usuario.
+Requiere autorización para elegir una identidad de revisor con correo confirmado, distinta del solicitante. La migración no habilita automáticamente a ningún usuario. El revisor ficticio de la campaña quedó deshabilitado; no reutilizarlo como un permiso permanente.
 
 Plan local (UUID real de prueba a proporcionar, no inventar):
 
@@ -40,6 +65,14 @@ python tool/onboarding_admin.py --reviewer-user UUID --execute-authorized-pilot 
 ```
 
 La herramienta solicita la credencial administrativa sin mostrarla; permanece en memoria y se usa sólo para el RPC restringido a `service_role`. Nunca llega a Flutter. `--disable` prepara/revoca exclusivamente el rol de revisor; no afecta Auth ni otros roles. El uso de la herramienta debe quedar registrado por el administrador responsable; la auditoría SQL diferencia esta configuración confiable de las decisiones hechas con el JWT individual del revisor. Las aprobaciones habituales se realizan con la sesión normal del revisor en Flutter, no con esa clave.
+
+### Uso cotidiano y reemplazo
+
+- Designación inicial: el responsable verifica la identidad y el UUID del revisor, documenta el alcance y autoriza la herramienta anterior. La credencial administrativa sólo la custodia el administrador; el revisor NO la necesita.
+- Acceso diario: Atena Multiusuario → Ingresar → Cuenta → **Incorporación y administración institucional**. Esa pantalla ya lista solicitudes pendientes autorizadas; permite **Revisar y aprobar** o **Rechazar**. No se necesita otro panel ni editar tablas.
+- Revisar externamente la representación; indicar una referencia no sensible. Aprobar exige confirmar explícitamente la revisión. La solicitud propia no muestra acciones y el servidor también impide autoaprobación. Decisión y configuración de revisor quedan registradas en `onboarding_audit`; la solicitud conserva revisor, referencia, fecha y resultado.
+- Reemplazo: autorizar al nuevo UUID confirmado; verificar acceso; deshabilitar al anterior con `--disable` mediante la misma herramienta. Si hay sospecha de compromiso, revocar primero al anterior. No asignar permisos institucionales ni cambiar Auth para efectuar el reemplazo. La siguiente decisión del revisor revocado debe ser rechazada, incluso con un diálogo abierto; un timeout se resuelve consultando estado/auditoría antes de repetir.
+- El alcance del revisor es revisión institucional del piloto, no administración global de Supabase. La auditoría de designación identifica el UUID objetivo como actor confiable; la identidad del administrador que ejecuta la herramienta requiere registro operativo externo. No afirmar atribución técnica individual de una clave compartida.
 
 Ante un problema de activación: rollback de la transacción si falla al aplicar. Si ya fue aplicada, detener nuevas altas mediante revocación de revisores y bloqueo controlado de los nuevos RPC, sólo con autorización; conservar solicitudes, auditoría e instituciones aprobadas. No ejecutar DROP ni borrar registros para revertir un alta usada.
 
@@ -82,7 +115,7 @@ Ensayo disponible: `tool/rehearse_local_recovery.py --pg-bin RUTA --source atena
 
 ## Validación y autorizaciones pendientes
 
-Resultados de ejecución se agregan al cierre de este documento. Pendientes remotos: aplicar candidato; habilitar un revisor ficticio; autorizar cuentas/confirmación por correo y pruebas JWT del nuevo alta; autorizar inventario/copia del conjunto ficticio y destino aislado para un ensayo Supabase completo. No hay prueba física ni despliegue público.
+La aplicación remota y las pruebas ficticias de alta ya terminaron; no repetirlas. Pendientes: autorizar/publicar el retorno y cambiar Site URL; designar al revisor operativo; autorizar un inventario/copia ficticios y destino aislado para ensayar Supabase completo. No se ejecutaron copias o restauraciones remotas ni pruebas físicas.
 
 ### Resultados locales del bloque (10–11 de octubre de 2026)
 
@@ -95,3 +128,9 @@ Resultados de ejecución se agregan al cierre de este documento. Pendientes remo
 - APK: `build/evaluation/atena-v1-piloto-evaluacion.apk`, SHA-256 `75431a9ee08383e32457d17d20b172615550dea1b195c554844738c6d9166932`. Piloto `eaegvxxxkvhdukbkydvy`, applicationId `org.atena.evaluation.multiuser`, firma de evaluación existente; no distribución pública.
 - Escaneo de patrones y contraseñas ficticias conocidas: sin hallazgos en archivos, historial alcanzable y builds; es una comprobación acotada, no una garantía universal de ausencia de secretos. 312 archivos protegidos sin cambios.
 - El diagnóstico SQL previamente modificado permanece fuera del commit de este bloque; los cuatro elementos históricos también. No se modificó Supabase ni se hicieron copias remotas, despliegues o pruebas físicas.
+
+### Cierre operativo local (13/10/2026)
+
+Pruebas nuevas del retorno sin red: PKCE/tokens descartados, error vencido/reutilizado, descripción no reflejada, redirección arbitraria ignorada, CSP verificada y fallo de history sin exponer secretos. Pruebas de pantalla del revisor: aprobación con confirmación explícita, rechazo, autoaprobación oculta y permiso revocado durante diálogo sin falso éxito. Los resultados finales de ejecución y builds se registran en `preparacion_evaluacion_v1.md`.
+
+No se modificó configuración remota ni se designó un revisor. Para presentar el circuito completo con fixtures siguen pendientes retorno accesible y responsable administrativo. Para usuarios reales también hacen falta alta/vínculo autorizado de alumnos y familias (hoy el escenario usa fixtures), entrega de correo operativa, recuperación completa ensayada y decisiones de privacidad, representación, custodia, conservación y operación. No se considera producción lista.

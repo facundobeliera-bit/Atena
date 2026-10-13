@@ -1,7 +1,7 @@
 # Matriz única de validación integral V1
 
 Estado de TODAS las filas: **PENDIENTE — no ejecutada manualmente**.
-Fecha de preparación: 10/10/2026. No iniciar hasta indicación del propietario.
+Fecha de preparación: 10/10/2026; actualización operativa: 13/10/2026. No iniciar hasta indicación del propietario.
 Sólo piloto ficticio, APK/web cuyo hash figure en `build/evaluation/manifest.json`.
 A = operador previamente habilitado; B = solicitante con perfil vinculado;
 C = identidad ajena sin permiso. No incluir contraseñas, tokens ni datos personales en evidencias.
@@ -17,10 +17,10 @@ N/A sólo con función inexistente documentada y decisión del responsable, nunc
 | --- | --- | --- | --- |
 | D01 | Distribución | Instalar actualización de evaluación conservando datos | Mismo paquete/certificado; datos locales anteriores intactos. Firma incompatible o pérdida = FAIL. |
 | D02 | Entorno | Abrir APK/web piloto | Acceso identifica cuentas piloto; endpoint esperado. Datos de otro entorno o fallback silencioso = FAIL. |
-| I01 | Institución nueva | Intentar alta multiusuario | BLOQUEADA actualmente: requiere onboarding verificado. Registro local NO prueba alta remota. |
+| I01 | Institución nueva | Intentar alta multiusuario | Solicitud remota pendiente, confirmación de correo y aprobación explícita por revisor; institución/operador creados sólo después. No usar registro local como evidencia remota. |
 | I02 | Institución habilitada | Login y abrir área autorizada | Identidad/operador/área correctos; ningún contexto arbitrario. |
 | I03 | Operador ajeno | Intentar abrir otra institución/área | Denegado sin datos privados ni escritura. |
-| I04 | Administración | Invitar/asignar/bajar operador autónomamente | BLOQUEADA: no existe flujo remoto autónomo validado. No sustituir por asignación manual y marcar PASS. |
+| I04 | Administración | Invitar/asignar/bajar operador autónomamente | Invitación de propietario a correo verificado, área/capacidades limitadas y vencimiento; revocación impide nuevos accesos conservando historial. No sustituir por edición de tablas. |
 | O01 | Ofertas | Crear borrador, salir y volver | Datos reaparecen para operador autorizado; no visibles públicamente. |
 | O02 | Ofertas | Editar y publicar | Servidor confirma versión; B y anónimo ven oferta/cupo correcto tras actualizar. |
 | O03 | Concurrencia de edición | Dos sesiones editan misma revisión | Edición obsoleta rechazada; primera guardada no se pierde. |
@@ -61,5 +61,14 @@ N/A sólo con función inexistente documentada y decisión del responsable, nunc
 
 Cierre: no habilitar datos reales si hay FAIL de identidad, privacidad, integridad,
 cupos o recuperación. Las filas bloqueadas requieren decidir alcance/implementación;
-no declarar que una institución nueva puede incorporarse autónomamente mientras I01/I04 sigan bloqueadas.
+no declarar el recorrido manual validado mientras I01/I04 continúen pendientes.
 No declarar producción lista a partir de esta matriz pendiente.
+
+## Retorno y administración — misma jornada, todavía PENDIENTES
+
+| ID | Acción futura | Criterio objetivo PASS / condición de FAIL |
+| --- | --- | --- |
+| ON01 | Confirmar correo ficticio en Android y web | Destino accesible; ningún token visible al continuar; login comprueba confirmación; no se concede institución automáticamente. Enlace vencido muestra error y no falso éxito. |
+| ON02 | Reemplazar revisor ficticio autorizado | Nuevo revisor accede; anterior no puede decidir con su JWT/diálogo previo. Sin cambios a roles institucionales. Referencia y auditoría registradas. |
+
+I01/I04 cubren solicitud, decisión e invitaciones sobre el backend ya validado. Permanecen PENDIENTES manualmente. No ejecutar aún ni consumir el escenario reservado.
