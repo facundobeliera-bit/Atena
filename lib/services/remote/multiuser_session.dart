@@ -193,8 +193,7 @@ class MultiuserSession {
       all.addAll(
         page.where(
           (r) => profile != null
-              ? r['applicant_profile_id'] == profile &&
-                    r['applicant_auth_user_id'] == identity.userId
+              ? r['applicant_profile_id'] == profile
               : r['institution_id'] == institutionId && r['area_id'] == areaId,
         ),
       );

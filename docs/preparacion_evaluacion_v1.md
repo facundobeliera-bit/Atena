@@ -170,3 +170,21 @@ No hay reactivación implícita mediante una invitación antigua; una eventual r
 - Escaneo acotado de patrones de claves secretas/administrativas y claves privadas en web/APK: sin hallazgos. No equivale a certificación universal de secretos.
 - 312 archivos protegidos conservan sus hashes. El diagnóstico SQL preexistente queda fuera del commit; staging aislado exclusivamente a la página, test y documentación de este sprint.
 - Pendientes mínimos: autorización de retorno/hosting, revisor responsable y recuperación completa en destino aislado autorizado. Para datos reales también se requieren política de privacidad/conservación, custodia/operación, entrega de correo y vinculación legítima de perfiles solicitantes/familias. Matriz manual íntegramente PENDIENTE.
+
+## Ampliación familiar local (13/10/2026)
+
+Referencia vigente: `alta_familiar_v1.md`. Registro y revisión familiar conectados desde Flutter,
+con candidato SQL **todavía no aplicado remotamente**. No usar el APK como evidencia de que el
+servidor ya permite altas familiares: sin la migración responde explícitamente que falta habilitarlo.
+
+- Flutter: 490 PASS, 0 skipped. PostgreSQL: 69 nuevas + 306 regresión = 375 PASS.
+- Herramienta administrativa: 3 pruebas PASS; no ejecución administrativa remota.
+- Recuperación cifrada local: 13 controles PASS, 45 tablas, nueva base aislada y objeto ficticio
+  separado. No certifica Supabase Auth/Storage remoto completo.
+- Análisis: 76 históricos, 0 nuevos. Android release y web JavaScript PASS.
+- APK vigente: `build/evaluation/atena-v1-piloto-evaluacion.apk`. Identificador, certificado,
+  configuración pública, hashes y fuente verificable registrados en `build/evaluation/manifest.json`.
+  Sigue dirigido exclusivamente al piloto; no se cambió la firma ni se distribuyó públicamente.
+- Pendientes agrupados: aplicar candidato familiar; designar revisor **familiar** independiente;
+  campaña ficticia Auth/JWT; retorno/hosting/correo operativo; ensayo Supabase completo aislado.
+  Ninguna intervención física o manual fue solicitada ni ejecutada durante este bloque.

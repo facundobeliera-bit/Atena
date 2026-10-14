@@ -30,6 +30,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../ui/family_onboarding_page.dart';
 
 import 'package:atena_app/l10n/gen/app_localizations.dart';
 
@@ -302,6 +303,12 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
   // =====================================================
   Future<void> _goRegistro() async {
     if (_cargando) return;
+    if (MultiuserSession.enabled) {
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const FamilyOnboardingPage()));
+      return;
+    }
 
     final t = AppLocalizations.of(context);
     final seedEmail = _normalizeEmail(_emailCtrl.text);
@@ -568,9 +575,7 @@ class _AlumnoLoginPageState extends State<AlumnoLoginPage> {
                     width: double.infinity,
                     height: 40,
                     child: OutlinedButton(
-                      onPressed: (_cargando || MultiuserSession.enabled)
-                          ? null
-                          : _goRegistro,
+                      onPressed: _cargando ? null : _goRegistro,
                       child: Text(t.commonRegister),
                     ),
                   ),

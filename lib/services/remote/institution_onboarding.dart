@@ -17,16 +17,15 @@ class InstitutionOnboarding {
     // Email confirmation and representation approval remain server requirements.
   }
 
-  Future<Map<String, dynamic>> state() => _request('atena_onboarding_state');
+  Future<Map<String, dynamic>> state() => request('atena_onboarding_state');
   Future<Map<String, dynamic>> command(
     String action,
     Map<String, dynamic> data,
-  ) => _request('atena_onboarding_command', {
-    'p_action': action,
-    'p_data': data,
-  });
+  ) =>
+      request('atena_onboarding_command', {'p_action': action, 'p_data': data});
 
-  Future<Map<String, dynamic>> _request(
+  /// Shared identity/token guard for onboarding RPCs, including family review.
+  Future<Map<String, dynamic>> request(
     String rpc, [
     Map<String, dynamic>? params,
   ]) async {

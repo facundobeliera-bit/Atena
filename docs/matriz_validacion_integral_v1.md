@@ -35,7 +35,11 @@ N/A sólo con función inexistente documentada y decisión del responsable, nunc
 | A07 | Último cupo | Dos solicitudes compiten por capacidad 1, escenario autorizado aparte | Exactamente una confirmada; sin ocupación > capacidad. No consumir escenario reservado sin permiso. |
 | A08 | Gestión | Rechazar/cancelar según rol y estado permitidos | Estado consistente y liberación de cupo sólo cuando el contrato lo exige. No reactivar terminal por reintento. |
 | F01 | Familia | Consultar perfil vinculado autorizado | Sólo información de ese perfil. Un vínculo local o correo coincidente no autoriza remoto. |
-| F02 | Tutor nuevo | Acreditar representación y vincular menor | BLOQUEADA: no hay alta autónoma/consentimiento de tutor validado. No usar menores reales. |
+| F02 | Tutor nuevo | Acreditar representación y vincular menor | Tras activar el candidato familiar: cuenta/correo confirmado, adulto revisado y vínculo aprobado explícitamente; pendiente no accede. Activación remota todavía pendiente. |
+| F03 | Mayor de edad | Crear perfil propio e inscribirse | Revisión de identidad/edad, perfil generado por servidor y confirmación institucional; no asignaciones manuales. |
+| F04 | Dos responsables | Vincularse al mismo menor con revisiones independientes | Un solo perfil, ambos ven la inscripción; no puede duplicarse cupo ni acceder a otra familia. |
+| F05 | Revocación | Revisor revoca un responsable | Pierde datos privados/operaciones; otro responsable conserva historia; cupo sin alteraciones. |
+| F06 | Mayoría de edad | Revisar acceso propio a perfil anteriormente de menor | Responsable deja de acceder; nueva identidad sólo accede tras revisión, conservando perfil e historia. |
 | C01 | Calendario | A publica actividad dirigida; B actualiza | Actividad persistida sólo para destinatarios autorizados. |
 | C02 | Calendario | B responde y A consulta | Respuesta persistida con autor/contexto correcto, sin duplicados al reintentar. |
 | C03 | Comunicaciones | Publicar, consultar y responder donde esté permitido | Sólo destinatarios; respuesta visible tras refrescar; sin atribuir otra identidad. |

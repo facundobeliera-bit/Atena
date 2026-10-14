@@ -47,11 +47,8 @@ void main() {
           labels.commonRegister,
         );
         expect(register, findsOneWidget);
-        expect(
-          tester.widget<OutlinedButton>(register).onPressed,
-          entry.name == 'institution' ? isNotNull : isNull,
-        );
-        if (entry.name == 'institution') {
+        expect(tester.widget<OutlinedButton>(register).onPressed, isNotNull);
+        {
           await tester.ensureVisible(register);
           await tester.tap(register);
           await tester.pumpAndSettle();

@@ -3,15 +3,17 @@ Execution requires separate remote authorization. Never edits tables directly.
 """
 import argparse,getpass,json,urllib.request,urllib.error,uuid
 PROJECT='eaegvxxxkvhdukbkydvy'
-def plan(user,active):
+def plan(user,active,scope='institution'):
+    if scope not in ('institution','family'):raise ValueError('Unknown review scope')
     user=str(uuid.UUID(user))
-    return {'project':PROJECT,'rpc':'atena_onboarding_reviewer','parameters':{'p_user':user,'p_active':active},'requires':'trusted administrative credential; separate remote authorization'}
+    return {'project':PROJECT,'rpc':'atena_family_reviewer' if scope=='family' else 'atena_onboarding_reviewer','parameters':{'p_user':user,'p_active':active},'requires':'trusted administrative credential; separate remote authorization'}
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--reviewer-user',required=True)
     p.add_argument('--disable',action='store_true')
+    p.add_argument('--scope',choices=['institution','family'],default='institution')
     p.add_argument('--execute-authorized-pilot',choices=[PROJECT])
-    a=p.parse_args();operation=plan(a.reviewer_user,not a.disable)
+    a=p.parse_args();operation=plan(a.reviewer_user,not a.disable,a.scope)
     if not a.execute_authorized_pilot:
         print(json.dumps(operation,indent=2));return
     credential=getpass.getpass('Administrative API credential (memory only): ')
