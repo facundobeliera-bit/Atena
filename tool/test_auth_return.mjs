@@ -64,3 +64,11 @@ test('unavailable history instructs closing the tab without exposing parameters'
   assert.match(result.nodes.detail.textContent, /Cerrá esta pestaña/);
   assert.doesNotMatch(JSON.stringify(result.nodes), /TEST_CODE/);
 });
+
+test('recovery return discards credentials and never claims a password reset', () => {
+  const result = render('', '#type=recovery&access_token=TEST_RECOVERY&refresh_token=TEST_REFRESH');
+  assert.deepEqual(result.changes, ['/auth/return.html']);
+  assert.equal(result.location.hash, '');
+  assert.equal(result.nodes.status.textContent, 'Continuá en Atena');
+  assert.doesNotMatch(JSON.stringify(result.nodes), /TEST_RECOVERY|TEST_REFRESH|contraseña actualizada/i);
+});

@@ -1,6 +1,8 @@
 # Atena V1 — preparación de evaluación privada
 
-Actualizado: 13/10/2026. Base funcional: `ab1c784`; cierre operativo local posterior.
+Actualizado: 14/10/2026. Base funcional vigente: `d83c585`; cierre operativo posterior.
+Guía actual y autorizaciones pendientes: [operación del primer piloto](operacion_primer_piloto_v1.md).
+Los resultados fechados al final son antecedentes, no reemplazan el estado vigente.
 Este documento reemplaza el estado «activación pendiente» del informe del 09/10.
 No autoriza despliegue, usuarios reales, purga ni nuevas migraciones.
 Las pruebas manuales están pospuestas; su única matriz está en
@@ -66,7 +68,10 @@ La migración `20261010000000` está aplicada. Registro/confirmación real, apro
 
 El alta no equivale a autoaprobación: una persona autorizada debe verificar la representación. Pendientes operativos: retorno de correo accesible (hoy Site URL es localhost:3000), entrega de correo y designación del revisor. La página estática local y el cambio exacto propuesto se describen en [alta y recuperación](alta_institucional_y_recuperacion_v1.md). No se publicó ni se cambió Auth.
 
-Alumno/familia: aún requieren vínculo de perfil autorizado; las pruebas usaron un fixture administrativo. No se ha implementado ni validado aquí un alta autónoma de familias/tutores. Las cuentas locales no acreditan identidad remota.
+Alumno/familia: alta implementada y validada remotamente en la campaña del 14/10/2026,
+mediante solicitudes y aprobación administrativa explícita. La cuenta local no acredita
+identidad remota. Los revisores institucionales y familiares se designan por separado;
+actualmente no hay revisores activos para operación cotidiana.
 
 ## Respaldo y recuperación
 
@@ -173,9 +178,9 @@ No hay reactivación implícita mediante una invitación antigua; una eventual r
 
 ## Ampliación familiar local (13/10/2026)
 
-Referencia vigente: `alta_familiar_v1.md`. Registro y revisión familiar conectados desde Flutter,
-con candidato SQL **todavía no aplicado remotamente**. No usar el APK como evidencia de que el
-servidor ya permite altas familiares: sin la migración responde explícitamente que falta habilitarlo.
+Estado histórico del 13/10: registro y revisión familiar conectados desde Flutter, entonces
+pendientes de activación. **Actualización 14/10:** candidato aplicado y campaña JWT completada;
+referencia vigente: `alta_familiar_v1.md`. No repetir la aplicación.
 
 - Flutter: 490 PASS, 0 skipped. PostgreSQL: 69 nuevas + 306 regresión = 375 PASS.
 - Herramienta administrativa: 3 pruebas PASS; no ejecución administrativa remota.
@@ -185,6 +190,6 @@ servidor ya permite altas familiares: sin la migración responde explícitamente
 - APK vigente: `build/evaluation/atena-v1-piloto-evaluacion.apk`. Identificador, certificado,
   configuración pública, hashes y fuente verificable registrados en `build/evaluation/manifest.json`.
   Sigue dirigido exclusivamente al piloto; no se cambió la firma ni se distribuyó públicamente.
-- Pendientes agrupados: aplicar candidato familiar; designar revisor **familiar** independiente;
-  campaña ficticia Auth/JWT; retorno/hosting/correo operativo; ensayo Supabase completo aislado.
-  Ninguna intervención física o manual fue solicitada ni ejecutada durante este bloque.
+- Pendientes actuales: revisores operativos por alcance, retorno/hosting/correo operativo,
+  ensayo Supabase completo aislado y decisiones de privacidad. La campaña remota ya finalizó.
+  En el cierre actual no se ejecutan pruebas físicas ni manuales.

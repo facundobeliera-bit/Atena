@@ -1,7 +1,11 @@
-# Alta de alumnos y familias — candidato local V1
+# Alta de alumnos y familias — piloto V1
 
-Estado: implementación local validada; **NO aplicada ni probada remotamente en este bloque**.
-No se crearon cuentas remotas, no se cambiaron contraseñas, RLS ni escenarios de teléfonos.
+Estado al 14/10/2026: migración `20261013000000` aplicada al piloto autorizado.
+Campaña con JWT reales: 96 comprobaciones PASS; activación: 34 controles PASS;
+verificación posterior: 14 controles PASS. Correo ficticio confirmado en Auth.
+Los revisores temporales quedaron deshabilitados. Escenarios de teléfonos intactos.
+No repetir la migración ni la campaña. El cierre operativo vigente se encuentra en
+[operación del primer piloto](operacion_primer_piloto_v1.md).
 
 ## Recorrido y autoridad
 
@@ -82,8 +86,10 @@ hay que contrastar definiciones/dependencias y revisar el diff efectivo del cand
   inscripción propia y familiar, confirmación idempotente y agotamiento. Dos conexiones reales
   compiten por cupo 1: una confirma, otra recibe conflicto. Filas de todas las tablas anteriores
   idénticas antes/después de aplicar el candidato local.
-- SQL usa claims y filas Auth ficticios. **No constituye una nueva validación JWT/GoTrue remoto
-  ni entrega real de correo**. Esas comprobaciones se ejecutarán tras autorización remota.
+- SQL local usa claims y filas Auth ficticios: no equivale a validar GoTrue. Separadamente,
+  la campaña remota autorizada posterior completó 96 comprobaciones con JWT reales.
+  Sólo el registro cuyo correo fue entregado y confirmado se cuenta como entrega real;
+  las cuentas fixture confirmadas administrativamente no se contabilizan como tal.
 - Análisis: 76 avisos históricos, 0 nuevos. Android release/web JavaScript: PASS.
 - Matriz manual única actualizada, íntegramente pendiente. No hubo pruebas físicas/manuales.
 
@@ -91,20 +97,20 @@ Reproducción local: `python tool/test_family_onboarding.py --psql RUTA_PSQL --p
 Requiere un servidor aislado con roles anon/authenticated/service_role. Crea base desechable;
 no acepta host remoto. Pruebas Flutter: `flutter test`; no requieren configuración Supabase real.
 
-## Operaciones pendientes de autorización, en orden
+## Operaciones completadas y pendientes
 
-1. **Piloto eaegvxxxkvhdukbkydvy — esquema.** Revisar historial/definiciones remotas, snapshot de
-   integridad y aplicar exclusivamente `20261013000000_family_onboarding.sql` una vez. Riesgo:
-   cambia la fuente de autorización de solicitantes; requiere pruebas negativas y JWT reales
-   antes de habilitar a nuevos participantes. No aplicar si existen modificaciones incompatibles.
+1. **Esquema y campaña completados.** `20261013000000` está aplicada; las 66 funciones
+   inspeccionadas coinciden con el esquema local probado. Las filas anteriores de 38 tablas
+   y los 15 usuarios Auth previos conservaron sus hashes. No volver a aplicar el candidato.
 2. **Piloto — revisor familiar ficticio.** Elegir UUID de una cuenta confirmada y autorizar la
    designación limitada. Preparar sin ejecutar: `python tool/onboarding_admin.py --scope family
    --reviewer-user UUID`. Ejecutar sólo con autorización y credencial administrativa fuera del
    cliente; el flag explícito de ejecución mantiene el proyecto piloto fijado. Aprobaciones y
    revocaciones posteriores se realizan desde la pantalla; no editar tablas manualmente.
-3. **Piloto — campaña ficticia Auth/JWT.** Autorizar cuentas/datos aislados, correo real y
-   recorrido adulto/menor/segundo responsable/revocación/inscripción. No consumir el escenario
-   reservado para teléfonos. Ningún PASS remoto de esta ampliación está declarado todavía.
+3. **Campaña ficticia cerrada.** Adulto/menor/segundo responsable/revocación/inscripción y
+   última vacante concurrente validados. No se consumió el escenario reservado para teléfonos.
+   El incidente del retorno de una cuenta nueva está contenido; alcance y limitaciones en
+   la guía operativa, sin credenciales ni enlaces de confirmación.
 4. **Hosting y Auth.** Autorizar publicación de `web/auth/return.html` y comprobar acceso a
    `https://atena-staging.facundobeliera.workers.dev/auth/return.html`; después cambiar exactamente
    Site URL. Última configuración observada: localhost:3000. No ampliar redirects con comodines.

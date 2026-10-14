@@ -133,4 +133,9 @@ La aplicación remota y las pruebas ficticias de alta ya terminaron; no repetirl
 
 Pruebas nuevas del retorno sin red: PKCE/tokens descartados, error vencido/reutilizado, descripción no reflejada, redirección arbitraria ignorada, CSP verificada y fallo de history sin exponer secretos. Pruebas de pantalla del revisor: aprobación con confirmación explícita, rechazo, autoaprobación oculta y permiso revocado durante diálogo sin falso éxito. Los resultados finales de ejecución y builds se registran en `preparacion_evaluacion_v1.md`.
 
-No se modificó configuración remota ni se designó un revisor. Para presentar el circuito completo con fixtures siguen pendientes retorno accesible y responsable administrativo. La ampliación local de alumnos/familias y su activación pendiente se documentan en `alta_familiar_v1.md`; no se debe confundir con una campaña remota ejecutada. Para usuarios reales también hacen falta entrega de correo operativa, recuperación completa ensayada y decisiones de privacidad, representación, custodia, conservación y operación. No se considera producción lista.
+En ese cierre local no se modificó configuración remota ni se designó un revisor. Posteriormente,
+el 14/10/2026 se activó y validó el alta familiar con autorización independiente; ver
+`alta_familiar_v1.md`. Los revisores de campaña quedaron deshabilitados. El estado y los pasos
+operativos vigentes están en `operacion_primer_piloto_v1.md`. Para usuarios reales siguen
+pendientes correo/retorno, responsables operativos, recuperación completa y decisiones de
+privacidad, representación, custodia y conservación. No se considera producción lista.
