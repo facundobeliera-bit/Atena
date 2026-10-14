@@ -1,7 +1,7 @@
 # Matriz única de validación integral V1
 
 Estado de TODAS las filas: **PENDIENTE — no ejecutada manualmente**.
-Fecha de preparación: 10/10/2026; actualización operativa: 13/10/2026. No iniciar hasta indicación del propietario.
+Fecha de preparación: 10/10/2026; actualización operativa: 14/10/2026. No iniciar hasta indicación del propietario.
 Sólo piloto ficticio, APK/web cuyo hash figure en `build/evaluation/manifest.json`.
 A = operador previamente habilitado; B = solicitante con perfil vinculado;
 C = identidad ajena sin permiso. No incluir contraseñas, tokens ni datos personales en evidencias.
@@ -35,7 +35,7 @@ N/A sólo con función inexistente documentada y decisión del responsable, nunc
 | A07 | Último cupo | Dos solicitudes compiten por capacidad 1, escenario autorizado aparte | Exactamente una confirmada; sin ocupación > capacidad. No consumir escenario reservado sin permiso. |
 | A08 | Gestión | Rechazar/cancelar según rol y estado permitidos | Estado consistente y liberación de cupo sólo cuando el contrato lo exige. No reactivar terminal por reintento. |
 | F01 | Familia | Consultar perfil vinculado autorizado | Sólo información de ese perfil. Un vínculo local o correo coincidente no autoriza remoto. |
-| F02 | Tutor nuevo | Acreditar representación y vincular menor | Tras activar el candidato familiar: cuenta/correo confirmado, adulto revisado y vínculo aprobado explícitamente; pendiente no accede. Activación remota todavía pendiente. |
+| F02 | Tutor nuevo | Acreditar representación y vincular menor | Cuenta/correo confirmado, adulto revisado y vínculo aprobado explícitamente; pendiente no accede. Backend activado; prueba manual pendiente. |
 | F03 | Mayor de edad | Crear perfil propio e inscribirse | Revisión de identidad/edad, perfil generado por servidor y confirmación institucional; no asignaciones manuales. |
 | F04 | Dos responsables | Vincularse al mismo menor con revisiones independientes | Un solo perfil, ambos ven la inscripción; no puede duplicarse cupo ni acceder a otra familia. |
 | F05 | Revocación | Revisor revoca un responsable | Pierde datos privados/operaciones; otro responsable conserva historia; cupo sin alteraciones. |
@@ -76,3 +76,20 @@ No declarar producción lista a partir de esta matriz pendiente.
 | ON02 | Reemplazar revisor ficticio autorizado | Nuevo revisor accede; anterior no puede decidir con su JWT/diálogo previo. Sin cambios a roles institucionales. Referencia y auditoría registradas. |
 
 I01/I04 cubren solicitud, decisión e invitaciones sobre el backend ya validado. Permanecen PENDIENTES manualmente. No ejecutar aún ni consumir el escenario reservado.
+
+## Recuperación de contraseña — capacidad pendiente, no confundir con confirmación
+
+No disponible actualmente. El retorno descarta los tokens y lo informa; ese comportamiento
+seguro no constituye una recuperación exitosa. Antes de habilitarla, exigir automáticamente:
+
+- Envío sin enumerar cuentas, con límites y retorno autorizado.
+- Sesión de recuperación sólo tras validación real de Auth/PKCE; parámetros inventados,
+  link vencido/reutilizado y cuenta diferente no permiten cambiar contraseña.
+- Pantalla dedicada: contraseña nueva confirmada, sin logs/persistencia del enlace secreto.
+- Cambio legítimo confirmado por Auth, contraseña anterior rechazada y sesiones previas
+  sin acceso privado mediante el guard de Atena, distinguiendo refresh de access JWT.
+- Flujo Android/web y navegador diferente con resultado explícito; no fallback inseguro
+  si falta el verificador PKCE. Estado de una identidad no se aplica a otra.
+
+Especificación preparada, implementación y E2E de recuperación pendientes. No marcar S02
+ni ON01 como evidencia de que existe este circuito completo. Mantener apagado el reset legacy.

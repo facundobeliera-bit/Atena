@@ -5,6 +5,10 @@ Este documento es una propuesta operativa; no autoriza publicación, cambios rem
 uso de datos reales ni eliminación. No sustituye asesoramiento jurídico.
 No cambia el funcionamiento de Flutter ni crea nuevos módulos.
 
+Decisión posterior del propietario: dominio y SMTP externo **pospuestos**. Las opciones
+de proveedor de esta guía quedan como referencia, no como trabajo a activar. Tampoco están
+autorizados la publicación del Worker, Site URL ni nuevos permisos remotos.
+
 ## Estado y acciones que faltan
 
 Alta institucional y familiar, operadores, áreas, publicación, inscripciones y cupos
@@ -26,6 +30,16 @@ El alojamiento existente responde 200 en
 `https://atena-staging.facundobeliera.workers.dev/`; `/auth/return.html` devuelve 404.
 No hace falta inventar un dominio para el retorno. No se comprobó una cuota o contrato
 de hosting nuevo; sólo se verificó que el Worker existente es accesible.
+
+Verificación API del 14/10: Worker `atena-staging`, versión activa
+`3030452d-1e1e-4187-9346-3f3d709679dd` con 100% del tráfico; compatibility date
+`2026-09-15`, workers.dev y previews habilitados, bindings/rutas vacíos, Logpush OFF y
+observability sin configurar. La versión informa assets `serve_directly=true`,
+`raw_run_worker_first=false`, sin handlers dinámicos. No se modificó nada.
+La [tarifa oficial de Static Assets](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/)
+no cobra almacenamiento ni solicitudes estáticas. Publicar el retorno en este Worker no
+requiere dominio, Worker nuevo, SMTP ni plan adicional; no se afirma que la cuenta completa
+carezca de otros cargos. El pago/dominio no bloquea técnicamente este retorno: falta autorización.
 
 1. Autorizar actualización del Worker existente con el build revisado. **El comando
    reemplaza el conjunto completo de Static Assets**, no agrega un archivo suelto.
@@ -58,6 +72,17 @@ se consulta al ingresar. Error vencido/reutilizado se muestra sin reflejar texto
 credenciales. Los flujos informativos no son una recuperación remota autónoma. Antes de prometer
 recuperación operativa hay que autorizar y validar un circuito legítimo separado; no habilitar
 el reset histórico inseguro. Las pruebas de descarte no cuentan como reset exitoso.
+Corrección local del cierre: `type=recovery` ahora muestra expresamente «Recuperación no
+disponible en este retorno», en lugar de orientar genéricamente al ingreso. Se mantiene la
+eliminación de parámetros y la CSP con hash actualizado; no se añade intercambio de tokens.
+La [API oficial de Supabase](https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail)
+requiere validar la recuperación antes de cambiar la contraseña del usuario autenticado.
+Los criterios futuros están en la matriz única, sin marcar el circuito inexistente como PASS.
+
+Límite de la página: sin JavaScript o si falla history, no puede garantizar la limpieza de la
+barra/historial; muestra que debe cerrarse. Un código PKCE en query llega al servidor antes de
+que la página pueda limpiarlo; no se certifican logs internos del proveedor ni del navegador.
+La página no registra ni refleja esos valores. No instrumentar la URL completa en soporte.
 
 ### SMTP recomendado para evaluación del propietario
 
@@ -133,6 +158,12 @@ La revisión READ-ONLY confirma que el guard remoto coincide con el probado loca
 **Prueba remota posterior a las 24 horas: pendiente**; no anticipar su PASS.
 Aunque Auth permita login/refresh tras el ban, eso no devuelve acceso privado en Atena.
 No reactivar esta cuenta ni cambiar su estado sin nueva autorización.
+Consulta reproducible preparada: `supabase/diagnostics/pilot_incident_containment_readonly.sql`.
+Sólo devuelve estado, recuentos y fingerprint de la función; nunca cierra el incidente por
+observar `disabled=true`. Fue ejecutada por lectura y conserva `incident_closed=false` y
+`credential_invalidation_verified=false`. Después del vencimiento deberá comprobarse también
+Auth/refresh y operaciones privadas mediante prueba aislada autorizada, sin publicar credenciales.
+La invalidez criptográfica de un access JWT vencido no demuestra invalidez del refresh.
 
 Las salidas posteriores contienen sólo estados/fechas/recuentos, sin JWT, emails completos,
 passwords ni URLs de retorno con parámetros. No se garantiza la eliminación del diagnóstico
@@ -236,7 +267,13 @@ Fuentes: [AAIP derechos](https://www.argentina.gob.ar/aaip/datospersonales/derec
 No hay sincronización realtime ni cola offline. Durante el piloto, actualizar explícitamente.
 Este recorrido es una guía futura; no declara una prueba física/manual realizada.
 
-## Validación de este cierre
+Escenario reservado comprobado sólo por lectura: «TEST TELEFONOS - Taller Atena», recurso
+activo y publicado, cupo 5, ocupación 0, solicitudes activas 0, vínculo solicitante habilitado.
+No se consumió ni reinició. Las identidades ficticias existentes se conservan sin alterarlas;
+no se crearon cuentas ni se probaron passwords. La entrega segura de acceso se resolverá al
+autorizar la demostración, sin incorporar credenciales a esta guía ni al APK.
+
+## Evidencia del cierre operativo anterior
 
 - Flutter pertinente: 50 PASS (alta institucional/familiar, contrato remoto y sesiones).
   Línea base completa anterior: 490 PASS; no se repitió por no cambiar código Flutter.
@@ -253,3 +290,32 @@ Este recorrido es una guía futura; no declara una prueba física/manual realiza
   y 62 archivos `.log` de build. Sin secretos detectados en distribución/Git; excepción de
   caché de navegador descrita arriba. 312 archivos protegidos sin cambios.
 - No se cambió Site URL, SMTP, privilegios, usuarios, datos o migraciones remotas. Sin deployment.
+
+## Cierre técnico posterior — alcance disponible completado
+
+- Se corrigió el mensaje del retorno de recuperación y su CSP; no se implementó un reset
+  parcial ni se reabrió el reset legacy. **Recuperación remota de contraseña: funcionalidad
+  pendiente**, independiente de contratar SMTP. Requiere desarrollo/validación del contrato
+  indicado en la matriz, no sólo habilitar un proveedor.
+- Regresiones afectadas: 28 Flutter PASS, 7 retorno PASS y 8 SQL locales PASS. Los dos nuevos
+  controles SQL comprueban corte tras cambio de credencial y nueva sesión legítima antes de
+  deshabilitar. Son fixtures locales; no equivalen a otra campaña Auth/JWT remota.
+- Consulta del incidente ejecutada exclusivamente READ-ONLY: cuenta encontrada, ban aún activo,
+  Atena deshabilitada, una sesión Auth, cero vínculos solicitantes. Incidente **ABIERTO/CONTENIDO**,
+  no cerrado hasta la prueba posterior al vencimiento y rechazo de credenciales expuestas.
+- No se repiten las 375 pruebas SQL, 96 JWT, recuperación de 45 tablas ni la suite Flutter
+  completa: no hubo cambios en su implementación. Las fuentes Dart/Android/dependencias están
+  intactas; se verifica el build de evaluación con el único cambio estático de retorno.
+- SMTP/dominio pospuestos: bloquean la entrega general fiable, no el hosting del retorno ni
+  las funciones de cuentas previamente habilitadas. No presentar correo a usuarios reales como
+  operativo con el proveedor actual de 2/hora y destinatarios restringidos.
+- Autorización remota futura: publicación del build completo/retorno y Site URL, designación
+  inicial de revisores por alcance y ensayo de recuperación integral en destino aislado.
+  No hubo nuevos usuarios, permisos, fixtures, consumo del escenario ni cambios de configuración.
+- Para datos reales siguen siendo obligatorios privacidad/menores, soporte y custodios,
+  conservación aprobada y recuperación completa. Nada de esto se sustituye por un PASS técnico.
+- Compilación de este bloque: Android release y web JavaScript PASS. Retorno del build igual
+  a la fuente corregida; firma/paquete/proyecto del APK verificados por el constructor existente.
+  Escaneo de 66 archivos web y 453 entradas APK sin hallazgos de secretos; 312 protegidos
+  idénticos. `git diff --check` PASS. No hubo actualización de dependencias ni nuevo análisis
+  Dart: no cambió código Dart, y la última comparación mantiene los 76 avisos históricos.

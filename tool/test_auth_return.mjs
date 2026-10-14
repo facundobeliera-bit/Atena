@@ -66,9 +66,23 @@ test('unavailable history instructs closing the tab without exposing parameters'
 });
 
 test('recovery return discards credentials and never claims a password reset', () => {
-  const result = render('', '#type=recovery&access_token=TEST_RECOVERY&refresh_token=TEST_REFRESH');
-  assert.deepEqual(result.changes, ['/auth/return.html']);
-  assert.equal(result.location.hash, '');
-  assert.equal(result.nodes.status.textContent, 'Continuá en Atena');
-  assert.doesNotMatch(JSON.stringify(result.nodes), /TEST_RECOVERY|TEST_REFRESH|contraseña actualizada/i);
+  for (const [query, fragment] of [
+    ['', '#type=recovery&access_token=TEST_RECOVERY&refresh_token=TEST_REFRESH'],
+    ['?type=recovery&code=TEST_RECOVERY', ''],
+  ]) {
+    const result = render(query, fragment);
+    assert.deepEqual(result.changes, ['/auth/return.html']);
+    assert.equal(result.location.hash + result.location.search, '');
+    assert.equal(result.nodes.status.textContent, 'Recuperación no disponible en este retorno');
+    assert.match(result.nodes.detail.textContent, /no cambia contraseñas ni inicia una sesión/);
+    assert.doesNotMatch(JSON.stringify(result.nodes), /TEST_RECOVERY|TEST_REFRESH|contraseña actualizada/i);
+  }
+});
+
+test('recovery does not hide errors or the instruction to close an uncleared URL', () => {
+  const failed = render('?type=recovery&error_code=otp_expired', '#access_token=TEST_ACCESS');
+  assert.equal(failed.nodes.status.textContent, 'El enlace no pudo completarse');
+  const uncleared = render('', '#type=recovery&access_token=TEST_ACCESS', true);
+  assert.match(uncleared.nodes.detail.textContent, /Cerrá esta pestaña/);
+  assert.doesNotMatch(JSON.stringify(uncleared.nodes), /TEST_ACCESS/);
 });

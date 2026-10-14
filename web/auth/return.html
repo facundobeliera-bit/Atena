@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-86R8OVfqV6vL2rx6z2qBwiS+TcrjJwgdskp/9RmyUT0='; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-KNyj8vI51p2/44Lcp/6tS7ClBkshzS/+jRbj2jca/No='; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'">
   <title>Atena piloto — Volver a la aplicación</title>
   <script>
 (() => {
@@ -14,6 +14,7 @@
   const query = new URLSearchParams(window.location.search);
   const fragment = new URLSearchParams(window.location.hash.slice(1));
   const failed = [query, fragment].some(p => p.has('error') || p.has('error_code'));
+  const recovery = [query, fragment].some(p => p.get('type') === 'recovery');
   // Clear all parameters, including PKCE codes/tokens, before any user navigation.
   let cleared = false;
   try {
@@ -24,6 +25,9 @@
     if (failed) {
       document.getElementById('status').textContent = 'El enlace no pudo completarse';
       document.getElementById('detail').textContent = 'Puede haber vencido o ya haberse utilizado. Volvé a Atena e intentá ingresar. Si tu correo sigue sin verificar, consultá al administrador del piloto.';
+    } else if (recovery) {
+      document.getElementById('status').textContent = 'Recuperación no disponible en este retorno';
+      document.getElementById('detail').textContent = 'Esta página no cambia contraseñas ni inicia una sesión. Cerrá esta pestaña y consultá al administrador del piloto para conocer el procedimiento autorizado.';
     }
     if (!cleared) {
       document.getElementById('detail').textContent = 'Cerrá esta pestaña y volvé a Atena para ingresar. No copies ni compartas la dirección de esta página.';

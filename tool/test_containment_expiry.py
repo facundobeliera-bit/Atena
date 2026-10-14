@@ -18,7 +18,7 @@ def main():
     args = parser.parse_args()
     if not re.fullmatch(r'atena_disposable_[a-z0-9_]+', args.database):
         raise ValueError('Only an existing disposable local fixture database is allowed.')
-    user, old, fresh = [str(uuid.uuid4()) for _ in range(3)]
+    user, old, fresh, after_password = [str(uuid.uuid4()) for _ in range(4)]
     claims = json.dumps({'sub': user, 'session_id': fresh})
     script = f"""
 begin;
@@ -33,6 +33,22 @@ do $$ begin
  if not atena_private.session_allowed() then raise exception 'Valid baseline session denied'; end if;
 end $$;
 select 'PASS baseline session allowed before containment';
+reset role;
+update auth.users set encrypted_password='FICTITIOUS-ONLY-HASH-CHANGE' where id='{user}';
+set local role authenticated;
+do $$ begin
+ if atena_private.session_allowed() then raise exception 'Password change left old session active'; end if;
+end $$;
+select 'PASS password change denies the previous session';
+reset role;
+insert into auth.sessions(id,user_id,created_at)
+values('{after_password}','{user}',clock_timestamp()+interval '1 second');
+set local role authenticated;
+set local request.jwt.claims='{json.dumps({'sub': user, 'session_id': after_password})}';
+do $$ begin
+ if not atena_private.session_allowed() then raise exception 'Password change incorrectly disabled account'; end if;
+end $$;
+select 'PASS new session accepted after password change before disable';
 reset role;
 select atena_private.revoke_sessions('{user}',true,'administrative');
 update auth.users set banned_until=now()-interval '1 second' where id='{user}';
@@ -88,10 +104,10 @@ select 'PASS rollback leaves no fixtures';
     if result.returncode:
         raise RuntimeError(result.stderr)
     checks = [line for line in result.stdout.splitlines() if line.startswith('PASS ')]
-    if len(checks) != 6:
+    if len(checks) != 8:
         raise RuntimeError('Incomplete local containment regression.')
     print('\n'.join(checks))
-    print('6 local containment checks PASS; no remote Auth request or token replay.')
+    print('8 local session checks PASS; no remote Auth request or token replay.')
 
 
 if __name__ == '__main__':
