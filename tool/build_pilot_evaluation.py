@@ -20,6 +20,27 @@ def validate_config(value):
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
+def configure_auth_return(web, config):
+    """Only a validated publishable key; no Auth session or privileged settings."""
+    validate_config(config)
+    page = web / 'auth/return.html'
+    text = page.read_text(encoding='utf-8')
+    marker = '__ATENA_PUBLISHABLE_KEY__'
+    if text.count(marker) != 1:
+        raise ValueError('Auth return public-key marker missing or duplicated.')
+    page.write_text(text.replace(marker, config['ATENA_SUPABASE_PUBLISHABLE_KEY']), encoding='utf-8', newline='\n')
+    worker = web / 'flutter_service_worker.js'
+    if worker.exists():
+        script = worker.read_text(encoding='utf-8')
+        match = re.search(r'const RESOURCES = (\{.*?\});', script, re.S)
+        if not match:
+            raise ValueError('Unknown service worker: cannot exclude Auth return from offline cache.')
+        resources = json.loads(match[1])
+        resources.pop('auth/return.html', None)
+        resources.pop('_headers', None)
+        script = script[:match.start(1)] + json.dumps(resources) + script[match.end(1):]
+        worker.write_text(script, encoding='utf-8', newline='\n')
+
 def run(args, env=None):
     return subprocess.run([str(a) for a in args], cwd=ROOT, env=env, check=True)
 
@@ -30,6 +51,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--config', required=True, type=pathlib.Path)
     p.add_argument('--flutter', default='flutter')
+    p.add_argument('--password-recovery-ready', action='store_true',
+        help='Enable email requests only AFTER approved return publication/template/redirect configuration.')
     a = p.parse_args()
     config = validate_config(json.loads(a.config.read_text(encoding='utf-8-sig')))
     flutter = shutil.which(a.flutter)
@@ -45,9 +68,11 @@ def main():
         raise RuntimeError('Lockfile changed unexpectedly; stop and inspect without discarding it.')
     env = dict(os.environ, ATENA_ANDROID_MULTIUSER='1', ATENA_ANDROID_DEMO='0')
     defines = '--dart-define-from-file=' + str(a.config.resolve())
+    recovery_defines = ['--dart-define=ATENA_PASSWORD_RECOVERY_READY=true'] if a.password_recovery_ready else []
     # Never clean the workspace or replace protected/untracked artifacts.
-    run([flutter, 'build', 'web', '--release', '--no-pub', defines], env)
-    run([flutter, 'build', 'apk', '--release', '--no-pub', defines], env)
+    run([flutter, 'build', 'web', '--release', '--no-pub', defines, *recovery_defines], env)
+    configure_auth_return(ROOT / 'build/web', config)
+    run([flutter, 'build', 'apk', '--release', '--no-pub', defines, *recovery_defines], env)
     apk = ROOT / 'build/app/outputs/flutter-apk/app-release.apk'
     sdk = os.environ.get('ANDROID_HOME') or os.environ.get('ANDROID_SDK_ROOT')
     if not sdk:
@@ -86,6 +111,7 @@ def main():
     manifest = {
         'purpose': 'PRIVATE PILOT EVALUATION ONLY; not production; no deployment',
         'project': PROJECT, 'environment': config['ATENA_REMOTE_ENV'],
+        'password_recovery_requests_enabled': a.password_recovery_ready,
         'application_id': 'org.atena.evaluation.multiuser',
         'head': output(['git', 'rev-parse', 'HEAD']).strip(),
         'tracked_diff_names': output(['git', 'diff', 'HEAD', '--name-only']).splitlines(),

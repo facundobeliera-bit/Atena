@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../services/remote/multiuser_session.dart';
+import '../../ui/password_recovery_page.dart';
 
 /// Recovery is unavailable until a verified external channel exists.
 class InstitucionForgotPasswordPage extends StatelessWidget {
@@ -18,6 +20,9 @@ class InstitucionForgotPasswordPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (MultiuserSession.enabled) {
+      return PasswordRecoveryPage(initialEmail: initialEmail);
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recuperar contraseña'),

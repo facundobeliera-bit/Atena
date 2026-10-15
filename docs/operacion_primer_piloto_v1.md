@@ -65,26 +65,85 @@ carezca de otros cargos. El pago/dominio no bloquea técnicamente este retorno: 
    protegida de Supabase y verificar envío/confirmación con una cuenta ficticia autorizada.
    Si falla, detener nuevos envíos y conservar el estado; no volver a localhost como solución.
 
-La página existente borra fragmento/query inmediatamente, no persiste ni intercambia tokens,
-no usa SDK, red o logs y no declara confirmación por un parámetro del cliente. El estado real
-se consulta al ingresar. Error vencido/reutilizado se muestra sin reflejar texto no confiable.
-**No implementa restablecimiento de contraseña**: un retorno `type=recovery` también descarta
-credenciales. Los flujos informativos no son una recuperación remota autónoma. Antes de prometer
-recuperación operativa hay que autorizar y validar un circuito legítimo separado; no habilitar
-el reset histórico inseguro. Las pruebas de descarte no cuentan como reset exitoso.
-Corrección local del cierre: `type=recovery` ahora muestra expresamente «Recuperación no
-disponible en este retorno», en lugar de orientar genéricamente al ingreso. Se mantiene la
-eliminación de parámetros y la CSP con hash actualizado; no se añade intercambio de tokens.
-La [API oficial de Supabase](https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail)
-requiere validar la recuperación antes de cambiar la contraseña del usuario autenticado.
-Los criterios futuros están en la matriz única, sin marcar el circuito inexistente como PASS.
+### Recuperación de contraseña preparada localmente — 2026-10-15
 
-Límite de la página: sin JavaScript o si falla history, no puede garantizar la limpieza de la
-barra/historial; muestra que debe cerrarse. Un código PKCE en query llega al servidor antes de
-que la página pueda limpiarlo; no se certifican logs internos del proveedor ni del navegador.
-La página no registra ni refleja esos valores. No instrumentar la URL completa en soporte.
+**Implementada y probada por contratos locales; NO habilitada ni validada de extremo a extremo remoto.**
+No se cambiaron Site URL, SMTP, plantillas remotas, RLS, usuarios ni contraseñas.
 
-### SMTP recomendado para evaluación del propietario
+- Ambos accesos Flutter abren la solicitud remota. El modo local mantiene el reset legacy
+  deshabilitado. El SDK solicita `resetPasswordForEmail` sin consultar cuentas ni reutilizar
+  la sesión habitual. Una respuesta neutral idéntica cubre cuentas inexistentes, límites y
+  errores: no certifica entrega. Los límites y posibles diferencias de tiempo del proveedor
+  requieren comprobación remota; no se promete resistencia absoluta a análisis temporal.
+- El retorno usa exclusivamente los endpoints oficiales de Supabase Auth. No implementa
+  un sistema de autenticación propio. La plantilla propuesta está en
+  `supabase/templates/recovery.html`: `.TokenHash` en el fragmento, nunca contraseña.
+- Se limpia la URL antes de operar. Sólo un código de ese formato y una pulsación explícita
+  permiten `POST /auth/v1/verify` con `type: recovery` fijo. Un `type` inventado no concede
+  autoridad: Auth debe verificar el código. Tokens de signup, JWT recibidos por URL,
+  códigos PKCE y parámetros en query no habilitan el formulario.
+- El bearer se conserva sólo en memoria de esta página, durante un máximo utilizable de
+  diez minutos y nunca se entrega a Flutter, almacenamiento, logs o canales entre pestañas.
+  El refresh token se descarta. Se exige contexto del mismo usuario y guard versión 1 antes
+  de mostrar el formulario y nuevamente antes de actualizar. No se crean roles ni vínculos.
+- Auth confirma `PUT /auth/v1/user` con la nueva contraseña. Se comprueba luego que el guard
+  rechace esa sesión anterior y se solicita `POST /auth/v1/logout?scope=global`.
+  Si alguna comprobación falla, se informa que el cierre está pendiente, sin declarar éxito
+  de revocación. Ante error de red durante el cambio se informa resultado incierto y no se
+  repite automáticamente. La persona debe volver al ingreso o pedir otro enlace.
+- El disparador existente por cambio de credencial establece el corte de sesiones de Atena.
+  Un JWT todavía criptográficamente válido no equivale a acceso privado permitido. No se
+  cambió ese disparador ni se promete revocación criptográfica instantánea de access tokens.
+- La página no lee ni modifica datos educativos ni cambia la sesión habitual de otro usuario.
+  Al volver, Atena valida su propia sesión contra el servidor. No se navega automáticamente
+  a un área privada desde el correo. Android vuelve a la aplicación; web al inicio.
+- CSP limita la red al piloto y fija el hash del script; cabeceras locales propuestas impiden
+  cacheo/iframe. El constructor excluye el retorno del caché offline generado por Flutter.
+  Una instalación web con un service worker antiguo debe actualizarse antes del ensayo.
+  Un build web directo sin el constructor no inyecta la clave pública y falla cerrado.
+
+**Activación pendiente: autorización separada, en este orden.**
+
+1. Publicar el build web completo preparado en el Worker existente, sin cambios de rutas ni
+   fallback. Verificar HTTPS 200 en `/auth/return.html`, cabeceras, contenido/configuración
+   públicos y actualización del service worker. No publicar sólo la carpeta `auth`.
+2. En el piloto `eaegvxxxkvhdukbkydvy`, autorizar únicamente la plantilla **Recovery** con el
+   contenido exacto de `supabase/templates/recovery.html` y añadir a la lista de redirect URLs
+   `https://atena-staging.facundobeliera.workers.dev/auth/return.html`, preservando otras entradas.
+   No cambiar Site URL, SMTP ni plantilla de confirmación. No usar el ConfirmationURL estándar
+   para recovery: consume el código antes de este retorno y éste rechaza esos tokens.
+3. Autorizar una prueba automatizada aislada con una cuenta ficticia dedicada y un buzón de
+   pruebas consentido. Sin ello no enviar correos ni modificar contraseñas existentes.
+   Verificar con **enlace real**: código de recovery válido, signup rechazado aunque se cambie
+   su tipo, vencido/reutilizado rechazados, contraseña nueva válida/anterior inválida, permisos
+   intactos, refresh anteriores rechazados, JWT anteriores sin acceso privado, otro usuario
+   intacto. Documentar resultados reales. No sustituirlo por generación administrativa de sesión.
+4. Sólo después habilitar las solicitudes con `--password-recovery-ready` en
+   `tool/build_pilot_evaluation.py`. El manifiesto registra el flag. Sin él, el APK y la web
+   informan que la recuperación está pendiente de habilitación y no envían correos.
+
+La entrega genérica del correo continúa limitada por el servicio predeterminado y su cuota;
+Resend, dominio y SMTP siguen pospuestos. Este circuito no necesita una migración ni permisos
+nuevos. Sin JavaScript, con history fallando, host inaccesible o navegador/extensión capturando
+la URL, no puede garantizarse eliminación absoluta del enlace en todos los sistemas: se falla
+cerrado y no se debe compartir la dirección. El fragmento evita enviarlo en la petición HTTP;
+los logs internos de Auth/correo no son controlados por esta página.
+
+Referencias oficiales: [plantillas Auth](https://supabase.com/docs/guides/auth/auth-email-templates),
+[recuperación](https://supabase.com/docs/guides/auth/passwords),
+[verifyOtp](https://supabase.com/docs/reference/javascript/auth-verifyotp).
+
+Validación de esta unidad: 47 casos Flutter relacionados PASS (10 nuevos), 15 casos del
+retorno con HTTP controlado PASS, 10 del constructor PASS y 8 SQL locales de sesiones PASS.
+No se repitió la suite completa ni se enviaron correos reales. Análisis global: 76 avisos
+históricos; análisis de los Dart modificados: 0 avisos. Builds Android y web JavaScript PASS.
+El `_headers` cubre tanto `/auth/return.html` como su ruta canónica, conforme a las
+[reglas de Static Assets](https://developers.cloudflare.com/workers/static-assets/headers/).
+El APK de evaluación mantiene `password_recovery_requests_enabled=false`; no es prueba
+de recuperación operativa. Controles por patrones sin secretos en fuente/builds y los
+312 archivos protegidos sin cambios. `git diff --check` PASS.
+
+## SMTP recomendado para evaluación del propietario
 
 Precios/límites consultados el 14/10/2026; pueden cambiar. No se contrató ni activó proveedor.
 

@@ -77,19 +77,19 @@ No declarar producción lista a partir de esta matriz pendiente.
 
 I01/I04 cubren solicitud, decisión e invitaciones sobre el backend ya validado. Permanecen PENDIENTES manualmente. No ejecutar aún ni consumir el escenario reservado.
 
-## Recuperación de contraseña — capacidad pendiente, no confundir con confirmación
+## Recuperación de contraseña — implementación local, activación y E2E pendientes
 
-No disponible actualmente. El retorno descarta los tokens y lo informa; ese comportamiento
-seguro no constituye una recuperación exitosa. Antes de habilitarla, exigir automáticamente:
+El circuito local está implementado y sus contratos automatizados se prueban sin usuarios reales.
+Las solicitudes están deshabilitadas hasta autorizar publicación y plantilla. Antes de habilitarlas:
 
 - Envío sin enumerar cuentas, con límites y retorno autorizado.
-- Sesión de recuperación sólo tras validación real de Auth/PKCE; parámetros inventados,
+- Sesión de recuperación sólo tras verificación Auth de TokenHash con tipo recovery fijo; parámetros inventados,
   link vencido/reutilizado y cuenta diferente no permiten cambiar contraseña.
 - Pantalla dedicada: contraseña nueva confirmada, sin logs/persistencia del enlace secreto.
 - Cambio legítimo confirmado por Auth, contraseña anterior rechazada y sesiones previas
   sin acceso privado mediante el guard de Atena, distinguiendo refresh de access JWT.
 - Flujo Android/web y navegador diferente con resultado explícito; no fallback inseguro
-  si falta el verificador PKCE. Estado de una identidad no se aplica a otra.
+  si sólo llega un código PKCE o un JWT en URL. Estado de una identidad no se aplica a otra.
 
-Especificación preparada, implementación y E2E de recuperación pendientes. No marcar S02
+Implementación local preparada; enlace real, entrega de correo y E2E remoto pendientes. No marcar S02
 ni ON01 como evidencia de que existe este circuito completo. Mantener apagado el reset legacy.

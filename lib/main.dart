@@ -34,6 +34,7 @@ import 'services/institucion_contexto_operativo_service.dart';
 import 'services/institucion_areas_service.dart';
 import 'services/remote/atena_supabase_client.dart';
 import 'services/remote/multiuser_session.dart';
+import 'ui/password_recovery_page.dart';
 import 'screens/auth/alumno_login_page.dart';
 import 'screens/auth/institucion_login_page.dart';
 
@@ -201,6 +202,8 @@ class _AtenaAppState extends State<AtenaApp> {
     if (name.isEmpty || name == '/') return _routeBootRoot();
     if (MultiuserSession.enabled) {
       return switch (name) {
+        '/alumno_forgot_password' || '/institucion_forgot_password' =>
+          MaterialPageRoute(builder: (_) => const PasswordRecoveryPage()),
         '/alumno_login' => MaterialPageRoute(
           builder: (_) => const AlumnoLoginPage(),
         ),
