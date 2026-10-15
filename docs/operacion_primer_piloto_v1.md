@@ -1,5 +1,104 @@
 # Atena V1 — operación del primer piloto
 
+## Estado vigente — 15/10/2026, recta final
+
+Esta sección prevalece sobre los planes y resultados históricos que siguen debajo.
+No autoriza cambios remotos. Dominio, Resend, SMTP, recuperación por correo, PKCE,
+laboratorio Auth y pruebas físicas/manuales están **pospuestos por el propietario**.
+Mantener `password_recovery_requests_enabled=false`; no enviar correos ni activar
+recuperación. No ejecutar las instrucciones históricas de Site URL o plantillas.
+
+### Seguridad: incidente contenido en Atena, todavía abierto en Auth
+
+Lectura del piloto `eaegvxxxkvhdukbkydvy` el 15/10/2026 a las 22:28 UTC:
+
+- Proyecto `ACTIVE_HEALTHY`. El bloqueo temporal de la cuenta ficticia afectada
+  venció a las 18:03:56 UTC (15:03:56 Argentina).
+- Atena conserva `disabled=true` y su corte de sesiones. No tiene vencimiento.
+- Cero vínculos familiares activos, operadores, vínculos institucionales o roles
+  de revisión activos para esa cuenta.
+- Auth conserva una fila de sesión y una fila de refresh token sin revocar.
+  **No se reprodujo el token ni se probó un login.** La fila no demuestra que el
+  token expuesto siga utilizable, pero tampoco permite afirmar su invalidación.
+- El guard remoto coincide exactamente con el probado localmente. Ocho controles
+  locales PASS: cambio de credencial, sesión posterior legítima, ban vencido,
+  bloqueo de sesiones viejas/nuevas, rechazo privado y rollback sin fixtures.
+
+No confundir contención de datos privados de Atena con revocación de Supabase Auth.
+Antes de datos reales, cerrar administrativamente el incidente. Se necesita autorización
+específica para invalidar las sesiones/credenciales de **esa única cuenta ficticia**
+y bloquear su ingreso Auth mediante mecanismos soportados, manteniendo la deshabilitación
+de Atena y sin borrar la identidad ni sus dependencias. La revocación puntual de sesiones
+no impide nuevos ingresos si una credencial permanece válida. Un ban temporal tampoco
+debe describirse como cierre permanente. No reutilizar el secreto expuesto para investigar.
+
+### Operación cotidiana y primera institución
+
+La lectura actual encuentra **0 revisores institucionales y 0 familiares activos**.
+Las pantallas para revisar, aprobar/rechazar y revocar ya existen. No hace falta un
+panel nuevo, pero no puede completarse una nueva adhesión mientras no haya un revisor.
+La designación inicial requiere custodio técnico, cuenta verificada y autorización
+remota por alcance, usando la herramienta administrativa existente. Después, las
+decisiones ordinarias se toman desde Atena, sin editar tablas ni compartir claves.
+El propietario institucional administra áreas e invitaciones limitadas desde la app.
+
+Guía breve para una institución interesada:
+
+1. **Presentación:** usar sólo las identidades ficticias habilitadas. Mostrar perfil,
+   oferta/turno/cupo, búsqueda y seguimiento. No prometer alta real ni recuperación.
+2. **Demostración:** el escenario reservado «TEST TELEFONOS - Taller Atena» continúa
+   publicado, activo, con capacidad 5, ocupación 0 y solicitudes activas 0. No se consumió
+   en esta revisión. Su ejecución manual sigue pospuesta; no está marcada PASS.
+3. **Solicitud de adhesión futura:** acordar alcance y responsables antes de introducir
+   datos reales. No recibir documentación personal por este canal de diagnóstico.
+4. **Habilitación futura:** resolver correo, designar revisores y verificar representación
+   mediante aprobación explícita. Registrarse no concede una institución ni permisos.
+5. **Operación:** propietario crea áreas, invita con permisos mínimos, configura y publica
+   ofertas. Alumno/responsable autorizado solicita; institución decide; ambos actualizan
+   para comprobar estado y cupo. No hay cola offline ni sincronización realtime.
+6. **Incidencia:** conservar datos; registrar versión, hora, operación y código de error
+   sin tokens ni contenido educativo. Actualizar antes de reintentar. No recrear cuentas,
+   editar cupos por SQL ni borrar datos para resolver un error.
+
+### Recuperación y límites
+
+Se conserva la evidencia del ensayo local cifrado: 45 tablas y 13 controles, incluyendo
+integridad, RLS/permisos y un objeto ficticio separado. Las pruebas del contenedor cifrado
+comprueban contraseña incorrecta, alteración y no sobrescritura. No se repitió el restore
+sin cambios de implementación. Esto **no restaura Supabase completo**: siguen pendientes
+destino aislado autorizado, inventario/copia de objetos privados, dependencias y configuración
+Auth, configuración del servicio y prueba conjunta de recuperación. No copiar el piloto ni
+restaurar sobre él sin permiso. No activar purga ni fijar retención automáticamente.
+
+La lectura conservó las filas históricas de 38 tablas y los usuarios Auth anteriores a
+la campaña familiar. El escenario de teléfonos no cambió. Comercial y purga permanecen OFF.
+La matriz única sigue siendo [matriz_validacion_integral_v1.md](matriz_validacion_integral_v1.md),
+íntegramente pendiente de ejecución manual. La presentación ficticia es distinta de operar
+con datos reales: faltan cierre del incidente, responsables/revisores, entrega de correo,
+recuperación integral, privacidad/conservación aprobadas y evaluación de uso.
+
+### Evidencia de este cierre
+
+- 169 tests Flutter focalizados PASS, sin omitidos: alta y revisión institucional/familiar,
+  contratos remotos, catálogo público, publicación, solicitudes, capacidad, identidad,
+  navegación y logout. Son regresiones locales/HTTP controlado; no una campaña JWT nueva.
+- 8 controles SQL locales de contención PASS, con rollback; 13 tests de constructor y
+  administración PASS; 2 tests de respaldo cifrado PASS. No se repitió la suite general.
+- 66 funciones remotas coinciden con el esquema local previamente probado. Se conserva
+  la evidencia anterior de alta/JWT y concurrencia, sin nuevas escrituras remotas.
+- Análisis: 76 avisos, exactamente iguales a la línea base, 0 nuevos; salida 1 por esos
+  avisos históricos. No se modificaron los archivos históricos para silenciarlos.
+- Builds Android release y web JavaScript PASS. Los avisos del sondeo Wasm son históricos;
+  no se certifica Wasm. Artefacto privado: `build/evaluation/atena-v1-piloto-evaluacion.apk`;
+  proyecto piloto y recuperación deshabilitada. Identidad, firma y hashes en el manifiesto
+  contiguo. La fuente funcional corresponde a `575e5b0`; este cierre sólo modifica esta guía.
+- No aparecieron defectos funcionales nuevos en los circuitos ejecutados. Se corrigió
+  documentación operativa obsoleta, sin atribuir a este bloque mejoras funcionales anteriores.
+- Escaneo por patrones: 467 archivos tracked, 67 archivos web y 453 entradas APK sin
+  hallazgos de claves privilegiadas, claves privadas o JWT de sesión piloto. No es prueba
+  universal de ausencia de secretos. Los 312 protegidos mantienen sus hashes;
+  `git diff --check` PASS. No compartir perfiles de navegador ni la carpeta `build` completa.
+
 Fecha: 14/10/2026. Proyecto exclusivo: `eaegvxxxkvhdukbkydvy`, región `sa-east-1`.
 Este documento es una propuesta operativa; no autoriza publicación, cambios remotos,
 uso de datos reales ni eliminación. No sustituye asesoramiento jurídico.
