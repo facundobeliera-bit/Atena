@@ -1,8 +1,103 @@
 # Atena V1 — operación del primer piloto
 
-## Estado vigente — 15/10/2026, recta final
+## Estado vigente — 16/10/2026, habilitación operativa
 
-Esta sección prevalece sobre los planes y resultados históricos que siguen debajo.
+Esta sección prevalece sobre los diagnósticos históricos siguientes. No autoriza
+uso de datos reales ni cambios remotos. El incidente de credenciales **está cerrado
+administrativamente**: cuenta conservada y deshabilitada en Atena, contraseña reemplazada
+por un secreto aleatorio descartado, cero sesiones/refresh tokens/estados PKCE/vínculos.
+Lectura independiente del 16/10 a las 05:25 UTC. No se reprodujeron las credenciales expuestas
+ni se afirma invalidación criptográfica de firmas JWT. No requiere otro bloqueo temporal.
+
+### Primer responsable de revisión: preparado, no designado
+
+Lectura específica del 16/10 a las 05:31 UTC: piloto ACTIVE_HEALTHY, **0 revisores
+institucionales y 0 familiares activos**. Ambos RPC de designación permiten service_role
+y rechazan authenticated. No se otorgaron roles ni se consultó una cuenta personal.
+
+Falta elegir el **UUID de auth.users de la cuenta individual del propietario** y autorizar
+expresamente cada alcance (institucional y familiar). No usar el ID de una institución,
+perfil local, operador o cuenta ficticia como sustituto. No inferir titularidad por email.
+Si aún no existe esa cuenta verificada, su creación/confirmación requiere autorización
+separada; la entrega general de correo sigue bloqueada por el proveedor actual.
+
+Procedimiento preparado con `tool/onboarding_admin.py`, sin SQL manual:
+
+1. Verificar UUID, titularidad, correo confirmado, ausencia de ban y de deshabilitación Atena.
+2. Registrar autorización, custodio ejecutor, alcances y fecha de revisión de la designación.
+3. Preparar dos planes con `--reviewer-user UUID` y `--scope institution` / `--scope family`.
+4. Sólo con autorización, ejecutar cada plan mediante `--execute-authorized-pilot eaegvxxxkvhdukbkydvy`.
+   La clave administrativa se solicita oculta, sólo en memoria; nunca va al cliente.
+5. Verificar ambos roles y auditorías; para retirar un alcance, mismo RPC con `--disable`.
+
+Son roles de revisión separados, no superusuario. Tienen alcance global dentro de su
+cola (instituciones o familias), **no están restringidos a una institución** y no expiran
+automáticamente. No prometer acceso temporal si no se programa su revocación explícita.
+No habilitar ambos alcances sin autorización de ambos. La autoaprobación sigue prohibida:
+si el propietario necesita aprobar una solicitud propia, deberá hacerlo otro revisor autorizado.
+La auditoría de decisiones registra el usuario autenticado; la designación con credencial
+administrativa no identifica por sí sola al humano ejecutor, por eso se conserva autorización externa.
+
+### Alcance cotidiano real del modo multiusuario
+
+| Área | Disponible desde Atena | Límite concreto / siguiente paso |
+| --- | --- | --- |
+| Institución | Solicitar alta; revisor aprueba/rechaza con referencia; propietario recibe identidad y contexto | Registro no equivale a aprobación; representación se comprueba administrativamente, no por registro oficial automático |
+| Áreas y operadores | Crear/renombrar áreas, invitar por 48 h con publicar/leer/decidir, aceptar y revocar operadores | No existe edición completa de capacidades del operador desde este formulario ni baja de área; no usar SQL cotidiano como sustituto |
+| Perfil institucional | Nombre inicial aprobado; ubicación y presentación pública de la oferta | No hay editor remoto completo de nombre, contacto y perfil institucional; no presentar el editor local como sincronizado |
+| Ofertas | Crear/editar grupos y turnos, tipo/nivel, horario, edades, requisitos, cupo; guardar borrador, publicar, suspender y retirar | Datos agrupados en catálogo de área; no hay CRUD remoto independiente de todos los niveles/turnos locales |
+| Inscripciones | Consultar solicitudes y confirmados; confirmar/rechazar con cupo atómico | Confirmados siguen siendo terminales: baja/cambio posterior requiere contrato y modificación remota autorizados |
+| Cancelación pendiente | Alumno/responsable o institución con permiso puede cancelar desde la pantalla usando el RPC existente | Corrección local de acción inaccesible. Confirmación explícita, sin éxito local; carrera con confirmación resuelta por servidor; no habilita cancelación de confirmados |
+| Adultos/familias | Alta, solicitud de perfil propio, vínculo con menor/segundo responsable y continuidad al llegar a mayoría de edad, con revisión | Sin revisor no hay alta autónoma completa; no hay edición general de datos identificatorios aprobados |
+| Consulta familiar | Búsqueda pública, horarios/requisitos/vacantes, solicitar, actualizar estado, ver información habilitada por inscripción | No hay realtime ni cola offline; sólo vínculos verificados habilitan acceso de menores |
+| Decisiones administrativas | Cuenta → Incorporación institucional / Mis perfiles y vínculos familiares | Uso cotidiano desde pantallas; designar o retirar revisores sigue siendo excepcional y técnico |
+
+Los límites de edición de identidad y baja de inscripciones no se amplían aquí: requieren
+un contrato de revisión/rectificación y conservación del historial. Propuesta mínima futura:
+rectificación revisada de datos identificatorios y baja institucional trazable que libere
+únicamente el cupo propio; debe autorizarse antes de cambiar funciones o permisos remotos.
+No se declara autonomía total para modificaciones y bajas posteriores a la confirmación.
+
+### Escenario, distribución y dependencias
+
+Escenario reservado conservado por lectura, sin escrituras: TEST TELEFONOS - Taller Atena,
+publicado y activo, capacidad 5, ocupación 0, solicitudes activas 0, vínculo solicitante
+habilitado. No se crearon duplicados, se consumieron cupos ni se probaron contraseñas.
+Puede demostrar búsqueda → solicitud → decisión → cupo compartido al habilitar su evaluación.
+Pruebas manuales/físicas siguen pospuestas; utilizar la matriz única existente.
+
+Orden mínimo de apertura, con autorizaciones separadas:
+
+1. Designar cuenta verificada del propietario y sus dos alcances; definir suplencia/conflictos.
+2. Resolver entrega de correo y retorno de registro para nuevos participantes. Dominio/Resend
+   siguen pospuestos. El Worker de retorno ya está publicado; los pasos de publicación
+   pendientes que aparecen más abajo son históricos. Recuperación sigue deshabilitada y su
+   separación segura de propósitos requiere prueba independiente; contratar correo no la resuelve.
+3. Acordar alcance del piloto, representación institucional, soporte y procedimiento ante fallos.
+4. Antes de datos reales: responsable de datos, privacidad/consentimiento, tratamiento de menores,
+   conservación y atención de derechos revisados por asesoría competente. No hay aprobación legal en este informe.
+5. Autorizar destino aislado y ensayo integral de recuperación: PostgreSQL + Auth + objetos
+   Storage + configuración. Las 45 tablas/13 controles locales y cifrado no certifican Supabase completo.
+6. Resolver o excluir expresamente del alcance las rectificaciones/bajas no disponibles.
+7. Ejecutar posteriormente la matriz integral Android/web y autorizar participantes/datos por etapas.
+
+No se modificaron Auth, roles, RLS, SMTP, Site URL, plantillas ni escenarios. No se activó
+recuperación, comercial ni purga. La corrección de cancelación usa el contrato remoto leído:
+pendiente como único estado transicionable, idempotencia y autorización familiar vigente.
+
+Validación de este bloque: **71 Flutter focalizados PASS**, incluidos 15 nuevos de
+cancelación; 3 pruebas de planes administrativos PASS. Son pruebas locales con HTTP
+controlado, no nuevas decisiones contra el piloto. Lectura remota confirma el contrato
+instalado y el escenario intacto. Análisis: 76 avisos idénticos a la línea base, 0 nuevos.
+Android release y web JavaScript PASS; recuperación sigue deshabilitada. APK vigente:
+`build/evaluation/atena-v1-piloto-evaluacion.apk`, con manifiesto contiguo y configuración
+piloto explícita. No se repitió la suite general ni se ejecutó una evaluación manual.
+Los 312 hashes protegidos siguen idénticos; el diagnóstico SQL previamente modificado
+y los cuatro elementos históricos quedan fuera del commit de esta corrección.
+
+## Antecedente — 15/10/2026, recta final
+
+Este antecedente se conserva como evidencia; prevalece el estado del 16/10/2026.
 No autoriza cambios remotos. Dominio, Resend, SMTP, recuperación por correo, PKCE,
 laboratorio Auth y pruebas físicas/manuales están **pospuestos por el propietario**.
 Mantener `password_recovery_requests_enabled=false`; no enviar correos ni activar

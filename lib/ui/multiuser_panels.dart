@@ -505,18 +505,65 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
       _error = null;
     });
     try {
-      await MultiuserSession.current.decide(
-        widget.institutionId!,
-        widget.areaId!,
-        id,
-        state,
-      );
+      if (widget.profile case final profile?) {
+        await MultiuserSession.current.cancelRequest(profile, id);
+      } else {
+        await MultiuserSession.current.decide(
+          widget.institutionId!,
+          widget.areaId!,
+          id,
+          state,
+        );
+      }
     } catch (e) {
       if (mounted) setState(() => _error = remoteError(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
     if (mounted && _error == null) await _load();
+  }
+
+  Future<void> _cancel(String id) async {
+    if (_busy) return;
+    final actor = MultiuserSession.current.userId;
+    setState(() => _busy = true);
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancelar solicitud pendiente'),
+        content: const Text(
+          'La cancelación se confirmará en el servidor. Si la institución ya '
+          'confirmó la inscripción, no se podrá cancelar por este medio.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Volver'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirmar cancelación'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (actor != MultiuserSession.current.userId) {
+      setState(() {
+        _rows = [];
+        _error = 'La sesión cambió. Volvé a ingresar.';
+      });
+      return;
+    }
+    if (accepted == true) {
+      await _decide(
+        id,
+        widget.profile != null
+            ? 'cancelled_by_student'
+            : 'cancelled_by_institution',
+      );
+    }
   }
 
   @override
@@ -565,6 +612,12 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
                         child: const Text('Rechazar'),
                       ),
                     ],
+                  ),
+                if (row['state'] == 'pending' &&
+                    (widget.profile != null || _canDecide))
+                  OutlinedButton(
+                    onPressed: _busy ? null : () => _cancel(row['id']),
+                    child: const Text('Cancelar solicitud'),
                   ),
               ],
             ),

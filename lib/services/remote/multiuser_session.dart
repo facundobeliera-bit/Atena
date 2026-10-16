@@ -209,12 +209,30 @@ class MultiuserSession {
     String id,
     String state,
   ) async {
+    final actor = userId;
     await institution(institutionId, areaId, 'requests.decide');
     final rows = await requests(institutionId: institutionId, areaId: areaId);
     if (!rows.any((r) => r['id'] == id)) {
       throw StateError('Solicitud fuera del área seleccionada.');
     }
+    if (userId != actor) throw StateError('La sesión cambió.');
     await SolicitudesSupabaseRepository(client).decidir(id, state);
+    if (userId != actor) throw StateError('La sesión cambió.');
+  }
+
+  /// Cancels only through the existing RPC. The server checks the live family
+  /// link and serializes this decision against institutional confirmation.
+  Future<void> cancelRequest(String profile, String id) async {
+    final actor = userId;
+    final rows = await requests(profile: profile);
+    if (!rows.any((r) => r['id'] == id)) {
+      throw StateError('Solicitud fuera del perfil seleccionado.');
+    }
+    if (userId != actor) throw StateError('La sesión cambió.');
+    await SolicitudesSupabaseRepository(
+      client,
+    ).decidir(id, 'cancelled_by_student');
+    if (userId != actor) throw StateError('La sesión cambió.');
   }
 
   /// Only provisioned, already published pilot offers can be revised here.
