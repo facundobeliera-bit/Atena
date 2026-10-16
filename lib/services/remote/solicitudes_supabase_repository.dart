@@ -73,6 +73,7 @@ class SolicitudesSupabaseRepository {
           'rejected',
           'cancelled_by_student',
           'cancelled_by_institution',
+          'withdrawn_by_institution',
         ].contains(row['state'])) {
       throw const FormatException('Solicitud remota inválida.');
     }

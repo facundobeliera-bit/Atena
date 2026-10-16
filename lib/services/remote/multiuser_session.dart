@@ -62,6 +62,9 @@ class MultiuserSession {
 
   final SupabaseClient client;
   MultiuserSession(this.client);
+  // Enable only after separately authorized remote migrations and validation.
+  bool get essentialOperationsReady =>
+      const bool.fromEnvironment('ATENA_ESSENTIAL_OPERATIONS_READY');
   bool get signedIn => client.auth.currentUser != null;
   String get userId => client.auth.currentUser?.id ?? '';
 
@@ -233,6 +236,65 @@ class MultiuserSession {
       client,
     ).decidir(id, 'cancelled_by_student');
     if (userId != actor) throw StateError('La sesión cambió.');
+  }
+
+  Future<Map<String, dynamic>> withdrawEnrollment(
+    String institutionId,
+    String areaId,
+    String id,
+    String reason,
+  ) async {
+    if (!essentialOperationsReady) {
+      throw StateError('La baja de inscripciones todavía no está habilitada.');
+    }
+    final actor = userId;
+    final token = client.auth.currentSession?.accessToken;
+    await institution(institutionId, areaId, 'requests.decide');
+    final rows = await requests(institutionId: institutionId, areaId: areaId);
+    if (!rows.any((r) => r['id'] == id)) {
+      throw StateError('Inscripción fuera del área seleccionada.');
+    }
+    void sameSession() {
+      if (userId != actor || client.auth.currentSession?.accessToken != token) {
+        throw StateError('La sesión cambió.');
+      }
+    }
+
+    sameSession();
+    final raw = await client.rpc(
+      'atena_enrollment_withdraw',
+      params: {'p_request_id': id, 'p_reason': reason.trim()},
+    );
+    sameSession();
+    if (raw is! Map ||
+        raw['request_id'] != id ||
+        raw['institution_id'] != institutionId ||
+        raw['area_id'] != areaId ||
+        raw['reason'] != reason.trim() ||
+        raw['withdrawn_at'] is! String ||
+        raw['withdrawn_by_auth_user_id'] is! String ||
+        raw['withdrawn_by_operator_id'] is! String) {
+      throw const FormatException('Respuesta de baja contradictoria.');
+    }
+    return Map<String, dynamic>.from(raw);
+  }
+
+  Future<Map<String, dynamic>> withdrawalHistory(String id) async {
+    if (!essentialOperationsReady) throw StateError('Historial no habilitado.');
+    final actor = userId;
+    final token = client.auth.currentSession?.accessToken;
+    await context();
+    final row = await client
+        .from('atena_enrollment_withdrawals')
+        .select()
+        .eq('request_id', id)
+        .single();
+    if (userId != actor ||
+        client.auth.currentSession?.accessToken != token ||
+        row['request_id'] != id) {
+      throw StateError('La sesión o inscripción cambió.');
+    }
+    return row;
   }
 
   /// Only provisioned, already published pilot offers can be revised here.

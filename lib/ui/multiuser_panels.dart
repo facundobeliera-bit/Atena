@@ -1,5 +1,6 @@
 import 'institution_onboarding_page.dart';
 import 'family_onboarding_page.dart';
+import 'identity_rectification_page.dart';
 import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'catalog_offer_editor.dart';
@@ -207,6 +208,18 @@ class _RemoteAccountPanelState extends State<RemoteAccountPanel> {
                   if (mounted) await _load();
                 },
           child: const Text('Mis perfiles y vínculos familiares'),
+        ),
+      if (_identity != null &&
+          MultiuserSession.current.essentialOperationsReady)
+        OutlinedButton(
+          onPressed: _busy
+              ? null
+              : () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const IdentityRectificationPage(),
+                  ),
+                ),
+          child: const Text('Rectificación de identidad'),
         ),
       for (final profile in _identity?.profiles ?? <String>[])
         Card(
@@ -566,6 +579,111 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
     }
   }
 
+  Future<void> _withdraw(String id) async {
+    if (_busy) return;
+    final service = MultiuserSession.current;
+    final actor = service.userId;
+    var reason = '';
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, update) => AlertDialog(
+          title: const Text('Dar de baja la inscripción'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Se conservará el historial y se liberará su vacante. '
+                'El motivo será visible para el alumno o su responsable. No incluyas datos sensibles.',
+              ),
+              TextField(
+                maxLength: 300,
+                decoration: const InputDecoration(
+                  labelText: 'Motivo de la baja',
+                ),
+                onChanged: (value) => update(() => reason = value),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Volver'),
+            ),
+            FilledButton(
+              onPressed: reason.trim().length >= 8
+                  ? () => Navigator.pop(ctx, true)
+                  : null,
+              child: const Text('Confirmar baja'),
+            ),
+          ],
+        ),
+      ),
+    );
+    final value = reason.trim();
+    if (!mounted || accepted != true) return;
+    if (actor != service.userId) {
+      setState(() {
+        _rows = [];
+        _error = 'La sesión cambió. Volvé a ingresar.';
+      });
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await service.withdrawEnrollment(
+        widget.institutionId!,
+        widget.areaId!,
+        id,
+        value,
+      );
+    } catch (e) {
+      if (mounted) setState(() => _error = remoteError(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    if (mounted && _error == null) await _load();
+  }
+
+  Future<void> _history(String id) async {
+    if (_busy) return;
+    final actor = MultiuserSession.current.userId;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final event = await MultiuserSession.current.withdrawalHistory(id);
+      if (!mounted || actor != MultiuserSession.current.userId) return;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Historial de inscripción'),
+          content: Text(
+            'Confirmada: ${event['confirmed_at']}\n'
+            'Operador: ${event['confirmed_by_operator_id']}\n'
+            'Baja: ${event['withdrawn_at']}\n'
+            'Operador: ${event['withdrawn_by_operator_id']}\n'
+            'Motivo: ${event['reason']}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (mounted) setState(() => _error = remoteError(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => _frame(
     context,
@@ -589,6 +707,7 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
                   'confirmed' => 'Confirmada',
                   'rejected' => 'Rechazada',
                   'pending' => 'Pendiente',
+                  'withdrawn_by_institution' => 'Baja institucional',
                   _ => 'Cancelada',
                 }),
                 if (_offers[row['group_id']] case final offer?)
@@ -618,6 +737,19 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
                   OutlinedButton(
                     onPressed: _busy ? null : () => _cancel(row['id']),
                     child: const Text('Cancelar solicitud'),
+                  ),
+                if (MultiuserSession.current.essentialOperationsReady &&
+                    _canDecide &&
+                    row['state'] == 'confirmed')
+                  OutlinedButton(
+                    onPressed: _busy ? null : () => _withdraw(row['id']),
+                    child: const Text('Dar de baja inscripción'),
+                  ),
+                if (MultiuserSession.current.essentialOperationsReady &&
+                    row['state'] == 'withdrawn_by_institution')
+                  TextButton(
+                    onPressed: _busy ? null : () => _history(row['id']),
+                    child: const Text('Ver historial de baja'),
                   ),
               ],
             ),
