@@ -1,5 +1,12 @@
 # Atena V1 — operación del primer piloto
 
+## Actualización local — 18/10/2026
+
+Ver `cierre_funcional_piloto_v1.md`: ficha pública institucional preparada,
+historial de bajas legible con acciones OFF y RPC de bajas cerrado en la candidata
+hasta autorización de compatibilidad. No se activó nada remoto ni se designaron
+revisores. No hay distribución/deployment ni pruebas físicas en esta unidad.
+
 ## Estado vigente — 16/10/2026, habilitación operativa
 
 Esta sección prevalece sobre los diagnósticos históricos siguientes. No autoriza

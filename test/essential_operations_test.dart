@@ -307,6 +307,27 @@ void main() {
     session.actor = 'auth-a';
     await expectLater(session.withdrawalHistory('request-a'), throwsStateError);
   });
+  testWidgets(
+    'compatible reader retains withdrawal history with new actions off',
+    (t) async {
+      session.enabled = false;
+      row['state'] = 'withdrawn_by_institution';
+      await open(t, institution: false);
+      expect(find.text('Baja institucional'), findsOneWidget);
+      expect(find.text('Dar de baja inscripción'), findsNothing);
+      await t.tap(find.text('Ver historial de baja'));
+      for (var i = 0; i < 25; i++) {
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await t.pump(const Duration(milliseconds: 50));
+      }
+      expect(find.text('Historial de inscripción'), findsOneWidget);
+      expect(find.textContaining('TEST reason'), findsOneWidget);
+      expect(writes, isEmpty);
+      await t.pumpWidget(const SizedBox.shrink());
+    },
+  );
   testWidgets('withdrawal dialog fits a narrow viewport with keyboard', (
     t,
   ) async {

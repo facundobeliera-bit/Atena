@@ -361,10 +361,12 @@ class _CatalogoPublicoBusquedaState extends State<CatalogoPublicoBusqueda> {
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             if (!_busy && _error == null && _results.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 28),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 28),
                 child: Text(
-                  'No hay propuestas publicadas que coincidan. Probá otros filtros. Las instituciones deben publicar su catálogo en este dispositivo.',
+                  MultiuserSession.enabled
+                      ? 'No hay propuestas publicadas que coincidan. Probá otros filtros o actualizá cuando la institución publique su oferta.'
+                      : 'No hay propuestas publicadas que coincidan. Probá otros filtros. Las instituciones deben publicar su catálogo en este dispositivo.',
                 ),
               ),
             for (final i in _results)
@@ -525,6 +527,10 @@ class _CatalogoPublicoPerfilState extends State<CatalogoPublicoPerfil> {
                   ),
                 if (i.telefono.isNotEmpty)
                   SelectableText('Contacto público: ${i.telefono}'),
+                if (i.email.isNotEmpty)
+                  SelectableText('Correo público: ${i.email}'),
+                if (i.horariosAtencion.isNotEmpty)
+                  Text('Atención: ${i.horariosAtencion}'),
                 if (!_recibeSolicitudes)
                   const Text(PlanHabilitacionService.inscripcionNoHabilitada),
                 for (final p in i.fotos.take(6))

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'institution_public_profile_page.dart';
 import '../services/remote/institution_onboarding.dart';
 import '../services/remote/multiuser_session.dart';
 
@@ -284,6 +285,18 @@ class _InstitutionOnboardingPageState extends State<InstitutionOnboardingPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(i['name'] as String),
+                      if (const bool.fromEnvironment(
+                        'ATENA_INSTITUTION_PROFILE_READY',
+                      ))
+                        _button('Editar perfil público', () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => InstitutionPublicProfilePage(
+                                institutionId: i['id'] as String,
+                              ),
+                            ),
+                          );
+                        }),
                       _button('Crear área', () async {
                         final n = await _text('Nueva área', 'Nombre');
                         if (n != null) {

@@ -280,7 +280,8 @@ class MultiuserSession {
   }
 
   Future<Map<String, dynamic>> withdrawalHistory(String id) async {
-    if (!essentialOperationsReady) throw StateError('Historial no habilitado.');
+    // Reading a known state must remain possible when new mutations are OFF.
+    // The server's RLS and live session guard remain authoritative.
     final actor = userId;
     final token = client.auth.currentSession?.accessToken;
     await context();

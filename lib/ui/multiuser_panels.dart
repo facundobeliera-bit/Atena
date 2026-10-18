@@ -745,8 +745,7 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
                     onPressed: _busy ? null : () => _withdraw(row['id']),
                     child: const Text('Dar de baja inscripción'),
                   ),
-                if (MultiuserSession.current.essentialOperationsReady &&
-                    row['state'] == 'withdrawn_by_institution')
+                if (row['state'] == 'withdrawn_by_institution')
                   TextButton(
                     onPressed: _busy ? null : () => _history(row['id']),
                     child: const Text('Ver historial de baja'),

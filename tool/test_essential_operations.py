@@ -22,6 +22,9 @@ def main():
  for name in ['20261016000000_enrollment_withdrawal.sql','20261016010000_identity_rectification.sql']:
   sql((ROOT/'supabase/candidates'/name).read_text(encoding='utf-8'))
   check(name+' preserves all pre-existing rows',all(digest(t)==h for t,h in before.items()))
+ check('withdrawal closed server-side before compatibility approval',sql("select has_function_privilege('authenticated','public.atena_enrollment_withdraw(uuid,text)','execute');")=='f')
+ # Local disposable rehearsal only; the equivalent remote GRANT needs approval.
+ sql('grant execute on function public.atena_enrollment_withdraw(uuid,text) to authenticated;')
  users={n:str(uuid.uuid4()) for n in ['owner','reviewer','familyreview','adult','second','stranger','readonly','operator','unverified']};sessions={n:str(uuid.uuid4()) for n in users}
  for n,u in users.items():sql(f"insert into auth.users(id,email,email_confirmed_at) values('{u}','essential-{n}@example.invalid',"+('null' if n=='unverified' else 'now()')+f");insert into auth.sessions(id,user_id) values('{sessions[n]}','{u}');")
  def auth(q,w='owner'):return f"set role authenticated;set request.jwt.claim.sub='{users[w]}';set request.jwt.claims='{json.dumps({'sub':users[w],'session_id':sessions[w]})}';"+q

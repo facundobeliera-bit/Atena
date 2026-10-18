@@ -1,5 +1,11 @@
 # Operaciones esenciales del piloto — candidatas locales (2026-10-16)
 
+Actualización 18/10: ver `cierre_funcional_piloto_v1.md`. La candidata de bajas
+queda SIN permiso EXECUTE para clientes hasta aprobación de compatibilidad;
+el historial sí puede leerse con acciones nuevas OFF. La ficha pública de contacto
+tiene ahora implementación local separada, pendiente de migración 20261016020000.
+Estos puntos prevalecen sobre la descripción inicial de contacto/activación inferior.
+
 ## Estado y alcance
 
 Baja institucional de inscripciones confirmadas y rectificación revisada de los

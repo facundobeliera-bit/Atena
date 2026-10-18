@@ -150,6 +150,7 @@ class FichaPublicaInstitucion {
       telefono,
       descripcion,
       modalidad;
+  final String email, horariosAtencion;
   final List<String> fotos;
   final List<OfertaPublica> ofertas;
   const FichaPublicaInstitucion({
@@ -164,6 +165,8 @@ class FichaPublicaInstitucion {
     required this.modalidad,
     required this.ofertas,
     this.fotos = const [],
+    this.email = '',
+    this.horariosAtencion = '',
   });
   Map<String, dynamic> toMap() => {
     'id': id,
@@ -175,6 +178,8 @@ class FichaPublicaInstitucion {
     'phone': telefono,
     'description': descripcion,
     'modality': modalidad,
+    'email': email,
+    'opening_hours': horariosAtencion,
     'photos': fotos,
     'offers': ofertas.map((e) => e.toMap()).toList(),
   };
@@ -189,6 +194,8 @@ class FichaPublicaInstitucion {
         telefono: m['phone'] as String,
         descripcion: m['description'] as String,
         modalidad: m['modality'] as String,
+        email: m['email'] as String? ?? '',
+        horariosAtencion: m['opening_hours'] as String? ?? '',
         fotos: List<String>.unmodifiable(
           (m['photos'] as List? ?? []).whereType<String>(),
         ),
@@ -209,6 +216,8 @@ class FichaPublicaInstitucion {
         telefono: telefono,
         descripcion: descripcion,
         modalidad: modalidad,
+        email: email,
+        horariosAtencion: horariosAtencion,
         fotos: fotos,
         ofertas: List.unmodifiable(values),
       );

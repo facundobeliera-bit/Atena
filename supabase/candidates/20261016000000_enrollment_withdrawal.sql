@@ -72,5 +72,7 @@ begin
  return e;
 end; $$;
 revoke all on function public.atena_enrollment_withdraw(uuid,text) from public,anon,authenticated,service_role;
-grant execute on function public.atena_enrollment_withdraw(uuid,text) to authenticated;
+-- Deliberately NOT granted to clients yet. Activation requires a separate,
+-- explicitly approved GRANT after incompatible clients have been retired.
+-- UI feature flags alone cannot protect readers from an unknown terminal state.
 commit;
