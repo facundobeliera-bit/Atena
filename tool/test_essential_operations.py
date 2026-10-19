@@ -23,11 +23,19 @@ def main():
   sql((ROOT/'supabase/candidates'/name).read_text(encoding='utf-8'))
   check(name+' preserves all pre-existing rows',all(digest(t)==h for t,h in before.items()))
  check('withdrawal closed server-side before compatibility approval',sql("select has_function_privilege('authenticated','public.atena_enrollment_withdraw(uuid,text)','execute');")=='f')
+ check('legacy protocol allowed before activation',sql('set role authenticated;select atena_private.require_request_contract();')=='t')
+ running=subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,encoding='utf-8')
+ running.stdin.write('begin;set role authenticated;select atena_private.require_request_contract();\n');running.stdin.flush()
+ assert running.stdout.readline().strip()=='t'
+ try:
+  check('activation waits for in-flight legacy transaction',sql("begin;select pg_try_advisory_xact_lock(hashtextextended('atena-request-contract',160));rollback;")=='f')
+ finally:
+  running.stdin.write('commit;\n');running.stdin.flush();running.stdin.close();assert running.wait(timeout=15)==0
  # Local disposable rehearsal only; the equivalent remote GRANT needs approval.
- sql('grant execute on function public.atena_enrollment_withdraw(uuid,text) to authenticated;')
+ sql("begin;select pg_advisory_xact_lock(hashtextextended('atena-request-contract',160));grant execute on function public.atena_enrollment_withdraw(uuid,text) to authenticated;commit;")
  users={n:str(uuid.uuid4()) for n in ['owner','reviewer','familyreview','adult','second','stranger','readonly','operator','unverified']};sessions={n:str(uuid.uuid4()) for n in users}
  for n,u in users.items():sql(f"insert into auth.users(id,email,email_confirmed_at) values('{u}','essential-{n}@example.invalid',"+('null' if n=='unverified' else 'now()')+f");insert into auth.sessions(id,user_id) values('{sessions[n]}','{u}');")
- def auth(q,w='owner'):return f"set role authenticated;set request.jwt.claim.sub='{users[w]}';set request.jwt.claims='{json.dumps({'sub':users[w],'session_id':sessions[w]})}';"+q
+ def auth(q,w='owner',contract='2'):return f"set role authenticated;set request.headers='{json.dumps({} if contract is None else {'x-atena-request-contract':contract})}';set request.jwt.claim.sub='{users[w]}';set request.jwt.claims='{json.dumps({'sub':users[w],'session_id':sessions[w]})}';"+q
  def rpc(fn,action,data,w='owner',err=None):
   out=sql(auth(f"select public.{fn}('{action}',{lit(data)});",w),err);return None if err else json.loads(out)
  def onboarding(action,data,w='owner',err=None):return rpc('atena_onboarding_command',action,data,w,err)
@@ -61,10 +69,21 @@ def main():
  def occupied():return int(sql(f"select occupied from atena_private.capacity_pools where id=(select group_pool_id from atena_private.request_resources where group_id='{gid}');"))
  r=request();withdraw(r,err='PT409');check('pending request cannot use confirmed withdrawal')
  decide(r);snapshot=json.loads(sql(f"select row_to_json(r) from public.atena_requests r where id='{r}';"))
+ for version in [None,'1','999']:
+  sql(auth(f"select * from public.atena_requests where id='{r}';",contract=version),'PT426')
+  check('incompatible reader rejected explicitly '+str(version))
+ for query in [f"select public.atena_request_create('{profiles['adult']}','{gid}','{uuid.uuid4()}');",f"select public.atena_request_decide('{r}','confirmed');",f"select public.atena_enrollment_withdraw('{r}','TEST legacy withdrawal');"]:
+  sql(auth(query,contract=None),'PT426')
+ check('legacy create decide and withdrawal rejected before mutation',occupied()==1 and digest('public.atena_enrollment_withdrawals')==sql("select md5('');"))
  for actor in ['adult','stranger','readonly']:
   withdraw(r,actor,err='42501');check(actor+' cannot withdraw enrollment')
  withdraw(r,reason='short',err='22023');check('auditable reason required',occupied()==1)
  event=withdraw(r,'operator');check('scoped decision operator withdraws with audit',event['confirmed_at']==snapshot['updated_at'] and event['confirmed_by_auth_user_id']==users['owner'] and event['withdrawn_by_auth_user_id']==users['operator'] and occupied()==0)
+ sql('revoke execute on function public.atena_enrollment_withdraw(uuid,text) from authenticated;')
+ sql(auth(f"select * from public.atena_requests where id='{r}';",contract=None),'PT426')
+ check('stopping new withdrawals does not reopen legacy reads')
+ check('compatible client still reads history after stop',sql(auth(f"select count(*) from public.atena_enrollment_withdrawals where request_id='{r}';"))=='1')
+ sql('grant execute on function public.atena_enrollment_withdraw(uuid,text) to authenticated;')
  check('same retry does not release twice',withdraw(r,'operator')==event and occupied()==0)
  withdraw(r,reason='TEST changed reason',err='PT409');check('conflicting retry rejected')
  decide(r,'PT409');check('withdrawn enrollment cannot reconfirm')

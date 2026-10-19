@@ -31,6 +31,7 @@ declare r public.atena_requests%rowtype; e public.atena_enrollment_withdrawals%r
  op text; n bigint; reason text:=btrim(p_reason);
 begin
  perform atena_private.require_current_session();
+ perform atena_private.require_request_contract();
  if reason is null or length(reason) not between 8 and 300 then raise exception 'Withdrawal reason required' using errcode='22023';end if;
  select * into r from public.atena_requests where id=p_request_id;
  if not found then raise exception 'Request unavailable' using errcode='42501';end if;
@@ -72,7 +73,38 @@ begin
  return e;
 end; $$;
 revoke all on function public.atena_enrollment_withdraw(uuid,text) from public,anon,authenticated,service_role;
+-- Compatibility negotiation, NOT identity or authorization. Old distributed
+-- clients omit this header and must fail explicitly before observing new states.
+-- Keep the gate after EXECUTE is revoked if any withdrawal already exists.
+create function atena_private.require_request_contract() returns boolean
+language plpgsql volatile security definer set search_path='' as $$
+begin
+ -- Activation takes the exclusive counterpart before GRANT; it waits for
+ -- in-flight legacy requests to finish, rather than changing their contract.
+ perform pg_advisory_xact_lock_shared(hashtextextended('atena-request-contract',160));
+ if (has_function_privilege('authenticated','public.atena_enrollment_withdraw(uuid,text)','execute')
+     or exists(select 1 from public.atena_enrollment_withdrawals))
+    and coalesce(nullif(current_setting('request.headers',true),'')::jsonb->>'x-atena-request-contract','')<>'2' then
+  raise exception 'Actualiza Atena para consultar o gestionar inscripciones.' using errcode='PT426';
+ end if;
+ return true;
+end $$;
+revoke all on function atena_private.require_request_contract() from public,anon,authenticated,service_role;
+grant execute on function atena_private.require_request_contract() to authenticated;
+create policy request_client_contract on public.atena_requests as restrictive for select to authenticated
+ using((select atena_private.require_request_contract()));
+-- Preserve the complete current business/identity logic and reject drift.
+do $$ declare signature text; definition text; marker text:='perform atena_private.require_current_session();'; begin
+ foreach signature in array array['public.atena_request_create(text,text,uuid)','public.atena_request_decide(uuid,text)'] loop
+  definition:=pg_get_functiondef(signature::regprocedure);
+  if (length(definition)-length(replace(definition,marker,'')))/length(marker)<>1
+     or position('require_request_contract' in definition)>0 then
+   raise exception 'Unexpected request definition: %',signature;
+  end if;
+  execute replace(definition,marker,marker||E'\n perform atena_private.require_request_contract();');
+ end loop;
+end $$;
 -- Deliberately NOT granted to clients yet. Activation requires a separate,
--- explicitly approved GRANT after incompatible clients have been retired.
--- UI feature flags alone cannot protect readers from an unknown terminal state.
+-- explicitly approved GRANT. It simultaneously gates legacy readers/writers.
+-- The contract header never replaces existing RLS, identity or capacity checks.
 commit;

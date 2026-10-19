@@ -55,6 +55,11 @@ void main() {
     session = _Session(client);
     MultiuserSession.testSession = session;
     server.listen((request) async {
+      if (request.uri.path.endsWith('/atena_requests') ||
+          request.uri.path.endsWith('atena_enrollment_withdraw') ||
+          request.uri.path.endsWith('/atena_enrollment_withdrawals')) {
+        expect(request.headers.value('x-atena-request-contract'), '2');
+      }
       final text = await utf8.decoder.bind(request).join();
       final body = text.isEmpty
           ? <String, dynamic>{}

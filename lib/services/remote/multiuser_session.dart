@@ -261,10 +261,15 @@ class MultiuserSession {
     }
 
     sameSession();
-    final raw = await client.rpc(
-      'atena_enrollment_withdraw',
-      params: {'p_request_id': id, 'p_reason': reason.trim()},
-    );
+    final raw = await client
+        .rpc(
+          'atena_enrollment_withdraw',
+          params: {'p_request_id': id, 'p_reason': reason.trim()},
+        )
+        .setHeader(
+          SolicitudesSupabaseRepository.contractHeader,
+          SolicitudesSupabaseRepository.contractVersion,
+        );
     sameSession();
     if (raw is! Map ||
         raw['request_id'] != id ||
@@ -287,6 +292,10 @@ class MultiuserSession {
     await context();
     final row = await client
         .from('atena_enrollment_withdrawals')
+        .setHeader(
+          SolicitudesSupabaseRepository.contractHeader,
+          SolicitudesSupabaseRepository.contractVersion,
+        )
         .select()
         .eq('request_id', id)
         .single();

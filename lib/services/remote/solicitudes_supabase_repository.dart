@@ -5,6 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Callers retain the operation UUID across retries; a failed call is NOT a
 /// local success and must never fall back to SolicitudesService.
 class SolicitudesSupabaseRepository {
+  // Protocol negotiation only; the server still resolves identity and permissions.
+  static const contractHeader = 'x-atena-request-contract';
+  static const contractVersion = '2';
   final SupabaseClient client;
   const SolicitudesSupabaseRepository(this.client);
 
@@ -13,14 +16,16 @@ class SolicitudesSupabaseRepository {
     required String grupoPublico,
     required String operationId,
   }) async {
-    final row = await client.rpc(
-      'atena_request_create',
-      params: {
-        'p_profile_id': perfilVerificado,
-        'p_group_id': grupoPublico,
-        'p_operation_id': operationId,
-      },
-    );
+    final row = await client
+        .rpc(
+          'atena_request_create',
+          params: {
+            'p_profile_id': perfilVerificado,
+            'p_group_id': grupoPublico,
+            'p_operation_id': operationId,
+          },
+        )
+        .setHeader(contractHeader, contractVersion);
     final result = _registro(row);
     if (result['applicant_profile_id'] != perfilVerificado ||
         result['group_id'] != grupoPublico ||
@@ -35,10 +40,12 @@ class SolicitudesSupabaseRepository {
     String estado,
   ) async {
     final result = _registro(
-      await client.rpc(
-        'atena_request_decide',
-        params: {'p_request_id': solicitudId, 'p_state': estado},
-      ),
+      await client
+          .rpc(
+            'atena_request_decide',
+            params: {'p_request_id': solicitudId, 'p_state': estado},
+          )
+          .setHeader(contractHeader, contractVersion),
     );
     if (result['id'] != solicitudId || result['state'] != estado) {
       throw const FormatException('Confirmación remota contradictoria.');
@@ -57,6 +64,7 @@ class SolicitudesSupabaseRepository {
     }
     final rows = await client
         .from('atena_requests')
+        .setHeader(contractHeader, contractVersion)
         .select()
         .order('created_at')
         .order('id')

@@ -1,5 +1,9 @@
 # Cierre funcional local del primer piloto — 18/10/2026
 
+Actualización 19/10: `activacion_piloto_20261019.md` registra la comparación remota
+de dependencias y el control de contrato de solicitudes probado localmente. Ese
+plan prevalece sobre el requisito anterior de retirar manualmente todos los clientes.
+
 ## Resultado y límites
 
 Esta unidad completa la ficha pública institucional y endurece la activación de
@@ -87,11 +91,12 @@ para comprobar el comportamiento existente. No hay un segundo mecanismo de baja.
    `ATENA_INSTITUTION_PROFILE_READY=true` exclusivamente después de validar cada backend.
    El constructor de evaluación de este bloque mantiene ambas acciones OFF.
 
-No existe hoy una atestación confiable de versión de cliente. Un header manipulable
-no sería autoridad de identidad. Si no puede garantizarse la retirada de clientes
-incompatibles, **NO conceder EXECUTE ni activar bajas**. Si se exige permitir coexistencia
-con versiones antiguas, hará falta acordar un contrato de API versionado antes de activar;
-este bloque no finge haber expulsado clientes instalados ni revoca sesiones remotas.
+La candidata actual incorpora negociación de contrato de solicitudes. Al conceder
+EXECUTE para bajas, lecturas y mutaciones incompatibles fallan explícitamente en el
+servidor con PT426. El cliente actual declara contrato 2; versiones anteriores no lo
+declaran. No es atestación del binario ni autoridad de identidad: RLS y permisos
+siguen siendo obligatorios aunque alguien manipule el encabezado. Después de una
+baja, retirar EXECUTE no vuelve a habilitar lectores antiguos. Ver plan del 19/10.
 
 Ante incidente: revocar EXECUTE para bloquear nuevas bajas, conservar todos los eventos
 ya creados y los lectores compatibles. Quitar el flag o volver a un cliente antiguo NO
