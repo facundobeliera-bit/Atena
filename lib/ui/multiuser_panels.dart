@@ -738,7 +738,7 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
                     onPressed: _busy ? null : () => _cancel(row['id']),
                     child: const Text('Cancelar solicitud'),
                   ),
-                if (MultiuserSession.current.essentialOperationsReady &&
+                if (MultiuserSession.current.enrollmentWithdrawalReady &&
                     _canDecide &&
                     row['state'] == 'confirmed')
                   OutlinedButton(

@@ -17,7 +17,7 @@ class _Session extends MultiuserSession {
   String actor = 'auth-a';
   bool enabled = true;
   @override
-  bool get essentialOperationsReady => enabled;
+  bool get enrollmentWithdrawalReady => enabled;
   @override
   String get userId => actor;
 }
@@ -169,6 +169,15 @@ void main() {
     await t.tap(find.text('Confirmar baja'));
     await settle(t);
   }
+
+  test('withdrawal build flag does not enable identity rectification', () {
+    final configured = MultiuserSession(client);
+    expect(configured.essentialOperationsReady, isFalse);
+    expect(
+      configured.enrollmentWithdrawalReady,
+      const bool.fromEnvironment('ATENA_ENROLLMENT_WITHDRAWAL_READY'),
+    );
+  });
 
   testWidgets(
     'institution withdrawal is remote and family sees audited terminal state',

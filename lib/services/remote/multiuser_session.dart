@@ -65,6 +65,10 @@ class MultiuserSession {
   // Enable only after separately authorized remote migrations and validation.
   bool get essentialOperationsReady =>
       const bool.fromEnvironment('ATENA_ESSENTIAL_OPERATIONS_READY');
+  // Allows the validated withdrawal flow without enabling identity rectification.
+  bool get enrollmentWithdrawalReady =>
+      essentialOperationsReady ||
+      const bool.fromEnvironment('ATENA_ENROLLMENT_WITHDRAWAL_READY');
   bool get signedIn => client.auth.currentUser != null;
   String get userId => client.auth.currentUser?.id ?? '';
 
@@ -244,7 +248,7 @@ class MultiuserSession {
     String id,
     String reason,
   ) async {
-    if (!essentialOperationsReady) {
+    if (!enrollmentWithdrawalReady) {
       throw StateError('La baja de inscripciones todavía no está habilitada.');
     }
     final actor = userId;
