@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:atena_app/services/remote/multiuser_session.dart';
@@ -31,11 +32,22 @@ void main() {
   late _Session session;
   late Map<String, dynamic> row;
   bool allowed = true, canDecide = true, fail = false, switchOnWrite = false;
+  bool commitThenDisconnect = false;
+  bool offline = false, requestExists = true;
+  String? refusalCode;
+  Completer<void>? catalogGate, catalogStarted;
+  final decisions = <Map<String, dynamic>>[];
   final writes = <Map<String, dynamic>>[];
   setUp(() async {
     SharedPreferences.setMockInitialValues({'local-preserved': 'keep'});
     allowed = canDecide = true;
     fail = switchOnWrite = false;
+    commitThenDisconnect = false;
+    offline = false;
+    requestExists = true;
+    refusalCode = null;
+    catalogGate = catalogStarted = null;
+    decisions.clear();
     writes.clear();
     row = {
       'id': 'request-a',
@@ -65,6 +77,70 @@ void main() {
           ? <String, dynamic>{}
           : (jsonDecode(text) as Map<String, dynamic>?) ?? <String, dynamic>{};
       Object result = [];
+      if (request.uri.path == '/auth/v1/token') {
+        session.actor = body['email'] == 'institution@example.invalid'
+            ? 'auth-a'
+            : 'auth-b';
+        result = {
+          'access_token': 'local-http-fixture-not-a-real-jwt',
+          'refresh_token': 'local-http-fixture-refresh',
+          'token_type': 'bearer',
+          'expires_in': 3600,
+          'user': {
+            'id': session.actor,
+            'aud': 'authenticated',
+            'email': body['email'],
+            'app_metadata': <String, dynamic>{},
+            'user_metadata': <String, dynamic>{},
+            'created_at': '2026-10-23T00:00:00Z',
+          },
+        };
+      }
+      if (request.uri.path.endsWith('atena_catalog_read')) {
+        if (catalogStarted != null && !catalogStarted!.isCompleted) {
+          catalogStarted!.complete();
+        }
+        await catalogGate?.future;
+        final occupied = row['state'] == 'confirmed' ? 1 : 0;
+        result = [
+          {
+            'institution_id': 'public-institution-a',
+            'area_id': 'public-area-a',
+            'document': {
+              'schema_version': 3,
+              'institution': {
+                'id': 'public-institution-a',
+                'name': 'Institution TEST',
+                'country': 'Argentina',
+                'province': 'TEST',
+                'city': 'TEST',
+              },
+              'area': {
+                'id': 'public-area-a',
+                'kind': 'curricular',
+                'name': 'Area TEST',
+              },
+              'activities': [],
+              'groups': [
+                {
+                  'id': 'group-a',
+                  'name': 'Group TEST',
+                  'kind': 'curricular',
+                  'activity_label': 'Activity TEST',
+                  'schedule': 'Lunes 10:00',
+                  'capacity': 2,
+                  'occupied': occupied,
+                  'available': 2 - occupied,
+                  'availability': 'available',
+                  'price': '',
+                  'ages': 'Adultos',
+                  'formal_type': 'escolar',
+                },
+              ],
+            },
+          },
+        ];
+      }
       if (request.uri.path.endsWith('atena_authenticated_context')) {
         result = {
           'auth_user_id': session.userId,
@@ -89,7 +165,24 @@ void main() {
           ],
         };
       }
-      if (request.uri.path.endsWith('/atena_requests')) result = [row];
+      if (request.uri.path.endsWith('/atena_requests')) {
+        result = requestExists ? [row] : [];
+      }
+      if (request.uri.path.endsWith('atena_request_create')) {
+        requestExists = true;
+        row = {
+          ...row,
+          'state': 'pending',
+          'operation_id': body['p_operation_id'],
+          'applicant_auth_user_id': session.actor,
+        };
+        result = row;
+      }
+      if (request.uri.path.endsWith('atena_request_decide')) {
+        decisions.add(body);
+        row = {...row, 'state': body['p_state']};
+        result = row;
+      }
       if (request.uri.path.endsWith('atena_enrollment_withdraw') ||
           request.uri.path.endsWith('/atena_enrollment_withdrawals')) {
         final event = {
@@ -107,22 +200,40 @@ void main() {
         result = event;
         if (request.uri.path.endsWith('atena_enrollment_withdraw')) {
           writes.add(body);
-          if (fail) {
+          if (fail || refusalCode != null) {
             request.response.statusCode = 409;
-            result = {'code': 'PT409', 'message': 'TEST conflict'};
+            result = {
+              'code': refusalCode ?? 'PT409',
+              'message': 'TEST refusal',
+            };
           } else {
             row = {...row, 'state': 'withdrawn_by_institution'};
           }
         }
         if (switchOnWrite) session.actor = 'auth-b';
       }
+      if (commitThenDisconnect &&
+          (request.uri.path.endsWith('atena_enrollment_withdraw') ||
+              request.uri.path.endsWith('atena_request_decide'))) {
+        commitThenDisconnect = false;
+        final socket = await request.response.detachSocket(writeHeaders: false);
+        socket.destroy();
+        return;
+      }
       request.response.headers.contentType = ContentType.json;
       request.response.persistentConnection = false;
+      if (offline) {
+        request.response.statusCode = 503;
+        result = {'code': '503', 'message': 'Local simulated outage'};
+      }
       request.response.write(jsonEncode(result));
       await request.response.close();
     });
   });
   tearDown(() async {
+    if (catalogGate != null && !catalogGate!.isCompleted) {
+      catalogGate!.complete();
+    }
     expect((await SharedPreferences.getInstance()).getKeys(), {
       'local-preserved',
     });
@@ -177,6 +288,210 @@ void main() {
       configured.enrollmentWithdrawalReady,
       const bool.fromEnvironment('ATENA_ENROLLMENT_WITHDRAWAL_READY'),
     );
+  });
+
+  for (final nextActor in ['', 'auth-b']) {
+    testWidgets(
+      'late catalog must not reveal previous profile actor=$nextActor',
+      (t) async {
+        catalogGate = Completer<void>();
+        catalogStarted = Completer<void>();
+        await t.pumpWidget(
+          const MaterialApp(home: RemoteRequestsPanel(profile: 'profile-a')),
+        );
+        for (var i = 0; i < 100 && !catalogStarted!.isCompleted; i++) {
+          await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
+          );
+          await t.pump(const Duration(milliseconds: 20));
+        }
+        expect(catalogStarted!.isCompleted, isTrue);
+        session.actor = nextActor;
+        catalogGate!.complete();
+        await settle(t);
+        expect(find.text('Perfil: profile-a'), findsNothing);
+        expect(find.text('Confirmada'), findsNothing);
+        await t.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
+  testWidgets(
+    'lost withdrawal response reconciles server state before another action',
+    (t) async {
+      await open(t, institution: true);
+      commitThenDisconnect = true;
+      await confirm(t);
+      expect(writes, hasLength(1));
+      expect(find.text('Baja institucional'), findsOneWidget);
+      expect(find.text('Dar de baja inscripción'), findsNothing);
+      expect(find.text('Vacantes disponibles: 2'), findsOneWidget);
+      await t.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets('lost confirmation response reconciles state and capacity', (
+    t,
+  ) async {
+    row['state'] = 'pending';
+    await open(t, institution: true);
+    commitThenDisconnect = true;
+    await t.tap(find.text('Confirmar'));
+    await settle(t);
+    expect(decisions, hasLength(1));
+    expect(find.text('Confirmada'), findsOneWidget);
+    expect(find.text('Vacantes disponibles: 1'), findsOneWidget);
+    await t.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('PT426 asks for an update instead of a blind retry', (t) async {
+    await open(t, institution: true);
+    refusalCode = 'PT426';
+    await confirm(t);
+    expect(find.textContaining('versión'), findsOneWidget);
+    expect(row['state'], 'confirmed');
+    await t.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets(
+    'HTTP simulated client journey from login and request to confirmation withdrawal and both histories',
+    (t) async {
+      requestExists = false;
+      row['state'] = 'pending';
+      await t.runAsync(
+        () =>
+            session.signIn('institution@example.invalid', 'local-fixture-only'),
+      );
+      expect(client.auth.currentUser!.id, 'auth-a');
+      final catalog = await t.runAsync(() => session.catalog());
+      expect(catalog!.single.ofertas.single.disponibles, 2);
+      await t.runAsync(
+        () => session.signIn('student@example.invalid', 'local-fixture-only'),
+      );
+      expect(client.auth.currentUser!.id, 'auth-b');
+      await t.pumpWidget(
+        MaterialApp(
+          home: RemoteRequestPanel(
+            profile: 'profile-a',
+            offer: catalog.single.ofertas.single,
+          ),
+        ),
+      );
+      await t.tap(find.text('Enviar solicitud'));
+      for (
+        var i = 0;
+        i < 150 && find.text('Pendiente').evaluate().isEmpty;
+        i++
+      ) {
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await t.pump(const Duration(milliseconds: 50));
+      }
+      expect(find.text('Pendiente'), findsOneWidget);
+      expect(row['applicant_auth_user_id'], 'auth-b');
+      await t.pumpWidget(const SizedBox.shrink());
+      await t.runAsync(
+        () =>
+            session.signIn('institution@example.invalid', 'local-fixture-only'),
+      );
+      await t.pumpWidget(const MaterialApp(home: RemoteAccountPanel()));
+      await settle(t);
+      await t.ensureVisible(find.text('Gestionar solicitudes'));
+      await t.tap(find.text('Gestionar solicitudes'));
+      await settle(t);
+      await t.pumpAndSettle();
+      final confirmAction = t
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Confirmar'))
+          .onPressed!;
+      confirmAction();
+      confirmAction();
+      await settle(t);
+      expect(decisions, hasLength(1));
+      expect(find.text('Confirmada'), findsOneWidget);
+      expect(find.text('Vacantes disponibles: 1'), findsOneWidget);
+      await t.pumpWidget(const SizedBox.shrink());
+      await t.runAsync(
+        () => session.signIn('student@example.invalid', 'local-fixture-only'),
+      );
+      await open(t);
+      expect(find.text('Confirmada'), findsOneWidget);
+      expect(find.text('Vacantes disponibles: 1'), findsOneWidget);
+      await t.pumpWidget(const SizedBox.shrink());
+      await t.runAsync(
+        () =>
+            session.signIn('institution@example.invalid', 'local-fixture-only'),
+      );
+      await open(t, institution: true);
+      await t.tap(find.text('Dar de baja inscripción'));
+      await t.pump(const Duration(milliseconds: 300));
+      await t.enterText(find.byType(TextField), 'TEST reason');
+      await t.pump();
+      final withdrawAction = t
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Confirmar baja'),
+          )
+          .onPressed!;
+      withdrawAction();
+      withdrawAction();
+      await settle(t);
+      expect(writes, hasLength(1));
+      expect(find.text('Baja institucional'), findsOneWidget);
+      expect(find.text('Vacantes disponibles: 2'), findsOneWidget);
+      for (final institution in [true, false]) {
+        await t.pumpWidget(const SizedBox.shrink());
+        if (!institution) {
+          await t.runAsync(
+            () =>
+                session.signIn('student@example.invalid', 'local-fixture-only'),
+          );
+        }
+        await open(t, institution: institution);
+        await t.tap(find.text('Ver historial de baja'));
+        for (var i = 0; i < 25; i++) {
+          await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
+          );
+          await t.pump(const Duration(milliseconds: 50));
+        }
+        expect(find.text('Historial de inscripción'), findsOneWidget);
+        expect(find.textContaining('TEST reason'), findsOneWidget);
+        await t.tap(find.text('Cerrar'));
+        await t.pumpAndSettle();
+        expect(find.text('Vacantes disponibles: 2'), findsOneWidget);
+      }
+      await t.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'connection recovery reloads without stale actions or new writes',
+    (t) async {
+      await open(t, institution: true);
+      offline = true;
+      await t.tap(find.byTooltip('Actualizar'));
+      await settle(t);
+      expect(find.text('Dar de baja inscripción'), findsNothing);
+      expect(find.text('Confirmada'), findsNothing);
+      offline = false;
+      await t.tap(find.byTooltip('Actualizar'));
+      await settle(t);
+      expect(find.text('Confirmada'), findsOneWidget);
+      expect(writes, isEmpty);
+      expect(decisions, isEmpty);
+      await t.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets('permission refusal is explicit and does not change enrollment', (
+    t,
+  ) async {
+    await open(t, institution: true);
+    refusalCode = '42501';
+    await confirm(t);
+    expect(find.textContaining('permiso vigente'), findsOneWidget);
+    expect(row['state'], 'confirmed');
+    await t.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets(

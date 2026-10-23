@@ -27,9 +27,19 @@ import 'atena_workspace.dart';
 
 const remoteSourceLabel = 'Supabase compartido · Piloto de evaluación';
 
-String remoteError(Object error) => error is StateError
-    ? error.message.toString()
-    : 'No se pudo confirmar la operación con el servidor. Actualizá o reintentá. No se guardó como operación local.';
+String remoteError(Object error) {
+  if (error is PostgrestException) {
+    if (error.code == 'PT426') {
+      return 'Esta versión de Atena no es compatible. Actualizá la aplicación antes de continuar.';
+    }
+    if (error.code == '42501') {
+      return 'No tenés permiso vigente para esta operación. Actualizá el acceso a tu cuenta.';
+    }
+  }
+  return error is StateError
+      ? error.message.toString()
+      : 'No se pudo confirmar la operación con el servidor. Actualizá para consultar su estado antes de reintentar. No se guardó como operación local.';
+}
 
 Widget _frame(
   BuildContext context,
@@ -474,13 +484,17 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
 
   Future<void> _load() async {
     if (_busy) return;
+    final service = MultiuserSession.current;
+    final actor = service.userId;
+    final token = service.client.auth.currentSession?.accessToken;
     setState(() {
       _busy = true;
       _rows = [];
+      _offers = {};
+      _canDecide = false;
       _error = null;
     });
     try {
-      final service = MultiuserSession.current;
       final rows = await service.requests(
         profile: widget.profile,
         institutionId: widget.institutionId,
@@ -497,6 +511,11 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
             widget.areaId!,
             'requests.read',
           )).capabilities.contains('requests.decide');
+      if (!identical(service, MultiuserSession.current) ||
+          actor != service.userId ||
+          token != service.client.auth.currentSession?.accessToken) {
+        throw StateError('La sesión cambió. Volvé a ingresar.');
+      }
       if (mounted) {
         setState(() {
           _rows = rows;
@@ -508,6 +527,16 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
       if (mounted) setState(() => _error = remoteError(e));
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _reconcileOperation() async {
+    final operationError = _error;
+    // A lost response may follow a committed write. Read the authoritative state
+    // before offering another action; if the read fails, no stale rows remain.
+    await _load();
+    if (mounted && _error == null && operationError != null) {
+      setState(() => _error = operationError);
     }
   }
 
@@ -533,7 +562,7 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-    if (mounted && _error == null) await _load();
+    if (mounted) await _reconcileOperation();
   }
 
   Future<void> _cancel(String id) async {
@@ -584,6 +613,8 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
     final service = MultiuserSession.current;
     final actor = service.userId;
     var reason = '';
+    var submitted = false;
+    setState(() => _busy = true);
     final accepted = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -612,7 +643,11 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
             ),
             FilledButton(
               onPressed: reason.trim().length >= 8
-                  ? () => Navigator.pop(ctx, true)
+                  ? () {
+                      if (submitted) return;
+                      submitted = true;
+                      Navigator.pop(ctx, true);
+                    }
                   : null,
               child: const Text('Confirmar baja'),
             ),
@@ -621,7 +656,9 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
       ),
     );
     final value = reason.trim();
-    if (!mounted || accepted != true) return;
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (accepted != true) return;
     if (actor != service.userId) {
       setState(() {
         _rows = [];
@@ -645,7 +682,7 @@ class _RemoteRequestsPanelState extends State<RemoteRequestsPanel> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-    if (mounted && _error == null) await _load();
+    if (mounted) await _reconcileOperation();
   }
 
   Future<void> _history(String id) async {
