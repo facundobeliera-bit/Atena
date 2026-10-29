@@ -140,4 +140,52 @@ void main() {
     expect(prefs.getKeys(), {'historical'});
     expect(await storage.hasAccessToken(), true);
   });
+  test('secure read failure never falls back to a legacy session', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (_) async {
+          throw PlatformException(code: 'locked', message: fixture);
+        });
+    await expectLater(
+      storage.accessToken(),
+      throwsA(
+        isA<StateError>().having(
+          (e) => e.toString().contains(fixture),
+          'no secret in error',
+          false,
+        ),
+      ),
+    );
+    expect(prefs.getString(key), fixture);
+  });
+  test('failed logout is reported; retry removes session and PKCE', () async {
+    await storage.initialize();
+    final pkce = SecureAuthPkceStorage(store);
+    await pkce.setItem(
+      key: SecureAuthLocalStorage.pkceKey,
+      value: 'test-verifier',
+    );
+    failWrite = true;
+    await expectLater(storage.removePersistedSession(), throwsStateError);
+    expect(encrypted[key], fixture);
+    failWrite = false;
+    await storage.removePersistedSession();
+    final restarted = SecureAuthLocalStorage(SecureAuthStore(prefs), key);
+    await restarted.initialize();
+    expect(await restarted.hasAccessToken(), false);
+    expect(await pkce.getItem(key: SecureAuthLocalStorage.pkceKey), isNull);
+    expect(prefs.getKeys(), {'historical'});
+  });
+  test(
+    'account replacement survives restart without the previous session',
+    () async {
+      await storage.initialize();
+      await storage.removePersistedSession();
+      await storage.persistSession('fictional-account-b');
+      final restarted = SecureAuthLocalStorage(SecureAuthStore(prefs), key);
+      await restarted.initialize();
+      expect(await restarted.accessToken(), 'fictional-account-b');
+      expect(encrypted.values, isNot(contains(fixture)));
+      expect(prefs.getKeys(), {'historical'});
+    },
+  );
 }
