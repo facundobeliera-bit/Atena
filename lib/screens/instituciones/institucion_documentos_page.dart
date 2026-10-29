@@ -1,3 +1,4 @@
+import '../../ui/document_error.dart';
 import '../../services/remote/multiuser_session.dart';
 import 'package:flutter/material.dart';
 import '../../models/solicitudes/solicitud_alumno.dart';
@@ -104,7 +105,7 @@ class _InstitucionDocumentosPageState extends State<InstitucionDocumentosPage> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = '$e';
+          _error = documentError(e);
           _students = [];
           _requests = [];
           _documents = [];
@@ -130,7 +131,7 @@ class _InstitucionDocumentosPageState extends State<InstitucionDocumentosPage> {
       await action();
       await _load();
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('$e')));
+      messenger.showSnackBar(SnackBar(content: Text(documentError(e))));
     } finally {
       if (mounted) {
         setState(() {

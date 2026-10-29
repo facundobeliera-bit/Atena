@@ -1,3 +1,4 @@
+import '../../ui/document_error.dart';
 import '../../services/remote/multiuser_session.dart';
 // lib/screens/alumnos/alumno_documentos_page.dart
 //
@@ -574,7 +575,7 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
       }
     } catch (e) {
       if (!mounted) return;
-      final msg = e.toString().replaceFirst('Exception: ', '');
+      final msg = documentError(e);
       setState(() => _error = msg);
       _snackMaybe(messenger, msg);
     } finally {
@@ -740,7 +741,7 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
       await _load();
     } catch (e) {
       if (!mounted) return;
-      _snackMaybe(messenger, e.toString().replaceFirst('Exception: ', ''));
+      _snackMaybe(messenger, documentError(e));
     }
   }
 
@@ -794,7 +795,7 @@ class _AlumnoDocumentosPageState extends State<AlumnoDocumentosPage>
       await _load();
     } catch (e) {
       if (!mounted) return;
-      _snackMaybe(messenger, e.toString().replaceFirst('Exception: ', ''));
+      _snackMaybe(messenger, documentError(e));
     }
   }
 

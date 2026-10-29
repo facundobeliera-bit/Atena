@@ -264,7 +264,7 @@ class SessionService {
       if (hasResidue) {
         // ignore: avoid_print
         print(
-          '[ATENA][SESSION][getSession] residue detected (userId="$id", role="$roleStr") -> logout()',
+          '[ATENA][SESSION] partial state detected; local logout',
         );
         await logout();
       }
@@ -571,13 +571,12 @@ class SessionService {
     final role = _roleFromString(roleRaw);
 
     return <String, dynamic>{
-      'userId': userId,
-      'roleRaw': roleRaw,
+      'hasUserId': userId.isNotEmpty,
       'role': role.name,
       'rememberMe': remember,
       'temp': temp,
-      'instOwner': instOwner,
-      'perfilSeleccionadoDni': perfilSel,
+      'hasInstitutionOwner': instOwner.isNotEmpty,
+      'hasSelectedProfile': perfilSel.isNotEmpty,
     };
   }
 
@@ -585,7 +584,7 @@ class SessionService {
     try {
       final snap = await debugSnapshot();
       // ignore: avoid_print
-      print('[ATENA][SESSION][$tag] $snap');
+      print('[ATENA][SESSION] $snap');
     } catch (_) {}
   }
 }

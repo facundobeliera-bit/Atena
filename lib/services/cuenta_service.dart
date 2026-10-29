@@ -1686,8 +1686,8 @@ class CuentaService {
     final sesTemp = await storage.getBool(_kSesionCuentaTemp);
 
     return <String, dynamic>{
-      'sesion_cuenta_raw': sesRaw,
-      'sesion_cuenta_id': await getSesionCuentaId(),
+      'hasStoredAccountSession': sesRaw.isNotEmpty,
+      'hasAccountSession': (await getSesionCuentaId()) != null,
       'sesion_cuenta_temp': sesTemp,
     };
   }
@@ -1696,7 +1696,7 @@ class CuentaService {
     try {
       final snap = await debugSnapshot();
       // ignore: avoid_print
-      print('[ATENA][CUENTA][$tag] $snap');
+      print('[ATENA][CUENTA] $snap');
     } catch (_) {
       // NO-OP
     }

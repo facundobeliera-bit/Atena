@@ -10,9 +10,13 @@ class DocumentosSupabaseRepository {
   DocumentosSupabaseRepository(this.session);
   Future<dynamic> _rpc(String name, Map<String, dynamic> params) async {
     final identity = session.userId;
+    final token = session.client.auth.currentSession?.accessToken;
     if (identity.isEmpty) throw StateError('Ingresá con tu cuenta remota.');
     final result = await session.client.rpc(name, params: params);
-    if (session.userId != identity) throw StateError('La sesión cambió.');
+    if (session.userId != identity ||
+        session.client.auth.currentSession?.accessToken != token) {
+      throw StateError('La sesión cambió.');
+    }
     return result;
   }
 

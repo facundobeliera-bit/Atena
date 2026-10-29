@@ -82,6 +82,7 @@ class MultiuserSession {
 
   Future<void> signOut() async {
     await client.auth.signOut(scope: SignOutScope.local);
+    await AtenaSupabaseClient.finishLocalSignOut(client);
   }
 
   Future<void> signOutEverywhere() async {
@@ -98,6 +99,7 @@ class MultiuserSession {
     // The server cutoff blocks prior access JWTs immediately; Auth global logout
     // additionally revokes refresh tokens. Never substitute a local-only logout.
     await client.auth.signOut(scope: SignOutScope.global);
+    await AtenaSupabaseClient.finishLocalSignOut(client);
   }
 
   Future<RemoteIdentityContext> context() async {
